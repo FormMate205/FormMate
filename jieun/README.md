@@ -51,16 +51,7 @@
 
 - 딥러닝 기반 분석 기술을 활용하면 가능
 - 핀테크 서비스와 연동하면 **사기 위험도 분석 기능**으로 확장 가능
-
-- +) 은행에 이미 있는 서비스도 같이 활용하면 좋을 것 같음!
     
-    ![image.png](attachment:858cf6f8-4752-42c5-b651-de29044410c1:image.png)
-    
-    ![image.png](attachment:4821d3e8-4d0b-4208-bf34-fbb6003b3dd1:image.png)
-    
-    ![image.png](attachment:ebc65d32-cb0a-4b99-9978-7d21afff3cb4:image.png)
-    
-
 ## ❌ **현실적인 어려움 & 해결 방법**
 
 ### **1️⃣ iOS PWA에서 WebRTC 사용 제한 (가장 큰 문제)**
