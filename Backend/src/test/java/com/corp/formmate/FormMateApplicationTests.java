@@ -1,10 +1,10 @@
-package com.corp.dealmate;
+package com.corp.formmate;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DealMateApplicationTests {
+class FormMateApplicationTests {
 
 	@Test
 	void contextLoads() {
