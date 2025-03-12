@@ -17,6 +17,13 @@ repositories {
 	mavenCentral()
 }
 
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
+}
+
 dependencies {
 	// Spring Boot 기본
 	implementation 'org.springframework.boot:spring-boot-starter-web'
