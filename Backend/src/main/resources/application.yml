@@ -1,4 +1,4 @@
-# default ???
+# default 프로필
 spring:
   config:
     activate:
@@ -17,8 +17,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 10MB      # ?? ??? ?? ??
-      max-request-size: 10MB   # ?? ??? ?? ??
+      max-file-size: 10MB      # 단일 파일의 최대 크기
+      max-request-size: 10MB   # 전체 요청의 최대 크기
 
   file:
     upload:
