@@ -1,5 +1,17 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import LayoutProvider from "./provider/LayoutProvider";
+import FormCreate from "../pages/form/FormCreate";
+
 const App = () => {
-    return <div className='text-primary-500'>메인페이지</div>;
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route element={<LayoutProvider />}>
+                    <Route path="/form/create" element={<FormCreate />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    )
 };
 
 export default App;
