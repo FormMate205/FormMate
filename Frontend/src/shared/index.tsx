@@ -1,1 +1,1 @@
-export {default as Icons} from './icon/Icons'
+export {default as Icons} from './icons/Icons'
