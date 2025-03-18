@@ -14,6 +14,10 @@ const buttonVariants = cva(
                     'w-full bg-[var(--color-primary-500)] !text-white text-[var(--font-size-text-xl)] font-[var(--font-weight-semibold)] py-3',
                 primaryDisabled:
                     'w-full bg-[var(--color-line-300)] text-[var(--color-line-700)] !text-[var(--color-line-700)] text-[var(--font-size-text-xl)] font-[var(--font-weight-semibold)] py-3 cursor-not-allowed',
+                choiceEmpty:
+                    'bg-white border border-[var(--color-primary-500)] text-[var(--color-primary-500)] text-sm font-[var(--font-weight-medium)] rounded-[4px] px-3 py-2',
+                choiceFill:
+                    'bg-[var(--color-primary-500)] border border-[var(--color-primary-500)] text-white text-sm font-[var(--font-weight-medium)] rounded-[4px] px-3 py-2',
             },
         },
         defaultVariants: {
