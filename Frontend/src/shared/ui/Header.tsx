@@ -43,12 +43,12 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
                     <button aria-label='뒤로가기' onClick={onNavigateBack}>
                         <Icons
                             name='chev-left'
-                            size={24}
+                            size={18}
                             className='fill-line-700'
                         />
                     </button>
                 )}
-                <p className='text-xl font-medium'>{title}</p>
+                <p className='text-lg font-medium'>{title}</p>
             </div>
 
             {/* 알림 버튼 */}
@@ -58,7 +58,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
                     onClick={onNavigateNotify}
                     className='flex items-center justify-center'
                 >
-                    <Icons name='bell' size={24} className='fill-white' />
+                    <Icons name='bell' size={18} className='fill-white' />
                 </button>
             )}
         </div>
