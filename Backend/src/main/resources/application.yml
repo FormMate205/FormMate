@@ -13,8 +13,8 @@ spring:
         size: 5
       thread-name-prefix: formmate-scheduler-
   autoconfigure:
-
-
+    exclude:
+      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
   servlet:
     multipart:
       max-file-size: 10MB      # 단일 파일의 최대 크기
