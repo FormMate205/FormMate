@@ -1,5 +1,15 @@
 import { Button } from '../../components/ui/button';
 import { Icons } from '../../shared';
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from '../../components/ui/drawer';
 
 const Transaction = () => {
     return (
@@ -9,7 +19,7 @@ const Transaction = () => {
                     <div className='flex flex-col gap-2'>
                         <div className='flex items-center gap-2'>
                             <span className='text-line-500 font-medium'>
-                                싸피뱅크 111-1111-1111
+                                싸피은행 111-1111-1111
                             </span>
                             <Icons name='copy' size={20} />
                         </div>
@@ -19,12 +29,31 @@ const Transaction = () => {
                 </div>
             </section>
             <section className='p-4'>
+                {/* 필터 컴포넌트  - shadcn Drawer 사용 예정 */}
+                <Drawer>
+                    <DrawerTrigger>Open</DrawerTrigger>
+                    <DrawerContent>
+                        <DrawerHeader>
+                            <DrawerTitle>Are you absolutely sure?</DrawerTitle>
+                            <DrawerDescription>
+                                This action cannot be undone.
+                            </DrawerDescription>
+                        </DrawerHeader>
+                        <DrawerFooter>
+                            <Button>Submit</Button>
+                            <DrawerClose>
+                                <Button>Cancel</Button>
+                            </DrawerClose>
+                        </DrawerFooter>
+                    </DrawerContent>
+                </Drawer>
+
                 <div className='flex flex-col gap-2'>
                     <div className='text-line-700 border-line-200 border-b pb-1 font-medium'>
                         2025.03.12
                     </div>
                     <div className='border-line-100 flex justify-between border-b pb-2'>
-                        <div className='flex items-center text-lg font-semibold'>
+                        <div className='flex items-center text-lg font-medium'>
                             강지은
                         </div>
                         <div className='flex flex-col items-end'>
