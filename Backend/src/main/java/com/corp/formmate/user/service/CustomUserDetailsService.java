@@ -16,12 +16,11 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        UserEntity user = userService.selectByEmail(email);
 
         return new User(
                 user.getEmail(), // userName으로 이메일 사용
@@ -35,8 +34,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public UserDetails loadUserById(int userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+        UserEntity user = userService.selectById(userId);
 
         return new User(
                 user.getEmail(), // userName으로 이메일 사용
