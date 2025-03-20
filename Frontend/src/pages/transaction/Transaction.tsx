@@ -10,18 +10,20 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from '../../components/ui/drawer';
+import Header from '../../shared/ui/Header';
 
 const Transaction = () => {
     return (
         <>
-            <section className='bg-primary-50 px-4 py-8'>
-                <div className='flex flex-col gap-7'>
+            <section className='bg-primary-50 pb-9'>
+                <Header title='거래내역 조회' />
+                <div className='flex flex-col gap-7 px-4'>
                     <div className='flex flex-col gap-2'>
                         <div className='flex items-center gap-2'>
                             <span className='text-line-500 font-medium'>
                                 싸피은행 111-1111-1111
                             </span>
-                            <Icons name='copy' size={20} />
+                            <Icons name='copy' size={16} />
                         </div>
                         <div className='text-3xl font-semibold'>12,345 원</div>
                     </div>

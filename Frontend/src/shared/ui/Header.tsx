@@ -33,7 +33,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
     };
 
     return (
-        <div className='flex items-center justify-between px-4 py-9'>
+        <div className='py- flex items-center justify-between px-4'>
             {/* 경로 표시 */}
             <div className='flex items-center gap-3'>
                 {!isHome && (
