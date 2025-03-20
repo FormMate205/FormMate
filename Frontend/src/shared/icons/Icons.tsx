@@ -18,7 +18,7 @@ const Icons = ({
             className={className}
             width={size}
             height={size}
-            viewBox='0 0 16 16'
+            viewBox='0 0 24 24'
             preserveAspectRatio='xMidYMid meet'
             {...props}
         >
