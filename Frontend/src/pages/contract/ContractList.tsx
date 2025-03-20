@@ -1,4 +1,5 @@
-import { Header, TagItem } from '../../shared';
+import { Header } from '@/widgets';
+import { TagItem } from '../../shared';
 import RadialChart from './ui/RadialChart';
 
 const ContractList = () => {

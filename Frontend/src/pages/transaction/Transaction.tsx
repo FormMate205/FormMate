@@ -1,13 +1,12 @@
-import { Button } from '../../components/ui/button';
-import { Icons } from '../../shared';
 import {
     Drawer,
     DrawerContent,
     DrawerFooter,
     DrawerTrigger,
-} from '../../components/ui/drawer';
-
-import Header from '../../shared/ui/Header';
+} from '@/components/ui/drawer';
+import { Header } from '@/widgets';
+import { Button } from '../../components/ui/button';
+import { Icons } from '../../shared';
 import TransactionList from './ui/TransactionList';
 
 // Dummy data

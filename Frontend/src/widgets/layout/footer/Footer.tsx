@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import Icons from '../icons/Icons';
+import { Icons } from '@/shared';
+import FormStartModal from './ui/FormStartModal';
 
 const Footer = () => {
     const navigate = useNavigate();
@@ -13,11 +14,6 @@ const Footer = () => {
     // const onNavigateHome = () => {
     //     navigate('/');
     // };
-
-    // 계약생성으로 이동
-    const onNavigateForm = () => {
-        navigate('/form');
-    };
 
     // 채팅으로 이동
     const onNavigateChat = () => {
@@ -42,13 +38,10 @@ const Footer = () => {
                 <Icons name='docs' size={20} className='fill-line-300' />
                 <p className='text-line-300 font-semibold'>계약 관리</p>
             </button>
-            <button
-                className='flex flex-col items-center justify-end gap-1'
-                onClick={onNavigateForm}
-            >
-                <Icons name='chatbot' size={40} />
-                <p className='text-line-300 font-semibold'>계약 생성</p>
-            </button>
+
+            {/* 계약 생성 모달 */}
+            <FormStartModal />
+
             <button
                 className='flex flex-col items-center justify-end gap-1'
                 onClick={onNavigateChat}

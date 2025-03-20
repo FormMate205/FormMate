@@ -1,4 +1,4 @@
-import Icons from '../icons/Icons';
+import { Icons } from '@/shared';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
