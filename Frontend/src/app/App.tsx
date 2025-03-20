@@ -3,6 +3,7 @@ import LayoutProvider from './provider/LayoutProvider';
 import FormCreate from '../pages/form/FormCreate';
 import Transaction from '../pages/transaction/Transaction';
 import ContractList from '../pages/contract/ContractList';
+import Login from '../pages/login/Login';
 
 const App = () => {
     return (
@@ -12,6 +13,7 @@ const App = () => {
                     <Route path='/form/create' element={<FormCreate />} />
                     <Route path='/transaction' element={<Transaction />} />
                     <Route path='/contract' element={<ContractList />} />
+                    <Route path='/login' element={<Login />} />
                 </Route>
             </Routes>
         </BrowserRouter>
