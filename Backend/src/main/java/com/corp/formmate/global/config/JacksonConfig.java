@@ -1,4 +1,4 @@
-package com.corp.formmate.global;
+package com.corp.formmate.global.config;
 
 import java.io.IOException;
 import java.util.TimeZone;
