@@ -1,4 +1,4 @@
-package com.corp.formmate.global;
+package com.corp.formmate.global.config;
 
 import com.corp.formmate.jwt.filter.JwtAuthenticationFilter;
 import com.corp.formmate.user.service.CustomUserDetailsService;

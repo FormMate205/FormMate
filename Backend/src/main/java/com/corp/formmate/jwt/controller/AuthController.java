@@ -63,12 +63,10 @@ public class AuthController {
             // Refresh Token을 쿠키에 저장
             jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
-            // Access Token만 응답 본문에 포함
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("accessToken", token.getAccessToken());
-            responseBody.put("userId", user.getId());
-
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            // Header에 Access Token 포함
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Authorization", "Bearer " + token.getAccessToken())
+                    .body(Map.of("userId", user.getId()));
         } catch (Exception e) {
             log.error("Login failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Authentication failed: " + e.getMessage()));
@@ -94,8 +92,10 @@ public class AuthController {
             // 새로운 Refresh Token을 쿠키에 설정
             jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
-            // 새로운 Access Token만 응답 본문에 포함
-            return ResponseEntity.status(HttpStatus.OK).body(Map.of("accessToken", token.getAccessToken()));
+            // Header에 새로운 Access Token 포함
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Authorization", "Bearer " + token.getAccessToken())
+                    .body(Map.of("message", "Token refreshed successfully"));
 
         } catch (Exception e) {
             log.error("Token refresh failed: {}", e.getMessage());
@@ -106,6 +106,7 @@ public class AuthController {
     /**
      * 로그아웃 API
      */
+    @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         try {
             // 현재 인증된 사용자 정보 가져오기
