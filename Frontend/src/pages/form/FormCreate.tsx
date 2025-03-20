@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../../components/ui/button';
-import Header from '../../shared/ui/Header';
+import { Button } from '@/components/ui/button';
+import Footer from '@/widgets/layout/footer/Footer';
+import Header from '@/widgets/layout/header/Header';
 
 const FormCreate = () => {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ const FormCreate = () => {
         <div className='flex h-full flex-col justify-between pb-4'>
             <div className='flex flex-col gap-[250px]'>
                 <Header title='계약 상대 등록' />
+
                 <div className='flex flex-col items-center gap-6'>
                     <img
                         src='/public/assets/images/avatar.png'
@@ -38,6 +40,7 @@ const FormCreate = () => {
             </div>
 
             <Button variant='primary' children='확인' onClick={onClick} />
+            <Footer />
         </div>
     );
 };

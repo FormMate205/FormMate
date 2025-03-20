@@ -59,6 +59,13 @@ export default tseslint.config(
                         order: 'asc',
                         caseInsensitive: true,
                     },
+                    pathGroups: [
+                        {
+                            pattern: '@/**',
+                            group: 'internal',
+                        },
+                    ],
+                    pathGroupsExcludedImportTypes: ['builtin'],
                 },
             ],
         },
