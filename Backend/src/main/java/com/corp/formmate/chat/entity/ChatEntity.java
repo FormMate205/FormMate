@@ -1,22 +1,16 @@
 package com.corp.formmate.chat.entity;
 
-import java.time.LocalDateTime;
-
-import com.corp.formmate.contract.entity.ContractEntity;
-import com.corp.formmate.user.entity.UserEntity;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+import com.corp.formmate.form.entity.FormEntity;
+import com.corp.formmate.user.entity.UserEntity;
 
 @Entity
 @Table(name = "chats")
@@ -24,18 +18,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChatEntity {
+public class ChatEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// FK: contract_id -> contracts.id
+	// form_id -> Form
 	@ManyToOne
-	@JoinColumn(name = "contract_id", nullable = false)
-	private ContractEntity contract;
+	@JoinColumn(name = "form_id", nullable = false)
+	private FormEntity form;
 
-	// FK: writer_id -> users.id
+	// writer_id -> User
 	@ManyToOne
 	@JoinColumn(name = "writer_id", nullable = false)
 	private UserEntity writer;
@@ -44,12 +38,11 @@ public class ChatEntity {
 	private String content;
 
 	@Column(name = "is_read", nullable = false)
-	private boolean isRead = false;
+	private Boolean isRead = false;
 
 	@Column(name = "is_deleted", nullable = false)
-	private boolean isDeleted = false;
+	private Boolean isDeleted = false;
 
-	@Column(name = "created_at", nullable = false,
-		columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
-	private LocalDateTime createdAt;
+	@Column(name = "created_at", nullable = false)
+	private LocalDateTime createdAt = LocalDateTime.now();
 }

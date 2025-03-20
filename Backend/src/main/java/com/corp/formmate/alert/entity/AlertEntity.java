@@ -1,21 +1,15 @@
 package com.corp.formmate.alert.entity;
 
-import java.time.LocalDateTime;
-
-import com.corp.formmate.user.entity.UserEntity;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+import com.corp.formmate.user.entity.UserEntity;
 
 @Entity
 @Table(name = "alerts")
@@ -23,30 +17,29 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AlertEntity {
+public class AlertEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// FK: user_id -> users.id
+	// user_id -> User
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
 	private UserEntity user;
 
-	@Column(name = "alert_type", length = 50, nullable = false)
+	@Column(name = "alert_type", nullable = false, length = 50)
 	private String alertType;
 
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String content;
 
 	@Column(name = "is_read", nullable = false)
-	private boolean isRead = false;
+	private Boolean isRead = false;
 
 	@Column(name = "is_deleted", nullable = false)
-	private boolean isDeleted = false;
+	private Boolean isDeleted = false;
 
-	@Column(name = "created_at", nullable = false,
-		columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
-	private LocalDateTime createdAt;
+	@Column(name = "created_at", nullable = false)
+	private LocalDateTime createdAt = LocalDateTime.now();
 }

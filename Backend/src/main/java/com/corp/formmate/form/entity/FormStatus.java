@@ -1,11 +1,11 @@
-package com.corp.formmate.contract.entity;
+package com.corp.formmate.form.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum ContractStatus {
+public enum FormStatus {
 	BEFORE_APPROVAL("상대승인전"),
 	AFTER_APPROVAL("상대승인후"),
 	IN_PROGRESS("진행중"),

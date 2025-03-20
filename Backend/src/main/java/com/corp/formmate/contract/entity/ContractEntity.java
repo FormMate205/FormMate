@@ -1,24 +1,15 @@
 package com.corp.formmate.contract.entity;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-import com.corp.formmate.user.entity.UserEntity;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+
+import com.corp.formmate.form.entity.FormEntity;
 
 @Entity
 @Table(name = "contracts")
@@ -26,92 +17,47 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
-public class ContractEntity {
+public class ContractEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private ContractStatus status;  // '상대승인전', '상대승인후', '진행중', '연체', '종료'
-
-	// FK: creator_id -> users.id
+	// form_id -> Form
 	@ManyToOne
-	@JoinColumn(name = "creator_id", nullable = false)
-	private UserEntity creator;
-	//
-	// // FK: receiver_id -> users.id
-	@ManyToOne
-	@JoinColumn(name = "receiver_id", nullable = false)
-	private UserEntity receiver;
-	//
-	// // FK: creditor_id -> users.id
-	@ManyToOne
-	@JoinColumn(name = "creditor_id", nullable = false)
-	private UserEntity creditor;
+	@JoinColumn(name = "form_id", nullable = false)
+	private FormEntity form;
 
-	// FK: debtor_id -> users.id
-	@ManyToOne
-	@JoinColumn(name = "debtor_id", nullable = false)
-	private UserEntity debtor;
+	@Column(name = "overdue_count", nullable = false)
+	private Integer overdueCount = 0;
 
-	@Column(name = "creditor_name", length = 100, nullable = false)
-	private String creditorName;
+	@Column(name = "overdue_amount", nullable = false)
+	private Long overdueAmount = 0L;
 
-	@Column(name = "creditor_address", columnDefinition = "TEXT", nullable = false)
-	private String creditorAddress;
+	@Column(name = "next_repayment_date", nullable = false)
+	private LocalDate nextRepaymentDate;
 
-	@Column(name = "creditor_phone", length = 20, nullable = false)
-	private String creditorPhone;
+	@Column(name = "early_repayment_count", nullable = false)
+	private Integer earlyRepaymentCount = 0;
 
-	@Column(name = "creditor_bank", length = 50, nullable = false)
-	private String creditorBank;
+	@Column(name = "total_early_repayment_fee", nullable = false)
+	private Long totalEarlyRepaymentFee = 0L;
 
-	@Column(name = "creditor_account", length = 50, nullable = false)
-	private String creditorAccount;
+	@Column(name = "remaining_principal")
+	private Long remainingPrincipal;
 
-	@Column(name = "debtor_name", length = 100, nullable = false)
-	private String debtorName;
+	@Column(name = "remaining_principal_minus_overdue")
+	private Long remainingPrincipalMinusOverdue;
 
-	@Column(name = "debtor_address", columnDefinition = "TEXT", nullable = false)
-	private String debtorAddress;
+	@Column(name = "interest_amount", nullable = false)
+	private Long interestAmount = 0L;
 
-	@Column(name = "debtor_phone", length = 20, nullable = false)
-	private String debtorPhone;
+	@Column(name = "overdue_interest_amount", nullable = false)
+	private Long overdueInterestAmount = 0L;
 
-	@Column(name = "debtor_bank", length = 50, nullable = false)
-	private String debtorBank;
+	@Column(name = "expected_maturity_payment", nullable = false)
+	private Long expectedMaturityPayment;
 
-	@Column(name = "debtor_account", length = 50, nullable = false)
-	private String debtorAccount;
-
-	@Column(name = "contract_date", nullable = false)
-	private LocalDate contractDate;
-
-	@Column(name = "maturity_date", nullable = false)
-	private LocalDate maturityDate;
-
-	@Column(name = "loan_amount", nullable = false)
-	private Long loanAmount;
-
-	@Enumerated(EnumType.STRING)
-	@Column(name = "repayment_method", nullable = false)
-	private RepaymentMethod repaymentMethod;
-
-	@Column(name = "repayment_day", nullable = false)
-	private Integer repaymentDay;
-
-	@Column(name = "interest_rate", precision = 4, scale = 2)
-	private BigDecimal interestRate = BigDecimal.ZERO;
-
-	@Column(name = "early_repayment_fee_rate", precision = 5, scale = 2)
-	private BigDecimal earlyRepaymentFeeRate = BigDecimal.ZERO;
-
-	@Column(name = "overdue_interest_rate", precision = 5, scale = 2)
-	private BigDecimal overdueInterestRate = BigDecimal.ZERO;
-
-	@Column(name = "overdue_limit")
-	private Integer overdueLimit = 0;
+	@Column(name = "current_payment_round", nullable = false)
+	private Integer currentPaymentRound = 1;
 }

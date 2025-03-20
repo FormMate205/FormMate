@@ -1,6 +1,5 @@
 package com.corp.formmate.global.error.handler;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -34,39 +33,38 @@ public class GlobalExceptionHandler {
 			ex.getStackTrace()[0].getMethodName()
 		);
 
-		return ResponseEntity
-			.status(errorCode.getStatus())
-			.body(ErrorResponse.of(errorCode));
+		return ErrorResponse.of(errorCode);
 	}
 
 	// Validation 예외 처리
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
 		log.error("MethodArgumentNotValidException: {}", ex.getMessage());
-		List<ErrorResponse.FieldError> fieldErrors = ex.getBindingResult()
+
+		// 유효성 검사 오류 메시지를 모아서 하나의 메시지로 만들기
+		String errorMessage = ex.getBindingResult()
 			.getFieldErrors()
 			.stream()
-			.map(error -> ErrorResponse.FieldError.builder()
-				.field(error.getField())
-				.value(String.valueOf(error.getRejectedValue()))
-				.reason(error.getDefaultMessage())
-				.build())
-			.collect(Collectors.toList());
+			.map(error -> error.getField() + ": " + error.getDefaultMessage())
+			.collect(Collectors.joining(", "));
 
-		return new ResponseEntity<>(
-			ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, fieldErrors),
-			HttpStatus.BAD_REQUEST
-		);
+		// INVALID_INPUT_VALUE에 해당하는 ErrorCode가 있다고 가정
+		ErrorResponse response = ErrorResponse.builder()
+			.status(HttpStatus.BAD_REQUEST.value())
+			.message(errorMessage.isEmpty() ? "유효하지 않은 입력 값입니다." : errorMessage)
+			.build();
+
+		return ResponseEntity
+			.status(HttpStatus.BAD_REQUEST)
+			.body(response);
 	}
 
 	// 나머지 예외 처리
 	@ExceptionHandler(Exception.class)
 	protected ResponseEntity<ErrorResponse> handleException(Exception ex) {
 		log.error("Exception: {}", ex.getMessage());
-		return new ResponseEntity<>(
-			ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR),
-			HttpStatus.INTERNAL_SERVER_ERROR
-		);
+
+		return ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
 	}
 }
 
