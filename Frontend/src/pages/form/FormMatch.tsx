@@ -4,8 +4,7 @@ import { ChangeEvent, useState } from 'react';
 import SearchListItem from './ui/SearchListItem';
 import ArrowListItem from '@/shared/ui/ArrowListItem';
 import { useNavigate } from 'react-router-dom';
-import { AlertModal, Header } from '@/widgets';
-import { Button } from '@/components/ui/button';
+import { Header } from '@/widgets';
 
 const FormMatch = () => {
     const navigate = useNavigate();
@@ -50,13 +49,6 @@ const FormMatch = () => {
     return (
         <div className='flex flex-col gap-8'>
             <Header title='계약 상대 등록' />
-
-            <AlertModal
-                buttonType='default'
-                buttonName='테스트'
-                title='테스트 모달'
-                children='안녕하세요 테스트 모달입니다.'
-            />
 
             <div className='text-xl font-semibold'>
                 누구와 계약을 원하시나요?
