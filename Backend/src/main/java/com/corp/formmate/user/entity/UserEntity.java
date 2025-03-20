@@ -32,8 +32,8 @@ public class UserEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    @Column(length = 20)
-    private String phonenumber;
+    @Column(name = "phonenumber", length = 20)
+    private String phoneNumber;
 
     @Column(length = 225)
     private String address;
@@ -55,14 +55,14 @@ public class UserEntity {
 
     @Builder
     public UserEntity(String email, Provider provider, String password, String userName,
-                Role role, String phonenumber, String address, String addressDetail,
+                Role role, String phoneNumber, String address, String addressDetail,
                 boolean status, Integer bankCode, String accountNumber, String accountPassword) {
         this.email = email;
         this.provider = provider != null ? provider : Provider.LOCAL;
         this.password = password;
         this.userName = userName;
         this.role = role != null ? role : Role.USER;
-        this.phonenumber = phonenumber;
+        this.phoneNumber = phoneNumber;
         this.address = address;
         this.addressDetail = addressDetail;
         this.status = status;

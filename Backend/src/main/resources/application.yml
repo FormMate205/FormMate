@@ -144,6 +144,21 @@ websocket:
   endpoint: /ws
   allowed-origins: ${CORS_ALLOWED_ORIGINS:"*"}
 
+# 카카오 비즈 API 관련 설정
+kakao:
+  biz:
+    api-key: ${KAKAO_API_KEY}
+    sender-key: ${KAKAO_SENDER_KEY}
+    template-code: ${KAKAO_TEMPLATE_CODE}
+    api-url: ${KAKAO_API_URL}
+
+# SMS 서비스 API 관련 설정
+sms:
+  api-key: ${SMS_API_KEY}
+  api-secret: ${SMS_API_SECRET}
+  sender-number: ${SMS_SENDER_NUMBER}
+  api-url: ${SMS_API_URL}
+
 ---
 # test ???
 spring:

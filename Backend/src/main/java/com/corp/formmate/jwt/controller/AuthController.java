@@ -33,7 +33,7 @@ public class AuthController {
 
     private final JwtTokenService jwtTokenService;
     private final JwtTokenProvider jwtTokenProvider;
-    private UserService userService;
+    private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtProperties jwtProperties;
 
