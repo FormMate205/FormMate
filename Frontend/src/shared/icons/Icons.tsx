@@ -19,6 +19,7 @@ const Icons = ({
             width={size}
             height={size}
             viewBox='0 0 24 24'
+            preserveAspectRatio='xMidYMid meet'
             {...props}
         >
             <use href={`/assets/icons/sprites.svg#${name}`} />
