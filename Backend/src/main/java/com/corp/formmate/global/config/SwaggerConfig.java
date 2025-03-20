@@ -1,4 +1,4 @@
-package com.corp.formmate.global;
+package com.corp.formmate.global.config;
 
 import java.util.List;
 
