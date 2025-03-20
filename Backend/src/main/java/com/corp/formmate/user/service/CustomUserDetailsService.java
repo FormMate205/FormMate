@@ -18,14 +18,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    public UserDetails loadUserById(int userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         return new User(
-                user.getUserName(),
-                user.getEmail(),
-                user.isStatus(),
+                user.getEmail(), // userName으로 이메일 사용
+                user.getPassword(), // 비밀번호
+                user.isStatus(), // 계정 활성화 여부
                 true, // 계정 만료 여부
                 true, // 자격 증명 만료 여부
                 true, // 계정 잠금 여부
@@ -33,8 +34,18 @@ public class CustomUserDetailsService implements UserDetailsService {
         );
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
+    public UserDetails loadUserById(int userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+
+        return new User(
+                user.getEmail(), // userName으로 이메일 사용
+                user.getPassword() != null ? user.getPassword() : "", // OAuth 사용자는 비밀번호가 없을 수 있음
+                user.isStatus(), // 계정 활성화 여부
+                true, // 계정 만료 여부
+                true, // 자격 증명 만료 여부
+                true, // 계정 잠금 여부
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
     }
 }

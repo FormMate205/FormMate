@@ -95,6 +95,7 @@ jwt:
   accessTokenExpiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
   refreshTokenExpiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
   temporaryTokenExpiration: ${JWT_TEMPORARY_TOKEN_EXPIRATION}
+  secure-flag: true  # HTTPS 사용 시 true로 설정
 
 cookie:
   secure-flag: false

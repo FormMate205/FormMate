@@ -140,4 +140,13 @@ public class JwtTokenProvider {
         }
         return null;
     }
+
+    // 토큰 만료 시간 조회 메서드
+    public long getAccessTokenExpiration() {
+        return jwtProperties.getAccessTokenExpiration();
+    }
+
+    public long getRefreshTokenExpiration() {
+        return jwtProperties.getRefreshTokenExpiration();
+    }
 }
