@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LandingVisual from './ui/LandingVisual';
 import { Button } from '../../components/ui/button';
+import LandingVisual from './ui/LandingVisual';
 
 export default function Landing() {
     const [showButtons, setShowButtons] = useState(false);

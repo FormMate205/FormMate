@@ -15,4 +15,4 @@
     "htmlWhitespaceSensitivity": "strict",
     "embeddedLanguageFormatting": "auto",
     "plugins": ["prettier-plugin-tailwindcss"]
-  }
+}

@@ -1,5 +1,5 @@
-import { Icons } from '@/shared';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Icons } from '@/shared';
 
 interface HeaderProps {
     isHome?: boolean;
@@ -33,7 +33,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
     };
 
     return (
-        <div className='py- flex items-center justify-between px-4 py-3'>
+        <div className='flex w-full items-center justify-between py-3'>
             {/* 경로 표시 */}
             <div className='flex items-center gap-3'>
                 {!isHome && (
