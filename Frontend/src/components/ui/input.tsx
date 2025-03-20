@@ -1,6 +1,6 @@
+import { cva } from 'class-variance-authority';
 import * as React from 'react';
 import { cn } from '../../lib/utils';
-import { cva } from 'class-variance-authority';
 import { Icons } from '../../shared';
 
 const inputVariants = cva('rounded w-full border py-3 px-4', {

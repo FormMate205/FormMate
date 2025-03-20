@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import LayoutProvider from './provider/LayoutProvider';
 import { FormCreate, FormMatch } from '../pages';
+import LayoutProvider from './provider/LayoutProvider';
 
 const App = () => {
     return (
