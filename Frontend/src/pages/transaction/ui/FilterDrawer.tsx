@@ -1,11 +1,11 @@
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
     Drawer,
     DrawerContent,
     DrawerFooter,
     DrawerHeader,
     DrawerTrigger,
-} from '../../../components/ui/drawer';
+} from '@/components/ui/drawer';
 
 const FilterDrawer = () => {
     <Drawer>
