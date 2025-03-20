@@ -1,4 +1,5 @@
-import { Header } from '../../shared';
+import { Header, TagItem } from '../../shared';
+import RadialChart from './ui/RadialChart';
 
 const ContractList = () => {
     return (
@@ -31,15 +32,25 @@ const ContractList = () => {
                         </div>
                     </div>
                 </section>
-                <section className='flex flex-col rounded-lg bg-white px-8 py-3'>
-                    <div className='border-line-200 flex border-b'>
-                        <div>차트 헤더</div>
-                        <div>차트</div>
+                <section className='flex flex-col rounded-lg bg-white px-3 py-3'>
+                    <div className='border-line-200 flex flex-col border-b py-2'>
+                        <div className='flex justify-between'>
+                            <div>차트 선택</div>
+                            <div>850000/1000000</div>
+                        </div>
+                        <div>
+                            <RadialChart />
+                        </div>
                     </div>
                     <div>
-                        계약서 건수
+                        <div className='flex justify-between'>
+                            <div>2건</div>
+                            <div>진행 중</div>
+                        </div>
                         <div>검색바</div>
-                        <div>계약서 리스트</div>
+                        <div>
+                            <TagItem text='진행' />
+                        </div>
                     </div>
                 </section>
             </div>
