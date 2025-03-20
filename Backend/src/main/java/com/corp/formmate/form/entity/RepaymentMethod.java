@@ -1,4 +1,4 @@
-package com.corp.formmate.contract.entity;
+package com.corp.formmate.form.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

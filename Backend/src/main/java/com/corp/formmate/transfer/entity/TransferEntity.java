@@ -1,24 +1,16 @@
 package com.corp.formmate.transfer.entity;
 
-import java.time.LocalDateTime;
-
-import com.corp.formmate.contract.entity.ContractEntity;
-import com.corp.formmate.user.entity.UserEntity;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+import com.corp.formmate.form.entity.FormEntity;
+import com.corp.formmate.user.entity.UserEntity;
 
 @Entity
 @Table(name = "transfers")
@@ -26,23 +18,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TransferEntity {
+public class TransferEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// FK: contract_id -> contracts.id
+	// form_id -> Form
 	@ManyToOne
-	@JoinColumn(name = "contract_id", nullable = false)
-	private ContractEntity contract;
+	@JoinColumn(name = "form_id", nullable = false)
+	private FormEntity form;
 
-	// FK: sender_id -> users.id
+	// sender_id -> User
 	@ManyToOne
 	@JoinColumn(name = "sender_id", nullable = false)
 	private UserEntity sender;
 
-	// FK: receiver_id -> users.id
+	// receiver_id -> User
 	@ManyToOne
 	@JoinColumn(name = "receiver_id", nullable = false)
 	private UserEntity receiver;
@@ -56,9 +48,10 @@ public class TransferEntity {
 	@Column(name = "payment_difference", nullable = false)
 	private Long paymentDifference = 0L;
 
+	// status ENUM('연체','납부','중도상환')
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private TransferStatus status; // '연체','납부','중도상환'
+	private TransferStatus status;
 
 	@Column(name = "transaction_date", nullable = false)
 	private LocalDateTime transactionDate;
