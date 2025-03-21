@@ -1,10 +1,10 @@
-import { Input } from '@/components/ui/input';
 import { debounce } from 'lodash';
 import { ChangeEvent, useState } from 'react';
-import SearchListItem from './ui/SearchListItem';
-import ArrowListItem from '@/shared/ui/ArrowListItem';
 import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import ArrowListItem from '@/shared/ui/ArrowListItem';
 import { Header } from '@/widgets';
+import SearchListItem from './ui/SearchListItem';
 
 const FormMatch = () => {
     const navigate = useNavigate();
