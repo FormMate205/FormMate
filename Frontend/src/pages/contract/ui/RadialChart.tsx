@@ -6,22 +6,30 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from '../../../components/ui/chart';
-const chartData = [{ month: 'january', desktop: 20, mobile: 80 }];
+
+const total = 1000000;
+const current = 850000;
+
+const chartData = [
+    { Data: 'ProgressData', left: total - current, current: current },
+];
+const percent = Math.round((current / total) * 100);
 
 const chartConfig = {
-    desktop: {
-        label: 'Desktop',
+    left: {
+        label: 'Left',
         color: '#FDE6F3',
     },
-    mobile: {
-        label: 'Mobile',
+
+    current: {
+        label: 'Current',
         color: '#E51D74',
     },
 } satisfies ChartConfig;
 
 const RadialChart = () => {
     return (
-        <ChartContainer config={chartConfig} className='aspect-square w-full'>
+        <ChartContainer config={chartConfig} className='w-ful mb-[-20%]'>
             <RadialBarChart
                 data={chartData}
                 endAngle={180}
@@ -45,9 +53,9 @@ const RadialChart = () => {
                                         <tspan
                                             x={viewBox.cx}
                                             y={(viewBox.cy || 0) - 8}
-                                            className='fill-foreground text-2xl font-bold'
+                                            className='text-2xl font-bold'
                                         >
-                                            {chartData[0].mobile}%
+                                            {percent}%
                                         </tspan>
                                     </text>
                                 );
@@ -56,15 +64,15 @@ const RadialChart = () => {
                     />
                 </PolarRadiusAxis>
                 <RadialBar
-                    dataKey='desktop'
+                    dataKey='left'
                     stackId='a'
                     cornerRadius={5}
-                    fill='var(--color-desktop)'
+                    fill='var(--color-left)'
                     className='stroke-transparent stroke-2'
                 />
                 <RadialBar
-                    dataKey='mobile'
-                    fill='var(--color-mobile)'
+                    dataKey='current'
+                    fill='var(--color-current)'
                     stackId='a'
                     cornerRadius={5}
                     className='stroke-transparent stroke-2'

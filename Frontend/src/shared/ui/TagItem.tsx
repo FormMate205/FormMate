@@ -17,7 +17,7 @@ const TagItem = ({ text, color = 'default' }: TagItemProps) => {
         <div
             className={cn(COLOR_CLASSES[color], 'w-fit rounded-sm px-2 py-0.5')}
         >
-            <span className=''>{text}</span>
+            <span>{text}</span>
         </div>
     );
 };
