@@ -2,7 +2,7 @@ package com.corp.formmate.form.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.corp.formmate.user.entity.UserEntity;
 
@@ -89,10 +89,10 @@ public class FormEntity implements Serializable {
 	private String debtorAccount;
 
 	@Column(name = "contract_date", nullable = false)
-	private LocalDate contractDate;
+	private LocalDateTime contractDate;
 
 	@Column(name = "maturity_date", nullable = false)
-	private LocalDate maturityDate;
+	private LocalDateTime maturityDate;
 
 	@Column(name = "loan_amount", nullable = false)
 	private Long loanAmount;
