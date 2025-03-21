@@ -13,7 +13,6 @@ const App = () => {
                 <Route element={<LayoutProvider />}>
                     <Route path='/form' element={<FormMatch />} />
                     <Route path='/form/create' element={<FormCreate />} />
-                    <Route path='/form/create' element={<FormCreate />} />
                     <Route path='/transaction' element={<Transaction />} />
                     <Route path='/contract' element={<ContractList />} />
                     <Route path='/login' element={<Login />} />

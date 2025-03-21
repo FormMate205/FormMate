@@ -10,7 +10,7 @@ const FormCreate = () => {
 
     const onClick = () => {
         console.log('계약서 생성');
-        navigate('/form/contract');
+        navigate('/form/chatbot');
     };
 
     return (
