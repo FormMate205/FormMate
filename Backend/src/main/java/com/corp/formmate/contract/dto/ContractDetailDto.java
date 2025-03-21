@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * 계약관리 - 계약 상세 조회 DTO
  * 연체 횟수 + 금액
  * 다음 상환일
  * 중도 상환 횟수 + 수수료
