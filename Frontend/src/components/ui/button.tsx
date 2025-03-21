@@ -9,15 +9,15 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default:
-                    'bg-[var(--color-primary-500)] !text-white text-[var(--font-size-text-md)] font-[var(--font-weight-medium)] px-4 py-1',
+                    'bg-primary-500 !text-white text-sm font-medium px-4 py-2',
                 primary:
-                    'w-full bg-[var(--color-primary-500)] !text-white text-[var(--font-size-text-xl)] font-[var(--font-weight-semibold)] py-3',
+                    'w-full bg-primary-500 !text-white text-size-text-xl font-weight-semibold py-3',
                 primaryDisabled:
-                    'w-full bg-[var(--color-line-300)] text-[var(--color-line-700)] !text-[var(--color-line-700)] text-[var(--font-size-text-xl)] font-[var(--font-weight-semibold)] py-3 cursor-not-allowed',
+                    'w-full bg-line-300 text-line-700 !text-line-700 text-size-text-xl font-semibold py-3 cursor-not-allowed',
                 choiceEmpty:
-                    'bg-white border border-[var(--color-primary-500)] text-[var(--color-primary-500)] text-sm font-[var(--font-weight-medium)] rounded-[4px] px-3 py-2',
+                    'bg-white border border-primary-500 text-primary-500 text-sm font-medium rounded-[4px] px-3 py-2',
                 choiceFill:
-                    'bg-[var(--color-primary-500)] border border-[var(--color-primary-500)] text-white text-sm font-[var(--font-weight-medium)] rounded-[4px] px-3 py-2',
+                    'bg-primary-500 border border-primary-500 text-white text-sm font-medium rounded-[4px] px-3 py-2',
             },
         },
         defaultVariants: {
