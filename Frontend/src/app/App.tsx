@@ -1,10 +1,11 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { FormCreate, FormMatch } from '@/pages';
+import ContractList from '@/pages/contract/ContractList';
 import Landing from '@/pages/login/Landing';
 import Login from '@/pages/login/Login';
+import Signup from '@/pages/signup/Signup';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
-import ContractList from '@/pages/contract/ContractList';
 
 const App = () => {
     return (
@@ -17,6 +18,7 @@ const App = () => {
                     <Route path='/contract' element={<ContractList />} />
                     <Route path='/login' element={<Login />} />
                     <Route path='/' element={<Landing />} />
+                    <Route path='/signup' element={<Signup />} />
                 </Route>
             </Routes>
         </BrowserRouter>
