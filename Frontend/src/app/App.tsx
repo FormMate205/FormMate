@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { FormCreate, FormMatch } from '@/pages';
+import ContractDetail from '@/pages/contract/ContractDetail';
 import ContractList from '@/pages/contract/ContractList';
 import Landing from '@/pages/login/Landing';
 import Login from '@/pages/login/Login';
@@ -16,6 +17,10 @@ const App = () => {
                     <Route path='/form/create' element={<FormCreate />} />
                     <Route path='/transaction' element={<Transaction />} />
                     <Route path='/contract' element={<ContractList />} />
+                    <Route
+                        path='/contract/detail'
+                        element={<ContractDetail />}
+                    />
                     <Route path='/login' element={<Login />} />
                     <Route path='/' element={<Landing />} />
                     <Route path='/signup' element={<Signup />} />
