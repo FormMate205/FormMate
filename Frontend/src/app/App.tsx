@@ -2,9 +2,9 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { FormCreate, FormMatch } from '@/pages';
 import Landing from '@/pages/login/Landing';
 import Login from '@/pages/login/Login';
+import Signup from '@/pages/signup/Signup';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
-import Signup from '@/pages/signup/Signup';
 
 const App = () => {
     return (
