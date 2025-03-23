@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { TagItem } from '@/shared';
 import { Header } from '@/widgets';
+import ProgressBar from './ui/ProgressBar';
 
 const ContractDetail = () => {
     return (
@@ -24,7 +25,7 @@ const ContractDetail = () => {
                             <div className='flex items-center gap-2'>
                                 <TagItem text='연체' color='red' />
                                 <div className='text-line-900 flex gap-1'>
-                                    <span className='text-subPink-700'>
+                                    <span className='text-subPink-600 font-medium'>
                                         1회/3회
                                     </span>
                                     <span>|</span>
@@ -34,7 +35,7 @@ const ContractDetail = () => {
                             <div className='flex items-center gap-2'>
                                 <TagItem text='진행' />
                                 <div className='text-line-900 flex gap-1'>
-                                    <span className='text-primary-500'>
+                                    <span className='text-primary-500 font-medium'>
                                         D-17
                                     </span>
                                     <span>|</span>
@@ -44,13 +45,16 @@ const ContractDetail = () => {
                             <div className='flex items-center gap-2'>
                                 <TagItem text='중도' color='purple' />
                                 <div className='text-line-900 flex gap-1'>
-                                    <span className='text-purple-700'>2회</span>
+                                    <span className='font-medium text-purple-700'>
+                                        2회
+                                    </span>
                                     <span>|</span>
                                     <span>총 납부 수수료 3,568원</span>
                                 </div>
                             </div>
                         </div>
-                        <div>Progress Bar</div>
+                        {/* Progress Bar */}
+                        <ProgressBar amount={48000} goal={100000} />
                     </section>
                     <div className='flex flex-col items-center gap-3'>
                         <div className='flex w-full justify-center gap-4'>
