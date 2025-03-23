@@ -1,6 +1,10 @@
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TagItem } from '@/shared';
 import { Header } from '@/widgets';
+import InterestInfoTab from './ui/ContractTabs/InterestInfoTab';
+import PaymentHistoryTab from './ui/ContractTabs/PaymentHistoryTab';
+import SummaryTab from './ui/ContractTabs/SummaryTab';
 import ProgressBar from './ui/ProgressBar';
 
 const ContractDetail = () => {
@@ -65,6 +69,24 @@ const ContractDetail = () => {
                             계약 조기 종료
                         </div>
                     </div>
+                    <Tabs defaultValue='contract'>
+                        <TabsList>
+                            <TabsTrigger value='contract'>차용증</TabsTrigger>
+                            <TabsTrigger value='history'>납부 내역</TabsTrigger>
+                            <TabsTrigger value='interest'>
+                                이자 조회
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value='contract'>
+                            <SummaryTab />
+                        </TabsContent>
+                        <TabsContent value='history'>
+                            <PaymentHistoryTab />
+                        </TabsContent>
+                        <TabsContent value='interest'>
+                            <InterestInfoTab />
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </div>
         </>

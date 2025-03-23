@@ -14,7 +14,7 @@ const ContractList = () => {
     return (
         <div className='flex h-full flex-col'>
             <div className='bg-line-50 flex h-full flex-col gap-4 px-4'>
-                <Header title='계약관리' />
+                <Header title='계약 관리' />
                 <section className='flex rounded-lg bg-white py-3'>
                     <div className='flex w-full text-center'>
                         <div className='border-line-200 flex flex-1 flex-col gap-2 border-r text-center'>
