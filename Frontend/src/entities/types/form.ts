@@ -1,0 +1,58 @@
+// 계약서
+export interface Form {
+    formId: string; // 계약서 id
+    status: // 계약 현황
+    | 'BEFORE_APPROVAL'
+        | 'AFTER_APPROVAL'
+        | 'IN_PROGRESS'
+        | 'OVERDUE'
+        | 'COMPLETED';
+    creatorId: string; // 게약 생성자
+    creatorName: string;
+    receiverId: string;
+    receiverName: string;
+    creditorId: string; // 채권자
+    debtorId: string; // 채무자
+    creditorName: string;
+    creditorAddress: string;
+    creditorPhone: string;
+    creditorBank: string;
+    creditorAccount: string;
+    debtorName: string;
+    debtorAddress: string;
+    debtorPhone: string;
+    debtorBank: string;
+    debtorAccount: string;
+    contractDate: string; // 계약 생성일
+    maturityDate: string; // 계약 만료일
+    loanAmount: string; // 대출 원금
+    repaymentMethod: '원금균등상환' | '원리금균등상환' | '원금상환';
+    repaymentDay: string; // 분할 상환 일자
+    interestRate: string; // 이자율
+    earlyRepaymentFeeRate: string; // 중도 상환 수수료
+    overdueInterestRate: string; // 연체 이자율
+    overdueLimit: string; // 연체 횟수
+    specialTerms: SpecialTerm[];
+}
+
+// 특약 사항
+export interface SpecialTerm {
+    specialTermIndex: string;
+    specialTermDetail: string;
+}
+
+// 계약 초안 request
+export type FormDraftRequest = Pick<
+    Form,
+    | 'receiverId'
+    | 'creditorId'
+    | 'debtorId'
+    | 'maturityDate'
+    | 'loanAmount'
+    | 'repaymentMethod'
+    | 'repaymentDay'
+    | 'interestRate'
+    | 'earlyRepaymentFeeRate'
+    | 'overdueInterestRate'
+    | 'overdueLimit'
+> & { specialTermIndexes: string[] };
