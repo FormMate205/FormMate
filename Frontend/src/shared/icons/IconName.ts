@@ -19,4 +19,6 @@ export type IconName =
     | 'bell'
     | 'docs'
     | 'copy'
-    | 'zoom-in';
+    | 'zoom-in'
+    | 'question'
+    | 'export';

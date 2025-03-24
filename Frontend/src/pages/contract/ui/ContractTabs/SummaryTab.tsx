@@ -1,10 +1,18 @@
+import { Icons } from '@/shared';
+
 const SummaryTab = () => {
     return (
         <div className='flex flex-col gap-8'>
-            <div className='flex justify-center text-xl font-medium'>
-                차용증
+            <div className='flex flex-col'>
+                <div className='flex justify-end'>
+                    <Icons name='export' />
+                </div>
+                <div className='flex justify-center text-xl font-medium'>
+                    차용증
+                </div>
             </div>
-            <article className='flex flex-col gap-4'>
+
+            <article className='text-line-900 flex flex-col gap-4'>
                 <div className='flex flex-col gap-1'>
                     <div className='flex justify-between'>
                         <span>채권자</span>
