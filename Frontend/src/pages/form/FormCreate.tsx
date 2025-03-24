@@ -14,7 +14,7 @@ const FormCreate = () => {
     };
 
     return (
-        <div className='flex h-full flex-col justify-between pb-4'>
+        <div className='flex h-full flex-col justify-between px-4 py-2'>
             <div className='flex flex-col gap-[250px]'>
                 <Header title='계약 상대 등록' />
 
