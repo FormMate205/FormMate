@@ -3,7 +3,6 @@ import { IconName } from './IconName';
 
 interface IconProps extends SVGProps<SVGSVGElement> {
     name: IconName;
-    color?: string;
     size?: number;
 }
 
