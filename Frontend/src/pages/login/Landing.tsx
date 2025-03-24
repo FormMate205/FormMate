@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import LandingVisual from './ui/LandingVisual';
 
-export default function Landing() {
+const Landing = () => {
     const [showButtons, setShowButtons] = useState(false);
     const navigate = useNavigate();
 
@@ -42,4 +42,6 @@ export default function Landing() {
             )}
         </div>
     );
-}
+};
+
+export default Landing;
