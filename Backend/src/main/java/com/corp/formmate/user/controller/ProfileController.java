@@ -2,6 +2,7 @@ package com.corp.formmate.user.controller;
 
 import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.user.dto.ProfileCompletionRequest;
+import com.corp.formmate.user.dto.ProfileCompletionResponse;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.MessageService;
 import com.corp.formmate.user.service.UserService;
@@ -64,19 +65,21 @@ public class ProfileController {
 
             log.info("User profile completed: {}", updatedUser.getEmail());
 
-            return ResponseEntity.status(HttpStatus.OK).body(Map.of(
-                    "message", "프로필이 성공적으로 업데이트 되었습니다.",
-                    "id", updatedUser.getId(),
-                    "email", updatedUser.getEmail(),
-                    "userName", updatedUser.getUserName()
-            ));
+            // 응답 생성
+            ProfileCompletionResponse response = new ProfileCompletionResponse(
+                    updatedUser.getId(),
+                    updatedUser.getEmail(),
+                    updatedUser.getUserName(),
+                    "프로필이 성공적으로 업데이트 되었습니다."
+            );
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
 
         } catch (UserException e) {
             throw e;
         } catch (Exception e) {
             log.error("Profile completion failed", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "프로필 업데이트 중 오류가 발생했습니다."));
+            throw new RuntimeException("프로필 업데이트 중 오류가 발생했습니다.");
         }
     }
 }

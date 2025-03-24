@@ -31,6 +31,8 @@ public enum ErrorCode {
 	PHONE_VERIFICATION_FAILED(400, "휴대전화 인증에 실패했습니다"),
 	PHONE_VERIFICATION_EXPIRED(400, "휴대전화 인증이 만료되었습니다"),
 	PHONE_ALREADY_REGISTERED(400, "이미 등록된 휴대전화 번호입니다"),
+	LOGOUT_FAILED(500, "로그아웃 처리 중 오류가 발생했습니다"),
+	NOT_AUTHENTICATED(401, "인증되지 않은 사용자입니다"),
 
 	// 계좌 관련
 	ACCOUNT_NOT_FOUND(404, "계좌 정보를 찾을 수 없습니다"),

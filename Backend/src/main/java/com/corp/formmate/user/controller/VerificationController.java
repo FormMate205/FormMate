@@ -37,7 +37,7 @@ public class VerificationController {
 
         // 2. 요청 제한 확인
         if (verificationService.isRateLimited(phoneNumber)) {
-            return ResponseEntity.status(HttpStatus.OK).body(VerificationResponse.fail("잠시 후 다시 시도해주세요."));
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(VerificationResponse.fail("잠시 후 다시 시도해주세요."));
         }
 
         // 3. 인증 코드 생성
@@ -56,7 +56,7 @@ public class VerificationController {
             return ResponseEntity.status(HttpStatus.OK).body(VerificationResponse.success("인증코드가 발송되었습니다."));
         } else {
             log.error("Failed to send verification code to phone number: {}", phoneNumber);
-            return ResponseEntity.status(HttpStatus.OK).body(VerificationResponse.fail("인증코드 발송에 실패했습니다. 다시 시도해주세요."));
+            throw new RuntimeException("인증코드 발송에 실패했습니다. 다시 시도해주세요.");
         }
 
     }
@@ -75,7 +75,7 @@ public class VerificationController {
             verificationService.markAsVerified(phoneNumber);
             return ResponseEntity.status(HttpStatus.OK).body(VerificationResponse.success("인증이 완료되었습니다."));
         } else {
-            return ResponseEntity.status(HttpStatus.OK).body(VerificationResponse.fail("인증 코드가 유효하지 않거나 만료되었습니다."));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(VerificationResponse.fail("인증 코드가 유효하지 않거나 만료되었습니다."));
         }
     }
 

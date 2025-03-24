@@ -1,10 +1,16 @@
 package com.corp.formmate.jwt.controller;
 
+import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.jwt.dto.Token;
+import com.corp.formmate.global.error.exception.AuthException;
+import com.corp.formmate.global.error.exception.TokenException;
 import com.corp.formmate.jwt.properties.JwtProperties;
 import com.corp.formmate.jwt.provider.JwtTokenProvider;
 import com.corp.formmate.jwt.service.JwtTokenService;
 import com.corp.formmate.user.dto.LoginRequest;
+import com.corp.formmate.user.dto.LoginResponse;
+import com.corp.formmate.user.dto.LogoutResponse;
+import com.corp.formmate.user.dto.TokenRefreshResponse;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -13,7 +19,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,7 +27,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -63,13 +67,20 @@ public class AuthController {
             // Refresh Token을 쿠키에 저장
             jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
+            // 응답 객체 생성
+            LoginResponse loginResponse = new LoginResponse(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getUserName()
+            );
+
             // Header에 Access Token 포함
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Authorization", "Bearer " + token.getAccessToken())
-                    .body(Map.of("userId", user.getId()));
+                    .body(loginResponse);
         } catch (Exception e) {
             log.error("Login failed: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Authentication failed: " + e.getMessage()));
+            throw new AuthException(ErrorCode.LOGIN_FAILED);
         }
     }
 
@@ -92,14 +103,20 @@ public class AuthController {
             // 새로운 Refresh Token을 쿠키에 설정
             jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
+            // 응답 객체 생성
+            TokenRefreshResponse refreshResponse = new TokenRefreshResponse(
+                    token.getAccessToken(),
+                    "Token refreshed successfully"
+            );
+
             // Header에 새로운 Access Token 포함
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Authorization", "Bearer " + token.getAccessToken())
-                    .body(Map.of("message", "Token refreshed successfully"));
+                    .body(refreshResponse);
 
         } catch (Exception e) {
             log.error("Token refresh failed: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Token refresh failed: " + e.getMessage()));
+            throw new TokenException(ErrorCode.INVALID_TOKEN);
         }
     }
 
@@ -133,10 +150,10 @@ public class AuthController {
             cookie.setMaxAge(0); // 즉시 만료
             response.addCookie(cookie);
 
-            return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Logged out successfully"));
+            return ResponseEntity.status(HttpStatus.OK).body(new LogoutResponse("Logged out successfully"));
         } catch (Exception e) {
             log.error("Logout failed: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Logout failed: " + e.getMessage()));
+            throw new AuthException(ErrorCode.LOGOUT_FAILED);
         }
     }
 }

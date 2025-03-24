@@ -5,7 +5,9 @@ import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.jwt.dto.Token;
 import com.corp.formmate.jwt.properties.JwtProperties;
 import com.corp.formmate.jwt.service.JwtTokenService;
+import com.corp.formmate.user.dto.EmailCheckResponse;
 import com.corp.formmate.user.dto.RegisterRequest;
+import com.corp.formmate.user.dto.RegisterResponse;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.MessageService;
 import com.corp.formmate.user.service.UserService;
@@ -28,7 +30,6 @@ import java.util.Map;
 public class RegisterController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final VerificationService verificationService;
     private final MessageService messageService;
     private final JwtTokenService jwtTokenService;
@@ -40,7 +41,7 @@ public class RegisterController {
     @GetMapping("/check-email")
     public ResponseEntity<?> checkEmailAvailability(@RequestParam String email) {
         boolean isAvailable = userService.checkEmailAvailability(email);
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("available", isAvailable));
+        return ResponseEntity.status(HttpStatus.OK).body(new EmailCheckResponse(isAvailable));
     }
 
     /**
@@ -66,13 +67,17 @@ public class RegisterController {
         // Refresh Token을 쿠키에 저장
         jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
+        // 응답 생성
+        RegisterResponse registerResponse = new RegisterResponse(
+                savedUser.getId(),
+                savedUser.getEmail(),
+                savedUser.getUserName(),
+                token.getAccessToken()
+        );
+
         // 응답 반환 (Access Token 포함)
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Authorization", "Bearer " + token.getAccessToken())
-                .body(Map.of(
-                        "id", savedUser.getId(),
-                        "email", savedUser.getEmail(),
-                        "userName", savedUser.getUserName()
-                ));
+                .body(registerResponse);
     }
 }
