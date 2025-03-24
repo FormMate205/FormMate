@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 
-export default function LoginForm() {
+const LoginForm = () => {
     return (
         <div className='mx-auto flex max-w-md flex-col gap-6 p-6'>
             <h1 className='mt-20 mb-20 text-center text-3xl font-bold'>
@@ -46,4 +46,6 @@ export default function LoginForm() {
             </div>
         </div>
     );
-}
+};
+
+export default LoginForm;
