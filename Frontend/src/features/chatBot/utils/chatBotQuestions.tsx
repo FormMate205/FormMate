@@ -1,0 +1,125 @@
+// 입력값 타입
+export type InputType = 'role' | 'number' | 'date' | 'boolean';
+
+// 질문에 대한 옵션
+export interface Option {
+    label: string;
+    value: string;
+}
+
+// 질문 타입 정의
+export interface BotQuestion {
+    id: string;
+    question: string;
+    type: InputType;
+    options?: Option[];
+    condition?: string[];
+    validation?: {
+        regex?: string; // 입력값 유효성 확인
+        errorMessage?: string;
+        min?: string;
+        max?: string;
+    };
+    next?: string | ((answer: string) => string); // 다음 질문 선택
+}
+
+// 질문 리스트
+export const chatBotQuestions: Record<string, BotQuestion> = {
+    role: {
+        id: 'role',
+        question: '당신은 채권자인가요, 채무자인가요?',
+        type: 'role',
+        options: [
+            { label: '채권자', value: 'creditor' },
+            { label: '채무자', value: 'debtor' },
+        ],
+        next: 'loanAmount',
+    },
+    loanAmount: {
+        id: 'loanAmount',
+        question: '대여 금액은 얼마인가요?',
+        type: 'number',
+        condition: ['✅ 숫자만 입력해주세요.'],
+        validation: {
+            regex: '^[0-9]+$',
+            errorMessage: '숫자만 입력해주세요.',
+        },
+        next: 'maturityDate',
+    },
+    maturityDate: {
+        id: 'maturityDate',
+        question: '상환 날짜를 입력해주세요.',
+        type: 'date',
+        condition: ['✅ YYYY-MM-DD 형식으로 입력해주세요.'],
+        validation: {
+            regex: '^\\d{4}-\\d{2}-\\d{2}$',
+            errorMessage: 'YYYY-MM-DD 형식으로 입력해주세요.',
+        },
+        next: 'interestRate',
+    },
+    interestRate: {
+        id: 'interestRate',
+        question: '이자율을 입력해주세요.',
+        type: 'number',
+        condition: [
+            '✅ 0~20% 범위 내로 적어주세요.',
+            '✅ 숫자로만 입력해주세요. (소수점 둘째 짜리까지 입력 가능)',
+        ],
+        validation: {
+            regex: '^[0-9]+$',
+            errorMessage: '0~20% 범위 내의 숫자로만 입력해주세요.',
+            min: '0',
+            max: '20',
+        },
+        next: 'overdueInterestRate',
+    },
+    overdueInterestRate: {
+        id: 'overdueInterestRate',
+        question: '연체 이자율을 입력해주세요.',
+        type: 'number',
+        condition: [
+            '✅ 0~20% 범위 내로 적어주세요.',
+            '✅ 숫자로만 입력해주세요. (소수점 둘째 짜리까지 입력 가능)',
+            '✅ 이자율 + 연체 이자율은 20%를 초과할 수 없습니다.',
+        ],
+        validation: {
+            regex: '^[0-9]+$',
+            errorMessage: '0~20% 범위 내의 숫자로만 입력해주세요.',
+            min: '0',
+            max: '20',
+        },
+        next: 'repayment',
+    },
+    repayment: {
+        id: 'repayment',
+        question: '분할 납부를 희망하십니까?',
+        type: 'boolean',
+        options: [
+            { label: '네', value: 'yes' },
+            { label: '아니오', value: 'no' },
+        ],
+        next: (answer) =>
+            answer === '네' ? 'repaymentDay' : 'earlyRepaymentFeeRate',
+    },
+    repaymentDay: {
+        id: 'repaymentDay',
+        question: '분할 납부일을 입력해주세요.',
+        type: 'number',
+        condition: [
+            '✅ 숫자로만 입력해주세요.',
+            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
+        ],
+        validation: {
+            regex: '^[0-9]+$',
+            errorMessage: '숫자로만 입력해주세요.',
+        },
+        next: 'repayment',
+    },
+    // repaymentMethod: {
+    //     id: 'repaymentMethod',
+    //     question: '분할 납부를 희망한다면 아래의 두가지 상환 방법 중 하나를 선택해주세요.',
+    //     condition: [
+    //         '✅ 미리보기 버튼을 누르면, 입력하신 정볼를 '
+    //     ]
+    // }
+};
