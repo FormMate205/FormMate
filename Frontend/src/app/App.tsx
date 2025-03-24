@@ -32,24 +32,21 @@ const App = () => {
                         path='/contract/detail'
                         element={<ContractDetail />}
                     />
+                    <Route path='/' element={<Home />} />
+                    <Route path='/landing' element={<Landing />} />
                     <Route path='/login' element={<Login />} />
-                    <Route path='/' element={<Landing />} />
-                    <Route path='/signup' element={<Signup />} />
-                    <Route path='/chatbot' element={<ChatBot />} />
-                    <Route path='/chat' element={<Chat />} />
+                    <Route path='/login/signup' element={<Signup />} />
                     <Route path='/login/findPw' element={<PhoneVerify />} />
                     <Route
                         path='/login/findPw/reset'
                         element={<PasswordReset />}
                     />
-                    <Route path='/home' element={<Home />} />
-                    <Route path='/account/regist' element={<AccountRegist />} />
+                    <Route path='/chatbot' element={<ChatBot />} />
+                    <Route path='/chat' element={<Chat />} />
+                    <Route path='/account' element={<AccountRegist />} />
+                    <Route path='/account/verify' element={<AccountVerify />} />
                     <Route
-                        path='/account/regist/verify'
-                        element={<AccountVerify />}
-                    />
-                    <Route
-                        path='/account/regist/password'
+                        path='/account/password'
                         element={<AccountPassword />}
                     />
                 </Route>

@@ -35,7 +35,7 @@ const AccountPasswordForm = () => {
                 setShowSuccess(true);
                 setTimeout(() => {
                     setShowSuccess(false);
-                    navigate('/home');
+                    navigate('/');
                 }, 1500);
             } else {
                 // 실패

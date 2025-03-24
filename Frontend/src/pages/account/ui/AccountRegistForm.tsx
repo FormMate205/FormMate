@@ -43,7 +43,7 @@ const AccountRegist = () => {
                     <Button
                         className='w-full'
                         variant='primary'
-                        onClick={() => navigate('/account/regist/verify')}
+                        onClick={() => navigate('/account/verify')}
                     >
                         1원 보내기
                     </Button>
