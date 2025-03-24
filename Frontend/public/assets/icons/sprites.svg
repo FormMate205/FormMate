@@ -47,7 +47,7 @@
         </clipPath>
       </defs>
     </symbol>
-    <symbol id="zoomin" width="24" height="24" fill="current" viewBox="0 0 24 24">
+    <symbol id="zoom-in" width="24" height="24" fill="current" viewBox="0 0 24 24">
       <path fill="current" fill-rule="evenodd" d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Zm0 2a8.962 8.962 0 0 0 5.618-1.968l3.675 3.675a1 1 0 0 0 1.414-1.414l-3.675-3.675A9 9 0 1 0 11 20Zm0-5a1 1 0 0 1-1-1v-2H8a1 1 0 1 1 0-2h2V8a1 1 0 1 1 2 0v2h2a1 1 0 1 1 0 2h-2v2a1 1 0 0 1-1 1Z" clip-rule="evenodd"/>
     </symbol>
     <symbol id="chat" width="24" height="24" fill="current" viewBox="0 0 24 24">

@@ -1,11 +1,32 @@
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Icons, TagItem } from '@/shared';
 import { Header } from '@/widgets';
 import InterestInfoTab from './ui/ContractTabs/InterestInfoTab';
 import PaymentHistoryTab from './ui/ContractTabs/PaymentHistoryTab';
 import SummaryTab from './ui/ContractTabs/SummaryTab';
 import ProgressBar from './ui/ProgressBar';
+import SummaryItem from './ui/SummaryItem';
+
+const summaryData = [
+    {
+        tag: '연체',
+        color: 'red',
+        mainText: '1회/3회',
+        subText: '110,000원 미납',
+        withIcon: true,
+    },
+    {
+        tag: '진행',
+        mainText: 'D-17',
+        subText: '다음 상환 일정 25.03.19',
+    },
+    {
+        tag: '중도',
+        color: 'purple',
+        mainText: '2회',
+        subText: '총 납부 수수료 3,568원',
+    },
+];
 
 const ContractDetail = () => {
     return (
@@ -19,47 +40,24 @@ const ContractDetail = () => {
                                 <span className='text-primary-500 text-xl'>
                                     강지은
                                 </span>
-                                <span>님과의 금전 차용증 계약</span>
+                                <span>님과의 차용증 계약</span>
                             </div>
                             <span className='text-purple-600'>채무 계약</span>
                         </div>
 
-                        <div className='border-line-200 flex flex-col gap-6 border-b py-4'>
+                        <div className='border-line-200 flex flex-col gap-8 border-b py-4'>
                             <div className='flex flex-col gap-2'>
-                                <div className='flex items-center gap-2'>
-                                    <TagItem text='연체' color='red' />
-                                    <div className='text-line-900 flex items-center gap-1'>
-                                        <span className='text-subPink-600 font-medium'>
-                                            1회/3회
-                                        </span>
-                                        <span>|</span>
-                                        <span>110,000원 미납</span>
-                                        <Icons
-                                            name='question'
-                                            size={14}
-                                            className='fill-line-900'
+                                <div className='flex flex-col gap-2'>
+                                    {summaryData.map((item, idx) => (
+                                        <SummaryItem
+                                            key={idx}
+                                            tagText={item.tag}
+                                            color={item.color}
+                                            mainText={item.mainText}
+                                            subText={item.subText}
+                                            withIcon={item.withIcon}
                                         />
-                                    </div>
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                    <TagItem text='진행' />
-                                    <div className='text-line-900 flex gap-1'>
-                                        <span className='text-primary-500 font-medium'>
-                                            D-17
-                                        </span>
-                                        <span>|</span>
-                                        <span>다음 상환 일정 - 25.03.19</span>
-                                    </div>
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                    <TagItem text='중도' color='purple' />
-                                    <div className='text-line-900 flex gap-1'>
-                                        <span className='font-medium text-purple-700'>
-                                            2회
-                                        </span>
-                                        <span>|</span>
-                                        <span>총 납부 수수료 3,568원</span>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
                             {/* Progress Bar */}

@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -89,7 +90,12 @@ const ContractList = () => {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className='p-4'>검색바</div>
+
+                        <Input
+                            variant={'search'}
+                            placeholder='이름을 입력하세요'
+                        />
+
                         <div className='flex'>
                             <TagItem text='진행' />
                             <ArrowListItem
