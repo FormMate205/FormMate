@@ -8,7 +8,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { Icons } from '@/shared';
 
 interface CommonModalProps {
     trigger: string;
@@ -31,9 +30,16 @@ const CommonModal = ({
     return (
         <Dialog>
             <DialogTrigger>
-                <div className='flex flex-col items-center justify-end gap-1'>
-                    <Icons name='chatbot' size={40} />
-                    <p className='text-line-300 font-semibold'>{trigger}</p>
+                <div className='relative flex flex-col items-center justify-end gap-1'>
+                    <img
+                        src='/assets/images/chatbot-btn.png'
+                        alt='전송하기'
+                        className='absolute -top-5 left-1/2 -translate-x-1/2'
+                        width={40}
+                    />
+                    <p className='text-line-300 mt-6 font-semibold'>
+                        {trigger}
+                    </p>
                 </div>
             </DialogTrigger>
 
