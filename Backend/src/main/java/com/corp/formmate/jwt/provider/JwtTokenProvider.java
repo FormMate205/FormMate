@@ -91,7 +91,13 @@ public class JwtTokenProvider {
                 .getSubject();
 
         String userIdStr = subject.replace(jwtProperties.getSubjectPrefix() + ":", "");
-        return Integer.parseInt(userIdStr) == 0 ? null : userIdStr;
+        try {
+            int userId = Integer.parseInt(userIdStr);
+            return userId == 0 ? null : userIdStr;
+        } catch (NumberFormatException e) {
+            log.error("Invalid user ID format in token: {}", userIdStr);
+            return null;
+        }
     }
 
     // 토큰 유효성 검증

@@ -3,14 +3,18 @@ package com.corp.formmate.user.service;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.user.dto.RegisterRequest;
+import com.corp.formmate.user.entity.Provider;
 import com.corp.formmate.user.entity.Role;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.support.PropertiesLoaderSupport;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PropertiesLoaderSupport propertiesLoaderSupport;
 
     /**
      * 이메일로 사용자 정보 조회
@@ -77,6 +82,43 @@ public class UserService {
 
         // 사용자 저장 및 반환
         return userRepository.save(user);
+    }
+
+    /**
+     * OAuth2 사용자 정보로 사용자 조회 또는 생성
+     * @param userInfo OAuth2 사용자 정보
+     * @param provider 인증 제공자
+     * @return 사용자 엔티티
+     */
+    @Transactional
+    public UserEntity getOrCreateOAuth2User(OAuth2UserInfo userInfo, Provider provider) {
+        Optional<UserEntity> existingUser = userRepository.findByEmail(userInfo.getEmail());
+
+        if (existingUser.isPresent()) {
+            // 이미 가입된 경우, 필요에 따라 정보 업데이트 가능
+            return existingUser.get();
+        } else {
+            // 신규 회원인 경우, OAuth 정보로 가입 처리
+            UserEntity newUser = UserEntity.builder()
+                    .email(userInfo.getEmail())
+                    .userName(userInfo.getName())
+                    .provider(provider)
+                    .role(Role.USER)
+                    .status(true)
+                    .build();
+
+            return userRepository.save(newUser);
+        }
+    }
+
+    @Transactional
+    public UserEntity completeProfile(String email, String phoneNumber, String address, String addressDetail) {
+        UserEntity user = selectByEmail(email);
+
+        // 사용자 정보 업데이트
+        user.updateAdditionalProfile(phoneNumber, address, addressDetail);
+
+        return user;
     }
 
 }

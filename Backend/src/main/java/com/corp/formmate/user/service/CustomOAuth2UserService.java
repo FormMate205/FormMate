@@ -27,7 +27,6 @@ import java.util.Optional;
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final UserService userService;
-    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -49,35 +48,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuth2UserInfo userInfo = OAuth2UserInfo.of(registrationId, userNameAttributeName, attributes);
 
         // 사용자 정보 조회 또는 생성
-        UserEntity user = getOrCreateUser(userInfo, provider);
+        UserEntity user = userService.getOrCreateOAuth2User(userInfo, provider);
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
                 attributes, userNameAttributeName
         );
-    }
-
-    /**
-     * 사용자 정보가 존재하면 업데이트, 없으면 생성
-     */
-    private UserEntity getOrCreateUser(OAuth2UserInfo userInfo, Provider provider) {
-        Optional<UserEntity> existingUser = userRepository.findByEmail(userInfo.getEmail());
-
-        if (existingUser.isPresent()) {
-            // 이미 가입된 경우, 정보 업데이트 (필요에 따라)
-            return existingUser.get();
-        } else {
-            // 신규 회원인 경우, OAuth 정보로 가입 처리
-            UserEntity newUser = UserEntity.builder()
-                    .email(userInfo.getEmail())
-                    .userName(userInfo.getName())
-                    .provider(provider)
-                    .role(Role.USER)
-                    .status(true)
-                    .build();
-
-            return userRepository.save(newUser);
-        }
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.corp.formmate.jwt.service;
 
 import com.corp.formmate.jwt.dto.Token;
+import com.corp.formmate.jwt.entity.RefreshTokenEntity;
 import com.corp.formmate.jwt.provider.JwtTokenProvider;
 import com.corp.formmate.jwt.repository.RefreshTokenRepository;
 import jakarta.servlet.http.Cookie;
@@ -21,7 +22,6 @@ public class JwtTokenService {
     /**
      * 토큰 발급 (로그인, 회원가입 시 사용)
      */
-
     @Transactional
     public Token createTokens(int userId) {
         // Access Token과 Refresh Token 생성
@@ -29,7 +29,14 @@ public class JwtTokenService {
         String refreshToken = jwtTokenProvider.createRefreshToken(userId);
 
         // Refresh Token을 Redis에 저장 (사용자 ID를 키로 사용)
-        refreshTokenRepository.saveRefreshToken(String.valueOf(userId), refreshToken);
+        String userIdStr = String.valueOf(userId);
+        RefreshTokenEntity tokenEntity = RefreshTokenEntity.builder()
+                .id(userIdStr)
+                .token(refreshToken)
+                .ttl(jwtTokenProvider.getRefreshTokenExpiration() / 1000) // Redis는 초 단위로 TTL 저장
+                .build();
+
+        refreshTokenRepository.save(tokenEntity);
 
         return new Token(accessToken, refreshToken);
     }
@@ -49,9 +56,11 @@ public class JwtTokenService {
         int userId = Integer.parseInt(userIdStr);
         
         // Redis에 저장된 Refresh Token과 비교
-        String savedRefreshToken = refreshTokenRepository.findRefreshToken(userIdStr);
-        if (savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
-            throw new RuntimeException("Refresh token is not in database or doesn't match");
+        RefreshTokenEntity savedToken = refreshTokenRepository.findById(userIdStr)
+                .orElseThrow(() -> new RuntimeException("Refresh token is not in database"));
+
+        if (!savedToken.getToken().equals(refreshToken)) {
+            throw new RuntimeException("Refresh token doesn't match");
         }
 
         // 새로운 토큰 발급
@@ -63,7 +72,7 @@ public class JwtTokenService {
      */
     @Transactional
     public void logout(int userId) {
-        refreshTokenRepository.deleteRefreshToken(String.valueOf(userId));
+        refreshTokenRepository.deleteById(String.valueOf(userId));
     }
 
     /**
