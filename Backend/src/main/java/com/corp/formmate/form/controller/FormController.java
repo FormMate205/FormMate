@@ -64,7 +64,7 @@ public class FormController {
 		@Parameter(description = "차용증 ID", required = true, example = "1")
 		@PathVariable Integer formId) {
 		log.info("차용증 상세 조회: id={}", formId);
-		return ResponseEntity.ok(formService.selectFormById(formId));
+		return ResponseEntity.status(HttpStatus.OK).body(formService.selectFormById(formId));
 	}
 
 	@Operation(summary = "차용증 목록 조회", description = "로그인한 사용자의 차용증 목록을 상태별로 조회하고 이름으로 필터링합니다.")
@@ -98,7 +98,8 @@ public class FormController {
 		Integer currentUserId = 1;
 		log.info("차용증 목록 조회 - 상태: {}, 이름: {}, 페이지: {}, 크기: {}",
 			status, name, pageable.getPageNumber(), pageable.getPageSize());
-		return ResponseEntity.ok(formService.selectForms(currentUserId, status, name, pageable));
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(formService.selectForms(currentUserId, status, name, pageable));
 	}
 
 	@Operation(summary = "차용증 생성", description = "새로운 차용증을 생성합니다.")
@@ -130,8 +131,7 @@ public class FormController {
 		Integer currentUserId = 1;
 		log.info("차용증 생성 요청 - 채권자ID: {}, 채무자ID: {}",
 			formCreateRequest.getCreditorId(), formCreateRequest.getDebtorId());
-		FormDetailResponse response = formService.createForm(currentUserId, formCreateRequest);
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(formService.createForm(currentUserId, formCreateRequest));
 	}
 
 	@Operation(summary = "차용증 수정", description = "기존 차용증 정보를 수정합니다.")
@@ -173,6 +173,7 @@ public class FormController {
 		@Valid @RequestBody FormUpdateRequest formUpdateRequest) {
 		log.info("차용증 수정: id={}", formId);
 		Integer currentUserId = 1;
-		return ResponseEntity.ok(formService.updateForm(currentUserId, formId, formUpdateRequest));
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(formService.updateForm(currentUserId, formId, formUpdateRequest));
 	}
 }

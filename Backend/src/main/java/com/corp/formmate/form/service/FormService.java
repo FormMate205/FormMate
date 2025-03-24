@@ -35,10 +35,10 @@ public class FormService {
 	@Transactional
 	public FormDetailResponse createForm(Integer userId, FormCreateRequest request) {
 		request.validate();
-		UserEntity creator = userService.findById(userId);
-		UserEntity receiver = userService.findById(request.getReceiverId());
-		UserEntity creditor = userService.findById(request.getCreditorId());
-		UserEntity debtor = userService.findById(request.getDebtorId());
+		UserEntity creator = userService.selectById(userId);
+		UserEntity receiver = userService.selectById(request.getReceiverId());
+		UserEntity creditor = userService.selectById(request.getCreditorId());
+		UserEntity debtor = userService.selectById(request.getDebtorId());
 		FormEntity formEntity = request.toEntity(request, creator, receiver, creditor, debtor);
 		formRepository.save(formEntity);
 		return FormDetailResponse.fromEntity(formEntity);
@@ -47,7 +47,7 @@ public class FormService {
 	// id로 FormDetailResponse 조회
 	@Transactional(readOnly = true)
 	public FormDetailResponse selectFormById(Integer formId) {
-		FormEntity formEntity = findById(formId);
+		FormEntity formEntity = selectById(formId);
 		return FormDetailResponse.fromEntity(formEntity);
 	}
 
@@ -55,7 +55,7 @@ public class FormService {
 	@Transactional
 	public FormDetailResponse updateForm(Integer userId, Integer formId, FormUpdateRequest request) {
 		request.validate();
-		FormEntity formEntity = findById(formId);
+		FormEntity formEntity = selectById(formId);
 		if (userId == null) {
 			throw new UserException(ErrorCode.USER_NOT_FOUND);
 		}
@@ -69,7 +69,7 @@ public class FormService {
 
 	// id로 formEntity 조회
 	@Transactional(readOnly = true)
-	public FormEntity findById(Integer formId) {
+	public FormEntity selectById(Integer formId) {
 		FormEntity formEntity = formRepository.findById(formId).orElse(null);
 		if (formEntity == null) {
 			throw new FormException(ErrorCode.FORM_NOT_FOUND);
@@ -80,7 +80,7 @@ public class FormService {
 	// 로그인한 유저의 계약서 전체 조회(상태 : 전체, 진행중, 연체, 종료)
 	public Page<FormListResponse> selectForms(Integer currentUserId, String status, String name,
 		Pageable pageable) {
-		UserEntity userEntity = userService.findById(currentUserId);
+		UserEntity userEntity = userService.selectById(currentUserId);
 
 		// 상태 필터 처리
 		FormStatus formStatus = null;
