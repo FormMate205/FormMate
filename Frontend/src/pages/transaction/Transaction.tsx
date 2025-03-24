@@ -1,12 +1,7 @@
-import {
-    Drawer,
-    DrawerContent,
-    DrawerFooter,
-    DrawerTrigger,
-} from '@/components/ui/drawer';
 import { Header } from '@/widgets';
 import { Button } from '../../components/ui/button';
 import { Icons } from '../../shared';
+import FilterDrawer from './ui/FilterDrawer';
 import TransactionList from './ui/TransactionList';
 
 // Dummy data
@@ -54,24 +49,8 @@ const Transaction = () => {
                 </div>
             </section>
             <section className='flex flex-col gap-4 p-4'>
-                <Drawer>
-                    <DrawerTrigger className='flex w-full items-center justify-end gap-1'>
-                        <span className='text-line-950'>1개월•전체•최신순</span>
-                        <Icons
-                            name='chev-down'
-                            size={14}
-                            className='fill-line-950'
-                        />
-                    </DrawerTrigger>
-                    <DrawerContent>
-                        <div className='tex-lg flex flex-col p-4 font-medium'>
-                            <span>거래 기간</span>
-                        </div>
-                        <DrawerFooter>
-                            <Button>확인</Button>
-                        </DrawerFooter>
-                    </DrawerContent>
-                </Drawer>
+                <FilterDrawer />
+
                 <div className='flex flex-col gap-6'>
                     <TransactionList transactions={transactionsData} />
                 </div>

@@ -41,7 +41,6 @@ const EarlyTerminateAlert = ({ onConfirm }: EarlyTerminateAlertProps) => {
                     은 상환 의무가 사라집니다.
                 </AlertDialogDescription>
 
-                {/* ✅ 추가 설명은 따로 아래에서 처리 (레이아웃 가능) */}
                 <div className='m-2 text-center font-medium text-black'>
                     상대에게 조기 종료를 신청하시겠습니까?
                 </div>
