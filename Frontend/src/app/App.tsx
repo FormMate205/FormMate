@@ -1,12 +1,18 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Chat, ChatBot, FormCreate, FormMatch, Home } from '@/pages';
-import ContractDetail from '@/pages/contract/ContractDetail';
-import ContractList from '@/pages/contract/ContractList';
-import Landing from '@/pages/login/Landing';
-import Login from '@/pages/login/Login';
-import PasswordReset from '@/pages/password/PasswordReset';
-import PhoneVerify from '@/pages/password/PhoneVerify';
-import Signup from '@/pages/signup/Signup';
+import {
+    Chat,
+    ChatBot,
+    FormCreate,
+    FormMatch,
+    Home,
+    Login,
+    Landing,
+    Signup,
+    PasswordReset,
+    PhoneVerify,
+    ContractList,
+    ContractDetail,
+} from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
 

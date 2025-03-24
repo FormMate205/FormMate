@@ -45,7 +45,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
                         />
                     </button>
                 )}
-                <p className='text-primary-500 text-lg font-bold'>{title}</p>
+                <p className='text-lg font-bold'>{title}</p>
             </div>
 
             {/* 알림 버튼 */}
