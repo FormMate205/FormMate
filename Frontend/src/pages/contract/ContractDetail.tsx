@@ -1,21 +1,11 @@
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Icons } from '@/shared';
 import { Header } from '@/widgets';
 
 import InterestInfoTab from './ui/ContractTabs/InterestInfoTab';
 import PaymentHistoryTab from './ui/ContractTabs/PaymentHistoryTab';
 import SummaryTab from './ui/ContractTabs/SummaryTab';
+import EarlyTerminateAlert from './ui/EarlyTerminateAlert';
 import ProgressBar from './ui/ProgressBar';
 import SummaryItem from './ui/SummaryItem';
 
@@ -80,58 +70,12 @@ const ContractDetail = () => {
                             <Button variant={'choiceEmpty'}>채팅하기</Button>
                             <Button variant={'choiceFill'}>이체하기</Button>
                         </div>
-                        <div className='text-line-700 underline'>
-                            <AlertDialog>
-                                <AlertDialogTrigger>
-                                    <div className='border-b'>
-                                        계약 조기 종료
-                                    </div>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <div className='flex justify-center'>
-                                            <Icons
-                                                name='exclamation'
-                                                size={28}
-                                                className='fill-primary-500'
-                                            />
-                                        </div>
-                                        <AlertDialogDescription>
-                                            <div className='flex flex-col gap-2'>
-                                                <div className='flex flex-col'>
-                                                    <div>
-                                                        조기 종료는
-                                                        <span className='text-primary-500'>
-                                                            상호 동의 하에만
-                                                        </span>
-                                                        이루어집니다.
-                                                    </div>
-                                                    <div>
-                                                        조기종료 시,
-                                                        <span className='text-primary-500'>
-                                                            미납 금액 52,000원
-                                                        </span>
-                                                        은 상환 의무가
-                                                        사라집니다.
-                                                    </div>
-                                                </div>
-                                                <div className='font-medium text-black'>
-                                                    상대에게 조기 종료를
-                                                    신청하시겠습니까?
-                                                </div>
-                                            </div>
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>
-                                            아니오
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction>
-                                            예
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                        <div className='text-line-700'>
+                            <EarlyTerminateAlert
+                                onConfirm={() => {
+                                    console.log('조기 종료 신청됨!');
+                                }}
+                            />
                         </div>
                     </div>
                     <section className='bg-white'>
