@@ -8,7 +8,7 @@ export default function Landing() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const timer = setTimeout(() => setShowButtons(true), 1000);
+        const timer = setTimeout(() => setShowButtons(true), 500);
         return () => clearTimeout(timer);
     }, []);
 

@@ -22,7 +22,7 @@ export default function LoginForm() {
             </div>
 
             <div className='text-line-500 text-center text-sm'>
-                <a href='#' className='underline'>
+                <a href='/login/findPw' className='underline'>
                     비밀번호를 잊으셨나요?
                 </a>
             </div>
