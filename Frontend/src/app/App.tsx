@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Chat, ChatBot, FormCreate, FormMatch } from '@/pages';
+import { Chat, ChatBot, FormCreate, FormMatch, Home } from '@/pages';
 import ContractDetail from '@/pages/contract/ContractDetail';
 import ContractList from '@/pages/contract/ContractList';
 import Landing from '@/pages/login/Landing';
@@ -33,6 +33,7 @@ const App = () => {
                         path='/login/findPw/reset'
                         element={<PasswordReset />}
                     />
+                    <Route path='/home' element={<Home />} />
                 </Route>
             </Routes>
         </BrowserRouter>
