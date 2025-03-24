@@ -42,44 +42,29 @@ public class ProfileController {
     @PostMapping("/complete")
     @Transactional
     public ResponseEntity<?> completeProfile(@Valid @RequestBody ProfileCompletionRequest request) {
-        try {
-            // 현재 인증된 사용자 정보 가져오기
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String email = ((UserDetails) authentication.getPrincipal()).getUsername();
+        // 현재 인증된 사용자 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = ((UserDetails) authentication.getPrincipal()).getUsername();
 
-            // 전화번호 정규화
-            String normalizedPhone = messageService.normalizePhoneNumber(request.getPhoneNumber());
+        // 전화번호 정규화
+        String normalizedPhone = messageService.normalizePhoneNumber(request.getPhoneNumber());
 
-            // 전화번호 인증 여부 확인
-            if (!verificationService.isPhoneNumberVerified(normalizedPhone)) {
-                return ResponseEntity.badRequest().body(Map.of("error", "전화번호 인증이 필요합니다."));
-            }
+        // 사용자 정보 업데이트
+        UserEntity updatedUser = userService.completeProfile(
+                email,
+                normalizedPhone,
+                request.getAddress(),
+                request.getAddressDetail()
+        );
 
-            // 사용자 정보 업데이트
-            UserEntity updatedUser = userService.completeProfile(
-                    email,
-                    normalizedPhone,
-                    request.getAddress(),
-                    request.getAddressDetail()
-            );
+        // 응답 생성
+        ProfileCompletionResponse response = new ProfileCompletionResponse(
+                updatedUser.getId(),
+                updatedUser.getEmail(),
+                updatedUser.getUserName(),
+                "프로필이 성공적으로 업데이트 되었습니다."
+        );
 
-            log.info("User profile completed: {}", updatedUser.getEmail());
-
-            // 응답 생성
-            ProfileCompletionResponse response = new ProfileCompletionResponse(
-                    updatedUser.getId(),
-                    updatedUser.getEmail(),
-                    updatedUser.getUserName(),
-                    "프로필이 성공적으로 업데이트 되었습니다."
-            );
-
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-
-        } catch (UserException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Profile completion failed", e);
-            throw new RuntimeException("프로필 업데이트 중 오류가 발생했습니다.");
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

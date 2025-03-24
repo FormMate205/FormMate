@@ -32,14 +32,19 @@ public class VerificationService {
      * @return 생성된 인증코드
      */
     public String generateCode() {
-        SecureRandom random = new SecureRandom();
-        StringBuilder codeBuilder = new StringBuilder();
+        try {
+            SecureRandom random = new SecureRandom();
+            StringBuilder codeBuilder = new StringBuilder();
 
-        for (int i = 0; i < CODE_LENGTH; i++) {
-            codeBuilder.append(random.nextInt(10)); // 0~9 사이의 숫자 추가
+            for (int i = 0; i < CODE_LENGTH; i++) {
+                codeBuilder.append(random.nextInt(10)); // 0~9 사이의 숫자 추가
+            }
+
+            return codeBuilder.toString();
+        } catch (Exception e) {
+            log.error("Failed to generate verification code: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
-
-        return codeBuilder.toString();
     }
 
     /**
@@ -48,9 +53,14 @@ public class VerificationService {
      * @param code 인증코드
      */
     public void storeCode(String phoneNumber, String code) {
-        String key = VERIFICATION_CODE_PREFIX + phoneNumber;
-        redisTemplate.opsForValue().set(key, code, CODE_EXPIRATION_TIME, TimeUnit.SECONDS);
-        log.info("Verification code stored for phone number: {}", phoneNumber);
+        try {
+            String key = VERIFICATION_CODE_PREFIX + phoneNumber;
+            redisTemplate.opsForValue().set(key, code, CODE_EXPIRATION_TIME, TimeUnit.SECONDS);
+            log.info("Verification code stored for phone number: {}", phoneNumber);
+        } catch (Exception e) {
+            log.error("Failed to store verification code: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -93,9 +103,14 @@ public class VerificationService {
      * @return 생성된 인증코드
      */
     public String createAndStoreCode(String phoneNumber) {
-        String code = generateCode();
-        storeCode(phoneNumber, code);
-        return code;
+        try {
+            String code = generateCode();
+            storeCode(phoneNumber, code);
+            return code;
+        } catch (Exception e) {
+            log.error("Failed to create and store verification code: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -105,17 +120,24 @@ public class VerificationService {
      * @return 제한 여부 (true: 제한됨, false: 제한 없음)
      */
     public boolean isRateLimited(String phoneNumber) {
-        String rateLimitKey = VERIFICATION_CODE_PREFIX + "ratelimit:" + phoneNumber;
-        Boolean limited = redisTemplate.hasKey(rateLimitKey);
+        try {
+            String rateLimitKey = VERIFICATION_CODE_PREFIX + "ratelimit:" + phoneNumber;
+            Boolean limited = redisTemplate.hasKey(rateLimitKey);
 
-        if (limited != null && limited) {
-            log.warn("Rate limit exceeded for phone number: {}", phoneNumber);
-            return true;
+            if (limited != null && limited) {
+                log.warn("Rate limit exceeded for phone number: {}", phoneNumber);
+                return true;
+            }
+
+            // 1분간 재요청 제한
+            redisTemplate.opsForValue().set(rateLimitKey, "1", 1, TimeUnit.MINUTES);
+            return false;
+        } catch (Exception e){
+            log.error("Rate limit check failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
-        // 1분간 재요청 제한
-        redisTemplate.opsForValue().set(rateLimitKey, "1", 1, TimeUnit.MINUTES);
-        return false;
+
     }
 
     /**
@@ -124,10 +146,15 @@ public class VerificationService {
      * @param phoneNumber 인증된 전화번호
      */
     public void markAsVerified(String phoneNumber) {
-        String verifiedKey = VERIFICATION_CODE_PREFIX + "verified" + phoneNumber;
-        // 인증 완료 상태를 30분동안 유지
-        redisTemplate.opsForValue().set(verifiedKey, "1", 30, TimeUnit.MINUTES);
-        log.info("Phone number marked as verified: {}", phoneNumber);
+        try {
+            String verifiedKey = VERIFICATION_CODE_PREFIX + "verified" + phoneNumber;
+            // 인증 완료 상태를 30분동안 유지
+            redisTemplate.opsForValue().set(verifiedKey, "1", 30, TimeUnit.MINUTES);
+            log.info("Phone number marked as verified: {}", phoneNumber);
+        } catch (Exception e) {
+            log.error("Failed to mark phone number as verified: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -136,10 +163,36 @@ public class VerificationService {
      * @return 인증 완료 여부
      */
     public boolean isPhoneNumberVerified(String phoneNumber) {
-        String verifiedKey = VERIFICATION_CODE_PREFIX + "verified:" + phoneNumber;
-        Boolean verified = redisTemplate.hasKey(verifiedKey);
-        return verified != null && verified;
+        try {
+            String verifiedKey = VERIFICATION_CODE_PREFIX + "verified:" + phoneNumber;
+            Boolean verified = redisTemplate.hasKey(verifiedKey);
+            return verified != null && verified;
+        } catch (Exception e) {
+            log.error("Phone verification check failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
+
+    /**
+     * 인증코드 확인 및 전화번호 인증 완료 처리
+     */
+    public VerificationResponse verifyAndMarkPhoneNumber(String phoneNumber, String code) {
+        try {
+            boolean isValid = verifyCode(phoneNumber, code);
+
+            if (isValid) {
+                // 인증 성공 시 해당 전화번호를 인증 완료 상태로 표시
+                markAsVerified(phoneNumber);
+                return VerificationResponse.success("인증이 완료되었습니다.");
+            } else {
+                return VerificationResponse.fail("인증 코드가 유효하지 않거나 만료되었습니다.");
+            }
+        } catch (Exception e) {
+        log.error("Verificaiton and marking failed: {}", e.getMessage());
+        throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     /**
      * 인증 코드 요청 및 발송 처리

@@ -9,6 +9,7 @@ import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.core.io.support.PropertiesLoaderSupport;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PropertiesLoaderSupport propertiesLoaderSupport;
+    private final VerificationService verificationService;
 
     /**
      * 이메일로 사용자 정보 조회
@@ -33,11 +34,12 @@ public class UserService {
         try {
             return userRepository.findByEmail(email)
                     .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        } catch (UserException e) {
+          throw e;
         } catch (Exception e) {
             log.error("User search by email failed: {}", e.getMessage());
             throw new UserException(ErrorCode.USER_SEARCH_ERROR);
         }
-
     }
 
     /**
@@ -48,6 +50,8 @@ public class UserService {
         try {
             return userRepository.findById(id)
                     .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        } catch (UserException e) {
+            throw e;
         } catch (Exception e) {
             log.error("User search by id failed: {}", e.getMessage());
             throw new UserException(ErrorCode.USER_SEARCH_ERROR);
@@ -62,7 +66,39 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public boolean checkEmailAvailability(String email) {
-        return !userRepository.existsByEmail(email);
+        try {
+            return !userRepository.existsByEmail(email);
+        } catch (Exception e) {
+            log.error("Email check failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 회원가입 (전화번호 인증 검증 포함)
+     */
+    @Transactional
+    public UserEntity registerWithPhoneVerification(RegisterRequest request, String normalizedPhone) {
+        try {
+            // 전화번호 인증 여부 확인
+            if (!verificationService.isPhoneNumberVerified(normalizedPhone)) {
+                throw new UserException(ErrorCode.PHONE_VERIFICATION_FAILED);
+            }
+
+            // 이메일 중복 확인
+            if (selectByEmail(request.getEmail()) != null) {
+                throw new UserException(ErrorCode.EMAIL_DUPLICATE);
+            }
+
+            // 회원가입 진행
+            return register(request, normalizedPhone);
+
+        } catch (UserException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Registration with phone verification failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -114,33 +150,54 @@ public class UserService {
      */
     @Transactional
     public UserEntity getOrCreateOAuth2User(OAuth2UserInfo userInfo, Provider provider) {
-        Optional<UserEntity> existingUser = userRepository.findByEmail(userInfo.getEmail());
+        try {
+            Optional<UserEntity> existingUser = Optional.ofNullable(selectByEmail(userInfo.getEmail()));
 
-        if (existingUser.isPresent()) {
-            // 이미 가입된 경우, 필요에 따라 정보 업데이트 가능
-            return existingUser.get();
-        } else {
-            // 신규 회원인 경우, OAuth 정보로 가입 처리
-            UserEntity newUser = UserEntity.builder()
-                    .email(userInfo.getEmail())
-                    .userName(userInfo.getName())
-                    .provider(provider)
-                    .role(Role.USER)
-                    .status(true)
-                    .build();
+            if (existingUser.isPresent()) {
+                // 이미 가입된 경우, 필요에 따라 정보 업데이트 가능
+                return existingUser.get();
+            } else {
+                // 신규 회원인 경우, OAuth 정보로 가입 처리
+                UserEntity newUser = UserEntity.builder()
+                        .email(userInfo.getEmail())
+                        .userName(userInfo.getName())
+                        .provider(provider)
+                        .role(Role.USER)
+                        .status(true)
+                        .build();
 
-            return userRepository.save(newUser);
+                return userRepository.save(newUser);
+            }
+        } catch (Exception e) {
+            log.error("OAuth2 user createion failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+
+
     }
 
+    /**
+     * OAuth2 로그인 후 추가 정보 확인
+     */
     @Transactional
     public UserEntity completeProfile(String email, String phoneNumber, String address, String addressDetail) {
-        UserEntity user = selectByEmail(email);
+        try {
+            UserEntity user = selectByEmail(email);
 
-        // 사용자 정보 업데이트
-        user.updateAdditionalProfile(phoneNumber, address, addressDetail);
+            // 전화번호 인증 여부 확인
+            if (!verificationService.isPhoneNumberVerified(phoneNumber)) {
+                throw new UserException(ErrorCode.PHONE_VERIFICATION_FAILED);
+            }
 
-        return user;
+            // 사용자 정보 업데이트
+            user.updateAdditionalProfile(phoneNumber, address, addressDetail);
+
+            return user;
+        } catch (UserException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Profile completion failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.PROFILE_UPDATE_ERROR);
+        }
     }
-
 }

@@ -46,42 +46,38 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        try {
-            // Spring Security의 인증 매커니즘을 사용하여 사용자 인증
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getEmail(),
-                            loginRequest.getPassword()
-                    )
-            );
+        // Spring Security의 인증 매커니즘을 사용하여 사용자 인증
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                )
+        );
 
-            // 인증 정보를 SecurityContext에 설정
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 인증 정보를 SecurityContext에 설정
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // 사용자 정보 조회
-            UserEntity user = userService.selectByEmail(loginRequest.getEmail());
+        // 사용자 정보 조회
+        UserEntity user = userService.selectByEmail(loginRequest.getEmail());
 
-            // 토큰 생성
-            Token token = jwtTokenService.createTokens(user.getId());
+        // 토큰 생성
+        Token token = jwtTokenService.createTokens(user.getId());
 
-            // Refresh Token을 쿠키에 저장
-            jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
+        // Refresh Token을 쿠키에 저장
+        jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
-            // 응답 객체 생성
-            LoginResponse loginResponse = new LoginResponse(
-                    user.getId(),
-                    user.getEmail(),
-                    user.getUserName()
-            );
+        // 응답 객체 생성
+        LoginResponse loginResponse = new LoginResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getUserName()
+        );
 
-            // Header에 Access Token 포함
-            return ResponseEntity.status(HttpStatus.OK)
-                    .header("Authorization", "Bearer " + token.getAccessToken())
-                    .body(loginResponse);
-        } catch (Exception e) {
-            log.error("Login failed: {}", e.getMessage());
-            throw new AuthException(ErrorCode.LOGIN_FAILED);
-        }
+        // Header에 Access Token 포함
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Authorization", "Bearer " + token.getAccessToken())
+                .body(loginResponse);
+
     }
 
     /**
@@ -89,35 +85,25 @@ public class AuthController {
      */
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            // 쿠키에서 Refresh Token 추출
-            String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
+        // 쿠키에서 Refresh Token 추출
+        String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
 
-            if (refreshToken == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Refresh token not found"));
-            }
+        // 토큰 갱신
+        Token token = jwtTokenService.refreshToken(refreshToken);
 
-            // 토큰 갱신
-            Token token = jwtTokenService.refreshToken(refreshToken);
+        // 새로운 Refresh Token을 쿠키에 설정
+        jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
-            // 새로운 Refresh Token을 쿠키에 설정
-            jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
+        // 응답 객체 생성
+        TokenRefreshResponse refreshResponse = new TokenRefreshResponse(
+                token.getAccessToken(),
+                "Token refreshed successfully"
+        );
 
-            // 응답 객체 생성
-            TokenRefreshResponse refreshResponse = new TokenRefreshResponse(
-                    token.getAccessToken(),
-                    "Token refreshed successfully"
-            );
-
-            // Header에 새로운 Access Token 포함
-            return ResponseEntity.status(HttpStatus.OK)
-                    .header("Authorization", "Bearer " + token.getAccessToken())
-                    .body(refreshResponse);
-
-        } catch (Exception e) {
-            log.error("Token refresh failed: {}", e.getMessage());
-            throw new TokenException(ErrorCode.INVALID_TOKEN);
-        }
+        // Header에 새로운 Access Token 포함
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Authorization", "Bearer " + token.getAccessToken())
+                .body(refreshResponse);
     }
 
     /**
@@ -125,35 +111,15 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            // 현재 인증된 사용자 정보 가져오기
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Not authenticated"));
-            }
+        // 현재 인증된 사용자 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            // Access Token에서 사용자 ID 추출
-            String token = jwtTokenProvider.resolveToken(request);
-            if (token != null) {
-                String userIdStr = jwtTokenProvider.getUserIdFromToken(token);
-                int userId = Integer.parseInt(userIdStr);
+        // Access Token에서 사용자 ID 추출
+        String token = jwtTokenProvider.resolveToken(request);
 
-                // Refresh Token 삭제
-                jwtTokenService.logout(userId);
-            }
+        // 로그아웃 처리 (에러 발생시 서비스 계층에서 예외 발생)
+        jwtTokenService.logout(token, authentication, response);
 
-            // 쿠키 삭제
-            Cookie cookie = new Cookie("refresh_token", null);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(jwtProperties.isSecureFlag());
-            cookie.setPath("/");
-            cookie.setMaxAge(0); // 즉시 만료
-            response.addCookie(cookie);
-
-            return ResponseEntity.status(HttpStatus.OK).body(new LogoutResponse("Logged out successfully"));
-        } catch (Exception e) {
-            log.error("Logout failed: {}", e.getMessage());
-            throw new AuthException(ErrorCode.LOGOUT_FAILED);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(new LogoutResponse("Logged out successfully"));
     }
 }
