@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.corp.formmate.contract.dto.ContractDetailDto;
+import com.corp.formmate.contract.dto.ExpectedPaymentAmountDto;
 import com.corp.formmate.contract.service.ContractService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,10 @@ public class ContractController {
 	@GetMapping("/{formId}")
 	public ResponseEntity<ContractDetailDto> selectContractDetail(@PathVariable Integer formId) {
 		return ResponseEntity.ok(contractService.selectContractDetail(formId));
+	}
+
+	@GetMapping("/{formId}/cost")
+	public ResponseEntity<ExpectedPaymentAmountDto> selectExpectedPaymentAmount(@PathVariable Integer formId) {
+		return ResponseEntity.ok(contractService.selectExpectedPaymentAmount(formId));
 	}
 }
