@@ -34,33 +34,15 @@ public class VerificationController {
      */
     @PostMapping("/request")
     public ResponseEntity<VerificationResponse> requestVerification(@Valid @RequestBody PhoneVerificationRequest request) {
-        // 1. 전화번호 형식 통일
-        String phoneNumber = messageService.normalizePhoneNumber(request.getPhoneNumber());
-
-        // 2. 요청 제한 확인
-        if (verificationService.isRateLimited(phoneNumber)) {
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(VerificationResponse.fail("잠시 후 다시 시도해주세요."));
-        }
-
-        // 3. 인증 코드 생성
-        String code = verificationService.createAndStoreCode(phoneNumber);
-
-        // 4. 메세지 발송
-        boolean messageSent = messageService.sendVerificationCode(
-                phoneNumber,
-                code,
-                request.isPreferKakao()
+        VerificationResponse response = verificationService.requestVerificationCode(
+                request.getPhoneNumber(),
+                request.isPreferAlimtalk()
         );
 
-        // 5. 응답 반환
-        if (messageSent) {
-            log.info("Verification code sent to phone number: {}", phoneNumber);
-            return ResponseEntity.status(HttpStatus.OK).body(VerificationResponse.success("인증코드가 발송되었습니다."));
-        } else {
-            log.error("Failed to send verification code to phone number: {}", phoneNumber);
-            throw new UserException(ErrorCode.FAIL_EMAIL_SEND);
-        }
+        // HTTP 상태 코드 설정 - 성공 또는 요청 제한 (TOO_MANY)REQUESTS)에 따라
+        HttpStatus status = response.isSuccess() ? HttpStatus.OK : HttpStatus.TOO_MANY_REQUESTS;
 
+        return ResponseEntity.status(status).body(response);
     }
 
     /**

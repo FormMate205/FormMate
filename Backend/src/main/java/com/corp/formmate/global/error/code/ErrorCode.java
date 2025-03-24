@@ -27,7 +27,7 @@ public enum ErrorCode {
 	INVALID_EMAIL_VERIFICATION(401, "유효하지 않은 인증 토큰입니다"),
 	EXPIRED_EMAIL_VERIFICATION(401, "만료된 인증 토큰입니다"),
 	DUPLICATE_EMAIL(400, "이미 등록된 이메일입니다"),
-	FAIL_EMAIL_SEND(500, "이메일 발송에 실패했습니다"),
+	FAIL_MESSAGE_SEND(500, "문자 발송에 실패했습니다"),
 	PHONE_VERIFICATION_FAILED(400, "휴대전화 인증에 실패했습니다"),
 	PHONE_VERIFICATION_EXPIRED(400, "휴대전화 인증이 만료되었습니다"),
 	PHONE_ALREADY_REGISTERED(400, "이미 등록된 휴대전화 번호입니다"),

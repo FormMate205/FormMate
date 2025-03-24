@@ -159,6 +159,19 @@ sms:
   sender-number: ${SMS_SENDER_NUMBER}
   api-url: ${SMS_API_URL}
 
+# Naver Clous SENS 설정
+naver:
+  cloud:
+    sens:
+      accessKey: ${NAVER_CLOUD_ACCESS_KEY}
+      secretKey: ${NAVER_CLOUD_SECRET_KEY}
+      serviceId: ${NAVER_CLOUD_SERVICE_ID}
+      senderPhone: ${NAVER_CLOUD_SENDER_PHONE}
+      smsUrl: https://sens.apigw.ntruss.com/sms/v2
+      alimtalkUrl: https://sens.apigw.ntruss.com/alimtalk/v2
+      kakaoSenderId: ${NAVER_CLOUD_KAKAO_SENDER_ID}
+      kakaoTemplateCode: ${NAVER_CLOUD_KAKAO_TEMPLATE_CODE}
+
 ---
 # test ???
 spring:

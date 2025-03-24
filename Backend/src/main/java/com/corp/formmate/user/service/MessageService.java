@@ -6,43 +6,36 @@ import org.springframework.stereotype.Service;
 
 /**
  * 메세지 발송 서비스
- * 카카오톡 알림톡과 SMS 발송을 통합 관리
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MessageService {
 
-    private final KakaoMessageSender kakaoMessageSender;
-    private final SmsMessageSender smsMessageSender;
+    private final NaverCloudSensSender naverCloudSensSender;
 
     /**
      * 인증 코드를 포함한 메세지를 발송
-     * 먼저 카카오톡 알림톡을 시도, 실패 시 SMS로 전송
      *
      * @param phoneNumber 수신자 전화번호
      * @param code 인증코드
-     * @param preferKakao 카카오톡 메세지 우선 발송 여부
+     * @param preferAlimtalk 카카오톡 메세지 우선 발송 여부
      * @return 발송 성공 여부
      */
-    public boolean sendVerificationCode(String phoneNumber, String code, boolean preferKakao) {
+    public boolean sendVerificationCode(String phoneNumber, String code, Boolean preferAlimtalk) {
         // 전화번호 형식 검증
         if (!isValidPhoneNumber(phoneNumber)) {
             log.error("Invalid phone number format: {}", phoneNumber);
             return false;
         }
 
-        if (preferKakao) {
-            // 카카오톡 메세지 시도
-            boolean kakaoSuccess = kakaoMessageSender.sendVerificationCode(phoneNumber, code);
-            if (kakaoSuccess) {
-                return true;
-            }
-            log.info("Kakao message failed, falling back to SMS for {}", phoneNumber);
+        try {
+            // NAVER Cloud SENS를 사용하여 메세지 전송
+            return naverCloudSensSender.sendVerificationCode(phoneNumber, code, preferAlimtalk);
+        } catch (Exception e) {
+            log.error("Failed to send verification code: {}", e.getMessage());
+            return false;
         }
-
-        // 카카오톡 실패 또는 SMS 선호 시 SMS 발송
-        return smsMessageSender.sendVerificationCode(phoneNumber, code);
     }
 
     /**

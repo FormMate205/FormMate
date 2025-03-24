@@ -20,5 +20,5 @@ public class PhoneVerificationRequest {
     private String phoneNumber;
 
     // 카카오톡 알림톡 선호 여부 (기본값: true)
-    private boolean preferKakao = true;
+    private boolean preferAlimtalk = true;
 }

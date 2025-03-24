@@ -1,5 +1,8 @@
 package com.corp.formmate.user.service;
 
+import com.corp.formmate.global.error.code.ErrorCode;
+import com.corp.formmate.global.error.exception.UserException;
+import com.corp.formmate.user.dto.VerificationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -13,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class VerificationService {
     private final RedisTemplate<String, String> redisTemplate;
+    private final MessageService messageService;
 
     // Redis에 저장될 때 사용될 키 접두사
     private static final String VERIFICATION_CODE_PREFIX = "verification:phone:";
@@ -135,5 +139,45 @@ public class VerificationService {
         String verifiedKey = VERIFICATION_CODE_PREFIX + "verified:" + phoneNumber;
         Boolean verified = redisTemplate.hasKey(verifiedKey);
         return verified != null && verified;
+    }
+
+    /**
+     * 인증 코드 요청 및 발송 처리
+     */
+    public VerificationResponse requestVerificationCode(String phoneNumber, Boolean preferAlimtalk) {
+        try {
+            // 1. 전화번호 형식 통일
+            String normalizedPhoneNumber = messageService.normalizePhoneNumber(phoneNumber);
+
+            // 2. 요청 제한 확인
+            if (isRateLimited(normalizedPhoneNumber)) {
+                return VerificationResponse.fail("잠시 후 다시 시도해주세요.");
+            }
+
+            // 3. 인증코드 생성
+            String code = createAndStoreCode(normalizedPhoneNumber);
+
+            // 4. 메세지 발송
+            boolean messageSent = messageService.sendVerificationCode(
+                    normalizedPhoneNumber,
+                    code,
+                    preferAlimtalk
+            );
+
+            // 5. 결과 반환
+             if (messageSent) {
+                 log.info("Verification successful for phone number: {}", phoneNumber);
+                 return VerificationResponse.success("인증코드가 발송되었습니다.");
+             } else {
+                 log.error("Failed to send verification code to phone numver: {}", normalizedPhoneNumber);
+                 throw new UserException(ErrorCode.FAIL_MESSAGE_SEND);
+             }
+
+        } catch (UserException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error in verification code request: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 }
