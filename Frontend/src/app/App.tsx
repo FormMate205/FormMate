@@ -1,6 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Chat, ChatBot, FormCreate, FormMatch } from '@/pages';
-import Home from '@/pages/home/Home';
+import { Chat, ChatBot, FormCreate, FormMatch, Home } from '@/pages';
 import Landing from '@/pages/login/Landing';
 import Login from '@/pages/login/Login';
 import PasswordReset from '@/pages/password/PasswordReset';
