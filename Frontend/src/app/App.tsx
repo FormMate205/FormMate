@@ -1,10 +1,18 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Chat, ChatBot, FormCreate, FormMatch } from '@/pages';
-import Landing from '@/pages/login/Landing';
-import Login from '@/pages/login/Login';
-import PasswordReset from '@/pages/password/PasswordReset';
-import PhoneVerify from '@/pages/password/PhoneVerify';
-import Signup from '@/pages/signup/Signup';
+import {
+    Chat,
+    ChatBot,
+    FormCreate,
+    FormMatch,
+    Home,
+    Login,
+    Landing,
+    Signup,
+    PasswordReset,
+    PhoneVerify,
+    ContractList,
+    ContractDetail,
+} from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
 
@@ -16,6 +24,11 @@ const App = () => {
                     <Route path='/form' element={<FormMatch />} />
                     <Route path='/form/create' element={<FormCreate />} />
                     <Route path='/transaction' element={<Transaction />} />
+                    <Route path='/contract' element={<ContractList />} />
+                    <Route
+                        path='/contract/detail'
+                        element={<ContractDetail />}
+                    />
                     <Route path='/login' element={<Login />} />
                     <Route path='/' element={<Landing />} />
                     <Route path='/signup' element={<Signup />} />
@@ -26,6 +39,7 @@ const App = () => {
                         path='/login/findPw/reset'
                         element={<PasswordReset />}
                     />
+                    <Route path='/home' element={<Home />} />
                 </Route>
             </Routes>
         </BrowserRouter>
