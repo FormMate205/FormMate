@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MessageService {
 
-    private final NaverCloudSensSender naverCloudSensSender;
+    private final CoolSMSSender coolSMSSender;
 
     /**
      * 인증 코드를 포함한 메세지를 발송
@@ -31,7 +31,7 @@ public class MessageService {
 
         try {
             // NAVER Cloud SENS를 사용하여 메세지 전송
-            return naverCloudSensSender.sendVerificationCode(phoneNumber, code, preferAlimtalk);
+            return coolSMSSender.sendVerificationCode(phoneNumber, code, preferAlimtalk);
         } catch (Exception e) {
             log.error("Failed to send verification code: {}", e.getMessage());
             return false;
