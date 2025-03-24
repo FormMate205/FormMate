@@ -3,3 +3,8 @@ export { default as FormMatch } from './form/FormMatch';
 export { default as Chat } from './chat/Chat';
 export { default as ChatBot } from './chat/ChatBot';
 export { default as Home } from './home/Home';
+export { default as Login } from './login/Login';
+export { default as Landing } from './login/Landing';
+export { default as Signup } from './signup/Signup';
+export { default as PasswordReset } from './password/PasswordReset';
+export { default as PhoneVerify } from './password/PhoneVerify';

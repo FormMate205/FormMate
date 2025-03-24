@@ -1,9 +1,11 @@
 import LoginForm from './ui/LoginForm';
 
-export default function Login() {
+const Login = () => {
     return (
         <div>
             <LoginForm />
         </div>
     );
-}
+};
+
+export default Login;

@@ -1,6 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
-export default function LoginForm() {
+const LoginForm = () => {
+    const navigate = useNavigate();
+
     return (
         <div className='mx-auto flex max-w-md flex-col gap-6 p-6'>
             <h1 className='mt-20 mb-20 text-center text-3xl font-bold'>
@@ -18,7 +21,9 @@ export default function LoginForm() {
                     placeholder='비밀번호를 입력하세요.'
                     className='focus:ring-primary-500 border-line-300 rounded border px-4 py-3 focus:ring-2 focus:outline-none'
                 />
-                <Button variant='primary'>로그인</Button>
+                <Button variant='primary' onClick={() => navigate('/home')}>
+                    로그인
+                </Button>
             </div>
 
             <div className='text-line-500 text-center text-sm'>
@@ -46,4 +51,6 @@ export default function LoginForm() {
             </div>
         </div>
     );
-}
+};
+
+export default LoginForm;

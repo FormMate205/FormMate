@@ -1,9 +1,11 @@
 import PasswordResetForm from './ui/PasswordResetForm';
 
-export default function PasswordReset() {
+const PasswordReset = () => {
     return (
         <div>
             <PasswordResetForm />
         </div>
     );
-}
+};
+
+export default PasswordReset;
