@@ -8,9 +8,9 @@ import {
     Login,
     Landing,
     Signup,
+    PasswordReset,
+    PhoneVerify,
 } from '@/pages';
-import PasswordReset from '@/pages/password/PasswordReset';
-import PhoneVerify from '@/pages/password/PhoneVerify';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
 

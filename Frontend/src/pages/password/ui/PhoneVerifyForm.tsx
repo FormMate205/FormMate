@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/widgets';
 
-export default function PhoneVerifyForm() {
+const PhoneVerifyForm = () => {
     // 인증여부는 임시로 하드코딩 상태
     const isPhoneValid = true;
     const isCodeValid = true;
@@ -60,4 +60,6 @@ export default function PhoneVerifyForm() {
             </div>
         </div>
     );
-}
+};
+
+export default PhoneVerifyForm;

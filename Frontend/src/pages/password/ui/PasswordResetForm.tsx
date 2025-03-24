@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Header } from '@/widgets';
 
-export default function PasswordResetForm() {
+const PasswordResetForm = () => {
     return (
         <div className='h-full flex-col justify-between'>
             <div className='flex flex-col gap-6 p-6'>
@@ -43,4 +43,6 @@ export default function PasswordResetForm() {
             </div>
         </div>
     );
-}
+};
+
+export default PasswordResetForm;
