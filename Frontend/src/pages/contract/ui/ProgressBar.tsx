@@ -50,7 +50,7 @@ const ProgressBar = ({ amount, goal }: ProgressBarProps) => {
                                 'border-subPink-600 absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-t-8 border-r-8 border-l-8 border-r-transparent border-l-transparent',
                                 {
                                     'left-3 translate-x-0': value <= 5, // 왼쪽
-                                    'right-3 translate-x-0': value >= 95, // 오른쪽
+                                    'right-4 translate-x-0': value >= 95, // 오른쪽
                                     'left-1/2 -translate-x-1/2':
                                         value > 5 && value < 95, // 중앙
                                 },

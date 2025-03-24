@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Progress } from '@/components/ui/progress';
 import {
     Select,
     SelectTrigger,
@@ -6,7 +7,6 @@ import {
     SelectContent,
     SelectItem,
 } from '@/components/ui/select';
-import ProgressBar from './ProgressBar';
 import RadialChart from './RadialChart';
 
 const ChartSummary = () => {
@@ -23,8 +23,8 @@ const ChartSummary = () => {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value='all'>전체</SelectItem>
-                        <SelectItem value='payable'>갚을 계약</SelectItem>
-                        <SelectItem value='receivable'>받을 계약</SelectItem>
+                        <SelectItem value='payable'>채무 계약</SelectItem>
+                        <SelectItem value='receivable'>채권 계약</SelectItem>
                     </SelectContent>
                 </Select>
 
@@ -35,22 +35,38 @@ const ChartSummary = () => {
                 </div>
             </div>
 
-            {/* 아래 콘텐츠는 선택값에 따라 다르게 표시 */}
+            {/* select value에 따른 차트 변화*/}
             <div>
                 {selectedContractType === 'all' && (
-                    <div className='flex flex-col gap-4'>
-                        <div className='flex items-center'>
-                            <div>채무 계약</div>
-                            <ProgressBar amount={0} goal={100000} />
+                    <div className='text-line-900 flex flex-col gap-4 px-4 py-6'>
+                        <div className='flex flex-col'>
+                            <div className='flex items-center gap-4'>
+                                <div className='font-medium whitespace-nowrap'>
+                                    채무계약
+                                </div>
+                                <Progress value={48} />
+                            </div>
+                            <div className='text-line-700 flex justify-end'>
+                                100,000원
+                            </div>
                         </div>
-                        <div className='flex items-center'>
-                            <div>채권 계약</div>
-                            <ProgressBar amount={100000} goal={100000} />
+                        <div className='flex flex-col'>
+                            <div className='flex items-center gap-4'>
+                                <div className='font-medium whitespace-nowrap'>
+                                    채권계약
+                                </div>
+                                <Progress value={79} color='blue' />
+                            </div>
+                            <div className='text-line-700 flex justify-end'>
+                                100,000원
+                            </div>
                         </div>
                     </div>
                 )}
                 {selectedContractType === 'payable' && <RadialChart />}
-                {selectedContractType === 'receivable' && <div>받을 계약</div>}
+                {selectedContractType === 'receivable' && (
+                    <RadialChart color='blue' />
+                )}
             </div>
         </div>
     );

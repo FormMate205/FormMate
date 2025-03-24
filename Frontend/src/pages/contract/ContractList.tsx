@@ -28,7 +28,9 @@ const ContractList = () => {
                                     <SelectValue placeholder='전체' />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value='all'>전체</SelectItem>
+                                    <SelectItem value='default'>
+                                        전체
+                                    </SelectItem>
                                     <SelectItem value='progress'>
                                         진행 중
                                     </SelectItem>

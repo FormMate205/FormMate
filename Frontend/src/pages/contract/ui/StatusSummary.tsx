@@ -2,8 +2,8 @@ import StatusSummaryItem from './StatusSummaryItem';
 
 const summaryData = [
     { label: '진행', value: '3' },
-    { label: '갚을', value: '2', colorClass: 'text-primary-500' },
-    { label: '받을', value: '1', colorClass: 'text-primary-500' },
+    { label: '채무', value: '2', colorClass: 'text-subPink-600' },
+    { label: '채권', value: '1', colorClass: 'text-primary-500' },
     {
         label: '종료',
         value: '10',

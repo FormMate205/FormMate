@@ -1,11 +1,14 @@
 import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from 'recharts';
 
 import {
-    ChartConfig,
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
 } from '../../../components/ui/chart';
+
+interface RadialChartProps {
+    color?: 'pink' | 'blue';
+}
 
 const total = 1000000;
 const current = 850000;
@@ -13,23 +16,40 @@ const current = 850000;
 const chartData = [
     { Data: 'ProgressData', left: total - current, current: current },
 ];
+
 const percent = Math.round((current / total) * 100);
 
-const chartConfig = {
-    left: {
-        label: 'Left',
-        color: '#FDE6F3',
-    },
+// Tailwind 색상 클래스 매핑 함수
+const getChartConfig = (color: 'pink' | 'blue') => {
+    if (color === 'blue') {
+        return {
+            left: {
+                label: 'Left',
+                color: '#DDEAFF',
+            },
+            current: {
+                label: 'Current',
+                color: '#4C6AFF',
+            },
+        };
+    }
+    return {
+        left: {
+            label: 'Left',
+            color: '#FDE6F3',
+        },
+        current: {
+            label: 'Current',
+            color: '#E51D74',
+        },
+    };
+};
 
-    current: {
-        label: 'Current',
-        color: '#E51D74',
-    },
-} satisfies ChartConfig;
+const RadialChart = ({ color = 'pink' }: RadialChartProps) => {
+    const fillClasses = getChartConfig(color);
 
-const RadialChart = () => {
     return (
-        <ChartContainer config={chartConfig} className='w-ful mb-[-20%]'>
+        <ChartContainer config={fillClasses} className='mb-[-20%] w-full'>
             <RadialBarChart
                 data={chartData}
                 endAngle={180}
@@ -63,19 +83,18 @@ const RadialChart = () => {
                         }}
                     />
                 </PolarRadiusAxis>
+
                 <RadialBar
                     dataKey='left'
                     stackId='a'
                     cornerRadius={5}
-                    fill='var(--color-left)'
-                    className='stroke-transparent stroke-2'
+                    fill={fillClasses.left.color}
                 />
                 <RadialBar
                     dataKey='current'
-                    fill='var(--color-current)'
                     stackId='a'
                     cornerRadius={5}
-                    className='stroke-transparent stroke-2'
+                    fill={fillClasses.current.color}
                 />
             </RadialBarChart>
         </ChartContainer>
