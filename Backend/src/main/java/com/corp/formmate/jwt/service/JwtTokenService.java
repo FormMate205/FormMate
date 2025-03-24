@@ -1,5 +1,7 @@
 package com.corp.formmate.jwt.service;
 
+import com.corp.formmate.global.error.code.ErrorCode;
+import com.corp.formmate.global.error.exception.TokenException;
 import com.corp.formmate.jwt.dto.Token;
 import com.corp.formmate.jwt.entity.RefreshTokenEntity;
 import com.corp.formmate.jwt.provider.JwtTokenProvider;
@@ -48,7 +50,7 @@ public class JwtTokenService {
     public Token refreshToken(String refreshToken) {
         // Refresh Token 유효성 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new TokenException(ErrorCode.INVALID_TOKEN);
         }
 
         // Refresh Token에서 사용자 ID 추출
@@ -57,10 +59,10 @@ public class JwtTokenService {
         
         // Redis에 저장된 Refresh Token과 비교
         RefreshTokenEntity savedToken = refreshTokenRepository.findById(userIdStr)
-                .orElseThrow(() -> new RuntimeException("Refresh token is not in database"));
+                .orElseThrow(() -> new TokenException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         if (!savedToken.getToken().equals(refreshToken)) {
-            throw new RuntimeException("Refresh token doesn't match");
+            throw new TokenException(ErrorCode.INVALID_TOKEN);
         }
 
         // 새로운 토큰 발급

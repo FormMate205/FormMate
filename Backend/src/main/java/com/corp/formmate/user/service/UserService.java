@@ -8,14 +8,15 @@ import com.corp.formmate.user.entity.Role;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.support.PropertiesLoaderSupport;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -29,8 +30,14 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public UserEntity selectByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        try {
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        } catch (Exception e) {
+            log.error("User search by email failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.USER_SEARCH_ERROR);
+        }
+
     }
 
     /**
@@ -38,8 +45,14 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public UserEntity selectById(int id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+        try {
+            return userRepository.findById(id)
+                    .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        } catch (Exception e) {
+            log.error("User search by id failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.USER_SEARCH_ERROR);
+        }
+
     }
 
     /**
@@ -59,29 +72,38 @@ public class UserService {
      */
     @Transactional
     public UserEntity register(RegisterRequest request, String normalizedPhone) {
-        // 이메일 중복 확인
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new UserException(ErrorCode.EMAIL_DUPLICATE);
+        try {
+            // 이메일 중복 확인
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new UserException(ErrorCode.EMAIL_DUPLICATE);
+            }
+
+            // 비밀번호 암호화
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+            // 사용자 엔티티 생성
+            UserEntity user = UserEntity.builder()
+                    .email(request.getEmail())
+                    .password(encodedPassword)
+                    .userName(request.getUserName())
+                    .phoneNumber(normalizedPhone)
+                    .address(request.getAddress())
+                    .addressDetail(request.getAddressDetail())
+                    .provider(request.getProvider())
+                    .role(Role.USER)
+                    .status(true)
+                    .build();
+
+            // 사용자 저장 및 반환
+            return userRepository.save(user);
+        } catch (UserException e) {
+            // 이미 UserException이면 그대로 throw
+            throw e;
+        } catch (Exception e) {
+            log.error("User register failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
-        // 비밀번호 암호화
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
-
-        // 사용자 엔티티 생성
-        UserEntity user = UserEntity.builder()
-                .email(request.getEmail())
-                .password(encodedPassword)
-                .userName(request.getUserName())
-                .phoneNumber(normalizedPhone)
-                .address(request.getAddress())
-                .addressDetail(request.getAddressDetail())
-                .provider(request.getProvider())
-                .role(Role.USER)
-                .status(true)
-                .build();
-
-        // 사용자 저장 및 반환
-        return userRepository.save(user);
     }
 
     /**

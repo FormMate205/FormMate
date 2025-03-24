@@ -1,5 +1,7 @@
 package com.corp.formmate.user.controller;
 
+import com.corp.formmate.global.error.code.ErrorCode;
+import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.user.dto.CodeVerificationRequest;
 import com.corp.formmate.user.dto.PhoneVerificationRequest;
 import com.corp.formmate.user.dto.VerificationResponse;
@@ -31,7 +33,7 @@ public class VerificationController {
      * @return
      */
     @PostMapping("/request")
-    public ResponseEntity<VerificationResponse> requestVerification(@RequestBody PhoneVerificationRequest request) {
+    public ResponseEntity<VerificationResponse> requestVerification(@Valid @RequestBody PhoneVerificationRequest request) {
         // 1. 전화번호 형식 통일
         String phoneNumber = messageService.normalizePhoneNumber(request.getPhoneNumber());
 
@@ -56,7 +58,7 @@ public class VerificationController {
             return ResponseEntity.status(HttpStatus.OK).body(VerificationResponse.success("인증코드가 발송되었습니다."));
         } else {
             log.error("Failed to send verification code to phone number: {}", phoneNumber);
-            throw new RuntimeException("인증코드 발송에 실패했습니다. 다시 시도해주세요.");
+            throw new UserException(ErrorCode.FAIL_EMAIL_SEND);
         }
 
     }

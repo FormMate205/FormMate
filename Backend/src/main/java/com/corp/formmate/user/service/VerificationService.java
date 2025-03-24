@@ -56,25 +56,31 @@ public class VerificationService {
      * @return 검증 결과 (true: 성공, false: 실패)
      */
     public boolean verifyCode(String phoneNumber, String code) {
-        String key = VERIFICATION_CODE_PREFIX + phoneNumber;
-        String storedCode = redisTemplate.opsForValue().get(key);
+        try {
+            String key = VERIFICATION_CODE_PREFIX + phoneNumber;
+            String storedCode = redisTemplate.opsForValue().get(key);
 
-        if (storedCode == null) {
-            log.warn("No verification code found for phone number: {}", phoneNumber);
+            if (storedCode == null) {
+                log.warn("No verification code found for phone number: {}", phoneNumber);
+                return false;
+            }
+
+            boolean isValid = storedCode.equals(code);
+
+            if (isValid) {
+                // 성공 시 인증 코드 삭제 (재사용 방지)
+                redisTemplate.delete(key);
+                log.info("Verification successful for phone number: {}", phoneNumber);
+            } else {
+                log.warn("Verification failed for phone number: {}", phoneNumber);
+            }
+
+            return isValid;
+        } catch (Exception e) {
+            log.error("Verification code checking error: {}", e.getMessage());
             return false;
         }
 
-        boolean isValid = storedCode.equals(code);
-
-        if (isValid) {
-            // 성공 시 인증 코드 삭제 (재사용 방지)
-            redisTemplate.delete(key);
-            log.info("Verification successful for phone number: {}", phoneNumber);
-        } else {
-            log.warn("Verification failed for phone number: {}", phoneNumber);
-        }
-
-        return isValid;
     }
 
     /**

@@ -40,7 +40,7 @@ public class JwtTokenProvider {
     }
     
     // AccessToken 생성
-    public String createAccessToken(int userId) {
+    public String createAccessToken(Integer userId) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration());
 
@@ -54,7 +54,7 @@ public class JwtTokenProvider {
     }
 
     // RefreshToken 생성
-    public String createRefreshToken(int userId) {
+    public String createRefreshToken(Integer userId) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtProperties.getRefreshTokenExpiration());
 
@@ -68,7 +68,7 @@ public class JwtTokenProvider {
     }
 
     // 임시 토큰 생성 (이메일 인증 등 용도)
-    public String createTemporaryToken(int userId) {
+    public String createTemporaryToken(Integer userId) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtProperties.getTemporaryTokenExpiration());
 
