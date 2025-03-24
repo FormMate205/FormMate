@@ -7,10 +7,10 @@ import {
     Home,
     Login,
     Landing,
+    Signup,
 } from '@/pages';
 import PasswordReset from '@/pages/password/PasswordReset';
 import PhoneVerify from '@/pages/password/PhoneVerify';
-import Signup from '@/pages/signup/Signup';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
 

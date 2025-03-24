@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import Header from '@/widgets/layout/header/Header';
 
-export default function SignupForm() {
+const SignupForm = () => {
     return (
-        <div className='flex flex-col gap-4 p-4'>
+        <div className='bg-line-50 flex flex-col gap-4 p-4'>
             <Header title='회원가입' />
 
             <div className='mb-4 rounded-lg bg-white p-6 shadow-sm'>
@@ -103,4 +103,6 @@ export default function SignupForm() {
             <Button variant='primaryDisabled'>회원가입</Button>
         </div>
     );
-}
+};
+
+export default SignupForm;
