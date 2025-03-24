@@ -36,4 +36,8 @@ public class SpecialTermEntity implements Serializable {
 
 	@Column(name = "special_term_detail", nullable = false, columnDefinition = "TEXT")
 	private String specialTermDetail;
+
+	@Column(name = "special_term_index", nullable = false)
+	private Integer specialTermIndex;
+
 }

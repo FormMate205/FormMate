@@ -1,5 +1,7 @@
 package com.corp.formmate.form.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import com.corp.formmate.form.repository.FormRepository;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.global.error.exception.UserException;
+import com.corp.formmate.specialterm.dto.SpecialTermResponse;
+import com.corp.formmate.specialterm.service.SpecialTermService;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.UserService;
 
@@ -31,6 +35,8 @@ public class FormService {
 
 	private final UserService userService;
 
+	private final SpecialTermService specialTermService;
+
 	// 계약서 생성
 	@Transactional
 	public FormDetailResponse createForm(Integer userId, FormCreateRequest request) {
@@ -41,14 +47,17 @@ public class FormService {
 		UserEntity debtor = userService.selectById(request.getDebtorId());
 		FormEntity formEntity = request.toEntity(request, creator, receiver, creditor, debtor);
 		formRepository.save(formEntity);
-		return FormDetailResponse.fromEntity(formEntity);
+		List<SpecialTermResponse> specialTermResponses = specialTermService.createSpecialTerms(formEntity,
+			request.getSpecialTermIndexes());
+		return FormDetailResponse.fromEntity(formEntity, specialTermResponses);
 	}
 
 	// id로 FormDetailResponse 조회
 	@Transactional(readOnly = true)
 	public FormDetailResponse selectFormById(Integer formId) {
 		FormEntity formEntity = selectById(formId);
-		return FormDetailResponse.fromEntity(formEntity);
+		List<SpecialTermResponse> specialTermResponses = specialTermService.selectSpecialTermsByFormId(formId);
+		return FormDetailResponse.fromEntity(formEntity, specialTermResponses);
 	}
 
 	// 계약서 수정
@@ -64,7 +73,9 @@ public class FormService {
 		}
 		formEntity.update(request);
 		formRepository.save(formEntity);
-		return FormDetailResponse.fromEntity(formEntity);
+		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(formEntity,
+			request.getSpecialTermIndexes());
+		return FormDetailResponse.fromEntity(formEntity, specialTermResponses);
 	}
 
 	// id로 formEntity 조회
@@ -78,6 +89,7 @@ public class FormService {
 	}
 
 	// 로그인한 유저의 계약서 전체 조회(상태 : 전체, 진행중, 연체, 종료)
+	@Transactional(readOnly = true)
 	public Page<FormListResponse> selectForms(Integer currentUserId, String status, String name,
 		Pageable pageable) {
 		UserEntity userEntity = userService.selectById(currentUserId);
