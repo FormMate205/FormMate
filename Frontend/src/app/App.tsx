@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { FormCreate, FormMatch } from '@/pages';
+import { Chat, ChatBot, FormCreate, FormMatch } from '@/pages';
 import Landing from '@/pages/login/Landing';
 import Login from '@/pages/login/Login';
 import PasswordReset from '@/pages/password/PasswordReset';
@@ -19,6 +19,8 @@ const App = () => {
                     <Route path='/login' element={<Login />} />
                     <Route path='/' element={<Landing />} />
                     <Route path='/signup' element={<Signup />} />
+                    <Route path='/chatbot' element={<ChatBot />} />
+                    <Route path='/chat' element={<Chat />} />
                     <Route path='/login/findPw' element={<PhoneVerify />} />
                     <Route
                         path='/login/findPw/reset'

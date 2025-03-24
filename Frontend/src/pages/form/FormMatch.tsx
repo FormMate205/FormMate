@@ -47,7 +47,7 @@ const FormMatch = () => {
     };
 
     return (
-        <div className='flex flex-col gap-8'>
+        <div className='flex flex-col gap-8 px-4 py-2'>
             <Header title='계약 상대 등록' />
 
             <div className='text-xl font-semibold'>
