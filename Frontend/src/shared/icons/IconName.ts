@@ -21,4 +21,6 @@ export type IconName =
     | 'copy'
     | 'zoom-in'
     | 'question'
-    | 'export';
+    | 'export'
+    | 'search'
+    | 'trash';

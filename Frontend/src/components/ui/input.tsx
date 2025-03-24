@@ -57,7 +57,7 @@ function Input({
         <div className='relative'>
             {variant === 'search' && (
                 <div className='pointer-events-none absolute top-1/2 left-4 -translate-y-1/2'>
-                    <Icons name='zoom-in' size={16} color='fill-line-500' />
+                    <Icons name='search' size={16} color='fill-line-500' />
                 </div>
             )}
             <input
