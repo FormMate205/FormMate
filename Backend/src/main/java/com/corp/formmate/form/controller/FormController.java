@@ -74,7 +74,34 @@ public class FormController {
 			description = "차용증 목록 조회 성공",
 			content = @Content(
 				mediaType = "application/json",
-				schema = @Schema(implementation = Page.class)
+				examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+					value = """
+						{
+						  "content": [
+						    {
+						      "formId": 1,
+						      "formStatus": "진행중",
+						      "receiverName": "홍길동"
+						    },
+						    {
+						      "formId": 2,
+						      "formStatus": "연체",
+						      "receiverName": "김철수"
+						    }
+						  ],
+						  "totalElements": 42,
+						  "totalPages": 5,
+						  "pageable": {
+						    "page": 0,
+						    "size": 10,
+						    "sort": {
+						      "sorted": true,
+						      "direction": "DESC"
+						    }
+						  }
+						}
+						"""
+				)
 			)
 		),
 		@ApiResponse(
