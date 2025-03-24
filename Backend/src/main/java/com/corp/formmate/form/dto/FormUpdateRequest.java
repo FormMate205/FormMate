@@ -3,14 +3,10 @@ package com.corp.formmate.form.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.corp.formmate.form.entity.FormEntity;
-import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.entity.RepaymentMethod;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,58 +14,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Schema(description = "차용증 상세 응답")
-@Builder
-public class FormDetailResponse {
-
-	@Schema(
-		description = "차용증 ID",
-		example = "1"
-	)
-	private Integer id;
-
-	@Schema(
-		description = "계약서 상태",
-		example = "BEFORE_APPROVAL"
-	)
-	private FormStatus status;
-
-	@Schema(
-		description = "생성자 ID",
-		example = "1"
-	)
-	private Integer creatorId;
-
-	@Schema(
-		description = "생성자 이름",
-		example = "생길동"
-	)
-	private String creatorName;
-
-	@Schema(
-		description = "수신자 ID",
-		example = "2"
-	)
-	private Integer receiverId;
-
-	@Schema(
-		description = "수신자 이름",
-		example = "수길동"
-	)
-	private String receiverName;
-
-	@Schema(
-		description = "채권자 ID",
-		example = "1"
-	)
-	private Integer creditorId;
-
-	@Schema(
-		description = "채무자 ID",
-		example = "3"
-	)
-	private Integer debtorId;
+@Schema(description = "차용증 수정 요청")
+public class FormUpdateRequest {
 
 	@Schema(
 		description = "채권자 이름",
@@ -186,36 +132,4 @@ public class FormDetailResponse {
 		example = "3"
 	)
 	private Integer overdueLimit;
-
-	public static FormDetailResponse fromEntity(FormEntity form) {
-		return FormDetailResponse.builder()
-			.id(form.getId())
-			.status(form.getStatus())
-			.creatorId(form.getCreator().getId())
-			.creatorName(form.getCreator().getUserName())
-			.receiverId(form.getReceiver().getId())
-			.receiverName(form.getReceiver().getUserName())
-			.creditorId(form.getCreditor().getId())
-			.debtorId(form.getDebtor().getId())
-			.creditorName(form.getCreditorName())
-			.creditorAddress(form.getCreditorAddress())
-			.creditorPhone(form.getCreditorPhone())
-			.creditorBank(form.getCreditorBank())
-			.creditorAccount(form.getCreditorAccount())
-			.debtorName(form.getDebtorName())
-			.debtorAddress(form.getDebtorAddress())
-			.debtorPhone(form.getDebtorPhone())
-			.debtorBank(form.getDebtorBank())
-			.debtorAccount(form.getDebtorAccount())
-			.contractDate(form.getContractDate())
-			.maturityDate(form.getMaturityDate())
-			.loanAmount(form.getLoanAmount())
-			.repaymentMethod(form.getRepaymentMethod())
-			.repaymentDay(form.getRepaymentDay())
-			.interestRate(form.getInterestRate())
-			.earlyRepaymentFeeRate(form.getEarlyRepaymentFeeRate())
-			.overdueInterestRate(form.getOverdueInterestRate())
-			.overdueLimit(form.getOverdueLimit())
-			.build();
-	}
 }

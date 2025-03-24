@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.corp.formmate.form.dto.FormUpdateRequest;
 import com.corp.formmate.user.entity.UserEntity;
 
 import jakarta.persistence.Column;
@@ -116,4 +117,28 @@ public class FormEntity implements Serializable {
 
 	@Column(name = "overdue_limit")
 	private Integer overdueLimit;
+
+	public void update(FormUpdateRequest request) {
+		this.creditorName = request.getCreditorName();
+		this.creditorAddress = request.getCreditorAddress();
+		this.creditorPhone = request.getCreditorPhone();
+		this.creditorBank = request.getCreditorBank();
+		this.creditorAccount = request.getCreditorAccount();
+
+		this.debtorName = request.getDebtorName();
+		this.debtorAddress = request.getDebtorAddress();
+		this.debtorPhone = request.getDebtorPhone();
+		this.debtorBank = request.getDebtorBank();
+		this.debtorAccount = request.getDebtorAccount();
+
+		this.contractDate = request.getContractDate();
+		this.maturityDate = request.getMaturityDate();
+		this.loanAmount = request.getLoanAmount();
+		this.repaymentMethod = request.getRepaymentMethod();
+		this.repaymentDay = request.getRepaymentDay();
+		this.interestRate = request.getInterestRate();
+		this.earlyRepaymentFeeRate = request.getEarlyRepaymentFeeRate();
+		this.overdueInterestRate = request.getOverdueInterestRate();
+		this.overdueLimit = request.getOverdueLimit();
+	}
 }
