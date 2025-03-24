@@ -2,10 +2,12 @@ package com.corp.formmate.form.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.entity.RepaymentMethod;
+import com.corp.formmate.specialterm.dto.SpecialTermResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -187,7 +189,13 @@ public class FormDetailResponse {
 	)
 	private Integer overdueLimit;
 
-	public static FormDetailResponse fromEntity(FormEntity form) {
+	@Schema(
+		description = "특약 목록 - 채무 계약에 적용되는 특별 조건들로, 법적 조치, 사용 제한, 분쟁 해결, 비용 부담 등의 항목이 포함될 수 있습니다. 없는 경우 빈 배열로 반환됩니다.",
+		example = "[{\"specialTermIndex\": 1, \"specialTermDetail\": \"채무자가 계약을 위반할 경우, 채권자는 본 계약을 근거로 법적 조치를 취할 수 있습니다.\"}, {\"specialTermIndex\": 3, \"specialTermDetail\": \"계약과 관련한 분쟁이 발생할 경우 대한민국 법률을 따릅니다.\"}]"
+	)
+	private List<SpecialTermResponse> specialTerms;
+
+	public static FormDetailResponse fromEntity(FormEntity form, List<SpecialTermResponse> specialTerms) {
 		return FormDetailResponse.builder()
 			.formId(form.getId())
 			.status(form.getStatus())
@@ -216,6 +224,7 @@ public class FormDetailResponse {
 			.earlyRepaymentFeeRate(form.getEarlyRepaymentFeeRate())
 			.overdueInterestRate(form.getOverdueInterestRate())
 			.overdueLimit(form.getOverdueLimit())
+			.specialTerms(specialTerms)
 			.build();
 	}
 }
