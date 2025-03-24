@@ -1,4 +1,4 @@
-export default function AssetInfo() {
+const AssetInfo = () => {
     return (
         <div>
             <p className='mb-4 text-lg font-semibold'>나의 자산</p>
@@ -20,4 +20,6 @@ export default function AssetInfo() {
             </div>
         </div>
     );
-}
+};
+
+export default AssetInfo;

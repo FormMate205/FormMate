@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 
-export default function AccountInfo() {
+const AccountInfo = () => {
     const hasAccount = true;
 
     return (
@@ -46,4 +46,6 @@ export default function AccountInfo() {
             )}
         </div>
     );
-}
+};
+
+export default AccountInfo;

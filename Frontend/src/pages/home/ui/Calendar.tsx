@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Calendar() {
+const Calendar = () => {
     const [weekDates, setWeekDates] = useState<Date[]>([]);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
@@ -31,4 +31,6 @@ export default function Calendar() {
             ))}
         </div>
     );
-}
+};
+
+export default Calendar;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Calendar from './Calendar';
 
-export default function Schedule() {
+const Schedule = () => {
     const hasSchedule = true;
     const [activeTab, setActiveTab] = useState<'send' | 'receive'>('send');
 
@@ -86,4 +86,6 @@ export default function Schedule() {
             </div>
         </div>
     );
-}
+};
+
+export default Schedule;
