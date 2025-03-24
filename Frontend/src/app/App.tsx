@@ -12,6 +12,9 @@ import {
     PhoneVerify,
     ContractList,
     ContractDetail,
+    AccountRegist,
+    AccountVerify,
+    AccountPassword,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -40,6 +43,15 @@ const App = () => {
                         element={<PasswordReset />}
                     />
                     <Route path='/home' element={<Home />} />
+                    <Route path='/account/regist' element={<AccountRegist />} />
+                    <Route
+                        path='/account/regist/verify'
+                        element={<AccountVerify />}
+                    />
+                    <Route
+                        path='/account/regist/password'
+                        element={<AccountPassword />}
+                    />
                 </Route>
             </Routes>
         </BrowserRouter>
