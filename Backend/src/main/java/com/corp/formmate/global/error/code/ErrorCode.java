@@ -59,6 +59,7 @@ public enum ErrorCode {
 	INVALID_FORM_PARTIES(400, "폼 당사자가 동일인입니다"),
 	NEGATIVE_LOAN_AMOUNT(400, "대출 금액은 0보다 커야 합니다"),
 	INVALID_INTEREST_AND_OVERDUE(400, "이자율과 연체이자율의 합은 20% 초과될 수 없습니다."),
+	INVALID_CREATOR_ID(400, "요청자와 차용증 생성사의 ID가 다릅니다."),
 
 	// 특약 관련
 	SPECIAL_TERM_NOT_FOUND(404, "특약 조항을 찾을 수 없습니다"),

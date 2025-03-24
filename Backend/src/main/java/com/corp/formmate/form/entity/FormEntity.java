@@ -136,9 +136,9 @@ public class FormEntity implements Serializable {
 		this.loanAmount = request.getLoanAmount();
 		this.repaymentMethod = request.getRepaymentMethod();
 		this.repaymentDay = request.getRepaymentDay();
-		this.interestRate = request.getInterestRate();
-		this.earlyRepaymentFeeRate = request.getEarlyRepaymentFeeRate();
-		this.overdueInterestRate = request.getOverdueInterestRate();
+		this.interestRate = request.getInterestRateAsBigDecimal();
+		this.earlyRepaymentFeeRate = request.getEarlyRepaymentFeeRateAsBigDecimal();
+		this.overdueInterestRate = request.getOverdueInterestRateAsBigDecimal();
 		this.overdueLimit = request.getOverdueLimit();
 	}
 }

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.corp.formmate.form.entity.RepaymentMethod;
+import com.corp.formmate.global.error.code.ErrorCode;
+import com.corp.formmate.global.error.exception.FormException;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -113,23 +115,74 @@ public class FormUpdateRequest {
 		description = "이자율",
 		example = "5.00"
 	)
-	private BigDecimal interestRate;
+	private String interestRate;
 
 	@Schema(
 		description = "중도상환수수료율",
 		example = "1.50"
 	)
-	private BigDecimal earlyRepaymentFeeRate;
+	private String earlyRepaymentFeeRate;
 
 	@Schema(
 		description = "연체이자율",
 		example = "15.00"
 	)
-	private BigDecimal overdueInterestRate;
+	private String overdueInterestRate;
 
 	@Schema(
 		description = "기한이익상실이 발동될 연체 횟수",
 		example = "3"
 	)
 	private Integer overdueLimit;
+
+	public void validate() {
+		// 이자율 검증 (최대 20%)
+		if (interestRate != null && !interestRate.isEmpty()) {
+			try {
+				BigDecimal rate = new BigDecimal(interestRate);
+				if (rate.compareTo(new BigDecimal("20.00")) > 0) {
+					throw new FormException(ErrorCode.INVALID_INTEREST_AND_OVERDUE);
+				}
+			} catch (NumberFormatException e) {
+				throw new FormException(ErrorCode.INVALID_INTEREST_RATE);
+			}
+		}
+
+		// 연체이자율 + 이자율 검증 (합이 20%를 넘지 않도록)
+		if (interestRate != null && !interestRate.isEmpty() &&
+			overdueInterestRate != null && !overdueInterestRate.isEmpty()) {
+			try {
+				BigDecimal baseRate = new BigDecimal(interestRate);
+				BigDecimal overdueRate = new BigDecimal(overdueInterestRate);
+				if (baseRate.add(overdueRate).compareTo(new BigDecimal("20.00")) > 0) {
+					throw new FormException(ErrorCode.INVALID_INTEREST_AND_OVERDUE);
+				}
+			} catch (NumberFormatException e) {
+				throw new FormException(ErrorCode.INVALID_INTEREST_RATE);
+			}
+		}
+	}
+
+	protected BigDecimal toBigDecimal(String value) {
+		if (value == null || value.isEmpty()) {
+			return null;
+		}
+		try {
+			return new BigDecimal(value);
+		} catch (NumberFormatException e) {
+			throw new FormException(ErrorCode.INVALID_INPUT_VALUE);
+		}
+	}
+
+	public BigDecimal getInterestRateAsBigDecimal() {
+		return toBigDecimal(this.interestRate);
+	}
+
+	public BigDecimal getEarlyRepaymentFeeRateAsBigDecimal() {
+		return toBigDecimal(this.earlyRepaymentFeeRate);
+	}
+
+	public BigDecimal getOverdueInterestRateAsBigDecimal() {
+		return toBigDecimal(this.overdueInterestRate);
+	}
 }

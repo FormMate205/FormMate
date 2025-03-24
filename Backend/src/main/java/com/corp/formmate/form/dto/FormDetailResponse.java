@@ -27,7 +27,7 @@ public class FormDetailResponse {
 		description = "차용증 ID",
 		example = "1"
 	)
-	private Integer id;
+	private Integer formId;
 
 	@Schema(
 		description = "계약서 상태",
@@ -189,7 +189,7 @@ public class FormDetailResponse {
 
 	public static FormDetailResponse fromEntity(FormEntity form) {
 		return FormDetailResponse.builder()
-			.id(form.getId())
+			.formId(form.getId())
 			.status(form.getStatus())
 			.creatorId(form.getCreator().getId())
 			.creatorName(form.getCreator().getUserName())
