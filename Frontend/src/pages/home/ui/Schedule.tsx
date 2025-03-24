@@ -31,15 +31,51 @@ export default function Schedule() {
                 {/* 일정 or 일정 없음 */}
                 {hasSchedule ? (
                     <>
-                        <div className='flex items-center justify-between p-2 text-sm'>
-                            <span className='text-primary-500 mr-2'>D-3</span>{' '}
-                            이동욱 - 80,000원
-                            <Button variant={'choiceFill'}>이체하기</Button>
+                        {/* 예정 */}
+                        <div className='mb-3'>
+                            <p className='p-1 font-semibold'>예정</p>
+                            <div className='flex items-center gap-1 p-2'>
+                                <span className='text-primary-500 min-w-[50px] text-sm'>
+                                    D-3
+                                </span>
+
+                                <div className='flex flex-1 items-center justify-between'>
+                                    <div>
+                                        <p className='pb-0.5 text-sm font-semibold'>
+                                            이동욱
+                                        </p>
+                                        <p className='text-line-500 text-xs'>
+                                            80,000원
+                                        </p>
+                                    </div>
+                                    <Button variant={'choiceFill'}>
+                                        이체하기
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
-                        <div className='flex items-center justify-between p-2 text-sm'>
-                            <span className='text-subPink-700 mr-2'>D+2</span>{' '}
-                            이동욱 - 100,000원
-                            <Button variant={'choiceFill'}>이체하기</Button>
+
+                        <div>
+                            <p className='p-1 font-semibold'>연체</p>
+                            <div className='flex items-center gap-1 p-2'>
+                                <span className='text-subPink-700 min-w-[50px] text-sm'>
+                                    D+2
+                                </span>
+
+                                <div className='flex flex-1 items-center justify-between'>
+                                    <div>
+                                        <p className='pb-0.5 text-sm font-semibold'>
+                                            이동욱
+                                        </p>
+                                        <p className='text-line-500 text-xs'>
+                                            100,000원
+                                        </p>
+                                    </div>
+                                    <Button variant={'choiceFill'}>
+                                        이체하기
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </>
                 ) : (
