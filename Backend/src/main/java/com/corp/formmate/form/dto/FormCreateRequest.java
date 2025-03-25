@@ -11,6 +11,7 @@ import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.user.entity.UserEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
@@ -73,7 +74,7 @@ public class FormCreateRequest {
 
 	@Schema(
 		description = "상환 방법 (원금균등상환, 원리금균등상환, 원금상환)",
-		example = "원리금균등상환",
+		example = "EQUAL_PRINCIPAL_INTEREST",
 		required = true
 	)
 	@NotNull(message = "상환 방법은 필수입니다")
@@ -176,14 +177,17 @@ public class FormCreateRequest {
 		}
 	}
 
+	@JsonIgnore
 	public BigDecimal getInterestRateAsBigDecimal() {
 		return toBigDecimal(this.interestRate);
 	}
 
+	@JsonIgnore
 	public BigDecimal getEarlyRepaymentFeeRateAsBigDecimal() {
 		return toBigDecimal(this.earlyRepaymentFeeRate);
 	}
 
+	@JsonIgnore
 	public BigDecimal getOverdueInterestRateAsBigDecimal() {
 		return toBigDecimal(this.overdueInterestRate);
 	}

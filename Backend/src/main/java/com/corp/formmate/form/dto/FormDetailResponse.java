@@ -155,7 +155,7 @@ public class FormDetailResponse {
 
 	@Schema(
 		description = "상환 방법 (원금균등상환, 원리금균등상환, 원금상환)",
-		example = "원리금균등상환"
+		example = "EQUAL_PRINCIPAL"
 	)
 	private RepaymentMethod repaymentMethod;
 
