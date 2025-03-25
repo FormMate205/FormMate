@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +32,7 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
+    @Lazy
     private final UserDetailsService userDetailsService;
 
     // 시크릿 키 생성
@@ -40,7 +42,7 @@ public class JwtTokenProvider {
     }
     
     // AccessToken 생성
-    public String createAccessToken(int userId) {
+    public String createAccessToken(Integer userId) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration());
 
@@ -54,7 +56,7 @@ public class JwtTokenProvider {
     }
 
     // RefreshToken 생성
-    public String createRefreshToken(int userId) {
+    public String createRefreshToken(Integer userId) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtProperties.getRefreshTokenExpiration());
 
@@ -68,7 +70,7 @@ public class JwtTokenProvider {
     }
 
     // 임시 토큰 생성 (이메일 인증 등 용도)
-    public String createTemporaryToken(int userId) {
+    public String createTemporaryToken(Integer userId) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtProperties.getTemporaryTokenExpiration());
 
@@ -91,7 +93,13 @@ public class JwtTokenProvider {
                 .getSubject();
 
         String userIdStr = subject.replace(jwtProperties.getSubjectPrefix() + ":", "");
-        return Integer.parseInt(userIdStr) == 0 ? null : userIdStr;
+        try {
+            int userId = Integer.parseInt(userIdStr);
+            return userId == 0 ? null : userIdStr;
+        } catch (NumberFormatException e) {
+            log.error("Invalid user ID format in token: {}", userIdStr);
+            return null;
+        }
     }
 
     // 토큰 유효성 검증
@@ -112,11 +120,14 @@ public class JwtTokenProvider {
     }
 
     // 인증 객체 생성
-    public Authentication getAuthentication(String token) {
-        int userId = Integer.parseInt(getUserIdFromToken(token));
-        // UserDetailService에서 userId로 사용자를 조회하는 메서드 필요
-        UserDetails userDetails = ((CustomUserDetailsService) userDetailsService).loadUserById(userId);
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+//    public Authentication getAuthentication(String token) {
+//        int userId = Integer.parseInt(getUserIdFromToken(token));
+//        // UserDetailService에서 userId로 사용자를 조회하는 메서드 필요
+//        UserDetails userDetails = ((CustomUserDetailsService) userDetailsService).loadUserById(userId);
+//        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+//    }
+    public Integer getUserIdFromTokenAsInteger(String token) {
+        return Integer.parseInt(getUserIdFromToken(token));
     }
 
     // HTTP 요청에서 토큰 추출 (Authorization 헤더에서)
@@ -139,5 +150,14 @@ public class JwtTokenProvider {
                     .orElse(null);
         }
         return null;
+    }
+
+    // 토큰 만료 시간 조회 메서드
+    public long getAccessTokenExpiration() {
+        return jwtProperties.getAccessTokenExpiration();
+    }
+
+    public long getRefreshTokenExpiration() {
+        return jwtProperties.getRefreshTokenExpiration();
     }
 }

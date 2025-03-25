@@ -16,10 +16,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @Schema(description = "예상 납부 스케줄 미리보기 요청")
 public class PaymentPreviewRequest {

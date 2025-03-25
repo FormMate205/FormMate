@@ -16,4 +16,5 @@ public class JwtProperties {
     private long accessTokenExpiration;
     private long refreshTokenExpiration;
     private long temporaryTokenExpiration;
+    private boolean secureFlag; // HTTPS 사용시 true로 설정
 }

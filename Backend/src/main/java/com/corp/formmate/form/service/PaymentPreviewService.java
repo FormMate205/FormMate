@@ -17,6 +17,8 @@ import com.corp.formmate.form.dto.PaymentPreviewRequest;
 import com.corp.formmate.form.dto.PaymentPreviewResponse;
 import com.corp.formmate.form.dto.PaymentScheduleResponse;
 import com.corp.formmate.form.entity.RepaymentMethod;
+import com.corp.formmate.global.error.code.ErrorCode;
+import com.corp.formmate.global.error.exception.FormException;
 
 @Service
 public class PaymentPreviewService {
@@ -49,7 +51,7 @@ public class PaymentPreviewService {
 				allSchedules = calculatePrincipalOnly(paymentPreviewRequest);
 				break;
 			default:
-				throw new IllegalArgumentException("지원하지 않는 상환 방법입니다: " + paymentPreviewRequest.getRepaymentMethod());
+				throw new FormException(ErrorCode.INVALID_INPUT_VALUE);
 		}
 
 		// 총 상환금액 계산

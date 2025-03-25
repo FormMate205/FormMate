@@ -13,8 +13,8 @@ spring:
         size: 5
       thread-name-prefix: formmate-scheduler-
   autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+#    exclude:
+#      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
   servlet:
     multipart:
       max-file-size: 10MB      # 단일 파일의 최대 크기
@@ -54,14 +54,15 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            #            redirect-uri: http://??/api/login/oauth2/code/google
+            redirect-uri: https://j12a205.p.ssafy.io/login/oauth2/code/google
             scope:
               - email
               - profile
           naver:
             client-id: ${NAVER_CLIENT_ID}
             client-secret: ${NAVER_CLIENT_SECRET}
-            #            redirect-uri: http://??/api/login/oauth2/code/naver
+            #            redirect-uri: https://j12a205.p.ssafy.io/login/oauth2/code/naver
+            redirect-uri: http://localhost8088/api/login/oauth2/code/naver
             authorization-grant-type: authorization_code
             scope:
               - name
@@ -95,6 +96,7 @@ jwt:
   accessTokenExpiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
   refreshTokenExpiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
   temporaryTokenExpiration: ${JWT_TEMPORARY_TOKEN_EXPIRATION}
+  secure-flag: true  # HTTPS 사용 시 true로 설정
 
 cookie:
   secure-flag: false
@@ -142,6 +144,15 @@ cache:
 websocket:
   endpoint: /ws
   allowed-origins: ${CORS_ALLOWED_ORIGINS:"*"}
+
+# CoolSMS
+coolsms:
+  api:
+    key: ${COOLSMS_API_KEY}
+    secret: ${COOLSMS_API_SECRET}
+  sender:
+    phone: ${COOLSMS_SENDER_PHONE}
+    domain: "https://api.coolsms.co.kr" # 기본 도메인
 
 ---
 # test ???
