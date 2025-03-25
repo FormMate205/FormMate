@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const AccountInfo = () => {
-    const hasAccount = true;
+    const hasAccount = false;
+    const navigate = useNavigate();
 
     return (
         <div className='flex items-center justify-between rounded-lg bg-white p-2 shadow-sm'>
@@ -39,6 +41,7 @@ const AccountInfo = () => {
                     <Button
                         variant={'choiceFill'}
                         className='h-[40px] w-auto px-4'
+                        onClick={() => navigate('/account')}
                     >
                         등록
                     </Button>

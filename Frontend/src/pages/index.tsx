@@ -11,3 +11,6 @@ export { default as Landing } from './login/Landing';
 export { default as Signup } from './signup/Signup';
 export { default as PasswordReset } from './password/PasswordReset';
 export { default as PhoneVerify } from './password/PhoneVerify';
+export { default as AccountRegist } from './account/AccountRegist';
+export { default as AccountVerify } from './account/AccountVerify';
+export { default as AccountPassword } from './account/AccountPassword';
