@@ -33,7 +33,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
     };
 
     return (
-        <div className='flex w-full items-center justify-between py-3'>
+        <div className='flex w-full items-center justify-between p-4'>
             {/* 경로 표시 */}
             <div className='flex items-center gap-3'>
                 {!isHome && (
@@ -45,7 +45,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
                         />
                     </button>
                 )}
-                <p className='text-lg font-bold'>{title}</p>
+                <p className='font-semibold'>{title}</p>
             </div>
 
             {/* 알림 버튼 */}
