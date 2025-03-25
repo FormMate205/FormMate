@@ -1,7 +1,5 @@
 package com.corp.formmate.user.controller;
 
-import com.corp.formmate.global.error.code.ErrorCode;
-import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.user.dto.PasswordFindRequest;
 import com.corp.formmate.user.dto.PasswordResetRequest;
 import com.corp.formmate.user.service.PasswordManagerService;

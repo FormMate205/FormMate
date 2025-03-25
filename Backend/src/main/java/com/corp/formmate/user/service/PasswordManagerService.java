@@ -47,10 +47,9 @@ public class PasswordManagerService {
      * 이름과 전화번호로 사용자 찾기
      * @param userName 사용자 이름
      * @param phoneNumber 전화번호
-     * @return 사용자 엔티티
      */
     @Transactional
-    public boolean sendPasswordResetVerification(String userName, String phoneNumber) {
+    public void sendPasswordResetVerification(String userName, String phoneNumber) {
         try {
             // 전화번호 정규화
             String normalizedPhone = messageService.normalizePhoneNumber(phoneNumber);
@@ -64,13 +63,11 @@ public class PasswordManagerService {
             // 인증 코드 전송
             boolean sent = messageService.sendVerificationCode(normalizedPhone, code);
 
-            if (sent) {
-                log.info("Password reset verification code sent to: {}", normalizedPhone);
-                return true;
-            } else {
+            if (!sent) {
                 log.error("Failed to send verification code to: {}", normalizedPhone);
                 throw new PasswordException(ErrorCode.FAIL_MESSAGE_SEND);
             }
+            log.info("Password reset verification code sent to: {}", normalizedPhone);
         } catch (PasswordException e) {
             log.error("Password error in verification: {}", e.getMessage());
             throw e;
@@ -89,10 +86,9 @@ public class PasswordManagerService {
      * @param verificationCode 인증 코드
      * @param newPassword 새 비밀번호
      * @param confirmPassword 비밀번화 확인
-     * @return 처리 결과
      */
     @Transactional
-    public boolean resetPassword(String phoneNumber, String verificationCode, String newPassword, String confirmPassword) {
+    public void resetPassword(String phoneNumber, String verificationCode, String newPassword, String confirmPassword) {
         try {
             // 전화번호 정규화
             String normalizedPhone = messageService.normalizePhoneNumber(phoneNumber);
@@ -103,10 +99,7 @@ public class PasswordManagerService {
             }
 
             // 인증 코드 확인
-            boolean isValid = verificationService.verifyCode(normalizedPhone, verificationCode);
-            if (!isValid) {
-                throw new PasswordException(ErrorCode.PHONE_VERIFICATION_FAILED);
-            }
+            verificationService.verifyCode(normalizedPhone, verificationCode);
 
             // 전화번호로 사용자 찾기
             UserEntity user;
@@ -125,8 +118,6 @@ public class PasswordManagerService {
             userService.updateUser(user);
 
             log.info("Password successfully reset for user with phone: {}", normalizedPhone);
-            return true;
-
         } catch (PasswordException e) {
             log.error("Password error in reset: {}", e.getMessage());
             throw e;
