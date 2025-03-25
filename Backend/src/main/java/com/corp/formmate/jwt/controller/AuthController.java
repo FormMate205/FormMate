@@ -1,5 +1,6 @@
 package com.corp.formmate.jwt.controller;
 
+import com.corp.formmate.global.error.dto.ErrorResponse;
 import com.corp.formmate.jwt.dto.Token;
 import com.corp.formmate.jwt.properties.JwtProperties;
 import com.corp.formmate.jwt.provider.JwtTokenProvider;
@@ -8,6 +9,13 @@ import com.corp.formmate.user.dto.LoginRequest;
 import com.corp.formmate.user.dto.LoginResponse;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -21,12 +29,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "인증 API", description = "로그인, 로그아웃, 토큰 갱신 관련 API")
 public class AuthController {
 
     private final JwtTokenService jwtTokenService;
@@ -38,8 +45,61 @@ public class AuthController {
     /**
      * 로그인 API
      */
+    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "로그인 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인 실패 - 인증 오류",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 401,
+                            "message": "이메일 또는 비밀번호가 일치하지 않습니다",
+                            "errors": []
+                        }
+                        """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 입력값",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 400,
+                            "message": "잘못된 입력값입니다",
+                            "errors": []
+                        }
+                        """
+                            )
+                    )
+            )
+    })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<?> login(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "로그인 정보",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = LoginRequest.class))
+            )
+            @Valid @RequestBody LoginRequest loginRequest,
+            HttpServletResponse response
+    ) {
         // Spring Security의 인증 매커니즘을 사용하여 사용자 인증
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -77,6 +137,58 @@ public class AuthController {
     /**
      * 토큰 갱신 API
      */
+    @Operation(summary = "토큰 갱신", description = "Refresh Token을 이용해 Access Token을 갱신합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "토큰 갱신 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                            "message": "Token refreshed successfully"
+                        }
+                        """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "토큰 갱신 실패 - 유효하지 않은 토큰",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 401,
+                            "message": "유효하지 않은 토큰입니다",
+                            "errors": []
+                        }
+                        """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "토큰 갱신 실패 - 리프레시 토큰을 찾을 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 404,
+                            "message": "리프레시 토큰을 찾을 수 없습니다",
+                            "errors": []
+                        }
+                        """
+                            )
+                    )
+            )
+    })
     @PostMapping("/refresh")
     public ResponseEntity<String> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         // 쿠키에서 Refresh Token 추출
@@ -97,6 +209,57 @@ public class AuthController {
     /**
      * 로그아웃 API
      */
+    @Operation(summary = "로그아웃", description = "현재 로그인된 사용자를 로그아웃처리합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "로그아웃 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "message": "Logged out successfully"
+                        }
+                        """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그아웃 실패 - 인증되지 않은 사용자",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 401,
+                            "message": "인증되지 않은 사용자입니다",
+                            "errors": []
+                        }
+                        """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "로그아웃 실패 - 서버 오류",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 500,
+                            "message": "로그아웃 처리 중 오류가 발생했습니다",
+                            "errors": []
+                        }
+                        """
+                            )
+                    )
+            )
+    })
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         // 현재 인증된 사용자 정보 가져오기

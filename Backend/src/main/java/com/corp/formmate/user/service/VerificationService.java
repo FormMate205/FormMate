@@ -153,7 +153,7 @@ public class VerificationService {
      */
     public void markAsVerified(String phoneNumber) {
         try {
-            String verifiedKey = VERIFICATION_CODE_PREFIX + "verified" + phoneNumber;
+            String verifiedKey = VERIFICATION_CODE_PREFIX + "verified:" + phoneNumber;
             // 인증 완료 상태를 30분동안 유지
             redisTemplate.opsForValue().set(verifiedKey, "1", 30, TimeUnit.MINUTES);
             log.info("Phone number marked as verified: {}", phoneNumber);

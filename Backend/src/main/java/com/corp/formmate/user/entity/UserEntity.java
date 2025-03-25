@@ -32,7 +32,7 @@ public class UserEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    @Column(name = "phonenumber", length = 20)
+    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
     @Column(length = 225)
