@@ -17,7 +17,7 @@ const AccountVerifyForm = () => {
     // 임시 인증번호 1234
     const handleVerify = () => {
         const code = codeArr.join('');
-        if (code === '1234') navigate('/account/regist/password');
+        if (code === '1234') navigate('/account/password');
         else setFailModal(true);
     };
 

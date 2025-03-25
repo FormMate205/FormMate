@@ -41,7 +41,7 @@ const AccountInfo = () => {
                     <Button
                         variant={'choiceFill'}
                         className='h-[40px] w-auto px-4'
-                        onClick={() => navigate('/account/regist')}
+                        onClick={() => navigate('/account')}
                     >
                         등록
                     </Button>
