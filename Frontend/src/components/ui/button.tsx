@@ -18,6 +18,7 @@ const buttonVariants = cva(
                     'bg-white border border-primary-500 text-primary-500 text-sm font-medium rounded-[4px] px-3 py-2',
                 choiceFill:
                     'bg-primary-500 border border-primary-500 text-white text-sm font-medium rounded-[4px] px-3 py-2',
+                light: 'bg-primary-50 text-primary-500 mt-4 w-full rounded py-2',
             },
         },
         defaultVariants: {
