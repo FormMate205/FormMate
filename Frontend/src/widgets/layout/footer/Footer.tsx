@@ -7,7 +7,7 @@ const Footer = () => {
 
     // 홈으로 이동
     const onNavigateHome = () => {
-        navigate('/home');
+        navigate('/');
     };
 
     // 계약관리로 이동
@@ -26,7 +26,7 @@ const Footer = () => {
     // };
 
     return (
-        <div className='flex w-full justify-between bg-white px-6 py-2 shadow-sm'>
+        <div className='flex w-full justify-between px-6 py-2 shadow-sm'>
             <button
                 className='flex flex-col items-center justify-end gap-1'
                 onClick={onNavigateHome}
