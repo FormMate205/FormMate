@@ -1,6 +1,7 @@
 package com.corp.formmate.jwt.filter;
 
 import com.corp.formmate.jwt.provider.JwtTokenProvider;
+import com.corp.formmate.user.service.CustomUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -11,9 +12,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,10 +29,17 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider,
+                                   @Lazy CustomUserDetailsService customUserDetailsService) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.customUserDetailsService = customUserDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -44,7 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 토큰이 유효하면 인증 정보 설정
             if (token != null) {
                 if (jwtTokenProvider.validateToken(token)) {
-                    Authentication auth = jwtTokenProvider.getAuthentication(token);
+                    // 수정된 부분: Authentication 생성 로직 변경
+                    Integer userId = jwtTokenProvider.getUserIdFromTokenAsInteger(token);
+                    UserDetails userDetails = customUserDetailsService.loadUserById(userId);
+                    Authentication auth = new UsernamePasswordAuthenticationToken(
+                            userDetails, "", userDetails.getAuthorities());
+
                     SecurityContextHolder.getContext().setAuthentication(auth);
                     log.debug("Set Authentication to security context for '{}', uri: {}",
                             auth.getName(), request.getRequestURI());

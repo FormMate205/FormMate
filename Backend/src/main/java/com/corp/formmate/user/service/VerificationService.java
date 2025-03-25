@@ -4,6 +4,8 @@ import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +14,17 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class VerificationService {
     private final RedisTemplate<String, String> redisTemplate;
     private final MessageService messageService;
+
+    @Autowired
+    public VerificationService(
+            @Qualifier("customStringRedisTemplate") RedisTemplate<String, String> redisTemplate,
+            MessageService messageService) {
+        this.redisTemplate = redisTemplate;
+        this.messageService = messageService;
+    }
 
     // Redis에 저장될 때 사용될 키 접두사
     private static final String VERIFICATION_CODE_PREFIX = "verification:phone:";

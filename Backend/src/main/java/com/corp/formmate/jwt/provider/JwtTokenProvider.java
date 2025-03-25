@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +32,7 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
+    @Lazy
     private final UserDetailsService userDetailsService;
 
     // 시크릿 키 생성
@@ -118,11 +120,14 @@ public class JwtTokenProvider {
     }
 
     // 인증 객체 생성
-    public Authentication getAuthentication(String token) {
-        int userId = Integer.parseInt(getUserIdFromToken(token));
-        // UserDetailService에서 userId로 사용자를 조회하는 메서드 필요
-        UserDetails userDetails = ((CustomUserDetailsService) userDetailsService).loadUserById(userId);
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+//    public Authentication getAuthentication(String token) {
+//        int userId = Integer.parseInt(getUserIdFromToken(token));
+//        // UserDetailService에서 userId로 사용자를 조회하는 메서드 필요
+//        UserDetails userDetails = ((CustomUserDetailsService) userDetailsService).loadUserById(userId);
+//        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+//    }
+    public Integer getUserIdFromTokenAsInteger(String token) {
+        return Integer.parseInt(getUserIdFromToken(token));
     }
 
     // HTTP 요청에서 토큰 추출 (Authorization 헤더에서)

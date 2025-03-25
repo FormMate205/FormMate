@@ -207,12 +207,12 @@ public class FormCreateRequest {
 			.debtor(debtor)
 			.creditorName(creditor.getUserName())
 			.creditorAddress(creditor.getAddress())
-			.creditorPhone(creditor.getPhonenumber())
+//			.creditorPhone(creditor.getPhonenumber())
 			.creditorBank(creditor.getBankCode().toString()) // 여기 바꿔야해용
 			.creditorAccount(creditor.getAccountNumber())
 			.debtorName(debtor.getUserName())
 			.debtorAddress(debtor.getAddress())
-			.debtorPhone(debtor.getPhonenumber())
+//			.debtorPhone(debtor.getPhonenumber())
 			.debtorBank(debtor.getBankCode().toString())
 			.debtorAccount(debtor.getAccountNumber()) // 여기 바꿔야해용
 			.contractDate(LocalDateTime.now())
