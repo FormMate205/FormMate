@@ -7,9 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.form.dto.FormCountResponse;
 import com.corp.formmate.form.dto.FormCreateRequest;
 import com.corp.formmate.form.dto.FormDetailResponse;
 import com.corp.formmate.form.dto.FormListResponse;
+import com.corp.formmate.form.dto.FormPartnerResponse;
 import com.corp.formmate.form.dto.FormUpdateRequest;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
@@ -113,5 +115,39 @@ public class FormService {
 
 		// Entity를 DTO로 변환해서 반환 (currentUserId 전달)
 		return formEntities.map(entity -> FormListResponse.fromEntity(entity, currentUserId));
+	}
+
+	// 특정 유저의 계약 상태별 개수 조회(1. 대기중 : 상대승인전, 상대승인후 2. 진행중 3. 완료)
+	@Transactional(readOnly = true)
+	public FormCountResponse countUsersForm(Integer userId) {
+		userService.selectById(userId);
+
+		// 대기중 상태 합계
+		Integer formPendingCount =
+			formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.BEFORE_APPROVAL) +
+				formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.AFTER_APPROVAL);
+
+		// 진행중 상태
+		Integer formActiveCount = formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS);
+
+		// 완료 상태
+		Integer formCompletedCount = formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.COMPLETED);
+
+		return FormCountResponse.builder()
+			.formPendingCount(formPendingCount)
+			.formActiveCount(formActiveCount)
+			.formCompletedCount(formCompletedCount)
+			.build();
+	}
+
+	// 최근 계약 상대 조회
+	@Transactional(readOnly = true)
+	public Page<FormPartnerResponse> selectFormPartner(Integer userId, Pageable pageable) {
+		Page<UserEntity> userEntities = formRepository.findDistinctContractedUsersByUserId(userId, pageable);
+		return userEntities.map(user -> new FormPartnerResponse(
+			user.getId(),
+			user.getUserName(),
+			user.getPhoneNumber()
+		));
 	}
 }

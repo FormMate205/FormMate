@@ -11,6 +11,7 @@ import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.user.entity.UserEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
@@ -21,10 +22,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @Schema(description = "차용증 생성 요청")
 public class FormCreateRequest {
@@ -77,7 +76,7 @@ public class FormCreateRequest {
 		required = true
 	)
 	@NotNull(message = "상환 방법은 필수입니다")
-	private RepaymentMethod repaymentMethod;
+	private String repaymentMethod;
 
 	@Schema(
 		description = "상환일 (매달 며칠)",
@@ -176,14 +175,17 @@ public class FormCreateRequest {
 		}
 	}
 
+	@JsonIgnore
 	public BigDecimal getInterestRateAsBigDecimal() {
 		return toBigDecimal(this.interestRate);
 	}
 
+	@JsonIgnore
 	public BigDecimal getEarlyRepaymentFeeRateAsBigDecimal() {
 		return toBigDecimal(this.earlyRepaymentFeeRate);
 	}
 
+	@JsonIgnore
 	public BigDecimal getOverdueInterestRateAsBigDecimal() {
 		return toBigDecimal(this.overdueInterestRate);
 	}
@@ -207,18 +209,18 @@ public class FormCreateRequest {
 			.debtor(debtor)
 			.creditorName(creditor.getUserName())
 			.creditorAddress(creditor.getAddress())
-//			.creditorPhone(creditor.getPhonenumber())
+			.creditorPhone(creditor.getPhoneNumber())
 			.creditorBank(creditor.getBankCode().toString()) // 여기 바꿔야해용
 			.creditorAccount(creditor.getAccountNumber())
 			.debtorName(debtor.getUserName())
 			.debtorAddress(debtor.getAddress())
-//			.debtorPhone(debtor.getPhonenumber())
+			.debtorPhone(debtor.getPhoneNumber())
 			.debtorBank(debtor.getBankCode().toString())
 			.debtorAccount(debtor.getAccountNumber()) // 여기 바꿔야해용
 			.contractDate(LocalDateTime.now())
 			.maturityDate(formCreateRequest.getMaturityDate())
 			.loanAmount(formCreateRequest.getLoanAmount())
-			.repaymentMethod(formCreateRequest.getRepaymentMethod())
+			.repaymentMethod(RepaymentMethod.fromKorName(formCreateRequest.getRepaymentMethod()))
 			.repaymentDay(repaymentDay)
 			.interestRate(formCreateRequest.getInterestRateAsBigDecimal())
 			.earlyRepaymentFeeRate(formCreateRequest.getEarlyRepaymentFeeRateAsBigDecimal())
