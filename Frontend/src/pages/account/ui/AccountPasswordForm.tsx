@@ -8,7 +8,7 @@ const AccountPasswordForm = () => {
 
     const [step, setStep] = useState<'input' | 'confirm'>('input');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    // const [confirmPassword, setConfirmPassword] = useState('');
     const [inputValue, setInputValue] = useState('');
     const [showFailModal, setShowFailModal] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
