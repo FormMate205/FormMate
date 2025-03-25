@@ -1,0 +1,50 @@
+import { Footer, Header } from '@/widgets';
+import AddressInfo from './ui/AddressInfo';
+import MyAccount from './ui/MyAccount';
+import UserInfo from './ui/UserInfo';
+
+const MyInfo = () => {
+    // 임시 데이터 (API 연결 후 대체)
+    const userData = {
+        userName: '강지은',
+        phoneNumber: '010-1234-1234',
+        email: 'ggsilver@naver.com',
+        isOAuth: false,
+        hasAccount: true,
+        accountNumber: '싸피뱅크 111-11111-11111',
+        zipCode: '12321',
+        address: '서울 강남구 테헤란로 212',
+        detailAddress: '멀티캠퍼스 802호',
+    };
+
+    return (
+        <div className='bg-line-50'>
+            <div className='flex min-h-screen flex-col gap-6 p-6'>
+                <Header title='내 정보' />
+
+                <MyAccount
+                    hasAccount={userData.hasAccount}
+                    userName={userData.userName}
+                    accountNumber={userData.accountNumber}
+                />
+
+                <div className='mt-8'>
+                    <UserInfo
+                        isOAuth={userData.isOAuth}
+                        userName={userData.userName}
+                        phoneNumber={userData.phoneNumber}
+                        email={userData.email}
+                    />
+                    <AddressInfo
+                        zipCode={userData.zipCode}
+                        address={userData.address}
+                        detailAddress={userData.detailAddress}
+                    />
+                </div>
+            </div>
+            <Footer />
+        </div>
+    );
+};
+
+export default MyInfo;
