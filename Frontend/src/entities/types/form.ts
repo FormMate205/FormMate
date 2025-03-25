@@ -1,12 +1,7 @@
 // 계약서
 export interface Form {
     formId: string; // 계약서 id
-    status: // 계약 현황
-    | 'BEFORE_APPROVAL'
-        | 'AFTER_APPROVAL'
-        | 'IN_PROGRESS'
-        | 'OVERDUE'
-        | 'COMPLETED';
+    status: string; // 계약 현황
     creatorId: string; // 게약 생성자
     creatorName: string;
     receiverId: string;
@@ -26,7 +21,7 @@ export interface Form {
     contractDate: string; // 계약 생성일
     maturityDate: string; // 계약 만료일
     loanAmount: string; // 대출 원금
-    repaymentMethod: '원금균등상환' | '원리금균등상환' | '원금상환';
+    repaymentMethod: string; // 분할 납부 방법
     repaymentDay: string; // 분할 상환 일자
     interestRate: string; // 이자율
     earlyRepaymentFeeRate: string; // 중도 상환 수수료
