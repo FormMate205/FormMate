@@ -2,7 +2,6 @@ package com.corp.formmate.user.service;
 
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.UserException;
-import com.corp.formmate.user.dto.VerificationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -176,16 +175,16 @@ public class VerificationService {
     /**
      * 인증코드 확인 및 전화번호 인증 완료 처리
      */
-    public VerificationResponse verifyAndMarkPhoneNumber(String phoneNumber, String code) {
+    public boolean verifyAndMarkPhoneNumber(String phoneNumber, String code) {
         try {
             boolean isValid = verifyCode(phoneNumber, code);
 
             if (isValid) {
                 // 인증 성공 시 해당 전화번호를 인증 완료 상태로 표시
                 markAsVerified(phoneNumber);
-                return VerificationResponse.success("인증이 완료되었습니다.");
+                return true;
             } else {
-                return VerificationResponse.fail("인증 코드가 유효하지 않거나 만료되었습니다.");
+                return false;
             }
         } catch (Exception e) {
         log.error("Verificaiton and marking failed: {}", e.getMessage());
@@ -197,14 +196,14 @@ public class VerificationService {
     /**
      * 인증 코드 요청 및 발송 처리
      */
-    public VerificationResponse requestVerificationCode(String phoneNumber, Boolean preferAlimtalk) {
+    public boolean requestVerificationCode(String phoneNumber, Boolean preferAlimtalk) {
         try {
             // 1. 전화번호 형식 통일
             String normalizedPhoneNumber = messageService.normalizePhoneNumber(phoneNumber);
 
             // 2. 요청 제한 확인
             if (isRateLimited(normalizedPhoneNumber)) {
-                return VerificationResponse.fail("잠시 후 다시 시도해주세요.");
+                return false;
             }
 
             // 3. 인증코드 생성
@@ -220,9 +219,9 @@ public class VerificationService {
             // 5. 결과 반환
              if (messageSent) {
                  log.info("Verification successful for phone number: {}", phoneNumber);
-                 return VerificationResponse.success("인증코드가 발송되었습니다.");
+                 return true;
              } else {
-                 log.error("Failed to send verification code to phone numver: {}", normalizedPhoneNumber);
+                 log.error("Failed to send verification code to phone number: {}", normalizedPhoneNumber);
                  throw new UserException(ErrorCode.FAIL_MESSAGE_SEND);
              }
 

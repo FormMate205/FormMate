@@ -5,7 +5,6 @@ import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.jwt.dto.Token;
 import com.corp.formmate.jwt.properties.JwtProperties;
 import com.corp.formmate.jwt.service.JwtTokenService;
-import com.corp.formmate.user.dto.EmailCheckResponse;
 import com.corp.formmate.user.dto.RegisterRequest;
 import com.corp.formmate.user.dto.RegisterResponse;
 import com.corp.formmate.user.entity.UserEntity;
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -39,9 +37,9 @@ public class RegisterController {
      * 이메일 중복 확인 API
      */
     @GetMapping("/check-email")
-    public ResponseEntity<?> checkEmailAvailability(@RequestParam String email) {
+    public ResponseEntity<Boolean> checkEmailAvailability(@RequestParam String email) {
         boolean isAvailable = userService.checkEmailAvailability(email);
-        return ResponseEntity.status(HttpStatus.OK).body(new EmailCheckResponse(isAvailable));
+        return ResponseEntity.status(HttpStatus.OK).body(isAvailable);
     }
 
     /**

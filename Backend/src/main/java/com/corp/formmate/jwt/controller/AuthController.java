@@ -1,19 +1,13 @@
 package com.corp.formmate.jwt.controller;
 
-import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.jwt.dto.Token;
-import com.corp.formmate.global.error.exception.AuthException;
-import com.corp.formmate.global.error.exception.TokenException;
 import com.corp.formmate.jwt.properties.JwtProperties;
 import com.corp.formmate.jwt.provider.JwtTokenProvider;
 import com.corp.formmate.jwt.service.JwtTokenService;
 import com.corp.formmate.user.dto.LoginRequest;
 import com.corp.formmate.user.dto.LoginResponse;
-import com.corp.formmate.user.dto.LogoutResponse;
-import com.corp.formmate.user.dto.TokenRefreshResponse;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.UserService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -84,7 +78,7 @@ public class AuthController {
      * 토큰 갱신 API
      */
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         // 쿠키에서 Refresh Token 추출
         String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
 
@@ -94,23 +88,17 @@ public class AuthController {
         // 새로운 Refresh Token을 쿠키에 설정
         jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
-        // 응답 객체 생성
-        TokenRefreshResponse refreshResponse = new TokenRefreshResponse(
-                token.getAccessToken(),
-                "Token refreshed successfully"
-        );
-
         // Header에 새로운 Access Token 포함
         return ResponseEntity.status(HttpStatus.OK)
                 .header("Authorization", "Bearer " + token.getAccessToken())
-                .body(refreshResponse);
+                .body("Token refreshed successfully");
     }
 
     /**
      * 로그아웃 API
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         // 현재 인증된 사용자 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -120,6 +108,6 @@ public class AuthController {
         // 로그아웃 처리 (에러 발생시 서비스 계층에서 예외 발생)
         jwtTokenService.logout(token, authentication, response);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new LogoutResponse("Logged out successfully"));
+        return ResponseEntity.status(HttpStatus.OK).body("Logged out successfully");
     }
 }
