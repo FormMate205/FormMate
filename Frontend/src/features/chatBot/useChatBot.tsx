@@ -2,7 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from '@/entities/types/chat';
 import { FormDraftRequest } from '@/entities/types/form';
 import { BotQuestion } from '@/features/chatBot/type';
-import { chatBotQuestions } from '@/features/chatBot/utils/chatBotQuestions';
+import {
+    chatBotQuestions,
+    specialTermsInfo,
+} from '@/features/chatBot/utils/chatBotQuestions';
 import { BOT_ID } from '@/shared/constant';
 import { formatDate } from '@/shared/utils/formatDate';
 
@@ -25,8 +28,11 @@ export const useChatBot = ({
     );
     const [inputEnabled, setInputEnabled] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>('');
-    const [showDivider, setShowDivider] = useState<boolean>(false);
     const messageIdCounterRef = useRef('1');
+
+    // 특약 조항 관련 상태
+    const [currentTermIndex, setCurrentTermIndex] = useState(0);
+    const [selectedTerms, setSelectedTerms] = useState<string[]>([]);
 
     // FormDraftRequest 상태 관리
     const [formDraft, setFormDraft] = useState<FormDraftRequest>({
@@ -78,17 +84,27 @@ export const useChatBot = ({
 
                     setChatHistory((prev) => [...prev, newMessage]);
 
+                    // 조건이 있는 경우 별도 메시지로 추가
+                    if (question.condition && question.condition.length > 0) {
+                        setTimeout(() => {
+                            messageIdCounterRef.current += 1;
+                            const conditionMessage: ChatMessage = {
+                                id: messageIdCounterRef.current.toString(),
+                                writerId: BOT_ID,
+                                content: question.condition!.join('\n'),
+                            };
+                            setChatHistory((prev) => [
+                                ...prev,
+                                conditionMessage,
+                            ]);
+                        }, 300);
+                    }
+
                     // 입력 유형에 따라 입력창 활성화/비활성화
                     setInputEnabled(
                         !['role', 'boolean', 'method', 'specialTerms'].includes(
                             question.type,
                         ),
-                    );
-
-                    // 분할 상환 방법 질문이나 특약사항일 때 구분선 표시
-                    setShowDivider(
-                        question.id === 'repaymentMethod' ||
-                            question.id === 'specialTerms',
                     );
                 }, 500);
             }
@@ -114,8 +130,23 @@ export const useChatBot = ({
         if (currentQuestion) {
             updateFormDraft(currentQuestion.id, content);
 
-            // 다음 질문 결정
-            if (currentQuestion.next) {
+            // 마지막 질문이라면
+            if (currentQuestion.id === 'complete') {
+                if (content === '네') {
+                    createContract();
+                } else {
+                    messageIdCounterRef.current += 1;
+                    const finalMessage: ChatMessage = {
+                        id: messageIdCounterRef.current.toString(),
+                        writerId: BOT_ID,
+                        content: '계약서 생성을 취소했습니다.',
+                    };
+                    setChatHistory((prev) => [...prev, finalMessage]);
+                }
+
+                setCurrentQuestion(null);
+            } else if (currentQuestion.next) {
+                // 다음 질문 결정
                 const nextQuestionId =
                     typeof currentQuestion.next === 'function'
                         ? currentQuestion.next(content)
@@ -124,9 +155,6 @@ export const useChatBot = ({
                 if (nextQuestionId) {
                     setCurrentQuestionId(nextQuestionId);
                 }
-            } else if (currentQuestion.id === 'complete' && content === '네') {
-                // 계약서 생성 처리
-                createContract();
             }
         }
     };
@@ -195,10 +223,8 @@ export const useChatBot = ({
 
     // 상환 방법 선택 처리
     const handleRepaymentMethodSelect = (method: string) => {
-        // 폼 데이터에 저장 및 메시지 전송
         sendMessage(method);
 
-        // 실제 API 전송용 value 값 별도 저장
         setFormDraft((prev) => ({
             ...prev,
             repaymentMethod:
@@ -206,24 +232,50 @@ export const useChatBot = ({
         }));
     };
 
+    // 특약사항 선택 처리
+    const handleSpecialTermSelect = (termId: string, isSelected: boolean) => {
+        const response = isSelected ? '네' : '아니오';
+
+        messageIdCounterRef.current += 1;
+        const userMessage: ChatMessage = {
+            id: messageIdCounterRef.current.toString(),
+            writerId: userId,
+            content: response,
+        };
+        setChatHistory((prev) => [...prev, userMessage]);
+
+        // 선택된 특약 업데이트
+        if (isSelected) {
+            setSelectedTerms((prev) => [...prev, termId]);
+        }
+
+        // 다음 특약조항으로 이동하거나 완료 처리
+        const nextTermIndex = currentTermIndex + 1;
+
+        if (nextTermIndex < specialTermsInfo.length) {
+            setCurrentTermIndex(nextTermIndex);
+        } else {
+            handleSpecialTermsComplete();
+        }
+    };
+
     // 특약사항 선택 완료 처리
-    const handleSpecialTermsComplete = (selectedTerms: string[]) => {
-        if (currentQuestion) {
-            // FormDraftRequest에 특약 인덱스 저장
-            setFormDraft((prev) => ({
-                ...prev,
-                specialTermIndexes: selectedTerms,
-            }));
+    const handleSpecialTermsComplete = () => {
+        // FormDraftRequest에 특약 인덱스 저장
+        setFormDraft((prev) => ({
+            ...prev,
+            specialTermIndexes: selectedTerms,
+        }));
 
-            // 다음 질문으로 이동
-            if (currentQuestion.next) {
+        // 다음 질문으로 이동
+        setTimeout(() => {
+            if (currentQuestion && currentQuestion.next) {
                 const nextQuestionId = currentQuestion.next;
-
                 if (nextQuestionId) {
                     setCurrentQuestionId(nextQuestionId);
                 }
             }
-        }
+        }, 500);
     };
 
     // receiverId 설정 함수
@@ -239,18 +291,24 @@ export const useChatBot = ({
         try {
             console.log('계약서 생성 요청:', formDraft);
 
+            messageIdCounterRef.current += 1;
             const completeMessage: ChatMessage = {
-                id: String(chatHistory.length + 1),
+                id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
                 content: '계약서가 성공적으로 생성되었습니다!',
             };
 
             setChatHistory((prev) => [...prev, completeMessage]);
+
+            // 계약서 생성 종료
+            setCurrentQuestion(null);
+            setInputEnabled(false);
         } catch (error) {
             console.error('계약서 생성 오류:', error);
 
+            messageIdCounterRef.current += 1;
             const errorMessage: ChatMessage = {
-                id: String(chatHistory.length + 1),
+                id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
                 content:
                     '계약서 생성 중 오류가 발생했습니다. 다시 시도해주세요.',
@@ -267,15 +325,15 @@ export const useChatBot = ({
         currentQuestion,
         inputEnabled,
         inputValue,
-        showDivider,
         formDraft,
+        currentTermIndex,
 
         // 액션
         setInputValue,
         sendMessage,
         handleRoleSelect,
         handleRepaymentMethodSelect,
-        handleSpecialTermsComplete,
+        handleSpecialTermSelect,
         setReceiverId,
         createContract,
     };

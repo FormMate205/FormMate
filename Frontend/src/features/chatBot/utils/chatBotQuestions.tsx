@@ -100,11 +100,11 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
         question: '분할 납부를 희망하십니까?',
         type: 'boolean',
         options: [
-            { label: '네', value: 'yes' },
-            { label: '아니오', value: 'no' },
+            { label: '네', value: true },
+            { label: '아니오', value: false },
         ],
         next: (answer) =>
-            answer === 'yes' ? 'repaymentDay' : 'earlyRepaymentFeeRate',
+            answer === '네' ? 'repaymentDay' : 'earlyRepaymentFeeRate',
     },
     repaymentDay: {
         id: 'repaymentDay',
@@ -120,7 +120,7 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
             min: '1',
             max: '31',
         },
-        next: 'repayment',
+        next: 'repaymentMethod',
     },
     repaymentMethod: {
         id: 'repaymentMethod',
@@ -158,7 +158,7 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
             regex: '^[0-9]+(\\.[0-9]{1,2})?$',
             errorMessage: '1.5% 범위 내의 숫자로만 입력해주세요.',
             min: '0',
-            max: '1,5',
+            max: '1.5',
         },
         next: 'overdueLimit',
     },
@@ -176,7 +176,7 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
             regex: '^[0-9]+$',
             errorMessage: '숫자로만 입력해주세요.',
         },
-        next: 'specialTerm1',
+        next: 'specialTerms',
     },
     specialTerms: {
         id: 'specialTerms',
@@ -189,8 +189,8 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
         question: '모든 정보가 입력되었습니다. 계약서를 생성하시겠습니까?',
         type: 'boolean',
         options: [
-            { label: '네', value: 'yes' },
-            { label: '아니오', value: 'no' },
+            { label: '네', value: true },
+            { label: '아니오', value: false },
         ],
     },
 };

@@ -11,16 +11,11 @@ import RepaymentMethodSelector from './ui/RepaymentMethodSelector';
 import RoleSelector from './ui/RoleSelector';
 import SpecialTermsSelector from './ui/SpecialTermSelector';
 
-interface ChatBotProps {
-    receiverId?: string;
-    receiverName?: string;
-}
+const ChatBot = () => {
+    const userId = '1';
+    const receiverId = '2';
+    const receiverName = '윤이영';
 
-const ChatBot = ({
-    receiverId = '',
-    receiverName = '윤이영',
-}: ChatBotProps) => {
-    const userId = '1'; // 현재 사용자 ID
     const writers = [
         { id: userId, name: '강지은' },
         { id: BOT_ID, name: '페이봇' },
@@ -32,12 +27,12 @@ const ChatBot = ({
         currentQuestion,
         inputEnabled,
         inputValue,
-        showDivider,
         setInputValue,
         sendMessage,
         handleRoleSelect,
         handleRepaymentMethodSelect,
-        handleSpecialTermsComplete,
+        handleSpecialTermSelect,
+        currentTermIndex,
     } = useChatBot({
         userId,
         initialReceiverId: receiverId,
@@ -52,23 +47,6 @@ const ChatBot = ({
 
     const onClick = () => {
         sendMessage(inputValue);
-    };
-
-    // 구분선 렌더링
-    const renderDivider = () => {
-        if (!showDivider) return null;
-
-        return (
-            <div className='my-4 flex w-full items-center justify-center'>
-                <div className='flex items-center'>
-                    <div className='h-px w-16 bg-gray-300'></div>
-                    <span className='mx-2 text-sm text-gray-500'>
-                        추가 정보
-                    </span>
-                    <div className='h-px w-16 bg-gray-300'></div>
-                </div>
-            </div>
-        );
     };
 
     // 입력 유형에 따른 컴포넌트 렌더링
@@ -92,11 +70,12 @@ const ChatBot = ({
 
             case 'boolean':
                 return (
-                    <div className='my-4 flex w-full justify-start gap-4'>
+                    <div className='flex w-full justify-start gap-2 px-2'>
                         {currentQuestion.options?.map((option) => (
                             <Button
-                                variant={`${option.label === '네' ? 'choiceFill' : 'choiceEmpty'}`}
-                                value={option.label}
+                                key={option.label}
+                                variant={`${option.value ? 'choiceFill' : 'choiceEmpty'}`}
+                                children={option.label}
                                 onClick={() => sendMessage(option.label)}
                             />
                         ))}
@@ -117,7 +96,8 @@ const ChatBot = ({
             case 'specialTerms':
                 return (
                     <SpecialTermsSelector
-                        onComplete={handleSpecialTermsComplete}
+                        currentTermIndex={currentTermIndex}
+                        onSelect={handleSpecialTermSelect}
                     />
                 );
 
@@ -152,9 +132,6 @@ const ChatBot = ({
                             />
                         );
                     })}
-
-                {/* 구분선 표시 */}
-                {renderDivider()}
 
                 {/* 입력 유형에 따른 컴포넌트 렌더링 */}
                 {renderInputByType()}
