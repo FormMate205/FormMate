@@ -21,7 +21,7 @@ const LoginForm = () => {
                     placeholder='비밀번호를 입력하세요.'
                     className='focus:ring-primary-500 border-line-300 rounded border px-4 py-3 focus:ring-2 focus:outline-none'
                 />
-                <Button variant='primary' onClick={() => navigate('/home')}>
+                <Button variant='primary' onClick={() => navigate('/')}>
                     로그인
                 </Button>
             </div>
