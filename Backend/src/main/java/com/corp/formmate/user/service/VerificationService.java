@@ -68,14 +68,14 @@ public class VerificationService {
      * @param code 사용자가 입력한 인증코드
      * @return 검증 결과 (true: 성공, false: 실패)
      */
-    public boolean verifyCode(String phoneNumber, String code) {
+    public void verifyCode(String phoneNumber, String code) {
         try {
             String key = VERIFICATION_CODE_PREFIX + phoneNumber;
             String storedCode = redisTemplate.opsForValue().get(key);
 
             if (storedCode == null) {
                 log.warn("No verification code found for phone number: {}", phoneNumber);
-                return false;
+                throw new UserException(ErrorCode.PHONE_VERIFICATION_EXPIRED);
             }
 
             boolean isValid = storedCode.equals(code);
@@ -86,14 +86,14 @@ public class VerificationService {
                 log.info("Verification successful for phone number: {}", phoneNumber);
             } else {
                 log.warn("Verification failed for phone number: {}", phoneNumber);
+                throw new UserException(ErrorCode.PHONE_VERIFICATION_FAILED);
             }
-
-            return isValid;
+        } catch (UserException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Verification code checking error: {}", e.getMessage());
-            return false;
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     /**
@@ -116,27 +116,25 @@ public class VerificationService {
      * 특정 전화번호에 대한 인증 코드 발급 제한 여부
      * 짧은 시간 내에 너무 많은 요청을 방지하기 위함
      * @param phoneNumber 전화번호
-     * @return 제한 여부 (true: 제한됨, false: 제한 없음)
      */
-    public boolean isRateLimited(String phoneNumber) {
+    public void checkRateLimit(String phoneNumber) {
         try {
             String rateLimitKey = VERIFICATION_CODE_PREFIX + "ratelimit:" + phoneNumber;
             Boolean limited = redisTemplate.hasKey(rateLimitKey);
 
             if (limited != null && limited) {
                 log.warn("Rate limit exceeded for phone number: {}", phoneNumber);
-                return true;
+                throw new UserException(ErrorCode.TOO_MANY_REQUESTS);
             }
 
             // 1분간 재요청 제한
             redisTemplate.opsForValue().set(rateLimitKey, "1", 1, TimeUnit.MINUTES);
-            return false;
+        } catch (UserException e) {
+            throw e;
         } catch (Exception e){
             log.error("Rate limit check failed: {}", e.getMessage());
             throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
-
-
     }
 
     /**
@@ -175,36 +173,33 @@ public class VerificationService {
     /**
      * 인증코드 확인 및 전화번호 인증 완료 처리
      */
-    public boolean verifyAndMarkPhoneNumber(String phoneNumber, String code) {
+    public void verifyAndMarkPhoneNumber(String phoneNumber, String code) {
         try {
-            boolean isValid = verifyCode(phoneNumber, code);
+            // 인증 코드 검증 (실패 시 예외 발생)
+            verifyCode(phoneNumber, code);
 
-            if (isValid) {
-                // 인증 성공 시 해당 전화번호를 인증 완료 상태로 표시
-                markAsVerified(phoneNumber);
-                return true;
-            } else {
-                return false;
-            }
+            // 인증 성공 시 해당 전화번호를 인증 완료 상태로 표시
+            markAsVerified(phoneNumber);
+
+            log.info("Phone number verified and marked: {}", phoneNumber);
+        } catch (UserException e) {
+            throw e;
         } catch (Exception e) {
-        log.error("Verificaiton and marking failed: {}", e.getMessage());
-        throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+            log.error("Verificaiton and marking failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     /**
      * 인증 코드 요청 및 발송 처리
      */
-    public boolean requestVerificationCode(String phoneNumber) {
+    public void requestVerificationCode(String phoneNumber) {
         try {
             // 1. 전화번호 형식 통일
             String normalizedPhoneNumber = messageService.normalizePhoneNumber(phoneNumber);
 
             // 2. 요청 제한 확인
-            if (isRateLimited(normalizedPhoneNumber)) {
-                return false;
-            }
+            checkRateLimit(normalizedPhoneNumber);
 
             // 3. 인증코드 생성
             String code = createAndStoreCode(normalizedPhoneNumber);
@@ -215,14 +210,13 @@ public class VerificationService {
                     code
             );
 
-            // 5. 결과 반환
-             if (messageSent) {
-                 log.info("Verification successful for phone number: {}", phoneNumber);
-                 return true;
-             } else {
-                 log.error("Failed to send verification code to phone number: {}", normalizedPhoneNumber);
-                 throw new UserException(ErrorCode.FAIL_MESSAGE_SEND);
-             }
+            // 5. 메세지 발송 실패 시 예외 발생
+            if (!messageSent) {
+                log.error("Failed to send verification code to phone number: {}", normalizedPhoneNumber);
+                throw new UserException(ErrorCode.FAIL_MESSAGE_SEND);
+            }
+
+            log.info("Verification successful for phone number: {}", phoneNumber);
 
         } catch (UserException e) {
             throw e;

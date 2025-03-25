@@ -29,13 +29,10 @@ public class VerificationController {
     @PostMapping("/request")
     public ResponseEntity<String> requestVerification(@Valid @RequestBody PhoneVerificationRequest request) {
         // 서비스 계층에서 예외 처리 및 결과 반환
-        boolean success = verificationService.requestVerificationCode(request.getPhoneNumber());
+        verificationService.requestVerificationCode(request.getPhoneNumber());
 
-        if (success) {
-            return ResponseEntity.status(HttpStatus.OK).body("인증코드가 발송되었습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("잠시 후 다시 시도해주세요.");
-        }
+        // 성공시 200 OK
+        return ResponseEntity.status(HttpStatus.OK).body("인증코드가 발송되었습니다.");
     }
 
     /**
@@ -46,14 +43,8 @@ public class VerificationController {
         String phoneNumber = messageService.normalizePhoneNumber(request.getPhoneNumber());
 
         // 인증 검증 (서비스 계층에서 예외 처리)
-        boolean success = verificationService.verifyAndMarkPhoneNumber(phoneNumber, request.getCode());
+        verificationService.verifyAndMarkPhoneNumber(phoneNumber, request.getCode());
 
-        if (success) {
-            return ResponseEntity.status(HttpStatus.OK).body("인증이 완료되었습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증 코드가 유효하지 않거나 만료되었습니다.");
-        }
-
+        return ResponseEntity.status(HttpStatus.OK).body("인증이 완료되었습니다.");
     }
-
 }
