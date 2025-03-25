@@ -27,6 +27,7 @@ const ChatInput = ({
             <div className='flex w-full rounded-[24px] bg-white px-4 py-2 shadow-sm'>
                 <textarea
                     ref={textareaRef}
+                    disabled={!isActive}
                     value={value}
                     onChange={onChange}
                     className='max-h-32 w-full resize-none overflow-y-auto leading-normal focus:outline-none'
