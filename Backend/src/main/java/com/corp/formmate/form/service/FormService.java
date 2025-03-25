@@ -147,7 +147,7 @@ public class FormService {
 		return userEntities.map(user -> new FormPartnerResponse(
 			user.getId(),
 			user.getUserName(),
-			user.getPhonenumber()
+			user.getPhoneNumber()
 		));
 	}
 }
