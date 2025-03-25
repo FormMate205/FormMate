@@ -119,6 +119,16 @@ public class FormEntity implements Serializable {
 	private Integer overdueLimit;
 
 	public void update(FormUpdateRequest request) {
+
+		Integer repaymentDay = request.getRepaymentDay();
+		Integer overdueLimit = request.getOverdueLimit();
+		if (repaymentDay == null || repaymentDay < 0) {
+			repaymentDay = 0;
+		}
+		if (overdueLimit == null || overdueLimit < 0) {
+			overdueLimit = 0;
+		}
+
 		this.creditorName = request.getCreditorName();
 		this.creditorAddress = request.getCreditorAddress();
 		this.creditorPhone = request.getCreditorPhone();
@@ -135,10 +145,10 @@ public class FormEntity implements Serializable {
 		this.maturityDate = request.getMaturityDate();
 		this.loanAmount = request.getLoanAmount();
 		this.repaymentMethod = request.getRepaymentMethod();
-		this.repaymentDay = request.getRepaymentDay();
+		this.repaymentDay = repaymentDay;
 		this.interestRate = request.getInterestRateAsBigDecimal();
 		this.earlyRepaymentFeeRate = request.getEarlyRepaymentFeeRateAsBigDecimal();
 		this.overdueInterestRate = request.getOverdueInterestRateAsBigDecimal();
-		this.overdueLimit = request.getOverdueLimit();
+		this.overdueLimit = overdueLimit;
 	}
 }

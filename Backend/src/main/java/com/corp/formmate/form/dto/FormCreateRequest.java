@@ -2,6 +2,7 @@ package com.corp.formmate.form.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
@@ -84,14 +85,14 @@ public class FormCreateRequest {
 		required = true
 	)
 	@NotNull(message = "상환일은 필수입니다")
-	@Min(value = 1, message = "상환일은 1일 이상이어야 합니다")
+	@Min(value = 0, message = "상환일은 0일 이상이어야 합니다(0 == 분할납부 하지 않음)")
 	@Max(value = 31, message = "상환일은 31일 이하여야 합니다")
 	private Integer repaymentDay;
 
 	@Schema(
 		description = "이자율 (최대 20%)",
 		example = "5.00",
-		required = false
+		required = true
 	)
 	@Pattern(regexp = "^\\d{1,3}(\\.\\d{1,2})?$", message = "이자율은 전체 5자리(소수점 아래 2자리 포함)까지 입력 가능합니다")
 	private String interestRate;
@@ -99,7 +100,7 @@ public class FormCreateRequest {
 	@Schema(
 		description = "중도상환수수료율",
 		example = "1.50",
-		required = false
+		required = true
 	)
 	@Pattern(regexp = "^\\d{1,3}(\\.\\d{1,2})?$", message = "중도상환수수료율은 전체 5자리(소수점 아래 2자리 포함)까지 입력 가능합니다")
 	private String earlyRepaymentFeeRate;
@@ -107,7 +108,7 @@ public class FormCreateRequest {
 	@Schema(
 		description = "연체이자율 (이자율과의 합이 20%를 넘을 수 없음)",
 		example = "15.00",
-		required = false
+		required = true
 	)
 	@Pattern(regexp = "^\\d{1,3}(\\.\\d{1,2})?$", message = "연체이자율은 전체 5자리(소수점 아래 2자리 포함)까지 입력 가능합니다")
 	private String overdueInterestRate;
@@ -115,10 +116,22 @@ public class FormCreateRequest {
 	@Schema(
 		description = "기한이익상실이 발동될 연체 횟수",
 		example = "3",
-		required = false
+		required = true
 	)
 	@Min(value = 0, message = "연체 횟수는 0 이상이어야 합니다")
 	private Integer overdueLimit;
+
+	@Schema(
+		description = """
+			특약 조항의 index들이 담길 리스트입니다.
+			1번 인덱스 : 채무자가 계약을 위반할 경우, 채권자는 본 계약을 근거로 법적 조치를 취할 수 있습니다. 이는 대여금 반환 소송 등을 의미합니다.
+			2번 인덱스 : 빌려간 돈을 생활비 등 특정 용도로 사용해야 하며, 도박 등 부적절한 용도로 사용할 수 없습니다.
+			3번 인덱스 : 계약과 관련한 분쟁이 발생할 경우 대한민국 법률을 따르며, 관할 법원은 채권자 또는 채무자의 주소지를 고려하여 결정할 수 있습니다.
+			4번 인덱스 : 채무자가 계약을 지키지 않을 경우, 발생하는 법적 비용(소송 비용 등)은 채무자가 부담해야 합니다.
+			""",
+		example = "[1, 2, 3]"
+	)
+	private List<Integer> specialTermIndexes;
 
 	public void validate() {
 		// 이자율 검증 (최대 20%)
@@ -150,10 +163,14 @@ public class FormCreateRequest {
 
 	protected BigDecimal toBigDecimal(String value) {
 		if (value == null || value.isEmpty()) {
-			return null;
+			return BigDecimal.ZERO;
 		}
 		try {
-			return new BigDecimal(value);
+			BigDecimal rate = new BigDecimal(value);
+			if (rate.compareTo(BigDecimal.ZERO) <= 0) {
+				return BigDecimal.ZERO;
+			}
+			return rate;
 		} catch (NumberFormatException e) {
 			throw new FormException(ErrorCode.INVALID_INPUT_VALUE);
 		}
@@ -174,6 +191,14 @@ public class FormCreateRequest {
 	@Builder
 	public FormEntity toEntity(FormCreateRequest formCreateRequest, UserEntity creator, UserEntity receiver,
 		UserEntity creditor, UserEntity debtor) {
+		Integer repaymentDay = formCreateRequest.getRepaymentDay();
+		Integer overdueLimit = formCreateRequest.getOverdueLimit();
+		if (repaymentDay == null || repaymentDay < 0) {
+			repaymentDay = 0;
+		}
+		if (overdueLimit == null || overdueLimit < 0) {
+			overdueLimit = 0;
+		}
 		return FormEntity.builder()
 			.status(FormStatus.BEFORE_APPROVAL)
 			.creator(creator)
@@ -194,11 +219,11 @@ public class FormCreateRequest {
 			.maturityDate(formCreateRequest.getMaturityDate())
 			.loanAmount(formCreateRequest.getLoanAmount())
 			.repaymentMethod(formCreateRequest.getRepaymentMethod())
-			.repaymentDay(formCreateRequest.getRepaymentDay())
+			.repaymentDay(repaymentDay)
 			.interestRate(formCreateRequest.getInterestRateAsBigDecimal())
 			.earlyRepaymentFeeRate(formCreateRequest.getEarlyRepaymentFeeRateAsBigDecimal())
 			.overdueInterestRate(formCreateRequest.getOverdueInterestRateAsBigDecimal())
-			.overdueLimit(formCreateRequest.getOverdueLimit())
+			.overdueLimit(overdueLimit)
 			.build();
 	}
 }
