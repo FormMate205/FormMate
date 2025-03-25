@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.corp.formmate.form.dto.FormCountResponse;
 import com.corp.formmate.form.dto.FormCreateRequest;
 import com.corp.formmate.form.dto.FormDetailResponse;
 import com.corp.formmate.form.dto.FormListResponse;
+import com.corp.formmate.form.dto.FormPartnerResponse;
 import com.corp.formmate.form.dto.FormUpdateRequest;
 import com.corp.formmate.form.dto.PaymentPreviewRequest;
 import com.corp.formmate.form.dto.PaymentPreviewResponse;
@@ -284,4 +286,85 @@ public class FormController {
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
+	@Operation(summary = "사용자의 계약 상태별 개수 조회", description = "로그인한 사용자가 관련된 계약서의 상태별(대기중, 진행중, 완료) 개수를 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "조회 성공",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = FormCountResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "사용자를 찾을 수 없음",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@GetMapping("/count")
+	public ResponseEntity<FormCountResponse> countUsersForm() {
+		Integer currentUserId = 1;
+		log.info("사용자의 계약 상태별 개수 조회: userId={}", currentUserId);
+		FormCountResponse response = formService.countUsersForm(currentUserId);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@Operation(summary = "최근 계약 상대 조회", description = "로그인한 사용자의 최근 계약 상대 목록을 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "최근 계약 상대 목록 조회 성공",
+			content = @Content(
+				mediaType = "application/json",
+				examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+					value = """
+						{
+						  "content": [
+						    {
+						      "userId": 2,
+						      "userName": "홍길동",
+						      "phoneNumber": "010-1234-5678"
+						    },
+						    {
+						      "userId": 3,
+						      "userName": "김철수",
+						      "phoneNumber": "010-9876-5432"
+						    }
+						  ],
+						  "totalElements": 25,
+						  "totalPages": 3,
+						  "pageable": {
+						    "page": 0,
+						    "size": 10,
+						    "sort": {
+						      "sorted": true,
+						      "direction": "ASC"
+						    }
+						  }
+						}
+						"""
+				)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "사용자를 찾을 수 없음",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@GetMapping("/partner")
+	public ResponseEntity<Page<FormPartnerResponse>> selectFormPartner(
+		@Parameter(description = "페이징 정보")
+		Pageable pageable) {
+		Integer currentUserId = 1;
+		Page<FormPartnerResponse> response = formService.selectFormPartner(currentUserId, pageable);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
 }

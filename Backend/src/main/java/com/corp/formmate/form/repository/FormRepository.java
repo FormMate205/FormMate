@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
+import com.corp.formmate.user.entity.UserEntity;
 
 @Repository
 public interface FormRepository extends JpaRepository<FormEntity, Integer> {
@@ -25,10 +26,21 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 	@Query("SELECT COUNT(f) FROM FormEntity f WHERE (f.creditor.id = :userId OR f.debtor.id = :userId) AND f.status = :status")
 	Integer countByCreditorIdOrDebtorIdAndStatus(@Param("userId") Integer userId, @Param("status") FormStatus status);
 
-	@Query("SELECT COUNT(f) FROM FormEntity f WHERE f.creditor.id = :userId AND f.status = :status")
-	Integer countByCreditorIdAndStatus(@Param("userId") Integer userId, @Param("status") FormStatus status);
-
-	@Query("SELECT COUNT(f) FROM FormEntity f WHERE f.debtor.id = :userId AND f.status = :status")
-	Integer countByDebtorIdAndStatus(@Param("userId") Integer userId, @Param("status") FormStatus status);
-
+	@Query(value =
+		"SELECT u.* FROM users u " +
+			"JOIN (" +
+			"SELECT " +
+			"CASE WHEN f.creditor_id = :userId THEN f.debtor_id ELSE f.creditor_id END AS partner_id, " +
+			"MAX(f.id) as latest_form_id " +
+			"FROM forms f " +
+			"WHERE f.creditor_id = :userId OR f.debtor_id = :userId " +
+			"GROUP BY partner_id" +
+			") AS latest ON latest.partner_id = u.id " +
+			"ORDER BY latest.latest_form_id DESC",
+		countQuery =
+			"SELECT COUNT(DISTINCT CASE WHEN f.creditor_id = :userId THEN f.debtor_id ELSE f.creditor_id END) " +
+				"FROM forms f " +
+				"WHERE f.creditor_id = :userId OR f.debtor_id = :userId",
+		nativeQuery = true)
+	Page<UserEntity> findDistinctContractedUsersByUserId(@Param("userId") Integer userId, Pageable pageable);
 }
