@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Schema(description = "납부 스케줄 항목")
-public class PaymentScheduleDto {
+public class PaymentScheduleResponse {
 
 	@Schema(description = "납부회차", example = "1")
 	private Integer installmentNumber;

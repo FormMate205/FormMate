@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.corp.formmate.form.dto.PaymentPreviewRequest;
 import com.corp.formmate.form.dto.PaymentPreviewResponse;
-import com.corp.formmate.form.dto.PaymentScheduleDto;
+import com.corp.formmate.form.dto.PaymentScheduleResponse;
 
 @Service
 public class PaymentPreviewService {
@@ -35,7 +35,7 @@ public class PaymentPreviewService {
 		paymentPreviewRequest.validate();
 
 		// 상환 방법에 따라 납부 스케줄 계산
-		List<PaymentScheduleDto> allSchedules;
+		List<PaymentScheduleResponse> allSchedules;
 
 		switch (paymentPreviewRequest.getRepaymentMethod()) {
 			case EQUAL_PRINCIPAL:
@@ -53,7 +53,7 @@ public class PaymentPreviewService {
 
 		// 총 상환금액 계산
 		Long totalRepaymentAmount = allSchedules.stream()
-			.mapToLong(PaymentScheduleDto::getPaymentAmount)
+			.mapToLong(PaymentScheduleResponse::getPaymentAmount)
 			.sum();
 
 		// 페이지네이션 적용
@@ -61,10 +61,10 @@ public class PaymentPreviewService {
 		int start = (int)pageable.getOffset();
 		int end = Math.min((start + pageable.getPageSize()), allSchedules.size());
 
-		List<PaymentScheduleDto> pageContent =
+		List<PaymentScheduleResponse> pageContent =
 			start < totalInstallments ? allSchedules.subList(start, end) : new ArrayList<>();
 
-		Page<PaymentScheduleDto> schedulePage = new PageImpl<>(
+		Page<PaymentScheduleResponse> schedulePage = new PageImpl<>(
 			pageContent, pageable, totalInstallments);
 
 		// 응답 구성
@@ -79,8 +79,8 @@ public class PaymentPreviewService {
 	 * 원금균등상환 방식의 납부 스케줄을 계산합니다.
 	 * 매월 동일한 원금을 상환하고, 이자는 남은 원금에 대해 계산됩니다.
 	 */
-	private List<PaymentScheduleDto> calculateEqualPrincipal(PaymentPreviewRequest paymentPreviewRequest) {
-		List<PaymentScheduleDto> schedules = new ArrayList<>();
+	private List<PaymentScheduleResponse> calculateEqualPrincipal(PaymentPreviewRequest paymentPreviewRequest) {
+		List<PaymentScheduleResponse> schedules = new ArrayList<>();
 
 		// 기본 정보 설정
 		Long loanAmount = paymentPreviewRequest.getLoanAmount();
@@ -115,7 +115,7 @@ public class PaymentPreviewService {
 			}
 
 			// 납부 스케줄 항목 생성
-			PaymentScheduleDto schedule = PaymentScheduleDto.builder()
+			PaymentScheduleResponse schedule = PaymentScheduleResponse.builder()
 				.installmentNumber(i + 1)
 				.paymentDate(paymentDate)
 				.principal(monthlyPrincipal)
@@ -137,8 +137,8 @@ public class PaymentPreviewService {
 	 * 매월 동일한 금액(원금+이자)을 상환하고, 초기에는 이자 비중이 크고 후기에는 원금 비중이 커집니다.
 	 * PMT 공식 사용: 월납입금 = 원금 * 월이자율 * (1 + 월이자율)^총개월 / ((1 + 월이자율)^총개월 - 1)
 	 */
-	private List<PaymentScheduleDto> calculateEqualPrincipalInterest(PaymentPreviewRequest request) {
-		List<PaymentScheduleDto> schedules = new ArrayList<>();
+	private List<PaymentScheduleResponse> calculateEqualPrincipalInterest(PaymentPreviewRequest request) {
+		List<PaymentScheduleResponse> schedules = new ArrayList<>();
 
 		// 기본 정보 설정
 		Long loanAmount = request.getLoanAmount();
@@ -192,7 +192,7 @@ public class PaymentPreviewService {
 			LocalDateTime paymentDate = calculatePaymentDate(request, i + 1);
 
 			// 납부 스케줄 항목 생성
-			PaymentScheduleDto schedule = PaymentScheduleDto.builder()
+			PaymentScheduleResponse schedule = PaymentScheduleResponse.builder()
 				.installmentNumber(i + 1)
 				.paymentDate(paymentDate)
 				.principal(principal)
@@ -213,8 +213,8 @@ public class PaymentPreviewService {
 	 * 원금상환 방식의 납부 스케줄을 계산합니다.
 	 * 만기일에 원금을 일시 상환하고, 매월 이자만 납부합니다.
 	 */
-	private List<PaymentScheduleDto> calculatePrincipalOnly(PaymentPreviewRequest request) {
-		List<PaymentScheduleDto> schedules = new ArrayList<>();
+	private List<PaymentScheduleResponse> calculatePrincipalOnly(PaymentPreviewRequest request) {
+		List<PaymentScheduleResponse> schedules = new ArrayList<>();
 
 		// 기본 정보 설정
 		Long loanAmount = request.getLoanAmount();
@@ -240,7 +240,7 @@ public class PaymentPreviewService {
 			LocalDateTime paymentDate = calculatePaymentDate(request, i + 1);
 
 			// 납부 스케줄 항목 생성
-			PaymentScheduleDto schedule = PaymentScheduleDto.builder()
+			PaymentScheduleResponse schedule = PaymentScheduleResponse.builder()
 				.installmentNumber(i + 1)
 				.paymentDate(paymentDate)
 				.principal(principal)

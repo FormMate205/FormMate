@@ -22,5 +22,5 @@ public class PaymentPreviewResponse {
 	private Integer totalInstallments;
 
 	@Schema(description = "페이지네이션된 납부 스케줄")
-	private Page<PaymentScheduleDto> schedulePage;
+	private Page<PaymentScheduleResponse> schedulePage;
 }
