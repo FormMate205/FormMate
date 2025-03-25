@@ -2,6 +2,7 @@ package com.corp.formmate.form.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,10 @@ import com.corp.formmate.form.dto.FormCreateRequest;
 import com.corp.formmate.form.dto.FormDetailResponse;
 import com.corp.formmate.form.dto.FormListResponse;
 import com.corp.formmate.form.dto.FormUpdateRequest;
+import com.corp.formmate.form.dto.PaymentPreviewRequest;
+import com.corp.formmate.form.dto.PaymentPreviewResponse;
 import com.corp.formmate.form.service.FormService;
+import com.corp.formmate.form.service.PaymentPreviewService;
 import com.corp.formmate.global.error.dto.ErrorResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +43,8 @@ import lombok.extern.slf4j.Slf4j;
 public class FormController {
 
 	private final FormService formService;
+
+	private final PaymentPreviewService paymentPreviewService;
 
 	@Operation(summary = "차용증 상세 조회", description = "차용증 ID를 이용하여 상세 정보를 조회합니다.")
 	@ApiResponses({
@@ -203,4 +209,79 @@ public class FormController {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(formService.updateForm(currentUserId, formId, formUpdateRequest));
 	}
+
+	@Operation(summary = "예상 납부 스케줄 미리보기", description = "대출 정보를 기반으로 예상 납부 스케줄을 계산합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "납부 스케줄 계산 성공",
+			content = @Content(
+				mediaType = "application/json",
+				examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+					value = """
+						{
+						  "totalRepaymentAmount": 10500000,
+						  "totalInstallments": 12,
+						  "schedulePage": {
+						    "content": [
+						      {
+						        "installmentNumber": 1,
+						        "paymentDate": "2024-05-25T00:00:00",
+						        "principal": 833333,
+						        "interest": 41667,
+						        "paymentAmount": 875000
+						      },
+						      {
+						        "installmentNumber": 2,
+						        "paymentDate": "2024-06-25T00:00:00",
+						        "principal": 833333,
+						        "interest": 37500,
+						        "paymentAmount": 870833
+						      }
+						    ],
+						    "totalElements": 12,
+						    "totalPages": 2,
+						    "pageable": {
+						      "page": 0,
+						      "size": 10,
+						      "sort": {
+						        "sorted": true,
+						        "direction": "ASC"
+						      }
+						    }
+						  }
+						}
+						"""
+				)
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 입력값",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@PostMapping("/plan")
+	public ResponseEntity<PaymentPreviewResponse> calculatePaymentPlan(
+		@io.swagger.v3.oas.annotations.parameters.RequestBody(
+			description = "납부 스케줄 계산 요청 정보",
+			required = true,
+			content = @Content(schema = @Schema(implementation = PaymentPreviewRequest.class))
+		)
+		@Valid @RequestBody PaymentPreviewRequest paymentPreviewRequest,
+		@Parameter(description = "페이징 정보")
+		@PageableDefault(size = 10) Pageable pageable) {
+
+		log.info("예상 납부 스케줄 계산 요청 - 대출금액: {}, 상환방식: {}, 이자율: {}",
+			paymentPreviewRequest.getLoanAmount(), paymentPreviewRequest.getRepaymentMethod(),
+			paymentPreviewRequest.getInterestRate());
+
+		PaymentPreviewResponse response = paymentPreviewService.calculatePaymentPreview(paymentPreviewRequest,
+			pageable);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
 }
