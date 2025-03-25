@@ -74,11 +74,11 @@ public class FormCreateRequest {
 
 	@Schema(
 		description = "상환 방법 (원금균등상환, 원리금균등상환, 원금상환)",
-		example = "EQUAL_PRINCIPAL_INTEREST",
+		example = "원리금균등상환",
 		required = true
 	)
 	@NotNull(message = "상환 방법은 필수입니다")
-	private RepaymentMethod repaymentMethod;
+	private String repaymentMethod;
 
 	@Schema(
 		description = "상환일 (매달 며칠)",
@@ -222,7 +222,7 @@ public class FormCreateRequest {
 			.contractDate(LocalDateTime.now())
 			.maturityDate(formCreateRequest.getMaturityDate())
 			.loanAmount(formCreateRequest.getLoanAmount())
-			.repaymentMethod(formCreateRequest.getRepaymentMethod())
+			.repaymentMethod(RepaymentMethod.fromKorName(formCreateRequest.getRepaymentMethod()))
 			.repaymentDay(repaymentDay)
 			.interestRate(formCreateRequest.getInterestRateAsBigDecimal())
 			.earlyRepaymentFeeRate(formCreateRequest.getEarlyRepaymentFeeRateAsBigDecimal())

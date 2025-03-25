@@ -1,7 +1,6 @@
 package com.corp.formmate.form.dto;
 
 import com.corp.formmate.form.entity.FormEntity;
-import com.corp.formmate.form.entity.FormStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -26,9 +25,9 @@ public class FormListResponse {
 
 	@Schema(
 		description = "계약 상태",
-		example = "IN_PROGRESS"
+		example = "진행중"
 	)
-	private FormStatus formStatus;
+	private String formStatus;
 
 	@Schema(
 		description = "상대방 이름",
@@ -49,7 +48,7 @@ public class FormListResponse {
 
 		return FormListResponse.builder()
 			.formId(formEntity.getId())
-			.formStatus(formEntity.getStatus())
+			.formStatus(formEntity.getStatus().getKorName())
 			.receiverName(receiverName)
 			.build();
 	}

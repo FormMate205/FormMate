@@ -3,7 +3,6 @@ package com.corp.formmate.form.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.corp.formmate.form.entity.RepaymentMethod;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -63,11 +62,11 @@ public class PaymentPreviewRequest {
 
 	@Schema(
 		description = "상환 방법 (원금균등상환, 원리금균등상환, 원금상환)",
-		example = "EQUAL_PRINCIPAL_INTEREST",
+		example = "원리금균등상환",
 		required = true
 	)
 	@NotNull(message = "상환 방법은 필수입니다")
-	private RepaymentMethod repaymentMethod;
+	private String repaymentMethod;
 
 	public void validate() {
 		// 이자율 검증 (최대 20%)

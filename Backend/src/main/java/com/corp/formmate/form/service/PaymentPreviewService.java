@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.corp.formmate.form.dto.PaymentPreviewRequest;
 import com.corp.formmate.form.dto.PaymentPreviewResponse;
 import com.corp.formmate.form.dto.PaymentScheduleResponse;
+import com.corp.formmate.form.entity.RepaymentMethod;
 
 @Service
 public class PaymentPreviewService {
@@ -37,7 +38,7 @@ public class PaymentPreviewService {
 		// 상환 방법에 따라 납부 스케줄 계산
 		List<PaymentScheduleResponse> allSchedules;
 
-		switch (paymentPreviewRequest.getRepaymentMethod()) {
+		switch (RepaymentMethod.fromKorName(paymentPreviewRequest.getRepaymentMethod())) {
 			case EQUAL_PRINCIPAL:
 				allSchedules = calculateEqualPrincipal(paymentPreviewRequest);
 				break;

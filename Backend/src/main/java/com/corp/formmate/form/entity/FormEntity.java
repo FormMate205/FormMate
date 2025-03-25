@@ -144,7 +144,7 @@ public class FormEntity implements Serializable {
 		this.contractDate = request.getContractDate();
 		this.maturityDate = request.getMaturityDate();
 		this.loanAmount = request.getLoanAmount();
-		this.repaymentMethod = request.getRepaymentMethod();
+		this.repaymentMethod = RepaymentMethod.fromKorName(request.getRepaymentMethod());
 		this.repaymentDay = repaymentDay;
 		this.interestRate = request.getInterestRateAsBigDecimal();
 		this.earlyRepaymentFeeRate = request.getEarlyRepaymentFeeRateAsBigDecimal();

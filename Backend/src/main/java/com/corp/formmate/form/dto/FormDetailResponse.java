@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.corp.formmate.form.entity.FormEntity;
-import com.corp.formmate.form.entity.FormStatus;
-import com.corp.formmate.form.entity.RepaymentMethod;
 import com.corp.formmate.specialterm.dto.SpecialTermResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -32,10 +30,10 @@ public class FormDetailResponse {
 	private Integer formId;
 
 	@Schema(
-		description = "계약서 상태",
-		example = "BEFORE_APPROVAL"
+		description = "계약서 상태(상대승인전, 상대승인후, 진행중, 연체, 종료)",
+		example = "상대승인전"
 	)
-	private FormStatus status;
+	private String status;
 
 	@Schema(
 		description = "생성자 ID",
@@ -155,9 +153,9 @@ public class FormDetailResponse {
 
 	@Schema(
 		description = "상환 방법 (원금균등상환, 원리금균등상환, 원금상환)",
-		example = "EQUAL_PRINCIPAL"
+		example = "원금균등상환"
 	)
-	private RepaymentMethod repaymentMethod;
+	private String repaymentMethod;
 
 	@Schema(
 		description = "상환일 (매달 며칠)",
@@ -198,7 +196,7 @@ public class FormDetailResponse {
 	public static FormDetailResponse fromEntity(FormEntity form, List<SpecialTermResponse> specialTerms) {
 		return FormDetailResponse.builder()
 			.formId(form.getId())
-			.status(form.getStatus())
+			.status(form.getStatus().getKorName())
 			.creatorId(form.getCreator().getId())
 			.creatorName(form.getCreator().getUserName())
 			.receiverId(form.getReceiver().getId())
@@ -218,7 +216,7 @@ public class FormDetailResponse {
 			.contractDate(form.getContractDate())
 			.maturityDate(form.getMaturityDate())
 			.loanAmount(form.getLoanAmount())
-			.repaymentMethod(form.getRepaymentMethod())
+			.repaymentMethod(form.getRepaymentMethod().getKorName())
 			.repaymentDay(form.getRepaymentDay())
 			.interestRate(form.getInterestRate())
 			.earlyRepaymentFeeRate(form.getEarlyRepaymentFeeRate())
