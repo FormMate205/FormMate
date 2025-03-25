@@ -1,12 +1,8 @@
-import {
-    Drawer,
-    DrawerContent,
-    DrawerFooter,
-    DrawerTrigger,
-} from '@/components/ui/drawer';
+import { useState } from 'react';
 import { Header } from '@/widgets';
 import { Button } from '../../components/ui/button';
 import { Icons } from '../../shared';
+import FilterDrawer from './ui/FilterDrawer';
 import TransactionList from './ui/TransactionList';
 
 // Dummy data
@@ -29,12 +25,43 @@ const transactionsData = [
         amount: '+15,000원',
         date: '2025.03.11',
     },
+    {
+        name: '이동욱',
+        transactionType: '입금',
+        amount: '+15,000원',
+        date: '2024.01.11',
+    },
+    {
+        name: '차윤영',
+        transactionType: '입금',
+        amount: '+1,000원',
+        date: '2024.03.11',
+    },
 ];
 
 const Transaction = () => {
+    const [filters, setFilters] = useState({
+        period: '3개월',
+        type: '전체',
+        order: '최신순',
+    });
+
+    // 이후 API 통신으로 대체 예정 (테스트용)
+    const filteredTransactions = transactionsData
+        .filter((tx) => {
+            if (filters.type === '전체') return true;
+            return filters.type === '입금만'
+                ? tx.transactionType === '입금'
+                : tx.transactionType === '출금';
+        })
+        .sort((a, b) => {
+            if (filters.order === '최신순') return b.date.localeCompare(a.date);
+            return a.date.localeCompare(b.date);
+        });
+
     return (
         <>
-            <section className='bg-primary-50 pb-9'>
+            <section className='bg-primary-50 flex flex-col gap-4 pb-9'>
                 <Header title='거래내역 조회' />
                 <div className='flex flex-col gap-7 px-4'>
                     <div className='flex flex-col gap-2'>
@@ -42,38 +69,28 @@ const Transaction = () => {
                             <span className='text-line-500 font-medium'>
                                 싸피은행 111-1111-1111
                             </span>
+                            {/* todo: 계좌번호 복사 로직 추가 */}
                             <Icons
                                 name='copy'
                                 size={14}
-                                className='fill-line-500'
+                                className='fill-line-500 cursor-pointer'
+                                onClick={() => {
+                                    console.log('copy account');
+                                }}
                             />
                         </div>
-                        <div className='text-3xl font-semibold'>12,345 원</div>
+                        <div className='text-4xl font-semibold'>12,345 원</div>
                     </div>
                     <Button variant='primary'>이체하기</Button>
                 </div>
             </section>
             <section className='flex flex-col gap-4 p-4'>
-                <Drawer>
-                    <DrawerTrigger className='flex w-full items-center justify-end gap-1'>
-                        <span className='text-line-950'>1개월•전체•최신순</span>
-                        <Icons
-                            name='chev-down'
-                            size={14}
-                            className='fill-line-950'
-                        />
-                    </DrawerTrigger>
-                    <DrawerContent>
-                        <div className='tex-lg flex flex-col p-4 font-medium'>
-                            <span>거래 기간</span>
-                        </div>
-                        <DrawerFooter>
-                            <Button>확인</Button>
-                        </DrawerFooter>
-                    </DrawerContent>
-                </Drawer>
+                <FilterDrawer
+                    defaultValues={filters}
+                    onConfirm={(nextFilters) => setFilters(nextFilters)}
+                />
                 <div className='flex flex-col gap-6'>
-                    <TransactionList transactions={transactionsData} />
+                    <TransactionList transactions={filteredTransactions} />
                 </div>
             </section>
         </>
