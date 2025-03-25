@@ -196,7 +196,7 @@ public class VerificationService {
     /**
      * 인증 코드 요청 및 발송 처리
      */
-    public boolean requestVerificationCode(String phoneNumber, Boolean preferAlimtalk) {
+    public boolean requestVerificationCode(String phoneNumber) {
         try {
             // 1. 전화번호 형식 통일
             String normalizedPhoneNumber = messageService.normalizePhoneNumber(phoneNumber);
@@ -212,8 +212,7 @@ public class VerificationService {
             // 4. 메세지 발송
             boolean messageSent = messageService.sendVerificationCode(
                     normalizedPhoneNumber,
-                    code,
-                    preferAlimtalk
+                    code
             );
 
             // 5. 결과 반환

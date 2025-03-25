@@ -29,10 +29,7 @@ public class VerificationController {
     @PostMapping("/request")
     public ResponseEntity<String> requestVerification(@Valid @RequestBody PhoneVerificationRequest request) {
         // 서비스 계층에서 예외 처리 및 결과 반환
-        boolean success = verificationService.requestVerificationCode(
-                request.getPhoneNumber(),
-                request.isPreferAlimtalk()
-        );
+        boolean success = verificationService.requestVerificationCode(request.getPhoneNumber());
 
         if (success) {
             return ResponseEntity.status(HttpStatus.OK).body("인증코드가 발송되었습니다.");

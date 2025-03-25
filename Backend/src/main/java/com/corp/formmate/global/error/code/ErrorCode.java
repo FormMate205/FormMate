@@ -12,6 +12,7 @@ public enum ErrorCode {
 	UNAUTHORIZED(401, "인증되지 않은 접근입니다"),
 	FORBIDDEN(403, "권한이 없습니다"),
 	INVALID_ENUM_VALUE(400, "잘못된 상태값입니다"),
+	TOO_MANY_REQUESTS(429, "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요"),
 
 	// Auth & User
 	INVALID_TOKEN(401, "유효하지 않은 토큰입니다"),

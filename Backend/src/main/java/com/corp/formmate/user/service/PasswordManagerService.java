@@ -3,16 +3,17 @@ package com.corp.formmate.user.service;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.PasswordException;
 import com.corp.formmate.global.error.exception.UserException;
-import com.corp.formmate.user.dto.PasswordResetResponse;
 import com.corp.formmate.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Setter
+@Service
 @RequiredArgsConstructor
 public class PasswordManagerService {
 
@@ -49,7 +50,7 @@ public class PasswordManagerService {
      * @return 사용자 엔티티
      */
     @Transactional
-    public PasswordResetResponse sendPasswordResetVerification(String userName, String phoneNumber, boolean preAlimtalk) {
+    public boolean sendPasswordResetVerification(String userName, String phoneNumber) {
         try {
             // 전화번호 정규화
             String normalizedPhone = messageService.normalizePhoneNumber(phoneNumber);
@@ -61,11 +62,11 @@ public class PasswordManagerService {
             String code = verificationService.createAndStoreCode(normalizedPhone);
 
             // 인증 코드 전송
-            boolean sent = messageService.sendVerificationCode(normalizedPhone, code, preAlimtalk);
+            boolean sent = messageService.sendVerificationCode(normalizedPhone, code);
 
             if (sent) {
                 log.info("Password reset verification code sent to: {}", normalizedPhone);
-                return PasswordResetResponse.success("비밀번호 재설정 인증번호가 전송되었습니다.");
+                return true;
             } else {
                 log.error("Failed to send verification code to: {}", normalizedPhone);
                 throw new PasswordException(ErrorCode.FAIL_MESSAGE_SEND);
@@ -91,7 +92,7 @@ public class PasswordManagerService {
      * @return 처리 결과
      */
     @Transactional
-    public PasswordResetResponse resetPassword(String phoneNumber, String verificationCode, String newPassword, String confirmPassword) {
+    public boolean resetPassword(String phoneNumber, String verificationCode, String newPassword, String confirmPassword) {
         try {
             // 전화번호 정규화
             String normalizedPhone = messageService.normalizePhoneNumber(phoneNumber);
@@ -124,7 +125,7 @@ public class PasswordManagerService {
             userService.updateUser(user);
 
             log.info("Password successfully reset for user with phone: {}", normalizedPhone);
-            return PasswordResetResponse.success("비밀번호가 성공적으로 재설정되었습니다.");
+            return true;
 
         } catch (PasswordException e) {
             log.error("Password error in reset: {}", e.getMessage());

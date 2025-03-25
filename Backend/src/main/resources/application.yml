@@ -61,7 +61,8 @@ spring:
           naver:
             client-id: ${NAVER_CLIENT_ID}
             client-secret: ${NAVER_CLIENT_SECRET}
-            #            redirect-uri: http://??/api/login/oauth2/code/naver
+            #            redirect-uri: https://j12a205.p.ssafy.io/login/oauth2/code/naver
+            redirect-uri: http://localhost8088/api/login/oauth2/code/naver
             authorization-grant-type: authorization_code
             scope:
               - name
@@ -152,9 +153,6 @@ coolsms:
   sender:
     phone: ${COOLSMS_SENDER_PHONE}
     domain: "https://api.coolsms.co.kr" # 기본 도메인
-  kakao:
-    pfid: ${COOLSMS_KAKAO_PFID} # 카카오톡 채널 ID
-    template-code: ${COOLSMS_KAKAO_TEMPLATE_CODE} # 알림톡 템플릿 코드
 
 ---
 # test ???

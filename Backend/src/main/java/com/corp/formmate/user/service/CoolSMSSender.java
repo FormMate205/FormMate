@@ -35,12 +35,6 @@ public class CoolSMSSender implements MessageSender {
     @Value("${coolsms.sender.domain}")
     private String domain;
 
-    @Value("${coolsms.kakao.pfid}")
-    private String kakaoSenderId;
-
-    @Value("${coolsms.kakao.template-code}")
-    private String kakaoTemplateCode;
-
     private DefaultMessageService messageService;
 
     @PostConstruct
@@ -50,14 +44,7 @@ public class CoolSMSSender implements MessageSender {
     }
 
     @Override
-    public boolean sendVerificationCode(String phoneNumber, String code, Boolean useAlimtalk) {
-        if (useAlimtalk) {
-            boolean alimtalkResult = sendAlimtalk(phoneNumber, code);
-            if (alimtalkResult) {
-                return true;
-            }
-            log.info("Alimtalk failed, falling back to SMS for {}", phoneNumber);
-        }
+    public boolean sendVerificationCode(String phoneNumber, String code) {
         return sendSms(phoneNumber, code);
     }
 
@@ -80,39 +67,4 @@ public class CoolSMSSender implements MessageSender {
             return false;
         }
     }
-
-    /**
-     * 카카오 알림톡을 발송하는 메서드
-     */
-    private boolean sendAlimtalk(String phoneNumber, String code) {
-        try {
-            Message message = new Message();
-            message.setFrom(senderPhone);
-            message.setTo(phoneNumber);
-            message.setText(String.format("[폼메이트] 인증번호 %s를 입력해주세요. 본인 확인을 위해 전송된 메시지입니다.", code));
-
-            // 알림톡 설정
-            KakaoOption kakaoOption = new KakaoOption();
-            kakaoOption.setPfId(kakaoSenderId);
-            kakaoOption.setTemplateId(kakaoTemplateCode);
-
-            // 알림톡 타입 (기본 알림톡)
-            kakaoOption.setDisableSms(false); // SMS로 대체발송 활성화
-
-            // 템플릿 파라미터 설정
-            Map<String, String> variables = new HashMap<>();
-            variables.put("code", code);
-            kakaoOption.setVariables(variables);
-
-            message.setKakaoOptions(kakaoOption);
-
-            SingleMessageSentResponse response = messageService.sendOne(new SingleMessageSendingRequest(message));
-            log.info("Alimtalk sent successfully: {}", response);
-            return true;
-        } catch (Exception e) {
-            log.error("Failed to send Alimtalk: {}", e.getMessage());
-            return false;
-        }
-    }
-
 }

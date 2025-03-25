@@ -19,10 +19,9 @@ public class MessageService {
      *
      * @param phoneNumber 수신자 전화번호
      * @param code 인증코드
-     * @param preferAlimtalk 카카오톡 메세지 우선 발송 여부
      * @return 발송 성공 여부
      */
-    public boolean sendVerificationCode(String phoneNumber, String code, Boolean preferAlimtalk) {
+    public boolean sendVerificationCode(String phoneNumber, String code) {
         // 전화번호 형식 검증
         if (!isValidPhoneNumber(phoneNumber)) {
             log.error("Invalid phone number format: {}", phoneNumber);
@@ -30,8 +29,8 @@ public class MessageService {
         }
 
         try {
-            // NAVER Cloud SENS를 사용하여 메세지 전송
-            return coolSMSSender.sendVerificationCode(phoneNumber, code, preferAlimtalk);
+            // CoolSMS를 사용하여 메세지 전송
+            return coolSMSSender.sendVerificationCode(phoneNumber, code);
         } catch (Exception e) {
             log.error("Failed to send verification code: {}", e.getMessage());
             return false;
