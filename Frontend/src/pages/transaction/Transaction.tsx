@@ -61,7 +61,7 @@ const Transaction = () => {
 
     return (
         <>
-            <section className='bg-primary-50 pb-9'>
+            <section className='bg-primary-50 flex flex-col gap-4 pb-9'>
                 <Header title='거래내역 조회' />
                 <div className='flex flex-col gap-7 px-4'>
                     <div className='flex flex-col gap-2'>
@@ -69,13 +69,17 @@ const Transaction = () => {
                             <span className='text-line-500 font-medium'>
                                 싸피은행 111-1111-1111
                             </span>
+                            {/* todo: 계좌번호 복사 로직 추가 */}
                             <Icons
                                 name='copy'
                                 size={14}
-                                className='fill-line-500'
+                                className='fill-line-500 cursor-pointer'
+                                onClick={() => {
+                                    console.log('copy account');
+                                }}
                             />
                         </div>
-                        <div className='text-3xl font-semibold'>12,345 원</div>
+                        <div className='text-4xl font-semibold'>12,345 원</div>
                     </div>
                     <Button variant='primary'>이체하기</Button>
                 </div>
