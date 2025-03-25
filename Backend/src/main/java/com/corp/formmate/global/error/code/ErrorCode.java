@@ -34,6 +34,12 @@ public enum ErrorCode {
 	LOGOUT_FAILED(500, "로그아웃 처리 중 오류가 발생했습니다"),
 	NOT_AUTHENTICATED(401, "인증되지 않은 사용자입니다"),
 
+	// 비밀번호 재설정 관련 오류 코드
+	PASSWORD_MISMATCH(400, "새 비밀번호가 일치하지 않습니다"),
+	CURRENT_PASSWORD_INCORRECT(400, "현재 비밀번호가 올바르지 않습니다"),
+	PASSWORD_RESET_REQUEST_NOT_FOUND(404, "비밀번호 재설정 요청을 찾을 수 없습니다"),
+	PASSWORD_RESET_TOKEN_EXPIRED(401, "비밀번호 재설정 토큰이 만료되었습니다"),
+
 	// 계좌 관련
 	ACCOUNT_NOT_FOUND(404, "계좌 정보를 찾을 수 없습니다"),
 	INVALID_ACCOUNT_NUMBER(400, "유효하지 않은 계좌번호입니다"),
@@ -129,8 +135,6 @@ public enum ErrorCode {
 
 	// 마이페이지 관련
 	PROFILE_UPDATE_ERROR(500, "프로필 업데이트 중 오류가 발생했습니다"),
-	PASSWORD_MISMATCH(400, "새 비밀번호가 일치하지 않습니다"),
-	CURRENT_PASSWORD_INCORRECT(400, "현재 비밀번호가 올바르지 않습니다"),
 	ADDRESS_NOT_FOUND(404, "주소 정보를 찾을 수 없습니다"),
 
 	// 날짜 관련

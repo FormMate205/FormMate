@@ -200,4 +200,56 @@ public class UserService {
             throw new UserException(ErrorCode.PROFILE_UPDATE_ERROR);
         }
     }
+
+    /**
+     * 이름과 전화번호로 사용자 찾기
+     * @param userName 사용자 이름
+     * @param phoenNumber 전화번호
+     * @return 사용자 엔티티
+     */
+    @Transactional(readOnly = true)
+    public UserEntity selectByUserNameAndPhoneNumber(String userName, String phoneNumber) {
+        try {
+            return userRepository.findByUserNameAndPhoneNumber(userName, phoneNumber)
+                    .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        } catch (UserException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("User search by name and phone number failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.USER_SEARCH_ERROR);
+        }
+    }
+
+    /**
+     * 전화번호로 사용자 찾기
+     * @param phoneNumber 전화번호
+     * @return 사용자 엔티티
+     */
+    @Transactional(readOnly = true)
+    public UserEntity selectByPhoneNumber(String phoneNumber) {
+        try {
+            return userRepository.findByPhoneNumber(phoneNumber)
+                    .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        } catch (UserException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("User search by phone number failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.USER_SEARCH_ERROR);
+        }
+    }
+
+    /**
+     * 사용자 정보 업데이트
+     * @param user 업데이트할 사용자 엔티티
+     * @return 업데이트한 사용자 엔티티
+     */
+    @Transactional
+    public UserEntity updateUser(UserEntity user) {
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            log.error("User update failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
