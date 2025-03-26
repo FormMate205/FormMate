@@ -2,7 +2,6 @@ package com.corp.formmate.user.service;
 
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.UserException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

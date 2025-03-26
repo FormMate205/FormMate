@@ -20,8 +20,8 @@ public class AuthUser implements UserDetails {
 
     private Integer id;
     private String email;
-    private String password;
     private String userName;
+    private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
     // UserEntity로부터 UserPrincipal 생성
@@ -31,8 +31,8 @@ public class AuthUser implements UserDetails {
         return AuthUser.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .password(user.getPassword())
                 .userName(user.getUserName())
+                .password(user.getPassword())
                 .authorities(Collections.singleton(authority))
                 .build();
     }
