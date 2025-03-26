@@ -6,7 +6,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import PaymentItem from './PaymentItem';
+import PaymentItem from '../../../../entities/contract/ui/PaymentItem';
 
 const paymentList = [
     {

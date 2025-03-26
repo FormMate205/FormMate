@@ -8,12 +8,12 @@ import {
     Signup,
     PasswordReset,
     PhoneVerify,
-    ContractList,
     ContractDetail,
     AccountRegist,
     AccountVerify,
     AccountPassword,
     MyInfo,
+    Contract,
     FormCheck,
     FormCreate,
 } from '@/pages';
@@ -28,9 +28,9 @@ const App = () => {
                     <Route path='/form' element={<FormMatch />} />
                     <Route path='/form/check' element={<FormCheck />} />
                     <Route path='/transaction' element={<Transaction />} />
-                    <Route path='/contract' element={<ContractList />} />
+                    <Route path='/contract' element={<Contract />} />
                     <Route
-                        path='/contract/detail'
+                        path='/contract/:contractId'
                         element={<ContractDetail />}
                     />
                     <Route path='/' element={<Home />} />

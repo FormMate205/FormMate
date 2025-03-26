@@ -11,9 +11,9 @@ const Footer = () => {
     };
 
     // 계약관리로 이동
-    // const onNavigateHome = () => {
-    //     navigate('/');
-    // };
+    const onNavigateContract = () => {
+        navigate('/contract');
+    };
 
     // 채팅으로 이동
     const onNavigateChat = () => {
@@ -35,7 +35,10 @@ const Footer = () => {
                     <Icons name='home' size={20} className='fill-line-300' />
                     <p className='text-line-300 font-semibold'>홈</p>
                 </button>
-                <button className='flex flex-col items-center justify-end gap-1'>
+                <button
+                    className='flex flex-col items-center justify-end gap-1'
+                    onClick={onNavigateContract}
+                >
                     <Icons name='docs' size={20} className='fill-line-300' />
                     <p className='text-line-300 font-semibold'>계약 관리</p>
                 </button>
