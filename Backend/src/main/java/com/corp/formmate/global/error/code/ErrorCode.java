@@ -41,6 +41,12 @@ public enum ErrorCode {
 	PASSWORD_RESET_REQUEST_NOT_FOUND(404, "비밀번호 재설정 요청을 찾을 수 없습니다"),
 	PASSWORD_RESET_TOKEN_EXPIRED(401, "비밀번호 재설정 토큰이 만료되었습니다"),
 
+	// 본인 인증 관련 오류 코드
+	INVALID_CAPTCHA(400, "reCAPTCHA 인증에 실패했습니다"),
+	IDENTITY_VERIFICATION_FAILED(400, "본인인증에 실패했습니다"),
+	IDENTITY_VERIFICATION_EXPIRED(401, "본인인증이 만료되었습니다"),
+	IDENTITY_NOT_VERIFIED(401, "본인인증이 필요합니다"),
+
 	// 계좌 관련
 	ACCOUNT_NOT_FOUND(404, "계좌 정보를 찾을 수 없습니다"),
 	INVALID_ACCOUNT_NUMBER(400, "유효하지 않은 계좌번호입니다"),

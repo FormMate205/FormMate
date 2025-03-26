@@ -154,6 +154,11 @@ coolsms:
     phone: ${COOLSMS_SENDER_PHONE}
     domain: "https://api.coolsms.co.kr" # 기본 도메인
 
+# reCAPTCHA
+recaptcha:
+  secret:
+    key: ${RECAPTCHA_SECRET_KEY}
+
 ---
 # test ???
 spring:
