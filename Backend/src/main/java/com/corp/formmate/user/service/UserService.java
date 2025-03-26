@@ -28,7 +28,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final VerificationService verificationService;
     private final MessageService messageService;
-    private final JwtTokenService jwtTokenService;
     private final JwtProperties jwtProperties;
 
     /**
@@ -134,13 +133,30 @@ public class UserService {
     @Transactional
     public UserEntity register(RegisterRequest request, String normalizedPhone) {
         try {
-            // 이메일 중복 확인
-            if (checkEmailAvailability(request.getEmail())) {
+//            // 이메일 중복 확인
+//            if (checkEmailAvailability(request.getEmail())) {
+//                throw new UserException(ErrorCode.EMAIL_DUPLICATE);
+//            }
+//
+//            // 전화번호 중복 확인
+//            if (checkPhoneNumberAvailability(normalizedPhone)) {
+//                throw new UserException(ErrorCode.PHONE_ALREADY_REGISTERED);
+//            }
+
+            // 이메일 중복 확인 (로깅 추가)
+            String email = request.getEmail();
+            boolean emailExists = userRepository.existsByEmail(email);
+            log.debug("Email check: '{}' exists: {}", email, emailExists);
+
+            if (emailExists) {
                 throw new UserException(ErrorCode.EMAIL_DUPLICATE);
             }
 
-            // 전화번호 중복 확인
-            if (checkPhoneNumberAvailability(normalizedPhone)) {
+            // 전화번호 중복 확인 (로깅 추가)
+            boolean phoneExists = userRepository.existsByPhoneNumber(normalizedPhone);
+            log.debug("Phone check: '{}' exists: {}", normalizedPhone, phoneExists);
+
+            if (phoneExists) {
                 throw new UserException(ErrorCode.PHONE_ALREADY_REGISTERED);
             }
 
@@ -173,34 +189,6 @@ public class UserService {
     }
 
     /**
-     * 가입 후 로그인까지
-     */
-    @Transactional
-    public String registerAndCreateToken(RegisterRequest request, HttpServletResponse response) {
-        // 전화번호 정규화
-        String normalizedPhone = messageService.normalizePhoneNumber(request.getPhoneNumber());
-
-        // 전화번호 인증 여부 확인
-        if (!verificationService.isPhoneNumberVerified(normalizedPhone)) {
-            throw new UserException(ErrorCode.PHONE_VERIFICATION_FAILED);
-        }
-
-        // 회원가입 (사용자 지정)
-        UserEntity savedUser = registerWithPhoneVerification(request, normalizedPhone);
-        log.info("New user registered: {}", savedUser.getEmail());
-
-        // JWT 토큰 생성
-        Token token = jwtTokenService.createTokens(savedUser.getId());
-
-        // Refresh Token을 쿠키에 저장
-        jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
-
-        // 엑세스 토큰 반환
-        return token.getAccessToken();
-    }
-
-    /**
-     * registerAndCreateToken: 토큰 생성 및 전체 회원가입 프로세스 관리
      * registerWithPhoneVerification: 전화번호 인증 확인 및 사용자 등록
      * register: 실제 사용자 데이터 저장
      */

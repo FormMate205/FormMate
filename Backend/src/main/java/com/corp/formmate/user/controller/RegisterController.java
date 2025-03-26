@@ -1,8 +1,12 @@
 package com.corp.formmate.user.controller;
 
+import com.corp.formmate.global.error.code.ErrorCode;
+import com.corp.formmate.global.error.exception.UserException;
+import com.corp.formmate.jwt.dto.Token;
 import com.corp.formmate.jwt.properties.JwtProperties;
 import com.corp.formmate.jwt.service.JwtTokenService;
 import com.corp.formmate.user.dto.RegisterRequest;
+import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.MessageService;
 import com.corp.formmate.user.service.UserService;
 import com.corp.formmate.user.service.VerificationService;
@@ -132,11 +136,24 @@ public class RegisterController {
             @Valid @RequestBody RegisterRequest request,
             HttpServletResponse response
     ) {
-        String accessToken = userService.registerAndCreateToken(request, response);
+        // 전화번호 정규화
+        String normalizedPhone = messageService.normalizePhoneNumber(request.getPhoneNumber());
+
+        // 전화번호 인증 여부 확인
+        if (!verificationService.isPhoneNumberVerified(normalizedPhone)) {
+            throw new UserException(ErrorCode.PHONE_VERIFICATION_FAILED);
+        }
+
+        // 회원가입
+        UserEntity savedUser = userService.register(request, normalizedPhone);
+
+        // 토큰 생성
+        Token token = jwtTokenService.createTokens(savedUser.getId());
+        jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
         // 응답 반환 (Access Token 포함)
         return ResponseEntity.status(HttpStatus.CREATED)
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", "Bearer " + token.getAccessToken())
                 .body("회원가입이 완료되었습니다.");
     }
 }

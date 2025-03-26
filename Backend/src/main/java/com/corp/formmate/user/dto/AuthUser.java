@@ -21,6 +21,7 @@ public class AuthUser implements UserDetails {
     private Integer id;
     private String email;
     private String userName;
+    private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
     // UserEntity로부터 UserPrincipal 생성
@@ -31,6 +32,7 @@ public class AuthUser implements UserDetails {
                 .id(user.getId())
                 .email(user.getEmail())
                 .userName(user.getUserName())
+                .password(user.getPassword())
                 .authorities(Collections.singleton(authority))
                 .build();
     }
@@ -42,7 +44,7 @@ public class AuthUser implements UserDetails {
 
     @Override
     public String getPassword() {
-        return "";
+        return password;
     }
 
     // email을 username으로 지정
