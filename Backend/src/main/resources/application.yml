@@ -13,8 +13,8 @@ spring:
         size: 5
       thread-name-prefix: formmate-scheduler-
   autoconfigure:
-#    exclude:
-#      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+  #    exclude:
+  #      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
   servlet:
     multipart:
       max-file-size: 10MB      # 단일 파일의 최대 크기
@@ -158,6 +158,13 @@ coolsms:
 recaptcha:
   secret:
     key: ${RECAPTCHA_SECRET_KEY}
+    
+# 가상 은행 api 이용을 위한 설정
+bank:
+  api:
+    url: ${BANK_API_URL}
+    key: ${BANK_API_KEY}
+    id: ${BANK_USER_ID}
 
 ---
 # test ???
