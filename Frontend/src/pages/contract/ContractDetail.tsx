@@ -1,8 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import InterestInfoTab from '@/features/contract/ui/tabs/InterestInfoTab';
-import PaymentHistoryTab from '@/features/contract/ui/tabs/PaymentHistoryTab';
-import SummaryTab from '@/features/contract/ui/tabs/SummaryTab';
+import ContractDetailTabs from '@/features/contract/ui/tabs/ContractDetailTabs';
 import { Header } from '@/widgets';
 import ProgressBar from '../../entities/contract/ui/ProgressBar';
 import EarlyTerminateAlert from '../../features/contract/ui/EarlyTerminateAlert';
@@ -81,24 +78,7 @@ const ContractDetail = () => {
                 </div>
             </div>
             {/* ContractDetailTabs */}
-            <section className='bg-white'>
-                <Tabs defaultValue='contract'>
-                    <TabsList>
-                        <TabsTrigger value='contract'>차용증</TabsTrigger>
-                        <TabsTrigger value='history'>납부 내역</TabsTrigger>
-                        <TabsTrigger value='interest'>이자 조회</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value='contract'>
-                        <SummaryTab />
-                    </TabsContent>
-                    <TabsContent value='history'>
-                        <PaymentHistoryTab />
-                    </TabsContent>
-                    <TabsContent value='interest'>
-                        <InterestInfoTab />
-                    </TabsContent>
-                </Tabs>
-            </section>
+            <ContractDetailTabs />
         </>
     );
 };
