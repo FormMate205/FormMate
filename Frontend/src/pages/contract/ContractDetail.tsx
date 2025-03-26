@@ -4,10 +4,9 @@ import InterestInfoTab from '@/features/contract/ui/tabs/InterestInfoTab';
 import PaymentHistoryTab from '@/features/contract/ui/tabs/PaymentHistoryTab';
 import SummaryTab from '@/features/contract/ui/tabs/SummaryTab';
 import { Header } from '@/widgets';
-
-import EarlyTerminateAlert from './ui/EarlyTerminateAlert';
-import ProgressBar from './ui/ProgressBar';
-import SummaryItem from './ui/SummaryItem';
+import ProgressBar from '../../features/contract/ui/charts/ProgressBar';
+import EarlyTerminateAlert from '../../features/contract/ui/EarlyTerminateAlert';
+import SummaryItem from '../../features/contract/ui/SummaryItem';
 
 const summaryData = [
     {
@@ -33,10 +32,10 @@ const summaryData = [
 const ContractDetail = () => {
     return (
         <>
-            <div className='flex h-full flex-col'>
-                <div className='bg-line-50 flex h-full flex-col gap-5'>
+            <div className='bg-line-50 flex h-full flex-col'>
+                <Header title='계약 상세' />
+                <div className='flex h-full flex-col gap-5'>
                     <section className='px-4'>
-                        <Header title='계약 상세' />
                         <div className='border-line-200 flex items-center justify-between border-b pb-3'>
                             <div className='text-lg font-medium'>
                                 <span className='text-primary-500 text-xl'>

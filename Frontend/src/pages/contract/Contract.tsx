@@ -1,11 +1,11 @@
 import { Input } from '@/components/ui/input';
 import { ContractStatus } from '@/features/contract/model/types';
 import { useContractFilters } from '@/features/contract/model/useContractFilters';
+import ContractChart from '@/features/contract/ui/charts/ContractChart';
 import ContractList from '@/features/contract/ui/ContractList';
 import ContractSelect from '@/features/contract/ui/ContractSelect';
 import { Footer, Header } from '@/widgets';
-import ContractChart from './ui/ContractChart';
-import StatusSummary from './ui/StatusSummary';
+import StatusSummary from '../../features/contract/ui/StatusSummary';
 
 export interface ContractCardProps {
     name: string;
