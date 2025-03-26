@@ -13,6 +13,7 @@ import {
     AccountRegist,
     AccountVerify,
     AccountPassword,
+    MyInfo,
     FormCheck,
     FormCreate,
 } from '@/pages';
@@ -49,6 +50,7 @@ const App = () => {
                         path='/account/password'
                         element={<AccountPassword />}
                     />
+                    <Route path='/myinfo' element={<MyInfo />} />
                 </Route>
             </Routes>
         </BrowserRouter>
