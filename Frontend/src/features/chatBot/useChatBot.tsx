@@ -52,46 +52,6 @@ export const useChatBot = ({
         specialTermIndexes: [],
     });
 
-    // 초기 질문 표시
-    useEffect(() => {
-        if (chatHistory.length === 0) {
-            const startQuestion = chatBotQuestions['role'];
-            setCurrentQuestion(startQuestion);
-
-            const firstMessage: ChatMessage = {
-                id: '1',
-                writerId: BOT_ID,
-                content: startQuestion.question,
-            };
-
-            setChatHistory([firstMessage]);
-        }
-    }, []);
-
-    // 특약 인덱스 업데이트
-    useEffect(() => {
-        // 모든 특약 처리가 완료된 후
-        if (isLastTermProcessed) {
-            setFormDraft((prev) => ({
-                ...prev,
-                specialTermIndexes: selectedTerms,
-            }));
-
-            // 마지막 질문으로 이동
-            setTimeout(() => {
-                if (currentQuestion && currentQuestion.next) {
-                    const nextQuestionId = currentQuestion.next;
-                    if (nextQuestionId) {
-                        setCurrentQuestionId(nextQuestionId);
-                    }
-                }
-            }, 500);
-
-            // 플래그 초기화
-            setIsLastTermProcessed(false);
-        }
-    }, [selectedTerms, isLastTermProcessed, currentQuestion]);
-
     // 현재 질문 업데이트
     useEffect(() => {
         if (currentQuestionId) {
@@ -140,6 +100,30 @@ export const useChatBot = ({
             }
         }
     }, [currentQuestionId]);
+
+    // 특약 인덱스 업데이트
+    useEffect(() => {
+        // 모든 특약 처리가 완료된 후
+        if (isLastTermProcessed) {
+            setFormDraft((prev) => ({
+                ...prev,
+                specialTermIndexes: selectedTerms,
+            }));
+
+            // 마지막 질문으로 이동
+            setTimeout(() => {
+                if (currentQuestion && currentQuestion.next) {
+                    const nextQuestionId = currentQuestion.next;
+                    if (nextQuestionId) {
+                        setCurrentQuestionId(nextQuestionId);
+                    }
+                }
+            }, 500);
+
+            // 플래그 초기화
+            setIsLastTermProcessed(false);
+        }
+    }, [selectedTerms, isLastTermProcessed, currentQuestion]);
 
     // 메시지 전송 함수
     const sendMessage = (content: string) => {
