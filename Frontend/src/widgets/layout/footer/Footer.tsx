@@ -26,7 +26,7 @@ const Footer = () => {
     };
 
     return (
-        <div className='fixed bottom-0 w-full bg-white shadow-sm'>
+        <div className='bottom-0 w-full bg-white shadow-sm'>
             <div className='flex justify-between px-6 py-2'>
                 <button
                     className='flex flex-col items-center justify-end gap-1'

@@ -18,8 +18,8 @@ const MyInfo = () => {
     };
 
     return (
-        <div className='bg-line-50'>
-            <div className='flex min-h-screen flex-col gap-6 p-6'>
+        <div className='flex h-screen flex-col overflow-hidden'>
+            <div className='bg-line-50 scrollbar-none flex h-full flex-col gap-6 overflow-y-auto p-6'>
                 <Header title='내 정보' />
 
                 <MyAccount
