@@ -48,8 +48,8 @@ const dummyContracts = [
 
 const ContractList = () => {
     return (
-        <div className='flex h-full flex-col'>
-            <div className='bg-line-50 flex h-full flex-col gap-4 px-4'>
+        <div className='flex h-screen flex-col overflow-hidden'>
+            <div className='bg-line-50 scrollbar-none flex h-full flex-col gap-4 overflow-y-auto p-6'>
                 <Header title='계약 관리' />
                 <div className='text-lg font-medium'>계약 현황</div>
                 <StatusSummary />

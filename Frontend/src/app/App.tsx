@@ -15,6 +15,7 @@ import {
     AccountRegist,
     AccountVerify,
     AccountPassword,
+    MyInfo,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -49,6 +50,7 @@ const App = () => {
                         path='/account/password'
                         element={<AccountPassword />}
                     />
+                    <Route path='/myinfo' element={<MyInfo />} />
                 </Route>
             </Routes>
         </BrowserRouter>

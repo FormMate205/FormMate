@@ -5,16 +5,16 @@ import Schedule from './ui/Schedule';
 
 const Home = () => {
     return (
-        <div>
-            <div className='bg-line-50 flex min-h-screen flex-col gap-6 p-6'>
-                <Header title='FormMate' isHome={true} />
-                <AccountInfo />
-                <AssetInfo />
-                <Schedule />
+        <div className='flex h-screen flex-col overflow-hidden'>
+            <div className='bg-line-50 scrollbar-none w-full flex-1 overflow-y-auto'>
+                <div className='flex flex-col gap-6 p-6'>
+                    <Header title='FormMate' isHome={true} />
+                    <AccountInfo />
+                    <AssetInfo />
+                    <Schedule />
+                </div>
             </div>
-            <div className='fixed bottom-0 w-full'>
-                <Footer />
-            </div>
+            <Footer />
         </div>
     );
 };
