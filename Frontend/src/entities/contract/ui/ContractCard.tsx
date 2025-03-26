@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { TagItem } from '@/shared';
-import { ContractCardProps, ContractStatus, TagColor } from '../model/types';
+import { ContractCardProps, ContractStatus, TagColor } from '../types';
 
 interface StatusStyle {
     color: TagColor;

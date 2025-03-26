@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { ContractCardProps, ContractStatus } from './types';
+import {
+    ContractCardProps,
+    ContractStatus,
+} from '../../../entities/contract/types';
 
 const dummyContracts: ContractCardProps[] = [
     {
