@@ -1,7 +1,7 @@
 import { Footer, Header } from '@/widgets';
 import AccountInfo from './ui/AccountInfo';
-import AssetInfo from './ui/AssetInfo';
 import Schedule from './ui/Schedule';
+import TodaySettlement from './ui/TodaySettlement';
 
 const Home = () => {
     return (
@@ -10,7 +10,13 @@ const Home = () => {
                 <div className='flex flex-col gap-6 p-6'>
                     <Header title='FormMate' isHome={true} />
                     <AccountInfo />
-                    <AssetInfo />
+                    <TodaySettlement
+                        hasTodayTransaction={true}
+                        isSend={true}
+                        targetName='강지은'
+                        amount={33500}
+                        principal={600000}
+                    />
                     <Schedule />
                 </div>
             </div>
