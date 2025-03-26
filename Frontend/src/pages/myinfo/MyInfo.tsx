@@ -18,10 +18,9 @@ const MyInfo = () => {
     };
 
     return (
-        <div className='flex h-screen flex-col overflow-hidden'>
-            <div className='bg-line-50 scrollbar-none flex h-full flex-col gap-6 overflow-y-auto p-6'>
-                <Header title='내 정보' />
-
+        <div className='bg-line-50 flex h-screen flex-col overflow-hidden'>
+            <Header title='내 정보' />
+            <div className='scrollbar-none flex h-full flex-col gap-6 overflow-y-auto p-6'>
                 <MyAccount
                     hasAccount={userData.hasAccount}
                     userName={userData.userName}

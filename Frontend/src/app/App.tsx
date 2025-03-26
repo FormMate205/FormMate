@@ -16,6 +16,8 @@ import {
     AccountVerify,
     AccountPassword,
     MyInfo,
+    UserPasswordUpdate,
+    PasswordPhoneVerify,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -51,6 +53,14 @@ const App = () => {
                         element={<AccountPassword />}
                     />
                     <Route path='/myinfo' element={<MyInfo />} />
+                    <Route
+                        path='/myinfo/password'
+                        element={<UserPasswordUpdate />}
+                    />
+                    <Route
+                        path='/myinfo/password/findPw'
+                        element={<PasswordPhoneVerify />}
+                    />
                 </Route>
             </Routes>
         </BrowserRouter>
