@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Header from '@/widgets/layout/header/Header';
 
-const FormCreate = () => {
+const FormCheck = () => {
     const navigate = useNavigate();
 
     // 더미데이터
@@ -10,7 +10,7 @@ const FormCreate = () => {
 
     const onClick = () => {
         console.log('계약서 생성');
-        navigate('/form/chatbot');
+        navigate('/form/create');
     };
 
     return (
@@ -43,4 +43,4 @@ const FormCreate = () => {
     );
 };
 
-export default FormCreate;
+export default FormCheck;

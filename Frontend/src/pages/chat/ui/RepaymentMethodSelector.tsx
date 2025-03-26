@@ -11,11 +11,11 @@ const RepaymentMethodSelector = ({
     onSelect,
 }: RepaymentMethodSelectorProps) => {
     return (
-        <div className='my-4 flex w-full flex-wrap gap-4'>
+        <div className='my-4 flex w-screen gap-4 rounded-lg'>
             {options.map((option, index) => (
                 <div
-                    key={option.value}
-                    className={`border-primary-200 flex w-full flex-col gap-9 rounded-lg border px-5 py-8 ${index === 0 ? 'bg-primary-500' : 'bg-white'}`}
+                    key={option.label}
+                    className={`border-primary-200 flex w-[212px] flex-col justify-between gap-9 rounded-lg border px-5 py-8 ${index === 0 ? 'bg-primary-50' : 'bg-white'}`}
                 >
                     <div className='flex flex-col gap-5'>
                         <p className='text-primary-500 text-xl font-bold'>
@@ -30,11 +30,11 @@ const RepaymentMethodSelector = ({
                         </div>
                     </div>
 
-                    <div className='flex w-full justify-between'>
-                        <Button variant='choiceEmpty' value='미리보기' />
+                    <div className='flex w-full gap-4'>
+                        <Button variant='choiceEmpty' children='미리보기' />
                         <Button
                             variant='choiceFill'
-                            value='선택하기'
+                            children='선택하기'
                             onClick={() => onSelect(option.label)}
                         />
                     </div>

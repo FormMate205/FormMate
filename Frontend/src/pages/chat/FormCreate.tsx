@@ -1,8 +1,10 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { CalendarButton } from '@/components/ui/calendarButton';
 import { getName, showName } from '@/features';
 import { useChatBot } from '@/features/chatBot/useChatBot';
 import { BOT_ID } from '@/shared/constant';
+import { DatePicker } from '@/shared/ui/DatePicker';
 import { Header } from '@/widgets';
 import ChatBox from './ui/ChatBox';
 import ChatInput from './ui/ChatInput';
@@ -11,37 +13,42 @@ import RepaymentMethodSelector from './ui/RepaymentMethodSelector';
 import RoleSelector from './ui/RoleSelector';
 import SpecialTermsSelector from './ui/SpecialTermSelector';
 
-interface ChatBotProps {
-    receiverId?: string;
-    receiverName?: string;
-}
+const FormCreate = () => {
+    const userId = '1';
+    const receiverId = '2';
+    const receiverName = '윤이영';
 
-const ChatBot = ({
-    receiverId = '',
-    receiverName = '윤이영',
-}: ChatBotProps) => {
-    const userId = '1'; // 현재 사용자 ID
     const writers = [
         { id: userId, name: '강지은' },
         { id: BOT_ID, name: '페이봇' },
     ];
 
-    // 커스텀 훅을 사용하여 챗봇 로직 분리
+    // 챗봇 로직 분리
     const {
         chatHistory,
         currentQuestion,
         inputEnabled,
         inputValue,
-        showDivider,
         setInputValue,
         sendMessage,
         handleRoleSelect,
         handleRepaymentMethodSelect,
-        handleSpecialTermsComplete,
+        handleSpecialTermSelect,
+        currentTermIndex,
     } = useChatBot({
         userId,
         initialReceiverId: receiverId,
     });
+
+    // 자동 스크롤
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop =
+                chatContainerRef.current.scrollHeight;
+        }
+    }, [chatHistory]);
 
     const getNameFunc = getName(writers);
     const showNameFunc = showName(chatHistory);
@@ -52,23 +59,6 @@ const ChatBot = ({
 
     const onClick = () => {
         sendMessage(inputValue);
-    };
-
-    // 구분선 렌더링
-    const renderDivider = () => {
-        if (!showDivider) return null;
-
-        return (
-            <div className='my-4 flex w-full items-center justify-center'>
-                <div className='flex items-center'>
-                    <div className='h-px w-16 bg-gray-300'></div>
-                    <span className='mx-2 text-sm text-gray-500'>
-                        추가 정보
-                    </span>
-                    <div className='h-px w-16 bg-gray-300'></div>
-                </div>
-            </div>
-        );
     };
 
     // 입력 유형에 따른 컴포넌트 렌더링
@@ -92,16 +82,29 @@ const ChatBot = ({
 
             case 'boolean':
                 return (
-                    <div className='my-4 flex w-full justify-start gap-4'>
+                    <div className='flex w-full justify-start gap-2 px-2'>
                         {currentQuestion.options?.map((option) => (
                             <Button
-                                variant={`${option.label === '네' ? 'choiceFill' : 'choiceEmpty'}`}
-                                value={option.label}
+                                key={option.label}
+                                variant={`${option.value ? 'choiceFill' : 'choiceEmpty'}`}
+                                children={option.label}
                                 onClick={() => sendMessage(option.label)}
                             />
                         ))}
                     </div>
                 );
+
+            case 'date': {
+                return (
+                    <div className='flex w-full justify-start px-1'>
+                        <DatePicker />
+                        <CalendarButton
+                            variant={'secondary'}
+                            className='확인'
+                        />
+                    </div>
+                );
+            }
 
             case 'method':
                 if (currentQuestion.options) {
@@ -117,7 +120,8 @@ const ChatBot = ({
             case 'specialTerms':
                 return (
                     <SpecialTermsSelector
-                        onComplete={handleSpecialTermsComplete}
+                        currentTermIndex={currentTermIndex}
+                        onSelect={handleSpecialTermSelect}
                     />
                 );
 
@@ -133,7 +137,10 @@ const ChatBot = ({
             <NotiContainer name={receiverName} />
 
             {/* 채팅 내용 */}
-            <div className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'>
+            <div
+                className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
+                ref={chatContainerRef}
+            >
                 {chatHistory.length > 0 &&
                     chatHistory.map((chat, index) => {
                         const isMe = userId === chat.writerId;
@@ -153,9 +160,6 @@ const ChatBot = ({
                         );
                     })}
 
-                {/* 구분선 표시 */}
-                {renderDivider()}
-
                 {/* 입력 유형에 따른 컴포넌트 렌더링 */}
                 {renderInputByType()}
             </div>
@@ -171,4 +175,4 @@ const ChatBot = ({
     );
 };
 
-export default ChatBot;
+export default FormCreate;
