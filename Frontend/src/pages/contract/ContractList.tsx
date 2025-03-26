@@ -7,8 +7,44 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Footer, Header } from '@/widgets';
+import ContractCard from './ui/ContractCard';
 import ContractChart from './ui/ContractChart';
 import StatusSummary from './ui/StatusSummary';
+
+// dummyData
+const dummyContracts = [
+    {
+        name: '강지은',
+        status: '진행',
+        contractType: 'send',
+        currentMonthAmount: 150000,
+        currentAmount: 450000,
+        totalAmount: 1500000,
+        endDate: '2025.04.23',
+    },
+    {
+        name: '이동욱',
+        status: '대기',
+    },
+    {
+        name: '박상학',
+        status: '연체',
+        contractType: 'receive',
+        currentMonthAmount: 100000,
+        currentAmount: 100000,
+        totalAmount: 500000,
+        endDate: '2025.02.15',
+    },
+    {
+        name: '차윤영',
+        status: '종료',
+        contractType: 'receive',
+        currentMonthAmount: 0,
+        currentAmount: 1000000,
+        totalAmount: 1000000,
+        endDate: '2025.01.01',
+    },
+];
 
 const ContractList = () => {
     return (
@@ -48,6 +84,12 @@ const ContractList = () => {
                             variant={'search'}
                             placeholder='이름을 입력하세요'
                         />
+
+                        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+                            {dummyContracts.map((contract, index) => (
+                                <ContractCard key={index} {...contract} />
+                            ))}
+                        </div>
                     </div>
                 </section>
             </div>
