@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ContractDetailDto {
+public class ContractDetailResponse {
 	private Integer overdueCount;
 	private Long overdueAmount;
 	private LocalDate nextRepaymentDate;
@@ -24,7 +24,7 @@ public class ContractDetailDto {
 	private Long totalEarlyRepaymentCharge;
 	private Long remainingPrincipal;
 
-	public ContractDetailDto(ContractEntity contract) {
+	public ContractDetailResponse(ContractEntity contract) {
 		this.overdueCount = contract.getOverdueCount();
 		this.overdueAmount = contract.getOverdueAmount();
 		this.nextRepaymentDate = contract.getNextRepaymentDate();

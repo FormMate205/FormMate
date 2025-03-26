@@ -65,6 +65,9 @@ public class ContractEntity implements Serializable {
 	@Column(name = "expected_maturity_payment", nullable = false)
 	private Long expectedMaturityPayment;
 
+	@Column(name = "expected_interest_amount_at_maturity", nullable = false)
+	private Long expectedInterestAmountAtMaturity;
+
 	@Column(name = "current_payment_round", nullable = false)
 	private Integer currentPaymentRound = 1;
 }
