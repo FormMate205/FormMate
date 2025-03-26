@@ -56,7 +56,7 @@ public class RegisterController {
                     )
             )
     })
-    @GetMapping("/check-email")
+    @GetMapping("/check/email")
     public ResponseEntity<Boolean> checkEmailAvailability(
             @Parameter(description = "확인할 이메일", required = true, example = "user@example.com")
             @RequestParam String email) {
@@ -126,7 +126,7 @@ public class RegisterController {
                     )
             )
     })
-    @PostMapping("/register")
+    @PostMapping("/email/register")
     public ResponseEntity<String> register(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "회원가입 정보",
