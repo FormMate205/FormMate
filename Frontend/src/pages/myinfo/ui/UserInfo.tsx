@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/button';
-
 interface UserInfoProps {
     isOAuth: boolean;
     userName: string;
@@ -21,11 +19,9 @@ const UserInfo = ({ isOAuth, userName, phoneNumber, email }: UserInfoProps) => (
             {!isOAuth && (
                 <div className='mt-1 flex items-center justify-between'>
                     <p>비밀번호</p>
-                    {/* <button className='text-primary-500 text-sm'>
+                    <button className='text-primary-500 text-sm underline'>
                         비밀번호 변경
-                    </button> */}
-
-                    <Button variant={'choiceEmpty'}>비밀번호 변경</Button>
+                    </button>
                 </div>
             )}
         </div>

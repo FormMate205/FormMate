@@ -28,7 +28,7 @@ const MyInfo = () => {
                     accountNumber={userData.accountNumber}
                 />
 
-                <div className='mt-8'>
+                <div className='mt-4'>
                     <UserInfo
                         isOAuth={userData.isOAuth}
                         userName={userData.userName}
