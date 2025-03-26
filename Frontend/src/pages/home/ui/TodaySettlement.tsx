@@ -41,24 +41,22 @@ const TodaySettlement = ({
                         </div>
                         <Button
                             variant='sendMinus'
-                            // className='h-10 px-6'
-                            onClick={() => navigate('/transaction')}
+                            onClick={() => navigate('/송금화면')}
                         >
                             송금
                         </Button>
                     </div>
                 ) : (
-                    <div className='flex items-center justify-between'>
+                    <div className='flex items-end justify-between'>
                         <div>
                             <p className='mb-2 text-sm'>예정된 내역이 없어요</p>
-                            <p className='text-subPink-700 mb-1 text-xl font-bold'>
+                            <p className='text-subPink-700 mb-1 text-3xl font-bold'>
                                 ?원
                             </p>
-                            <p className='text-line-500 text-xs'>원금 | ?원</p>
+                            <p className='text-line-500 text-sm'>원금 | ?원</p>
                         </div>
                         <Button
-                            variant='primary'
-                            className='h-10 px-6'
+                            variant='sendMinus'
                             onClick={() => navigate('/contracts')}
                         >
                             거래 내역 보기

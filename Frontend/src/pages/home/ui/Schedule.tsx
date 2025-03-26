@@ -49,7 +49,7 @@ const Schedule = () => {
                                         </p>
                                     </div>
                                     <Button variant={'choiceFill'}>
-                                        이체하기
+                                        송금하기
                                     </Button>
                                 </div>
                             </div>
@@ -72,7 +72,7 @@ const Schedule = () => {
                                         </p>
                                     </div>
                                     <Button variant={'choiceFill'}>
-                                        이체하기
+                                        송금하기
                                     </Button>
                                 </div>
                             </div>
