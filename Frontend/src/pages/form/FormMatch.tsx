@@ -43,7 +43,7 @@ const FormMatch = () => {
 
     const handleItemClick = (item: (typeof itemsData)[0]) => {
         console.log('선택된 항목:', item);
-        navigate('/form/create');
+        navigate('/form/check');
     };
 
     return (

@@ -42,24 +42,24 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
     },
     loanAmount: {
         id: 'loanAmount',
-        question: '대여 금액은 얼마인가요?',
+        question: '대여 금액을 입력해주세요.',
         type: 'number',
-        condition: ['✅ 숫자만 입력해주세요.'],
+        condition: [
+            '✅ 만 원 이상의 금액을 입력해주세요.',
+            '✅ 숫자만 입력해주세요.',
+        ],
         validation: {
-            regex: '^[0-9]+$',
-            errorMessage: '숫자만 입력해주세요.',
+            regex: '^\\d+$',
+            errorMessage: '만 원 이상의 숫자로만 입력해주세요.',
+            min: '10000',
         },
         next: 'maturityDate',
     },
     maturityDate: {
         id: 'maturityDate',
-        question: '상환 날짜를 입력해주세요.',
+        question:
+            '아래의 날짜 선택 상자를 통해 상환 날짜를 선택한 후 입력해주세요.',
         type: 'date',
-        condition: ['✅ YYYY-MM-DD 형식으로 입력해주세요.'],
-        validation: {
-            regex: '^\\d{4}-\\d{2}-\\d{2}$',
-            errorMessage: 'YYYY-MM-DD 형식으로 입력해주세요.',
-        },
         next: 'interestRate',
     },
     interestRate: {
@@ -71,7 +71,7 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
             '✅ 숫자로만 입력해주세요. (소수점 둘째 짜리까지 입력 가능)',
         ],
         validation: {
-            regex: '^[0-9]+(\\.[0-9]{1,2})?$',
+            regex: '^\\d+(\\.\\d{1,2})?$',
             errorMessage: '0~20% 범위 내의 숫자로만 입력해주세요.',
             min: '0',
             max: '20',
@@ -88,7 +88,7 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
             '✅ 이자율 + 연체 이자율은 20%를 초과할 수 없습니다.',
         ],
         validation: {
-            regex: '^[0-9]+(\\.[0-9]{1,2})?$',
+            regex: '^\\d+(\\.\\d{1,2})?$',
             errorMessage: '0~20% 범위 내의 숫자로만 입력해주세요.',
             min: '0',
             max: '20',
@@ -115,7 +115,7 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
             '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
         ],
         validation: {
-            regex: '^[0-9]+$',
+            regex: '^\\d+$',
             errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
             min: '1',
             max: '31',
@@ -155,7 +155,7 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
             '✅ 숫자로만 입력해주세요. (소수점 둘째 짜리까지 입력 가능)',
         ],
         validation: {
-            regex: '^[0-9]+(\\.[0-9]{1,2})?$',
+            regex: '^\\d+(\\.\\d{1,2})?$',
             errorMessage: '1.5% 범위 내의 숫자로만 입력해주세요.',
             min: '0',
             max: '1.5',
@@ -163,7 +163,7 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
         next: 'overdueLimit',
     },
     overdueLimit: {
-        id: 'overdueInterestRate',
+        id: 'overdueLimit',
         question:
             '기한이익상실 조항은 채무자가 지정한 연체 횟수를 초과할 경우 남은 채무를 즉시 갚는 조항입니다. 연체 횟수를 지정해주세요.',
         type: 'number',
@@ -173,8 +173,9 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
             '예시: 채무자가 연체 3회를 초과하면, 남은 채무를 즉시 갚아야 합니다.',
         ],
         validation: {
-            regex: '^[0-9]+$',
+            regex: '^\\d+$',
             errorMessage: '숫자로만 입력해주세요.',
+            min: '0',
         },
         next: 'specialTerms',
     },

@@ -1,8 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import {
     Chat,
-    ChatBot,
-    FormCreate,
     FormMatch,
     Home,
     Login,
@@ -15,6 +13,8 @@ import {
     AccountRegist,
     AccountVerify,
     AccountPassword,
+    FormCheck,
+    FormCreate,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -25,7 +25,7 @@ const App = () => {
             <Routes>
                 <Route element={<LayoutProvider />}>
                     <Route path='/form' element={<FormMatch />} />
-                    <Route path='/form/create' element={<FormCreate />} />
+                    <Route path='/form/check' element={<FormCheck />} />
                     <Route path='/transaction' element={<Transaction />} />
                     <Route path='/contract' element={<ContractList />} />
                     <Route
@@ -41,7 +41,7 @@ const App = () => {
                         path='/login/findPw/reset'
                         element={<PasswordReset />}
                     />
-                    <Route path='/chatbot' element={<ChatBot />} />
+                    <Route path='/form/create' element={<FormCreate />} />
                     <Route path='/chat' element={<Chat />} />
                     <Route path='/account' element={<AccountRegist />} />
                     <Route path='/account/verify' element={<AccountVerify />} />

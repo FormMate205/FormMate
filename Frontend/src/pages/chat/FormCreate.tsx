@@ -1,8 +1,10 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { CalendarButton } from '@/components/ui/calendarButton';
 import { getName, showName } from '@/features';
 import { useChatBot } from '@/features/chatBot/useChatBot';
 import { BOT_ID } from '@/shared/constant';
+import { DatePicker } from '@/shared/ui/DatePicker';
 import { Header } from '@/widgets';
 import ChatBox from './ui/ChatBox';
 import ChatInput from './ui/ChatInput';
@@ -11,7 +13,7 @@ import RepaymentMethodSelector from './ui/RepaymentMethodSelector';
 import RoleSelector from './ui/RoleSelector';
 import SpecialTermsSelector from './ui/SpecialTermSelector';
 
-const ChatBot = () => {
+const FormCreate = () => {
     const userId = '1';
     const receiverId = '2';
     const receiverName = '윤이영';
@@ -21,7 +23,7 @@ const ChatBot = () => {
         { id: BOT_ID, name: '페이봇' },
     ];
 
-    // 커스텀 훅을 사용하여 챗봇 로직 분리
+    // 챗봇 로직 분리
     const {
         chatHistory,
         currentQuestion,
@@ -37,6 +39,16 @@ const ChatBot = () => {
         userId,
         initialReceiverId: receiverId,
     });
+
+    // 자동 스크롤
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop =
+                chatContainerRef.current.scrollHeight;
+        }
+    }, [chatHistory]);
 
     const getNameFunc = getName(writers);
     const showNameFunc = showName(chatHistory);
@@ -82,6 +94,18 @@ const ChatBot = () => {
                     </div>
                 );
 
+            case 'date': {
+                return (
+                    <div className='flex w-full justify-start px-1'>
+                        <DatePicker />
+                        <CalendarButton
+                            variant={'secondary'}
+                            className='확인'
+                        />
+                    </div>
+                );
+            }
+
             case 'method':
                 if (currentQuestion.options) {
                     return (
@@ -113,7 +137,10 @@ const ChatBot = () => {
             <NotiContainer name={receiverName} />
 
             {/* 채팅 내용 */}
-            <div className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'>
+            <div
+                className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
+                ref={chatContainerRef}
+            >
                 {chatHistory.length > 0 &&
                     chatHistory.map((chat, index) => {
                         const isMe = userId === chat.writerId;
@@ -148,4 +175,4 @@ const ChatBot = () => {
     );
 };
 
-export default ChatBot;
+export default FormCreate;

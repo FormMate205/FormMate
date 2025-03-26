@@ -8,6 +8,7 @@ import {
 } from '@/features/chatBot/utils/chatBotQuestions';
 import { BOT_ID } from '@/shared/constant';
 import { formatDate } from '@/shared/utils/formatDate';
+import { validateUserAnswer } from './utils/chatValid';
 
 interface UseChatBotParams {
     userId: string;
@@ -33,6 +34,7 @@ export const useChatBot = ({
     // 특약 조항 관련 상태
     const [currentTermIndex, setCurrentTermIndex] = useState(0);
     const [selectedTerms, setSelectedTerms] = useState<string[]>([]);
+    const [isLastTermProcessed, setIsLastTermProcessed] = useState(false);
 
     // FormDraftRequest 상태 관리
     const [formDraft, setFormDraft] = useState<FormDraftRequest>({
@@ -66,7 +68,31 @@ export const useChatBot = ({
         }
     }, []);
 
-    // 현재 질문 ID가 변경될 때 현재 질문 업데이트
+    // 특약 인덱스 업데이트
+    useEffect(() => {
+        // 모든 특약 처리가 완료된 후
+        if (isLastTermProcessed) {
+            setFormDraft((prev) => ({
+                ...prev,
+                specialTermIndexes: selectedTerms,
+            }));
+
+            // 마지막 질문으로 이동
+            setTimeout(() => {
+                if (currentQuestion && currentQuestion.next) {
+                    const nextQuestionId = currentQuestion.next;
+                    if (nextQuestionId) {
+                        setCurrentQuestionId(nextQuestionId);
+                    }
+                }
+            }, 500);
+
+            // 플래그 초기화
+            setIsLastTermProcessed(false);
+        }
+    }, [selectedTerms, isLastTermProcessed, currentQuestion]);
+
+    // 현재 질문 업데이트
     useEffect(() => {
         if (currentQuestionId) {
             const question = chatBotQuestions[currentQuestionId];
@@ -100,11 +126,15 @@ export const useChatBot = ({
                         }, 300);
                     }
 
-                    // 입력 유형에 따라 입력창 활성화/비활성화
+                    // 입력창 비활성화 타입
                     setInputEnabled(
-                        !['role', 'boolean', 'method', 'specialTerms'].includes(
-                            question.type,
-                        ),
+                        ![
+                            'role',
+                            'boolean',
+                            'method',
+                            'date',
+                            'specialTerms',
+                        ].includes(question.type),
                     );
                 }, 500);
             }
@@ -114,6 +144,25 @@ export const useChatBot = ({
     // 메시지 전송 함수
     const sendMessage = (content: string) => {
         if (!content.trim()) return;
+
+        const { isValid, errorMessage } = validateUserAnswer(
+            formDraft,
+            currentQuestion,
+            content,
+        );
+
+        if (!isValid) {
+            // 챗봇 메시지 추가
+            messageIdCounterRef.current += 1;
+            const newMessage: ChatMessage = {
+                id: messageIdCounterRef.current.toString(),
+                writerId: BOT_ID,
+                content: errorMessage || '다시 입력해주세요.',
+            };
+
+            setChatHistory((prev) => [...prev, newMessage]);
+            return;
+        }
 
         // 사용자 메시지 추가
         messageIdCounterRef.current += 1;
@@ -232,7 +281,7 @@ export const useChatBot = ({
         }));
     };
 
-    // 특약사항 선택 처리
+    // 특약사항 선택 처리S
     const handleSpecialTermSelect = (termId: string, isSelected: boolean) => {
         const response = isSelected ? '네' : '아니오';
 
@@ -246,36 +295,19 @@ export const useChatBot = ({
 
         // 선택된 특약 업데이트
         if (isSelected) {
+            console.log('선택: ' + termId);
             setSelectedTerms((prev) => [...prev, termId]);
         }
 
-        // 다음 특약조항으로 이동하거나 완료 처리
+        // 다음 특약조항으로 이동
         const nextTermIndex = currentTermIndex + 1;
 
         if (nextTermIndex < specialTermsInfo.length) {
             setCurrentTermIndex(nextTermIndex);
         } else {
-            handleSpecialTermsComplete();
+            // 마지막 특약 처리 완료 플래그 설정
+            setIsLastTermProcessed(true);
         }
-    };
-
-    // 특약사항 선택 완료 처리
-    const handleSpecialTermsComplete = () => {
-        // FormDraftRequest에 특약 인덱스 저장
-        setFormDraft((prev) => ({
-            ...prev,
-            specialTermIndexes: selectedTerms,
-        }));
-
-        // 다음 질문으로 이동
-        setTimeout(() => {
-            if (currentQuestion && currentQuestion.next) {
-                const nextQuestionId = currentQuestion.next;
-                if (nextQuestionId) {
-                    setCurrentQuestionId(nextQuestionId);
-                }
-            }
-        }, 500);
     };
 
     // receiverId 설정 함수
@@ -289,8 +321,6 @@ export const useChatBot = ({
     // 계약서 생성 처리
     const createContract = async () => {
         try {
-            console.log('계약서 생성 요청:', formDraft);
-
             messageIdCounterRef.current += 1;
             const completeMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
@@ -303,6 +333,8 @@ export const useChatBot = ({
             // 계약서 생성 종료
             setCurrentQuestion(null);
             setInputEnabled(false);
+
+            console.log('계약서 생성:', formDraft);
         } catch (error) {
             console.error('계약서 생성 오류:', error);
 
