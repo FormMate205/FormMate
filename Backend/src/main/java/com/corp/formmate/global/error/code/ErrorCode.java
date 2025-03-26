@@ -12,6 +12,7 @@ public enum ErrorCode {
 	UNAUTHORIZED(401, "인증되지 않은 접근입니다"),
 	FORBIDDEN(403, "권한이 없습니다"),
 	INVALID_ENUM_VALUE(400, "잘못된 상태값입니다"),
+	TOO_MANY_REQUESTS(429, "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요"),
 
 	// Auth & User
 	INVALID_TOKEN(401, "유효하지 않은 토큰입니다"),
@@ -27,10 +28,18 @@ public enum ErrorCode {
 	INVALID_EMAIL_VERIFICATION(401, "유효하지 않은 인증 토큰입니다"),
 	EXPIRED_EMAIL_VERIFICATION(401, "만료된 인증 토큰입니다"),
 	DUPLICATE_EMAIL(400, "이미 등록된 이메일입니다"),
-	FAIL_EMAIL_SEND(500, "이메일 발송에 실패했습니다"),
+	FAIL_MESSAGE_SEND(500, "문자 발송에 실패했습니다"),
 	PHONE_VERIFICATION_FAILED(400, "휴대전화 인증에 실패했습니다"),
 	PHONE_VERIFICATION_EXPIRED(400, "휴대전화 인증이 만료되었습니다"),
 	PHONE_ALREADY_REGISTERED(400, "이미 등록된 휴대전화 번호입니다"),
+	LOGOUT_FAILED(500, "로그아웃 처리 중 오류가 발생했습니다"),
+	NOT_AUTHENTICATED(401, "인증되지 않은 사용자입니다"),
+
+	// 비밀번호 재설정 관련 오류 코드
+	PASSWORD_MISMATCH(400, "새 비밀번호가 일치하지 않습니다"),
+	CURRENT_PASSWORD_INCORRECT(400, "현재 비밀번호가 올바르지 않습니다"),
+	PASSWORD_RESET_REQUEST_NOT_FOUND(404, "비밀번호 재설정 요청을 찾을 수 없습니다"),
+	PASSWORD_RESET_TOKEN_EXPIRED(401, "비밀번호 재설정 토큰이 만료되었습니다"),
 
 	// 계좌 관련
 	ACCOUNT_NOT_FOUND(404, "계좌 정보를 찾을 수 없습니다"),
@@ -41,13 +50,13 @@ public enum ErrorCode {
 	ACCOUNT_ALREADY_REGISTERED(400, "이미 등록된 계좌입니다"),
 	INVALID_BANK_CODE(400, "유효하지 않은 은행 코드입니다"),
 
-	// 계약 관련
-	CONTRACT_NOT_FOUND(404, "계약을 찾을 수 없습니다"),
-	INVALID_CONTRACT_STATUS(400, "잘못된 계약 상태입니다"),
-	CONTRACT_ALREADY_CONFIRMED(400, "이미 체결된 계약입니다"),
-	CONTRACT_ALREADY_TERMINATED(400, "이미 종료된 계약입니다"),
-	CONTRACT_MODIFICATION_FORBIDDEN(403, "계약 상태에서는 수정이 불가능합니다"),
-	CONTRACT_EXECUTION_FAILED(500, "계약 체결 중 오류가 발생했습니다"),
+	// 폼 관련 (이전 계약 관련)
+	FORM_NOT_FOUND(404, "폼을 찾을 수 없습니다"),
+	INVALID_FORM_STATUS(400, "잘못된 폼 상태입니다"),
+	FORM_ALREADY_CONFIRMED(400, "이미 체결된 폼입니다"),
+	FORM_ALREADY_TERMINATED(400, "이미 종료된 폼입니다"),
+	FORM_MODIFICATION_FORBIDDEN(403, "폼 상태에서는 수정이 불가능합니다"),
+	FORM_EXECUTION_FAILED(500, "폼 체결 중 오류가 발생했습니다"),
 	INVALID_CREDITOR(400, "유효하지 않은 채권자 정보입니다"),
 	INVALID_DEBTOR(400, "유효하지 않은 채무자 정보입니다"),
 	INVALID_LOAN_AMOUNT(400, "유효하지 않은 대출 금액입니다"),
@@ -55,9 +64,11 @@ public enum ErrorCode {
 	INVALID_REPAYMENT_METHOD(400, "유효하지 않은 상환 방식입니다"),
 	INVALID_REPAYMENT_DAY(400, "유효하지 않은 상환일입니다"),
 	INVALID_MATURITY_DATE(400, "유효하지 않은 만기일입니다"),
-	PAST_CONTRACT_DATE(400, "계약일은 과거 날짜로 설정할 수 없습니다"),
-	INVALID_CONTRACT_PARTIES(400, "계약 당사자가 동일인입니다"),
+	PAST_FORM_DATE(400, "폼일은 과거 날짜로 설정할 수 없습니다"),
+	INVALID_FORM_PARTIES(400, "폼 당사자가 동일인입니다"),
 	NEGATIVE_LOAN_AMOUNT(400, "대출 금액은 0보다 커야 합니다"),
+	INVALID_INTEREST_AND_OVERDUE(400, "이자율과 연체이자율의 합은 20% 초과될 수 없습니다."),
+	INVALID_CREATOR_ID(400, "요청자와 차용증 생성사의 ID가 다릅니다."),
 
 	// 특약 관련
 	SPECIAL_TERM_NOT_FOUND(404, "특약 조항을 찾을 수 없습니다"),
@@ -69,7 +80,7 @@ public enum ErrorCode {
 	INVALID_PAYMENT_AMOUNT(400, "유효하지 않은 납부 금액입니다"),
 	PAYMENT_PROCESSING_ERROR(500, "납부 처리 중 오류가 발생했습니다"),
 	PAYMENT_ALREADY_COMPLETED(400, "이미 완료된 납부입니다"),
-	EARLY_REPAYMENT_NOT_ALLOWED(400, "현재 계약 상태에서는 중도상환이 불가능합니다"),
+	EARLY_REPAYMENT_NOT_ALLOWED(400, "현재 폼 상태에서는 중도상환이 불가능합니다"),
 	PAYMENT_AMOUNT_BELOW_MINIMUM(400, "최소 납부 금액보다 적습니다"),
 	INVALID_PAYMENT_DATE(400, "유효하지 않은 납부일입니다"),
 	OVERDUE_AMOUNT_REQUIRED(400, "연체금을 먼저 납부해야 합니다"),
@@ -95,16 +106,16 @@ public enum ErrorCode {
 	INVALID_NOTIFICATION_TYPE(400, "유효하지 않은 알림 유형입니다"),
 	SSE_CONNECTION_ERROR(500, "알림 연결 중 오류가 발생했습니다"),
 
-	// 계약 관리 관련
-	CONTRACT_MANAGEMENT_NOT_FOUND(404, "계약 관리 정보를 찾을 수 없습니다"),
+	// 계약 관련 (이전 계약 관리 관련)
+	CONTRACT_NOT_FOUND(404, "계약 정보를 찾을 수 없습니다"),
 	INVALID_PAYMENT_SCHEDULE(400, "유효하지 않은 납부 일정입니다"),
 	SCHEDULE_CALCULATION_ERROR(500, "납부 일정 계산 중 오류가 발생했습니다"),
 	OVERDUE_INTEREST_CALCULATION_ERROR(500, "연체 이자 계산 중 오류가 발생했습니다"),
 
-	// 계약 종료 관련
-	CONTRACT_TERMINATION_REQUEST_NOT_FOUND(404, "계약 파기 요청을 찾을 수 없습니다"),
-	CONTRACT_TERMINATION_NOT_ALLOWED(400, "현재 계약 상태에서는 파기가 불가능합니다"),
-	CONTRACT_TERMINATION_ALREADY_REQUESTED(400, "이미 파기 요청이 존재합니다"),
+	// 폼 종료 관련
+	FORM_TERMINATION_REQUEST_NOT_FOUND(404, "폼 파기 요청을 찾을 수 없습니다"),
+	FORM_TERMINATION_NOT_ALLOWED(400, "현재 폼 상태에서는 파기가 불가능합니다"),
+	FORM_TERMINATION_ALREADY_REQUESTED(400, "이미 파기 요청이 존재합니다"),
 	TERMINATION_APPROVAL_ERROR(500, "파기 승인 처리 중 오류가 발생했습니다"),
 
 	// 외부 API 관련
@@ -125,8 +136,6 @@ public enum ErrorCode {
 
 	// 마이페이지 관련
 	PROFILE_UPDATE_ERROR(500, "프로필 업데이트 중 오류가 발생했습니다"),
-	PASSWORD_MISMATCH(400, "새 비밀번호가 일치하지 않습니다"),
-	CURRENT_PASSWORD_INCORRECT(400, "현재 비밀번호가 올바르지 않습니다"),
 	ADDRESS_NOT_FOUND(404, "주소 정보를 찾을 수 없습니다"),
 
 	// 날짜 관련

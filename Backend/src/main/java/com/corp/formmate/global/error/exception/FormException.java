@@ -5,8 +5,8 @@ import com.corp.formmate.global.error.code.ErrorCode;
 import lombok.Getter;
 
 @Getter
-public class ContractManagementException extends BusinessException {
-	public ContractManagementException(ErrorCode errorCode) {
+public class FormException extends BusinessException {
+	public FormException(ErrorCode errorCode) {
 		super(errorCode);
 	}
 }

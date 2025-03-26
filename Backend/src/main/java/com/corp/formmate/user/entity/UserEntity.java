@@ -32,8 +32,8 @@ public class UserEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    @Column(length = 20)
-    private String phonenumber;
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
 
     @Column(length = 225)
     private String address;
@@ -55,14 +55,14 @@ public class UserEntity {
 
     @Builder
     public UserEntity(String email, Provider provider, String password, String userName,
-                Role role, String phonenumber, String address, String addressDetail,
+                Role role, String phoneNumber, String address, String addressDetail,
                 boolean status, Integer bankCode, String accountNumber, String accountPassword) {
         this.email = email;
         this.provider = provider != null ? provider : Provider.LOCAL;
         this.password = password;
         this.userName = userName;
         this.role = role != null ? role : Role.USER;
-        this.phonenumber = phonenumber;
+        this.phoneNumber = phoneNumber;
         this.address = address;
         this.addressDetail = addressDetail;
         this.status = status;
@@ -71,5 +71,38 @@ public class UserEntity {
         this.accountPassword = accountPassword;
     }
 
+    // user 추가정보 수정
+    public void updateAdditionalProfile(String phoneNumber, String address, String addressDetail) {
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.addressDetail = addressDetail;
+    }
 
+    // 비밀번호 수정
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    // 이름 수정
+    public void updateUserName(String userName) {
+        this.userName = userName;
+    }
+
+    // 주소 수정
+    public void updateAddress(String address, String addressDetail) {
+        this.address = address;
+        this.addressDetail = addressDetail;
+    }
+
+    // 전화번호 수정
+    public void updatePhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    // 계좌정보 수정
+
+    // 상태 수정
+    public void updateStatus(boolean status) {
+        this.status = status;
+    }
 }
