@@ -1,0 +1,14 @@
+import { ContractCardProps } from '../model/types';
+import ContractCard from '../ui/ContractCard';
+
+const ContractList = ({ contracts }: { contracts: ContractCardProps[] }) => {
+    return (
+        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+            {contracts.map((contract, index) => (
+                <ContractCard key={index} {...contract} />
+            ))}
+        </div>
+    );
+};
+
+export default ContractList;

@@ -10,12 +10,12 @@ import {
     Signup,
     PasswordReset,
     PhoneVerify,
-    ContractList,
     ContractDetail,
     AccountRegist,
     AccountVerify,
     AccountPassword,
     MyInfo,
+    Contract,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -28,7 +28,7 @@ const App = () => {
                     <Route path='/form' element={<FormMatch />} />
                     <Route path='/form/create' element={<FormCreate />} />
                     <Route path='/transaction' element={<Transaction />} />
-                    <Route path='/contract' element={<ContractList />} />
+                    <Route path='/contract' element={<Contract />} />
                     <Route
                         path='/contract/detail'
                         element={<ContractDetail />}

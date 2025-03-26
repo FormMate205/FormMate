@@ -1,6 +1,6 @@
 import { Progress } from '@/components/ui/progress';
 import { TagItem } from '@/shared';
-import { ContractStatus, TagColor } from '../Contract';
+import { ContractStatus, TagColor } from '../model/types';
 
 interface StatusStyle {
     color: TagColor;
