@@ -12,10 +12,10 @@ const Home = ({ userName }: HomeProps) => {
 
     return (
         <div className='flex h-screen flex-col overflow-hidden'>
-            <div className='bg-line-50 scrollbar-none w-full flex-1 overflow-y-auto'>
+            <div className='bg-line-50 scrollbar-none w-full flex-1 overflow-y-auto px-4 py-2'>
                 <Header title='FormMate' isHome={true} />
-                <div className='flex flex-col gap-7 p-6'>
-                    <div className='relative'>
+                <div className='flex flex-col gap-7'>
+                    <div className='relative mt-2'>
                         <p className='text-2xl font-semibold'>
                             {userName}님
                             <br />

@@ -35,10 +35,10 @@ const App = () => {
                         path='/contract/detail'
                         element={<ContractDetail />}
                     />
-                    <Route path='/' element={<Home />} />
+                    <Route path='/' element={<Home userName='' />} />
                     <Route path='/landing' element={<Landing />} />
                     <Route path='/login' element={<Login />} />
-                    <Route path='/login/signup' element={<Signup />} />
+                    <Route path='/landing/signup' element={<Signup />} />
                     <Route path='/login/findPw' element={<PhoneVerify />} />
                     <Route
                         path='/login/findPw/reset'

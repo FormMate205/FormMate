@@ -23,9 +23,9 @@ const UserPasswordUpdate = () => {
     };
 
     return (
-        <div className='relative flex min-h-screen flex-col'>
+        <div className='relative flex min-h-screen flex-col px-4 py-2'>
             <Header title='비밀번호 변경'></Header>
-            <div className='p-6'>
+            <div className='mt-6'>
                 <label className='mb-2 block text-sm'>
                     기존 비밀번호를 입력하세요
                 </label>

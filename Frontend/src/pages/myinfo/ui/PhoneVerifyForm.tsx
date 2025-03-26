@@ -12,10 +12,9 @@ const PhoneVerifyForm = () => {
     const navigate = useNavigate();
 
     return (
-        //relative flex min-h-screen flex-col
-        <div className='relative flex h-screen flex-col overflow-hidden'>
+        <div className='relative flex h-screen flex-col overflow-hidden px-4 py-2'>
             <Header title='비밀번호 찾기' />
-            <div className='scrollbar-none flex h-full flex-col gap-6 overflow-y-auto p-6'>
+            <div className='scrollbar-none mt-6 flex h-full flex-col gap-6 overflow-y-auto'>
                 <h2 className='text-xl font-semibold'>전화번호로 인증하기</h2>
 
                 {/* 전화번호 입력 */}

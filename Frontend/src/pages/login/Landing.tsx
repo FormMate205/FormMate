@@ -34,7 +34,7 @@ const Landing = () => {
                     </Button>
                     <button
                         className='text-line-700 underline'
-                        onClick={() => navigate('/login/signup')}
+                        onClick={() => navigate('/landing/signup')}
                     >
                         회원가입
                     </button>
