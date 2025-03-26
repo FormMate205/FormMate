@@ -1,4 +1,5 @@
-import { ChangeEvent, useEffect, useRef } from 'react';
+import { format } from 'date-fns';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CalendarButton } from '@/components/ui/calendarButton';
 import { getName, showName } from '@/features';
@@ -50,6 +51,16 @@ const FormCreate = () => {
         }
     }, [chatHistory]);
 
+    // 상환 날짜 선택 관리
+    const [selectedDate, setSelectedDate] = useState<Date>();
+    const handleDateSelect = (date: Date | undefined) => {
+        setSelectedDate(date);
+    };
+    const handleConfirmDate = (date: Date | undefined) => {
+        if (!date) return;
+        sendMessage(format(date, 'yyyy-MM-dd'));
+    };
+
     const getNameFunc = getName(writers);
     const showNameFunc = showName(chatHistory);
 
@@ -96,12 +107,17 @@ const FormCreate = () => {
 
             case 'date': {
                 return (
-                    <div className='flex w-full justify-start px-1'>
-                        <DatePicker />
-                        <CalendarButton
-                            variant={'secondary'}
-                            className='확인'
+                    <div className='flex w-full justify-start gap-2 px-1'>
+                        <DatePicker
+                            onSelect={handleDateSelect}
+                            selectedDate={selectedDate}
                         />
+                        <CalendarButton
+                            variant={`${selectedDate ? 'default' : 'secondary'}`}
+                            onClick={() => handleConfirmDate(selectedDate)}
+                        >
+                            확인
+                        </CalendarButton>
                     </div>
                 );
             }

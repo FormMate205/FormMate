@@ -143,7 +143,18 @@ export const useChatBot = ({
 
     // 메시지 전송 함수
     const sendMessage = (content: string) => {
-        if (!content.trim()) return;
+        if (!content.trim()) {
+            // 챗봇 메시지 추가
+            messageIdCounterRef.current += 1;
+            const newMessage: ChatMessage = {
+                id: messageIdCounterRef.current.toString(),
+                writerId: BOT_ID,
+                content: '값을 입력해주세요.',
+            };
+
+            setChatHistory((prev) => [...prev, newMessage]);
+            return;
+        }
 
         const { isValid, errorMessage } = validateUserAnswer(
             formDraft,

@@ -57,8 +57,7 @@ export const chatBotQuestions: Record<string, BotQuestion> = {
     },
     maturityDate: {
         id: 'maturityDate',
-        question:
-            '아래의 날짜 선택 상자를 통해 상환 날짜를 선택한 후 입력해주세요.',
+        question: '상환 날짜를 선택한 후 확인 버튼을 눌러주세요.',
         type: 'date',
         next: 'interestRate',
     },
