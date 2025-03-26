@@ -43,7 +43,7 @@ const CommonModal = ({
                 </div>
             </DialogTrigger>
 
-            <DialogContent className='top-auto bottom-32 flex translate-y-0 flex-col items-center gap-4 bg-white'>
+            <DialogContent className='top-auto bottom-24 flex translate-y-0 flex-col items-center gap-4 bg-white'>
                 <DialogHeader className='flex flex-col items-center gap-2'>
                     <img
                         src='/public/assets/images/chatbot.png'
