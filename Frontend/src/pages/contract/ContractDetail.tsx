@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import InterestInfoTab from '@/features/contract/ui/tabs/InterestInfoTab';
+import PaymentHistoryTab from '@/features/contract/ui/tabs/PaymentHistoryTab';
+import SummaryTab from '@/features/contract/ui/tabs/SummaryTab';
 import { Header } from '@/widgets';
 
-import InterestInfoTab from './ui/ContractTabs/InterestInfoTab';
-import PaymentHistoryTab from './ui/ContractTabs/PaymentHistoryTab';
-import SummaryTab from './ui/ContractTabs/SummaryTab';
 import EarlyTerminateAlert from './ui/EarlyTerminateAlert';
 import ProgressBar from './ui/ProgressBar';
 import SummaryItem from './ui/SummaryItem';

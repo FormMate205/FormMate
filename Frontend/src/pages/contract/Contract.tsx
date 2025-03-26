@@ -1,10 +1,9 @@
 import { Input } from '@/components/ui/input';
-
+import { ContractStatus } from '@/features/contract/model/types';
 import { useContractFilters } from '@/features/contract/model/useContractFilters';
 import ContractList from '@/features/contract/ui/ContractList';
 import ContractSelect from '@/features/contract/ui/ContractSelect';
 import { Footer, Header } from '@/widgets';
-import { ContractStatus } from './Contract';
 import ContractChart from './ui/ContractChart';
 import StatusSummary from './ui/StatusSummary';
 
@@ -28,7 +27,6 @@ const Contract = () => {
     return (
         <div className='bg-line-50 flex h-screen flex-col overflow-hidden'>
             <Header title='계약 관리' />
-
             <div className='scrollbar-none flex h-full flex-col gap-6 overflow-y-auto px-6 py-4'>
                 {/* 계약 현황 */}
                 <StatusSummary />

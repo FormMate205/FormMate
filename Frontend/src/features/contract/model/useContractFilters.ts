@@ -3,6 +3,7 @@ import { ContractCardProps, ContractStatus } from './types';
 
 const dummyContracts: ContractCardProps[] = [
     {
+        id: '1',
         name: '강지은',
         status: '진행',
         contractType: 'send',
@@ -12,10 +13,12 @@ const dummyContracts: ContractCardProps[] = [
         endDate: '2025.04.23',
     },
     {
+        id: '2',
         name: '이동욱',
         status: '대기',
     },
     {
+        id: '3',
         name: '박상학',
         status: '연체',
         contractType: 'receive',
@@ -25,6 +28,7 @@ const dummyContracts: ContractCardProps[] = [
         endDate: '2025.02.15',
     },
     {
+        id: '4',
         name: '차윤영',
         status: '완료',
         contractType: 'receive',

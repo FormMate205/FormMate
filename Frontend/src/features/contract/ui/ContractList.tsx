@@ -4,8 +4,8 @@ import ContractCard from '../ui/ContractCard';
 const ContractList = ({ contracts }: { contracts: ContractCardProps[] }) => {
     return (
         <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-            {contracts.map((contract, index) => (
-                <ContractCard key={index} {...contract} />
+            {contracts.map((contract) => (
+                <ContractCard key={contract.id} {...contract} />
             ))}
         </div>
     );
