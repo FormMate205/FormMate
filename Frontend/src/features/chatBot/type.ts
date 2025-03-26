@@ -10,7 +10,7 @@ export type InputType =
 // 질문에 대한 옵션
 export interface Option {
     label: string;
-    value: string;
+    value: string | boolean;
     description?: string;
 }
 
@@ -28,25 +28,4 @@ export interface BotQuestion {
         max?: string;
     };
     next?: string | ((answer: string) => string); // 다음 질문 선택
-    infoTitle?: string; // 정보 제목
-    infoContent?: string; // 추가 설명
-}
-
-// 역할 타입 정의
-export type RoleType = '채권자' | '채무자';
-
-// 폼 데이터 정의
-export interface FormInputData {
-    role: RoleType;
-    loanAmount: string;
-    maturityDate: string;
-    interestRate: string;
-    overdueInterestRate: string;
-    earlyRepaymentFeeRate: string;
-    repayment: boolean;
-    repaymentDay: string;
-    repaymentMethod: string;
-    overdueLimit: string;
-    specialTerms: string[];
-    complete?: boolean;
 }

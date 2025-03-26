@@ -1,8 +1,4 @@
-interface ChatMessage {
-    id: string;
-    writerId: string;
-    content: string;
-}
+import { ChatMessage } from '@/entities/types/chat';
 
 const showName = (chatHistory: ChatMessage[]) => {
     return (index: number): boolean => {
