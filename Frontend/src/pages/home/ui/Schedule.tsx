@@ -8,7 +8,7 @@ const Schedule = () => {
 
     return (
         <div className='mb-20'>
-            <p className='mb-4 text-lg font-semibold'>일정</p>
+            <p className='mb-4 text-lg font-semibold'>주간 일정</p>
             <div className='rounded-lg bg-white p-4 pt-8 shadow-sm'>
                 <Calendar />
 
@@ -49,7 +49,7 @@ const Schedule = () => {
                                         </p>
                                     </div>
                                     <Button variant={'choiceFill'}>
-                                        이체하기
+                                        송금하기
                                     </Button>
                                 </div>
                             </div>
@@ -72,7 +72,7 @@ const Schedule = () => {
                                         </p>
                                     </div>
                                     <Button variant={'choiceFill'}>
-                                        이체하기
+                                        송금하기
                                     </Button>
                                 </div>
                             </div>

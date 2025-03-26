@@ -15,3 +15,5 @@ export { default as AccountRegist } from './account/AccountRegist';
 export { default as AccountVerify } from './account/AccountVerify';
 export { default as AccountPassword } from './account/AccountPassword';
 export { default as MyInfo } from './myinfo/MyInfo';
+export { default as UserPasswordUpdate } from './myinfo/UserPasswordUpdate';
+export { default as PasswordPhoneVerify } from './myinfo/PasswordPhoneVerify';
