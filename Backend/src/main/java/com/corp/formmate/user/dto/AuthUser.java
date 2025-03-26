@@ -20,7 +20,6 @@ public class AuthUser implements UserDetails {
 
     private Integer id;
     private String email;
-    private String password;
     private String userName;
     private Collection<? extends GrantedAuthority> authorities;
 
@@ -31,7 +30,6 @@ public class AuthUser implements UserDetails {
         return AuthUser.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .password(user.getPassword())
                 .userName(user.getUserName())
                 .authorities(Collections.singleton(authority))
                 .build();
@@ -44,7 +42,7 @@ public class AuthUser implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password;
+        return "";
     }
 
     // email을 username으로 지정

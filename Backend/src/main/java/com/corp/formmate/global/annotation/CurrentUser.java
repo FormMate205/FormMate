@@ -9,5 +9,5 @@ import java.lang.annotation.*;
 @Documented
 @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : user")
 public @interface CurrentUser {
-    // Spring Security의 @AuthenticaitonPrincaipla을 확장하는 커스텀 어노테이션
+    // Spring Security의 @AuthenticaitonPrincipal을 확장하는 커스텀 어노테이션
 }

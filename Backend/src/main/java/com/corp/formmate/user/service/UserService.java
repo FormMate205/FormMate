@@ -2,11 +2,15 @@ package com.corp.formmate.user.service;
 
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.UserException;
+import com.corp.formmate.jwt.dto.Token;
+import com.corp.formmate.jwt.properties.JwtProperties;
+import com.corp.formmate.jwt.service.JwtTokenService;
 import com.corp.formmate.user.dto.RegisterRequest;
 import com.corp.formmate.user.entity.Provider;
 import com.corp.formmate.user.entity.Role;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +27,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationService verificationService;
+    private final MessageService messageService;
+    private final JwtTokenService jwtTokenService;
+    private final JwtProperties jwtProperties;
 
     /**
      * 이메일로 사용자 정보 조회
@@ -73,6 +80,21 @@ public class UserService {
     }
 
     /**
+     * 전화번호 중복 확인
+     * @param phoneNumber 확인할 전화번호
+     * @return 사용 가능 여부 (true: 사용 가능, false: 이미 사용 중)
+     */
+    @Transactional(readOnly = true)
+    public boolean checkPhoneNumberAvailability(String phoneNumber) {
+        try {
+            return !userRepository.existsByPhoneNumber(phoneNumber);
+        } catch (Exception e) {
+            log.error("Phone number check failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * 회원가입 (전화번호 인증 검증 포함)
      */
     @Transactional
@@ -84,8 +106,13 @@ public class UserService {
             }
 
             // 이메일 중복 확인
-            if (selectByEmail(request.getEmail()) != null) {
+            if (checkEmailAvailability(request.getEmail())) {
                 throw new UserException(ErrorCode.EMAIL_DUPLICATE);
+            }
+
+            // 전화번호 중복 확인
+            if (checkPhoneNumberAvailability(normalizedPhone)) {
+                throw new UserException(ErrorCode.PHONE_ALREADY_REGISTERED);
             }
 
             // 회원가입 진행
@@ -108,8 +135,13 @@ public class UserService {
     public UserEntity register(RegisterRequest request, String normalizedPhone) {
         try {
             // 이메일 중복 확인
-            if (userRepository.existsByEmail(request.getEmail())) {
+            if (checkEmailAvailability(request.getEmail())) {
                 throw new UserException(ErrorCode.EMAIL_DUPLICATE);
+            }
+
+            // 전화번호 중복 확인
+            if (checkPhoneNumberAvailability(normalizedPhone)) {
+                throw new UserException(ErrorCode.PHONE_ALREADY_REGISTERED);
             }
 
             // 비밀번호 암호화
@@ -139,6 +171,39 @@ public class UserService {
         }
 
     }
+
+    /**
+     * 가입 후 로그인까지
+     */
+    @Transactional
+    public String registerAndCreateToken(RegisterRequest request, HttpServletResponse response) {
+        // 전화번호 정규화
+        String normalizedPhone = messageService.normalizePhoneNumber(request.getPhoneNumber());
+
+        // 전화번호 인증 여부 확인
+        if (!verificationService.isPhoneNumberVerified(normalizedPhone)) {
+            throw new UserException(ErrorCode.PHONE_VERIFICATION_FAILED);
+        }
+
+        // 회원가입 (사용자 지정)
+        UserEntity savedUser = registerWithPhoneVerification(request, normalizedPhone);
+        log.info("New user registered: {}", savedUser.getEmail());
+
+        // JWT 토큰 생성
+        Token token = jwtTokenService.createTokens(savedUser.getId());
+
+        // Refresh Token을 쿠키에 저장
+        jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
+
+        // 엑세스 토큰 반환
+        return token.getAccessToken();
+    }
+
+    /**
+     * registerAndCreateToken: 토큰 생성 및 전체 회원가입 프로세스 관리
+     * registerWithPhoneVerification: 전화번호 인증 확인 및 사용자 등록
+     * register: 실제 사용자 데이터 저장
+     */
 
     /**
      * OAuth2 사용자 정보로 사용자 조회 또는 생성
