@@ -1,0 +1,113 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.corp'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+dependencies {
+    // Spring Boot 기본
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.2.RELEASE'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+    // OAuth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.security:spring-security-oauth2-jose'
+
+    // Database
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    runtimeOnly 'com.mysql:mysql-connector-j:8.3.0'
+
+    // Dev Tools
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test에서 lombok 사용을 위한 의존성 추가
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // WebSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-websocket'
+
+    // STOMP 웹소켓 메시징
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+    implementation 'org.webjars:sockjs-client:1.5.1'
+
+    // Test
+// Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.6.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.6.0'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
+
+    // Swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
+    // Logback (Spring Boot 기본 제공)
+    implementation 'ch.qos.logback:logback-classic'
+    implementation 'ch.qos.logback:logback-core'
+
+    // 캐싱처리
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    // env 설정
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+    // MySQL - 중복 제거 (위에 runtimeOnly로 이미 추가됨)
+    // implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.26'
+
+    // H2 데이터베이스
+    testImplementation 'com.h2database:h2:2.2.224'
+
+    // json
+    implementation 'org.json:json:20231013'
+
+    // Mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // JSON 통신
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // CoolSMS SDK
+    implementation 'net.nurigo:sdk:4.3.0'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+    }
+}
