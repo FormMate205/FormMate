@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/widgets';
@@ -10,9 +11,13 @@ const PhoneVerifyForm = () => {
     const failCount = 0; // 최대 3회 (?)
 
     const navigate = useNavigate();
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [certCode, setCertCode] = useState('');
+
+    const isCertValid = certCode.length === 6; // 6자리 입력했을 때 활성화
 
     return (
-        <div className='flex flex-col gap-6 p-6'>
+        <div className='relative flex h-screen flex-col gap-6 p-6'>
             <Header title='비밀번호 찾기' />
 
             <h2 className='text-xl font-semibold'>전화번호로 인증하기</h2>
@@ -22,7 +27,12 @@ const PhoneVerifyForm = () => {
                 <input
                     type='tel'
                     placeholder="전화번호 입력 ('-' 제외)"
-                    className='f-0 focus:outline-noneocus:ring border-line-300 min-w-0 flex-1 border-b px-2 py-3'
+                    className='border-line-300 min-w-0 flex-1 border-b px-2 py-3'
+                    value={phoneNumber}
+                    maxLength={11}
+                    onChange={(e) =>
+                        setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))
+                    }
                 />
                 <Button
                     variant={'choiceFill'}
@@ -36,7 +46,12 @@ const PhoneVerifyForm = () => {
             <input
                 type='text'
                 placeholder='인증번호 입력'
-                className={`border-b px-2 py-3 ${isFailed ? 'border-subPink-500)]' : 'border-line-300'}`}
+                maxLength={6}
+                className={`border-b px-2 py-3 ${isFailed ? 'border-subPink-500' : 'border-line-300'}`}
+                value={certCode}
+                onChange={(e) =>
+                    setCertCode(e.target.value.replace(/[^0-9]/g, ''))
+                }
             />
 
             {/* 인증 실패 카운트 */}
@@ -46,14 +61,15 @@ const PhoneVerifyForm = () => {
                 {isFailed ? `${failCount}/3` : `${failCount}/3`}
             </p>
 
-            <div className='fixed bottom-0 left-0 w-full gap-6 p-6'>
+            <div className='absolute bottom-0 left-0 w-full gap-6 p-6'>
                 {/* 본인 인증 버튼 */}
                 <Button
-                    variant={'primary'}
-                    className={`${isCodeValid ? 'bg-primary-500 text-white' : 'bg-line-300 text-line-700'} w-full py-3`}
+                    variant={isCertValid ? 'primary' : 'primaryDisabled'}
+                    className='w-full py-3'
                     onClick={() =>
-                        isCodeValid && navigate('/login/findPw/reset')
+                        isCertValid && navigate('/login/findPw/reset')
                     }
+                    disabled={!isCertValid}
                 >
                     본인 인증
                 </Button>
