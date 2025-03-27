@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,10 +12,10 @@ import com.corp.formmate.contract.dto.ContractDetailResponse;
 import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
-import com.corp.formmate.contract.dto.UserIdRequest;
 import com.corp.formmate.contract.service.ContractService;
-import com.corp.formmate.form.dto.FormUpdateRequest;
+import com.corp.formmate.global.annotation.CurrentUser;
 import com.corp.formmate.global.error.dto.ErrorResponse;
+import com.corp.formmate.user.dto.AuthUser;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -128,12 +127,10 @@ public class ContractController {
 		)
 	})
 	@GetMapping("/remain/{userId}")
-	public ResponseEntity<List<ContractWithPartnerResponse>> selectContractWithPartner(@PathVariable Integer userId, @io.swagger.v3.oas.annotations.parameters.RequestBody(
-		description = "사용자 id",
-		required = true,
-		content = @Content(schema = @Schema(implementation = UserIdRequest.class))
-	) @RequestBody
-		UserIdRequest userIdRequest) {
-		return ResponseEntity.ok(contractService.selectContractWithPartner(userIdRequest.getId(), userId));
+	public ResponseEntity<List<ContractWithPartnerResponse>> selectContractWithPartner(@PathVariable Integer userId,
+		@CurrentUser
+		AuthUser authUser) {
+		Integer currentUserId = authUser.getId();
+		return ResponseEntity.ok(contractService.selectContractWithPartner(currentUserId, userId));
 	}
 }
