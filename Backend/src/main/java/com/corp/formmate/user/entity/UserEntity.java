@@ -83,23 +83,25 @@ public class UserEntity {
         this.password = password;
     }
 
-    // 이름 수정
-    public void updateUserName(String userName) {
-        this.userName = userName;
-    }
-
     // 주소 수정
     public void updateAddress(String address, String addressDetail) {
         this.address = address;
         this.addressDetail = addressDetail;
     }
 
-    // 전화번호 수정
-    public void updatePhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    // 계좌정보 수정
+    public void updateAccount(String bankName, String accountNumber, String accountPassword) {
+        this.bankName = bankName;
+        this.accountNumber = accountNumber;
+        this.accountPassword = accountPassword;
     }
 
-    // 계좌정보 수정
+    // 계좌정보 삭제
+    public void deleteAccount() {
+        this.bankName = null;
+        this.accountNumber = null;
+        this.accountPassword = null;
+    }
 
     // 상태 수정
     public void updateStatus(boolean status) {

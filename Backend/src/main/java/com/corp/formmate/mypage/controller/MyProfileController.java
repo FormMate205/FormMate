@@ -56,5 +56,4 @@ public class MyProfileController {
         myProfileService.updateMyPassword(authUser.getId(), request);
         return ResponseEntity.status(HttpStatus.OK).body("비밀번호가 성공적으로 변경되었습니다.");
     }
-
 }

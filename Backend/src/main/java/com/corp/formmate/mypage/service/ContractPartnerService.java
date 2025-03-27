@@ -26,6 +26,7 @@ public class ContractPartnerService {
             UserEntity user = userService.selectByPhoneNumber(phoneNumber);
 
             return new ContractPartnerSearchResponse(
+                    user.getId(),
                     user.getUserName(),
                     user.getPhoneNumber()
             );

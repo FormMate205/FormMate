@@ -81,7 +81,7 @@ public class MyProfileService {
             throw e;
         } catch (Exception e) {
             log.error("사용자 주소 조회 조회 중 오류: {}", e.getMessage());
-            throw new RuntimeException("사용자 주소 조회 조회 중 오류가 발생했습니다.", e);
+            throw new RuntimeException("사용자 주소 조회 중 오류가 발생했습니다.", e);
         }
     }
 
@@ -140,5 +140,4 @@ public class MyProfileService {
             throw new RuntimeException("사용자 비밀번호 수정 중 오류가 발생했습니다.", e);
         }
     }
-
 }

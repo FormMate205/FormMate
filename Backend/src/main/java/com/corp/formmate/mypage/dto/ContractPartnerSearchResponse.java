@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Schema(description = "계약상대 조회 응답")
 public class ContractPartnerSearchResponse {
+    @Schema(description = "사용자 아이디", example = "1")
+    private Integer userId;
+
     @Schema(description = "사용자 이름", example = "홍길동")
     private String userName;
 
