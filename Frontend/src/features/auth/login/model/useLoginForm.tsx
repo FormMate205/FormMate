@@ -3,11 +3,7 @@ import { useForm } from 'react-hook-form';
 import { loginFormSchema, LoginFormSchema } from '../types';
 
 export const useLoginForm = () => {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isValid },
-    } = useForm<LoginFormSchema>({
+    const { register, handleSubmit, formState } = useForm<LoginFormSchema>({
         resolver: zodResolver(loginFormSchema),
         mode: 'onChange',
     });
@@ -15,7 +11,6 @@ export const useLoginForm = () => {
     return {
         register,
         handleSubmit,
-        errors,
-        isValid,
+        formState,
     };
 };

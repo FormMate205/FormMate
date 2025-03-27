@@ -1,5 +1,6 @@
 import { Footer, Header } from '@/widgets';
 import AddressInfo from './ui/AddressInfo';
+import Logout from './ui/Logout';
 import MyAccount from './ui/MyAccount';
 import UserInfo from './ui/UserInfo';
 
@@ -41,6 +42,10 @@ const MyInfo = () => {
                             address={userData.address}
                             detailAddress={userData.detailAddress}
                         />
+                    </div>
+
+                    <div className='mx-auto'>
+                        <Logout />
                     </div>
                 </div>
             </div>

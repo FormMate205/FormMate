@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useUserStore } from '@/entities/user/model/useUserStore';
 import { login } from '../api/login';
 import { useLoginForm } from '../model/useLoginForm';
 import { LoginFormSchema } from '../types';
@@ -9,19 +8,20 @@ import { LoginFormSchema } from '../types';
 const LoginForm = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const setLogin = useUserStore((state) => state.setLogin);
-    const { register, handleSubmit, errors, isValid } = useLoginForm();
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isValid },
+    } = useLoginForm();
 
     const onSubmit = async (data: LoginFormSchema) => {
         try {
             const res = await login(data); // mock login 함수
             // 1. 토큰 저장
             localStorage.setItem('accessToken', res.token);
-            // 2. 상태 설정
-            setLogin(res.token);
-            // 3. 유저 쿼리 갱신
+            // 2. 유저 쿼리 갱신
             await queryClient.invalidateQueries({ queryKey: ['user'] });
-            // 4. 이동
+            // 3. 이동
             navigate('/');
         } catch (err) {
             alert(err instanceof Error ? err.message : '로그인 실패');
