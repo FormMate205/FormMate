@@ -18,7 +18,7 @@ const summaryData = [
     },
 ];
 
-const StatusSummary = () => {
+const ContractStatusSummary = () => {
     return (
         <div className='flex flex-col gap-2'>
             <span className='text-lg font-medium'>계약 현황</span>
@@ -48,4 +48,4 @@ const StatusSummary = () => {
     );
 };
 
-export default StatusSummary;
+export default ContractStatusSummary;
