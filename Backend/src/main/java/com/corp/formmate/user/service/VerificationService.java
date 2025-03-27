@@ -233,4 +233,8 @@ public class VerificationService {
             throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public String getVerificationKeyPrefix() {
+        return VERIFICATION_CODE_PREFIX;
+    }
 }
