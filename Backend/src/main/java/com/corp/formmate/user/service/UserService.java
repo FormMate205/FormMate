@@ -303,4 +303,32 @@ public class UserService {
             throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Transactional(readOnly = true)
+    public boolean verifyPassword(Integer userId, String password) {
+        try {
+            UserEntity user = selectById(userId);
+            return passwordEncoder.matches(password, user.getPassword());
+        } catch (UserException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("User verify password failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public void updatePassword(Integer userId, String newPassword) {
+        try {
+            UserEntity user = selectById(userId);
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.updatePassword(encodedPassword);
+            updateUser(user);
+        } catch (UserException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("User update password failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
