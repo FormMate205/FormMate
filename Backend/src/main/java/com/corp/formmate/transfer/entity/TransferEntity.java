@@ -18,12 +18,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "transfers")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -57,7 +55,7 @@ public class TransferEntity implements Serializable {
 	@Column(name = "payment_difference", nullable = false)
 	private Long paymentDifference = 0L;
 
-	// status ENUM('연체','납부','중도상환')
+	// status ENUM('OVERDUE','PAID','EARLY_REPAYMENT')
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private TransferStatus status;

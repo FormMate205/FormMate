@@ -11,4 +11,13 @@ public enum TransferStatus {
 	EARLY_REPAYMENT("중도상환");
 
 	private final String korName;
+
+	public static TransferStatus fromKorName(String korName) {
+		for (TransferStatus status : TransferStatus.values()) {
+			if (status.getKorName().equals(korName)) {
+				return status;
+			}
+		}
+		throw new IllegalArgumentException("일치하는 상태값이 없습니다: " + korName);
+	}
 }
