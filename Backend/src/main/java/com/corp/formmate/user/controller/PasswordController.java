@@ -1,7 +1,11 @@
 package com.corp.formmate.user.controller;
 
+import com.corp.formmate.global.annotation.CurrentUser;
+import com.corp.formmate.global.error.dto.ErrorResponse;
+import com.corp.formmate.user.dto.AuthUser;
 import com.corp.formmate.user.dto.PasswordFindRequest;
 import com.corp.formmate.user.dto.PasswordResetRequest;
+import com.corp.formmate.user.dto.PasswordVerifyRequest;
 import com.corp.formmate.user.service.PasswordManagerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -112,9 +116,73 @@ public class PasswordController {
     }
 
     /**
-     * 비밀번호 재설정 (인증번호 확인 및 새 비밀번호 설정)
+     * 비밀번호 인증번호 확인
      */
-    @Operation(summary = "비밀번호 재설정", description = "인증 코드를 확인하고 새로운 비밀번호로 재설정합니다.")
+    @Operation(summary = "인증번호 확인", description = "비밀번호 재설정을 위한 인증번호를 확인합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "인증 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(type = "string"),
+                            examples = @ExampleObject(value = "\"인증이 완료되었습니다.\"")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 400,
+                            "message": "휴대전화 인증에 실패했습니다",
+                            "errors": []
+                        }
+                        """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 404,
+                            "message": "사용자를 찾을 수 없습니다",
+                            "errors": []
+                        }
+                        """
+                            )
+                    )
+            )
+    })
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyPhoneAndPassword(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "비밀번호 인증번호 확인 요청 정보",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = PasswordVerifyRequest.class))
+            )
+            @Valid @RequestBody PasswordVerifyRequest request) {
+        passwordManagerService.verifyPhoneAndPassword(request);
+
+        return ResponseEntity.status(HttpStatus.OK).body("인증이 완료되었습니다.");
+    }
+
+    /**
+     * 새 비밀번호 설정
+     */
+    @Operation(summary = "비밀번호 재설정", description = "인증된 사용자의 비밀번호를 재설정합니다.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -130,18 +198,8 @@ public class PasswordController {
                     description = "잘못된 요청",
                     content = @Content(
                             mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
-                                    @ExampleObject(
-                                            name = "인증 코드 오류",
-                                            value = """
-                            {
-                                "timestamp": "2024-01-23T10:00:00",
-                                "status": 400,
-                                "message": "휴대전화 인증에 실패했습니다",
-                                "errors": []
-                            }
-                            """
-                                    ),
                                     @ExampleObject(
                                             name = "비밀번호 불일치",
                                             value = """
@@ -154,19 +212,13 @@ public class PasswordController {
                             """
                                     ),
                                     @ExampleObject(
-                                            name = "잘못된 비밀번호 형식",
+                                            name = "인증되지 않은 요청",
                                             value = """
                             {
                                 "timestamp": "2024-01-23T10:00:00",
                                 "status": 400,
-                                "message": "잘못된 입력값입니다",
-                                "errors": [
-                                    {
-                                        "field": "newPassword",
-                                        "value": "password",
-                                        "reason": "비밀번호는 숫자, 영문자, 특수문자를 포함해야 합니다"
-                                    }
-                                ]
+                                "message": "휴대전화 인증이 필요합니다",
+                                "errors": []
                             }
                             """
                                     )
@@ -178,6 +230,7 @@ public class PasswordController {
                     description = "사용자를 찾을 수 없음",
                     content = @Content(
                             mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
                                     value = """
                         {
@@ -195,6 +248,7 @@ public class PasswordController {
                     description = "서버 오류",
                     content = @Content(
                             mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
                                     value = """
                         {
@@ -209,20 +263,14 @@ public class PasswordController {
             )
     })
     @PostMapping("/reset")
-    public ResponseEntity<String> resetPassword(
+    public ResponseEntity<?> resetPassword(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "비밀번호 재설정 요청 정보",
                     required = true,
                     content = @Content(schema = @Schema(implementation = PasswordResetRequest.class))
             )
             @Valid @RequestBody PasswordResetRequest request) {
-        passwordManagerService.resetPassword(
-                request.getPhoneNumber(),
-                request.getVerificationCode(),
-                request.getNewPassword(),
-                request.getConfirmPassword()
-        );
-
+        passwordManagerService.resetPassword(request);
         return ResponseEntity.status(HttpStatus.OK).body("비밀번호가 성공적으로 재설정되었습니다.");
     }
 }

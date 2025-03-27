@@ -29,18 +29,26 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 	@Query(value =
 		"SELECT u.* FROM users u " +
 			"JOIN (" +
-			"SELECT " +
-			"CASE WHEN f.creditor_id = :userId THEN f.debtor_id ELSE f.creditor_id END AS partner_id, " +
-			"MAX(f.id) as latest_form_id " +
-			"FROM forms f " +
-			"WHERE f.creditor_id = :userId OR f.debtor_id = :userId " +
-			"GROUP BY partner_id" +
+			"    SELECT " +
+			"    CASE WHEN f.creditor_id = :userId THEN f.debtor_id ELSE f.creditor_id END AS partner_id, " +
+			"    MAX(f.id) as latest_form_id " +
+			"    FROM forms f " +
+			"    WHERE (f.creditor_id = :userId OR f.debtor_id = :userId) " +
+			"    GROUP BY partner_id" +
 			") AS latest ON latest.partner_id = u.id " +
+			"WHERE (:input IS NULL OR u.user_name LIKE CONCAT('%', :input, '%') OR u.phone_number LIKE CONCAT('%', :input, '%')) "
+			+
 			"ORDER BY latest.latest_form_id DESC",
 		countQuery =
-			"SELECT COUNT(DISTINCT CASE WHEN f.creditor_id = :userId THEN f.debtor_id ELSE f.creditor_id END) " +
-				"FROM forms f " +
-				"WHERE f.creditor_id = :userId OR f.debtor_id = :userId",
+			"SELECT COUNT(DISTINCT u.id) FROM users u " +
+				"JOIN (" +
+				"    SELECT " +
+				"    CASE WHEN f.creditor_id = :userId THEN f.debtor_id ELSE f.creditor_id END AS partner_id " +
+				"    FROM forms f " +
+				"    WHERE (f.creditor_id = :userId OR f.debtor_id = :userId) " +
+				") AS partners ON partners.partner_id = u.id " +
+				"WHERE (:input IS NULL OR u.user_name LIKE CONCAT('%', :input, '%') OR u.phone_number LIKE CONCAT('%', :input, '%'))",
 		nativeQuery = true)
-	Page<UserEntity> findDistinctContractedUsersByUserId(@Param("userId") Integer userId, Pageable pageable);
+	Page<UserEntity> findDistinctContractedUsersByUserId(@Param("userId") Integer userId, @Param("input") String input,
+		Pageable pageable);
 }

@@ -23,11 +23,6 @@ public class PasswordResetRequest {
     @Schema(description = "전화번호", example = "01012345678", required = true)
     private String phoneNumber;
 
-    @NotBlank(message = "인증 코드는 필수 입력 항목입니다.")
-    @Pattern(regexp = "^[0-9]{6}$", message = "인증 코드는 6자리 숫자여야 합니다.")
-    @Schema(description = "인증 코드", example = "123456", required = true)
-    private String verificationCode;
-
     @NotBlank(message = "새 비밀번호는 필수 입력 항목입니다.")
     @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=!]).*$",

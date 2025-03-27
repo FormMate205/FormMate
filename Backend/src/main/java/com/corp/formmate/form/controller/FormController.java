@@ -24,7 +24,9 @@ import com.corp.formmate.form.dto.PaymentPreviewRequest;
 import com.corp.formmate.form.dto.PaymentPreviewResponse;
 import com.corp.formmate.form.service.FormService;
 import com.corp.formmate.form.service.PaymentPreviewService;
+import com.corp.formmate.global.annotation.CurrentUser;
 import com.corp.formmate.global.error.dto.ErrorResponse;
+import com.corp.formmate.user.dto.AuthUser;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -128,13 +130,14 @@ public class FormController {
 		@Parameter(description = "이름 검색 (채권자 또는 채무자)", example = "홍길동")
 		@RequestParam(required = false) String name,
 		@Parameter(description = "페이징 정보")
-		Pageable pageable) {
+		Pageable pageable,
+		@CurrentUser AuthUser authuser) {
 
-		Integer currentUserId = 1;
+		Integer userId = authuser.getId();
 		log.info("차용증 목록 조회 - 상태: {}, 이름: {}, 페이지: {}, 크기: {}",
 			status, name, pageable.getPageNumber(), pageable.getPageSize());
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(formService.selectForms(currentUserId, status, name, pageable));
+			.body(formService.selectForms(userId, status, name, pageable));
 	}
 
 	@Operation(summary = "차용증 생성", description = "새로운 차용증을 생성합니다.")
@@ -158,15 +161,16 @@ public class FormController {
 	})
 	@PostMapping("")
 	public ResponseEntity<FormDetailResponse> createForm(@io.swagger.v3.oas.annotations.parameters.RequestBody(
-		description = "차용증 생성 정보",
-		required = true,
-		content = @Content(schema = @Schema(implementation = FormCreateRequest.class))
-	)
-	@Valid @RequestBody FormCreateRequest formCreateRequest) {
-		Integer currentUserId = 1;
+			description = "차용증 생성 정보",
+			required = true,
+			content = @Content(schema = @Schema(implementation = FormCreateRequest.class))
+		)
+		@Valid @RequestBody FormCreateRequest formCreateRequest,
+		@CurrentUser AuthUser authUser) {
+		Integer userId = authUser.getId();
 		log.info("차용증 생성 요청 - 채권자ID: {}, 채무자ID: {}",
 			formCreateRequest.getCreditorId(), formCreateRequest.getDebtorId());
-		return ResponseEntity.status(HttpStatus.CREATED).body(formService.createForm(currentUserId, formCreateRequest));
+		return ResponseEntity.status(HttpStatus.CREATED).body(formService.createForm(userId, formCreateRequest));
 	}
 
 	@Operation(summary = "차용증 수정", description = "기존 차용증 정보를 수정합니다.")
@@ -205,11 +209,12 @@ public class FormController {
 			required = true,
 			content = @Content(schema = @Schema(implementation = FormUpdateRequest.class))
 		)
-		@Valid @RequestBody FormUpdateRequest formUpdateRequest) {
+		@Valid @RequestBody FormUpdateRequest formUpdateRequest,
+		@CurrentUser AuthUser authUser) {
 		log.info("차용증 수정: id={}", formId);
-		Integer currentUserId = 1;
+		Integer userId = authUser.getId();
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(formService.updateForm(currentUserId, formId, formUpdateRequest));
+			.body(formService.updateForm(userId, formId, formUpdateRequest));
 	}
 
 	@Operation(summary = "예상 납부 스케줄 미리보기", description = "대출 정보를 기반으로 예상 납부 스케줄을 계산합니다.")
@@ -306,10 +311,12 @@ public class FormController {
 		)
 	})
 	@GetMapping("/count")
-	public ResponseEntity<FormCountResponse> countUsersForm() {
-		Integer currentUserId = 1;
-		log.info("사용자의 계약 상태별 개수 조회: userId={}", currentUserId);
-		FormCountResponse response = formService.countUsersForm(currentUserId);
+	public ResponseEntity<FormCountResponse> countUsersForm(
+		@CurrentUser AuthUser authUser
+	) {
+		Integer userId = authUser.getId();
+		log.info("사용자의 계약 상태별 개수 조회: userId={}", userId);
+		FormCountResponse response = formService.countUsersForm(userId);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
@@ -362,9 +369,13 @@ public class FormController {
 	@GetMapping("/partner")
 	public ResponseEntity<Page<FormPartnerResponse>> selectFormPartner(
 		@Parameter(description = "페이징 정보")
-		Pageable pageable) {
-		Integer currentUserId = 1;
-		Page<FormPartnerResponse> response = formService.selectFormPartner(currentUserId, pageable);
+		Pageable pageable,
+		@Parameter(description = "이름 혹은 전화번호 검색", example = "홍길동, 01012341234")
+		@RequestParam(required = false) String input,
+		@CurrentUser AuthUser authUser
+	) {
+		Integer userId = authUser.getId();
+		Page<FormPartnerResponse> response = formService.selectFormPartner(userId, input, pageable);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
