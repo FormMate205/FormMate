@@ -4,7 +4,7 @@ import getName from '@/features/chat/model/getName';
 import showName from '@/features/chat/model/showName';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
-import FormSelector from '@/features/formDraft/ui/formSelector';
+import FormSelector from '@/features/formDraft/ui/FormSelector';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 import NotiContainer from '../../entities/formDraft/ui/NotiContainer';
@@ -72,7 +72,7 @@ const FormDraft = () => {
 
             {/* 채팅 내용 */}
             <div
-                className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
+                className='scrollbar-none my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
                 ref={chatContainerRef}
             >
                 {chatHistory.length > 0 &&
