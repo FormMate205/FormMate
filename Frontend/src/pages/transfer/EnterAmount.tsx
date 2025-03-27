@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import AmountInput from '@/features/transfer/ui/AmountInput';
+import NumberPad from '@/shared/ui/NumberPad';
 import { Header } from '@/widgets';
 
 const EnterAmount = () => {
     const navigate = useNavigate();
     const [inputValue, setInputValue] = useState('');
     const handleNumberClick = (num: string) => {
-        if (inputValue.length >= 6) return;
         setInputValue((prev) => prev + num);
     };
     const handleDelete = () => {
         setInputValue((prev) => prev.slice(0, -1));
+    };
+    const handleRecommendClick = () => {
+        setInputValue('20000');
     };
     return (
         <div className='flex flex-col px-4 py-2'>
@@ -23,54 +27,31 @@ const EnterAmount = () => {
                         상환 예정액: 200,000원
                     </span>
                 </div>
-                <div className='flex flex-col gap-4'>
-                    <input
-                        type='text'
-                        placeholder='얼마를 보낼까요?'
-                        className='border-line-300 placeholder:text-line-300 w-full border-b-2 py-3 text-2xl font-semibold outline-none'
-                    />
-                    <div className='flex justify-center'>
-                        <Button variant={'choiceEmpty'}>상환액 20,000원</Button>
+                <AmountInput
+                    inputValue={inputValue}
+                    recommendAmount={200000}
+                    onRecommendClick={handleRecommendClick}
+                />
+            </section>
+            <div className='fixed bottom-0 left-0 flex w-full flex-col gap-6 px-6 pb-6'>
+                <div className='flex justify-between px-3'>
+                    <div className='bg-line-100 rounded-2xl px-4 py-2'>
+                        + 1만
+                    </div>
+                    <div className='bg-line-100 rounded-2xl px-4 py-2'>
+                        + 5만
+                    </div>
+                    <div className='bg-line-100 rounded-2xl px-4 py-2'>
+                        + 10만
+                    </div>
+                    <div className='bg-line-100 rounded-2xl px-4 py-2'>
+                        + 50만
                     </div>
                 </div>
-            </section>
-            <div className='fixed bottom-0 left-0 w-full px-6 pb-6'>
-                {/* 숫자 키패드 */}
-                <div className='mb-10 grid grid-cols-3 gap-8 text-center text-2xl'>
-                    {[
-                        '1',
-                        '2',
-                        '3',
-                        '4',
-                        '5',
-                        '6',
-                        '7',
-                        '8',
-                        '9',
-                        '',
-                        '0',
-                        '←',
-                    ].map((num) =>
-                        num === '←' ? (
-                            <div
-                                key={num}
-                                onClick={handleDelete}
-                                className='cursor-pointer'
-                            >
-                                ←
-                            </div>
-                        ) : (
-                            <div
-                                key={num}
-                                onClick={() => handleNumberClick(num)}
-                                className='cursor-pointer'
-                            >
-                                {num}
-                            </div>
-                        ),
-                    )}
-                </div>
-
+                <NumberPad
+                    onNumberClick={handleNumberClick}
+                    onDelete={handleDelete}
+                />
                 <Button
                     variant='primary'
                     onClick={() => navigate('/transfer/password')}
