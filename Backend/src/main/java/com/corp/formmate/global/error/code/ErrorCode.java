@@ -55,6 +55,9 @@ public enum ErrorCode {
 	BANK_CONNECTION_ERROR(500, "은행 시스템 연결 중 오류가 발생했습니다"),
 	ACCOUNT_ALREADY_REGISTERED(400, "이미 등록된 계좌입니다"),
 	INVALID_BANK_CODE(400, "유효하지 않은 은행 코드입니다"),
+	VERIFY_NOT_FOUND(404, "인증코드 발급 내역이 없습니다."),
+	EXPIRED_VERIFY_TIME(400, "인증 시간이 만료되었습니다."),
+	VERIFY_NOT_MATCHED(400, "인증코드가 일치하지 않습니다."),
 
 	// 폼 관련 (이전 계약 관련)
 	FORM_NOT_FOUND(404, "폼을 찾을 수 없습니다"),
