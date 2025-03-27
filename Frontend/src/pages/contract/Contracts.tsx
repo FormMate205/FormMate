@@ -18,7 +18,7 @@ export interface ContractCardProps {
     totalAmount?: number;
 }
 
-const Contract = () => {
+const Contracts = () => {
     const {
         filter,
         setFilter,
@@ -58,4 +58,4 @@ const Contract = () => {
     );
 };
 
-export default Contract;
+export default Contracts;
