@@ -3,6 +3,7 @@ package com.corp.formmate.form.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,6 +15,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -98,6 +101,14 @@ public class PaymentPreviewRequest {
 	@JsonIgnore
 	public BigDecimal getInterestRateAsBigDecimal() {
 		return toBigDecimal(this.interestRate);
+	}
+
+	public PaymentPreviewRequest(FormEntity form) {
+		this.interestRate = String.valueOf(form.getInterestRate());
+		this.loanAmount = form.getLoanAmount();
+		this.maturityDate = form.getMaturityDate();
+		this.repaymentMethod = String.valueOf(form.getRepaymentMethod());
+		this.repaymentDay = form.getRepaymentDay();
 	}
 
 }
