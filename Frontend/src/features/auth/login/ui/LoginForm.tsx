@@ -1,11 +1,33 @@
+import { useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { userAtom } from '@/entities/user/model/userStore';
+import { login } from '../api/login';
+import { useLoginForm } from '../model/useLoginForm';
+import { LoginFormSchema } from '../types';
 
 const LoginForm = () => {
     const navigate = useNavigate();
+    const setUser = useSetAtom(userAtom);
+    const { register, handleSubmit, errors, isValid } = useLoginForm();
+
+    const onSubmit = async (data: LoginFormSchema) => {
+        try {
+            const res = await login(data);
+            if (res.success) {
+                setUser(res.user);
+                navigate('/');
+            }
+        } catch (err) {
+            alert(err instanceof Error ? err.message : '로그인 실패');
+        }
+    };
 
     return (
-        <div className='mx-auto flex max-w-md flex-col gap-6 p-6'>
+        <form
+            onSubmit={handleSubmit(onSubmit)}
+            className='mx-auto flex max-w-md flex-col gap-6 p-6'
+        >
             <h1 className='mt-20 mb-20 text-center text-3xl font-bold'>
                 서비스명
             </h1>
@@ -14,14 +36,28 @@ const LoginForm = () => {
                 <input
                     type='email'
                     placeholder='아이디(이메일)를 입력하세요.'
+                    {...register('email')}
                     className='border-line-300 focus:ring-primary-500 rounded border px-4 py-3 focus:ring-2 focus:outline-none'
                 />
+                {errors.email && (
+                    <p className='text-sm text-red-500'>
+                        {errors.email.message}
+                    </p>
+                )}
+
                 <input
                     type='password'
                     placeholder='비밀번호를 입력하세요.'
-                    className='focus:ring-primary-500 border-line-300 rounded border px-4 py-3 focus:ring-2 focus:outline-none'
+                    {...register('password')}
+                    className='border-line-300 focus:ring-primary-500 rounded border px-4 py-3 focus:ring-2 focus:outline-none'
                 />
-                <Button variant='primary' onClick={() => navigate('/')}>
+                {errors.password && (
+                    <p className='text-sm text-red-500'>
+                        {errors.password.message}
+                    </p>
+                )}
+
+                <Button type='submit' variant='primary' disabled={!isValid}>
                     로그인
                 </Button>
             </div>
@@ -49,7 +85,7 @@ const LoginForm = () => {
                     className='h-10 w-10 cursor-pointer'
                 />
             </div>
-        </div>
+        </form>
     );
 };
 
