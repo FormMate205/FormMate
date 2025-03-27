@@ -58,6 +58,8 @@ public enum ErrorCode {
 	VERIFY_NOT_FOUND(404, "인증코드 발급 내역이 없습니다."),
 	EXPIRED_VERIFY_TIME(400, "인증 시간이 만료되었습니다."),
 	VERIFY_NOT_MATCHED(400, "인증코드가 일치하지 않습니다."),
+	ACCOUNT_VERIFICATION_FAILED(400, "계좌 인증에 실패했습니다"),
+	VERIFICATION_ATTEMPT_EXCEEDED(429, "인증 시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요"),
 
 	// 폼 관련 (이전 계약 관련)
 	FORM_NOT_FOUND(404, "폼을 찾을 수 없습니다"),
