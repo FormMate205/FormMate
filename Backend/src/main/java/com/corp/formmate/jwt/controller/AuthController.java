@@ -90,7 +90,7 @@ public class AuthController {
                     )
             )
     })
-    @PostMapping("/login")
+    @PostMapping("/email/login")
     public ResponseEntity<?> login(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "로그인 정보",
