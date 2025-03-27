@@ -19,6 +19,7 @@ import {
     FormDraft,
     Contracts,
     Notifications,
+    TransferComplete,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -62,6 +63,10 @@ const App = () => {
                     <Route
                         path='/myinfo/password/findPw'
                         element={<PasswordPhoneVerify />}
+                    />
+                    <Route
+                        path='/transfer/complete'
+                        element={<TransferComplete />}
                     />
                 </Route>
             </Routes>
