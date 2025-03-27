@@ -42,11 +42,14 @@ public class AlertEntity implements Serializable {
 	private String content;
 
 	@Column(name = "is_read", nullable = false)
+	@Builder.Default
 	private Boolean isRead = false;
 
 	@Column(name = "is_deleted", nullable = false)
+	@Builder.Default
 	private Boolean isDeleted = false;
 
 	@Column(name = "created_at", nullable = false)
+	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
 }

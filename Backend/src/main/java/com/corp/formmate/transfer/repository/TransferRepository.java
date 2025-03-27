@@ -30,4 +30,6 @@ public interface TransferRepository extends JpaRepository<TransferEntity, Intege
 		UserEntity receiver,
 		LocalDateTime startDate, LocalDateTime endDate,
 		Pageable pageable);
+
+	Optional<List<TransferEntity>> findByForm(FormEntity form);
 }

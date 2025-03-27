@@ -36,18 +36,22 @@ public class ContractEntity implements Serializable {
 	private FormEntity form;
 
 	@Column(name = "overdue_count", nullable = false)
+	@Builder.Default
 	private Integer overdueCount = 0;
 
 	@Column(name = "overdue_amount", nullable = false)
+	@Builder.Default
 	private Long overdueAmount = 0L;
 
 	@Column(name = "next_repayment_date", nullable = false)
 	private LocalDate nextRepaymentDate;
 
 	@Column(name = "early_repayment_count", nullable = false)
+	@Builder.Default
 	private Integer earlyRepaymentCount = 0;
 
 	@Column(name = "total_early_repayment_fee", nullable = false)
+	@Builder.Default
 	private Long totalEarlyRepaymentFee = 0L;
 
 	@Column(name = "remaining_principal")
@@ -57,14 +61,20 @@ public class ContractEntity implements Serializable {
 	private Long remainingPrincipalMinusOverdue;
 
 	@Column(name = "interest_amount", nullable = false)
+	@Builder.Default
 	private Long interestAmount = 0L;
 
 	@Column(name = "overdue_interest_amount", nullable = false)
+	@Builder.Default
 	private Long overdueInterestAmount = 0L;
 
 	@Column(name = "expected_maturity_payment", nullable = false)
 	private Long expectedMaturityPayment;
 
+	@Column(name = "expected_interest_amount_at_maturity", nullable = false)
+	private Long expectedInterestAmountAtMaturity;
+
 	@Column(name = "current_payment_round", nullable = false)
+	@Builder.Default
 	private Integer currentPaymentRound = 1;
 }
