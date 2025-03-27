@@ -21,6 +21,8 @@ import {
     Notifications,
     TransferComplete,
     SelectRecipient,
+    EnterAmount,
+    EnterPassword,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -70,6 +72,11 @@ const App = () => {
                         path='/transfer/complete'
                         element={<TransferComplete />}
                     />
+                    <Route
+                        path='/transfer/password'
+                        element={<EnterPassword />}
+                    />
+                    <Route path='/transfer/amount' element={<EnterAmount />} />
                 </Route>
             </Routes>
         </BrowserRouter>
