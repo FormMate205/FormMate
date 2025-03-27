@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.TransferException;
@@ -31,6 +32,7 @@ public class TransferService {
 
 	private final UserService userService;
 
+	@Transactional(readOnly = true)
 	public Page<TransferListResponse> selectTransfers(Integer userId, String period, String transferType,
 		Boolean latestFirst, Pageable pageable) {
 
