@@ -4,3 +4,8 @@ export interface ChatMessage {
     writerId: string;
     content: string;
 }
+
+export interface Writer {
+    writerId: string;
+    name: string;
+}

@@ -1,19 +1,13 @@
-import { format } from 'date-fns';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { CalendarButton } from '@/components/ui/calendarButton';
+import { ChangeEvent, useEffect, useRef } from 'react';
 import { BOT_ID } from '@/entities/formDraft/config/constant';
 import getName from '@/features/chat/model/getName';
 import showName from '@/features/chat/model/showName';
+import ChatBox from '@/features/chat/ui/ChatBox';
 import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
-import { DatePicker } from '@/shared/ui/DatePicker';
+import FormSelector from '@/features/formDraft/ui/formSelector';
 import { Header } from '@/widgets';
-import ChatBox from '../../entities/chat/ui/ChatBox';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 import NotiContainer from '../../entities/formDraft/ui/NotiContainer';
-import RepaymentMethodSelector from '../../entities/formDraft/ui/RepaymentMethodSelector';
-import RoleSelector from '../../entities/formDraft/ui/RoleSelector';
-import SpecialTermsSelector from '../../entities/formDraft/ui/SpecialTermSelector';
 
 const FormDraft = () => {
     const userId = '1';
@@ -21,8 +15,8 @@ const FormDraft = () => {
     const receiverName = '윤이영';
 
     const writers = [
-        { id: userId, name: '강지은' },
-        { id: BOT_ID, name: '페이봇' },
+        { writerId: userId, name: '강지은' },
+        { writerId: BOT_ID, name: '페이봇' },
     ];
 
     // 챗봇 로직 분리
@@ -42,9 +36,16 @@ const FormDraft = () => {
         initialReceiverId: receiverId,
     });
 
+    // 마지막 메시지가 챗봇인지 확인
+    const isLastMessageFromBot =
+        chatHistory.length > 0 &&
+        chatHistory[chatHistory.length - 1].writerId === BOT_ID;
+
+    // 챗봇이 질문을 다 한 후 선택 컴포넌트 렌더링
+    const renderSelector = currentQuestion && isLastMessageFromBot;
+
     // 자동 스크롤
     const chatContainerRef = useRef<HTMLDivElement>(null);
-
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop =
@@ -52,18 +53,8 @@ const FormDraft = () => {
         }
     }, [chatHistory]);
 
-    // 상환 날짜 선택 관리
-    const [selectedDate, setSelectedDate] = useState<Date>();
-    const handleDateSelect = (date: Date | undefined) => {
-        setSelectedDate(date);
-    };
-    const handleConfirmDate = (date: Date | undefined) => {
-        if (!date) return;
-        sendMessage(format(date, 'yyyy-MM-dd'));
-    };
-
-    const getNameFunc = getName(writers);
-    const showNameFunc = showName(chatHistory);
+    // 연속채팅 중 첫 채팅만 프로필 표시
+    const displayProfile = showName(chatHistory);
 
     const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setInputValue(e.target.value);
@@ -71,80 +62,6 @@ const FormDraft = () => {
 
     const onClick = () => {
         sendMessage(inputValue);
-    };
-
-    // 입력 유형에 따른 컴포넌트 렌더링
-    const renderInputByType = () => {
-        if (!currentQuestion) return null;
-
-        switch (currentQuestion.type) {
-            case 'role':
-                return (
-                    <div className='my-4 flex w-full justify-start gap-4'>
-                        <RoleSelector
-                            type='creditor'
-                            onClick={() => handleRoleSelect('creditor')}
-                        />
-                        <RoleSelector
-                            type='debtor'
-                            onClick={() => handleRoleSelect('debtor')}
-                        />
-                    </div>
-                );
-
-            case 'boolean':
-                return (
-                    <div className='flex w-full justify-start gap-2 px-2'>
-                        {currentQuestion.options?.map((option) => (
-                            <Button
-                                key={option.label}
-                                variant={`${option.value ? 'choiceFill' : 'choiceEmpty'}`}
-                                children={option.label}
-                                onClick={() => sendMessage(option.label)}
-                            />
-                        ))}
-                    </div>
-                );
-
-            case 'date': {
-                return (
-                    <div className='flex w-full justify-start gap-2 px-1'>
-                        <DatePicker
-                            onSelect={handleDateSelect}
-                            selectedDate={selectedDate}
-                        />
-                        <CalendarButton
-                            variant={`${selectedDate ? 'default' : 'secondary'}`}
-                            onClick={() => handleConfirmDate(selectedDate)}
-                        >
-                            확인
-                        </CalendarButton>
-                    </div>
-                );
-            }
-
-            case 'method':
-                if (currentQuestion.options) {
-                    return (
-                        <RepaymentMethodSelector
-                            options={currentQuestion.options}
-                            onSelect={handleRepaymentMethodSelect}
-                        />
-                    );
-                }
-                return null;
-
-            case 'specialTerms':
-                return (
-                    <SpecialTermsSelector
-                        currentTermIndex={currentTermIndex}
-                        onSelect={handleSpecialTermSelect}
-                    />
-                );
-
-            default:
-                return null;
-        }
     };
 
     return (
@@ -160,17 +77,15 @@ const FormDraft = () => {
             >
                 {chatHistory.length > 0 &&
                     chatHistory.map((chat, index) => {
-                        const isMe = userId === chat.writerId;
-                        const showName = !isMe && showNameFunc(index);
-
                         return (
                             <ChatBox
                                 key={chat.id}
-                                isMe={isMe}
+                                writerId={chat.writerId}
                                 content={chat.content}
-                                userName={
-                                    showName
-                                        ? getNameFunc(chat.writerId)
+                                name={
+                                    chat.writerId !== userId &&
+                                    displayProfile(index)
+                                        ? getName(writers, chat.writerId)
                                         : undefined
                                 }
                             />
@@ -178,7 +93,19 @@ const FormDraft = () => {
                     })}
 
                 {/* 입력 유형에 따른 컴포넌트 렌더링 */}
-                {renderInputByType()}
+                {(currentQuestion?.type === 'specialTerms' ||
+                    renderSelector) && (
+                    <FormSelector
+                        currentQuestion={currentQuestion}
+                        handleRoleSelect={handleRoleSelect}
+                        handleRepaymentMethodSelect={
+                            handleRepaymentMethodSelect
+                        }
+                        handleSpecialTermSelect={handleSpecialTermSelect}
+                        sendMessage={sendMessage}
+                        currentTermIndex={currentTermIndex}
+                    />
+                )}
             </div>
 
             {/* 채팅 입력창 */}
