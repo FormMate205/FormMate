@@ -2,11 +2,15 @@ package com.corp.formmate.user.service;
 
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.UserException;
+import com.corp.formmate.jwt.dto.Token;
+import com.corp.formmate.jwt.properties.JwtProperties;
+import com.corp.formmate.jwt.service.JwtTokenService;
 import com.corp.formmate.user.dto.RegisterRequest;
 import com.corp.formmate.user.entity.Provider;
 import com.corp.formmate.user.entity.Role;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +27,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationService verificationService;
+    private final MessageService messageService;
+    private final JwtProperties jwtProperties;
 
     /**
      * 이메일로 사용자 정보 조회
@@ -73,6 +79,21 @@ public class UserService {
     }
 
     /**
+     * 전화번호 중복 확인
+     * @param phoneNumber 확인할 전화번호
+     * @return 사용 가능 여부 (true: 사용 가능, false: 이미 사용 중)
+     */
+    @Transactional(readOnly = true)
+    public boolean checkPhoneNumberAvailability(String phoneNumber) {
+        try {
+            return !userRepository.existsByPhoneNumber(phoneNumber);
+        } catch (Exception e) {
+            log.error("Phone number check failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * 회원가입 (전화번호 인증 검증 포함)
      */
     @Transactional
@@ -84,8 +105,13 @@ public class UserService {
             }
 
             // 이메일 중복 확인
-            if (selectByEmail(request.getEmail()) != null) {
+            if (checkEmailAvailability(request.getEmail())) {
                 throw new UserException(ErrorCode.EMAIL_DUPLICATE);
+            }
+
+            // 전화번호 중복 확인
+            if (checkPhoneNumberAvailability(normalizedPhone)) {
+                throw new UserException(ErrorCode.PHONE_ALREADY_REGISTERED);
             }
 
             // 회원가입 진행
@@ -107,9 +133,31 @@ public class UserService {
     @Transactional
     public UserEntity register(RegisterRequest request, String normalizedPhone) {
         try {
-            // 이메일 중복 확인
-            if (userRepository.existsByEmail(request.getEmail())) {
+//            // 이메일 중복 확인
+//            if (checkEmailAvailability(request.getEmail())) {
+//                throw new UserException(ErrorCode.EMAIL_DUPLICATE);
+//            }
+//
+//            // 전화번호 중복 확인
+//            if (checkPhoneNumberAvailability(normalizedPhone)) {
+//                throw new UserException(ErrorCode.PHONE_ALREADY_REGISTERED);
+//            }
+
+            // 이메일 중복 확인 (로깅 추가)
+            String email = request.getEmail();
+            boolean emailExists = userRepository.existsByEmail(email);
+            log.debug("Email check: '{}' exists: {}", email, emailExists);
+
+            if (emailExists) {
                 throw new UserException(ErrorCode.EMAIL_DUPLICATE);
+            }
+
+            // 전화번호 중복 확인 (로깅 추가)
+            boolean phoneExists = userRepository.existsByPhoneNumber(normalizedPhone);
+            log.debug("Phone check: '{}' exists: {}", normalizedPhone, phoneExists);
+
+            if (phoneExists) {
+                throw new UserException(ErrorCode.PHONE_ALREADY_REGISTERED);
             }
 
             // 비밀번호 암호화
@@ -139,6 +187,11 @@ public class UserService {
         }
 
     }
+
+    /**
+     * registerWithPhoneVerification: 전화번호 인증 확인 및 사용자 등록
+     * register: 실제 사용자 데이터 저장
+     */
 
     /**
      * OAuth2 사용자 정보로 사용자 조회 또는 생성
@@ -247,6 +300,34 @@ public class UserService {
             return userRepository.save(user);
         } catch (Exception e) {
             log.error("User update failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public boolean verifyPassword(Integer userId, String password) {
+        try {
+            UserEntity user = selectById(userId);
+            return passwordEncoder.matches(password, user.getPassword());
+        } catch (UserException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("User verify password failed: {}", e.getMessage());
+            throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public void updatePassword(Integer userId, String newPassword) {
+        try {
+            UserEntity user = selectById(userId);
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.updatePassword(encodedPassword);
+            updateUser(user);
+        } catch (UserException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("User update password failed: {}", e.getMessage());
             throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }

@@ -156,8 +156,7 @@ public class ProfileController {
         ProfileCompletionResponse response = new ProfileCompletionResponse(
                 updatedUser.getId(),
                 updatedUser.getEmail(),
-                updatedUser.getUserName(),
-                "프로필이 성공적으로 업데이트 되었습니다."
+                updatedUser.getUserName()
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

@@ -44,8 +44,8 @@ public class UserEntity {
     @Column(nullable = false)
     private boolean status = true;
 
-    @Column(name = "bank_code")
-    private Integer bankCode;
+    @Column(name = "bank_name")
+    private String bankName;
 
     @Column(name = "account_number", length = 32)
     private String accountNumber;
@@ -56,7 +56,7 @@ public class UserEntity {
     @Builder
     public UserEntity(String email, Provider provider, String password, String userName,
                 Role role, String phoneNumber, String address, String addressDetail,
-                boolean status, Integer bankCode, String accountNumber, String accountPassword) {
+                boolean status, String bankName, String accountNumber, String accountPassword) {
         this.email = email;
         this.provider = provider != null ? provider : Provider.LOCAL;
         this.password = password;
@@ -66,7 +66,7 @@ public class UserEntity {
         this.address = address;
         this.addressDetail = addressDetail;
         this.status = status;
-        this.bankCode = bankCode;
+        this.bankName = bankName;
         this.accountNumber = accountNumber;
         this.accountPassword = accountPassword;
     }

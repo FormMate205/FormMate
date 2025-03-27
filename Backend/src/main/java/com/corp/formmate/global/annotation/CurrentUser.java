@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 @Target({ElementType.PARAMETER, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : user")
+@AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : #this")
 public @interface CurrentUser {
-    // Spring Security의 @AuthenticaitonPrincaipla을 확장하는 커스텀 어노테이션
+    // Spring Security의 @AuthenticaitonPrincipal을 확장하는 커스텀 어노테이션
 }

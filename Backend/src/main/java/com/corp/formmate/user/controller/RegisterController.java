@@ -6,7 +6,6 @@ import com.corp.formmate.jwt.dto.Token;
 import com.corp.formmate.jwt.properties.JwtProperties;
 import com.corp.formmate.jwt.service.JwtTokenService;
 import com.corp.formmate.user.dto.RegisterRequest;
-import com.corp.formmate.user.dto.RegisterResponse;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.MessageService;
 import com.corp.formmate.user.service.UserService;
@@ -57,7 +56,7 @@ public class RegisterController {
                     )
             )
     })
-    @GetMapping("/check-email")
+    @GetMapping("/check/email")
     public ResponseEntity<Boolean> checkEmailAvailability(
             @Parameter(description = "확인할 이메일", required = true, example = "user@example.com")
             @RequestParam String email) {
@@ -75,7 +74,7 @@ public class RegisterController {
                     description = "회원가입 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = RegisterResponse.class)
+                            schema = @Schema(type = "string")
                     )
             ),
             @ApiResponse(
@@ -127,8 +126,8 @@ public class RegisterController {
                     )
             )
     })
-    @PostMapping("/register")
-    public ResponseEntity<?> register(
+    @PostMapping("/email/register")
+    public ResponseEntity<String> register(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "회원가입 정보",
                     required = true,
@@ -145,27 +144,16 @@ public class RegisterController {
             throw new UserException(ErrorCode.PHONE_VERIFICATION_FAILED);
         }
 
-        // 회원가입 (사용자 저장)
+        // 회원가입
         UserEntity savedUser = userService.register(request, normalizedPhone);
-        log.info("New user registerd: {}", savedUser.getEmail());
 
-        // JWT 토큰 생성
+        // 토큰 생성
         Token token = jwtTokenService.createTokens(savedUser.getId());
-
-        // Refresh Token을 쿠키에 저장
         jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
-
-        // 응답 생성
-        RegisterResponse registerResponse = new RegisterResponse(
-                savedUser.getId(),
-                savedUser.getEmail(),
-                savedUser.getUserName(),
-                token.getAccessToken()
-        );
 
         // 응답 반환 (Access Token 포함)
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Authorization", "Bearer " + token.getAccessToken())
-                .body(registerResponse);
+                .body("회원가입이 완료되었습니다.");
     }
 }

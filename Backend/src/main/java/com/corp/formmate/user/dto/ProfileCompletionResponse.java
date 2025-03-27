@@ -18,7 +18,4 @@ public class ProfileCompletionResponse {
 
     @Schema(description = "사용자 이름", example = "홍길동")
     private String userName;
-
-    @Schema(description = "메시지", example = "프로필이 성공적으로 업데이트 되었습니다.")
-    private String message;
 }
