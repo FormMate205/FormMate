@@ -1,5 +1,4 @@
 export type IconName =
-    | 'chatbot'
     | 'home'
     | 'docs'
     | 'docs-fill'

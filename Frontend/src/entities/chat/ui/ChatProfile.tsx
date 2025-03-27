@@ -1,15 +1,16 @@
-import { Icons } from '@/shared';
-
 interface ChatProfileProps {
-    isBot?: boolean;
+    isBot: boolean;
     name: string;
 }
 
-const ChatProfile = ({ isBot = false, name }: ChatProfileProps) => {
+const ChatProfile = ({ isBot, name }: ChatProfileProps) => {
     return (
-        <div className='flex items-start justify-center gap-3'>
+        <div className='flex items-center gap-3'>
             {isBot ? (
-                <Icons name='chatbot' size={24} />
+                <img
+                    src='/public/assets/images/chatbot-profile.png'
+                    width={28}
+                />
             ) : (
                 <img src='/public/assets/images/avatar.png' width={24} />
             )}

@@ -46,7 +46,7 @@ export const formDraftQuestions: Record<string, Question> = {
         type: 'number',
         condition: [
             '✅ 만 원 이상의 금액을 입력해주세요.',
-            '✅ 숫자만 입력해주세요.',
+            '✅ 숫자로만 입력해주세요.',
         ],
         validation: {
             regex: '^\\d+$',
@@ -169,7 +169,7 @@ export const formDraftQuestions: Record<string, Question> = {
         condition: [
             '✅ 숫자로만 입력해주세요.',
             '✅ 기한이익상실 조항을 추가하지 않는다면 0을 입력해주세요.',
-            '예시: 채무자가 연체 3회를 초과하면, 남은 채무를 즉시 갚아야 합니다.',
+            '✅ 예시: 채무자가 연체 3회를 초과하면, 남은 채무를 즉시 갚아야 합니다.',
         ],
         validation: {
             regex: '^\\d+$',
