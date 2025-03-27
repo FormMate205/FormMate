@@ -290,7 +290,6 @@ export const useFormDraftCreate = ({
 
         // 선택된 특약 업데이트
         if (isSelected) {
-            console.log('선택: ' + termId);
             setSelectedTerms((prev) => [...prev, termId]);
         }
 

@@ -1,8 +1,8 @@
 import { ChangeEvent, useState } from 'react';
 import getName from '@/features/chat/model/getName';
 import showName from '@/features/chat/model/showName';
+import ChatBox from '@/features/chat/ui/ChatBox';
 import { Header } from '@/widgets';
-import ChatBox from '../../entities/chat/ui/ChatBox';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 
 const Chat = () => {
@@ -11,11 +11,11 @@ const Chat = () => {
         formId: '1',
         writer: [
             {
-                id: '1',
+                writerId: '1',
                 name: '강지은',
             },
             {
-                id: '2',
+                writerId: '2',
                 name: '윤이영',
             },
         ],
@@ -40,9 +40,8 @@ const Chat = () => {
 
     const [value, setValue] = useState('');
     const [chatting, setChatting] = useState(dummy);
-
-    const getNameFunc = getName(chatting.writer);
-    const showNameFunc = showName(chatting.history);
+    const writers = chatting.writer;
+    const displayProfile = showName(chatting.history);
 
     const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setValue(e.target.value);
@@ -73,17 +72,15 @@ const Chat = () => {
             <div className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'>
                 {chatting.history.length > 0 &&
                     chatting.history.map((chat, index) => {
-                        const isMe = userId === chat.writerId;
-                        const showName = !isMe && showNameFunc(index);
-
                         return (
                             <ChatBox
                                 key={chat.id}
-                                isMe={isMe}
+                                writerId={chat.writerId}
                                 content={chat.content}
-                                userName={
-                                    showName
-                                        ? getNameFunc(chat.writerId)
+                                name={
+                                    chat.writerId !== userId &&
+                                    displayProfile(index)
+                                        ? getName(writers, chat.writerId)
                                         : undefined
                                 }
                             />

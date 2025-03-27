@@ -1,13 +1,8 @@
-interface Writer {
-    id: string;
-    name: string;
-}
+import { Writer } from '@/entities/chat/model/types';
 
-const getName = (writers: Writer[]) => {
-    return (writerId: string): string => {
-        const writer = writers.find((w) => w.id === writerId);
-        return writer ? writer.name : '';
-    };
+const getName = (writers: Writer[], writerId: string) => {
+    const writer = writers.find((w) => w.writerId === writerId);
+    return writer?.name;
 };
 
 export default getName;
