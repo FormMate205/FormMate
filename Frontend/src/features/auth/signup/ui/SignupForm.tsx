@@ -1,29 +1,52 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Header from '@/widgets/layout/header/Header';
+import { useSignupForm } from '../model/useSignupForm';
+
+declare global {
+    interface Window {
+        daum: {
+            Postcode: new (options: PostcodeOptions) => { open(): void };
+        };
+    }
+
+    interface PostcodeData {
+        roadAddress: string;
+        jibunAddress: string;
+        zonecode: string;
+        addressType: string;
+        buildingName: string;
+        apartment: string;
+        bname: string;
+    }
+
+    interface PostcodeOptions {
+        oncomplete: (data: PostcodeData) => void;
+        onclose?: () => void;
+    }
+}
 
 const SignupForm = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [passwordConfirm, setPasswordConfirm] = useState('');
-    const [address, setAddress] = useState('');
-    const [detailAddress, setDetailAddress] = useState('');
-    const [phone, setPhone] = useState('');
-    const [certCode, setCertCode] = useState('');
+    const { form, handleChange, isFormValid } = useSignupForm();
 
-    const navigate = useNavigate();
-
-    const isFormValid =
-        name &&
-        email &&
-        password &&
-        passwordConfirm &&
-        address &&
-        detailAddress &&
-        phone &&
-        certCode;
+    // 다음 주소 검색
+    const handleOpenPostcode = () => {
+        if (window.daum?.Postcode) {
+            new window.daum.Postcode({
+                oncomplete: (data: PostcodeData) => {
+                    handleChange('address', data.roadAddress);
+                    setTimeout(() => {
+                        document.getElementById('detailAddress')?.focus();
+                    }, 0);
+                },
+            }).open();
+        } else {
+            const script = document.createElement('script');
+            script.src =
+                '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+            script.onload = () => handleOpenPostcode();
+            document.body.appendChild(script);
+        }
+    };
 
     return (
         <div className='flex h-screen flex-col overflow-hidden'>
@@ -39,8 +62,10 @@ const SignupForm = () => {
                         <input
                             type='text'
                             placeholder='성명을 입력하세요.'
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            value={form.name}
+                            onChange={(e) =>
+                                handleChange('name', e.target.value)
+                            }
                             className='border-line-300 rounded border px-4 py-2 text-sm'
                         />
                     </div>
@@ -52,8 +77,10 @@ const SignupForm = () => {
                             <input
                                 type='email'
                                 placeholder='이메일을 입력하세요.'
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                value={form.email}
+                                onChange={(e) =>
+                                    handleChange('email', e.target.value)
+                                }
                                 className='border-line-300 min-w-0 flex-1 rounded border px-4 py-2 text-sm'
                             />
                             <Button>중복 확인</Button>
@@ -71,15 +98,19 @@ const SignupForm = () => {
                         <input
                             type='password'
                             placeholder='비밀번호를 입력하세요.'
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={form.password}
+                            onChange={(e) =>
+                                handleChange('password', e.target.value)
+                            }
                             className='border-line-300 rounded border px-4 py-2 text-sm'
                         />
                         <input
                             type='password'
                             placeholder='비밀번호를 한 번 더 입력하세요.'
-                            value={passwordConfirm}
-                            onChange={(e) => setPasswordConfirm(e.target.value)}
+                            value={form.passwordConfirm}
+                            onChange={(e) =>
+                                handleChange('passwordConfirm', e.target.value)
+                            }
                             className='border-line-300 mt-2 rounded border px-4 py-2 text-sm'
                         />
                     </div>
@@ -91,18 +122,25 @@ const SignupForm = () => {
                             <input
                                 type='text'
                                 placeholder='도로명 주소를 입력하세요.'
-                                value={address}
-                                onChange={(e) => setAddress(e.target.value)}
+                                value={form.address}
+                                onChange={(e) =>
+                                    handleChange('address', e.target.value)
+                                }
                                 className='border-line-300 min-w-0 flex-1 rounded border px-4 py-2 text-sm'
                             />
-                            <Button>도로명 검색</Button>
+
+                            <Button onClick={handleOpenPostcode}>
+                                도로명 검색
+                            </Button>
                         </div>
 
                         <input
                             type='text'
                             placeholder='상세 주소를 입력하세요.'
-                            value={detailAddress}
-                            onChange={(e) => setDetailAddress(e.target.value)}
+                            value={form.detailAddress}
+                            onChange={(e) =>
+                                handleChange('detailAddress', e.target.value)
+                            }
                             className='border-line-300 mt-2 rounded border px-4 py-2 text-sm'
                         />
                     </div>
@@ -114,8 +152,10 @@ const SignupForm = () => {
                             <input
                                 type='tel'
                                 placeholder='전화번호를 입력하세요.'
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                value={form.phone}
+                                onChange={(e) =>
+                                    handleChange('phone', e.target.value)
+                                }
                                 className='border-line-300 min-w-0 flex-1 rounded border px-4 py-2 text-sm'
                             />
                             <Button>인증</Button>
@@ -125,8 +165,10 @@ const SignupForm = () => {
                             <input
                                 type='text'
                                 placeholder='인증 번호를 입력하세요.'
-                                value={certCode}
-                                onChange={(e) => setCertCode(e.target.value)}
+                                value={form.certCode}
+                                onChange={(e) =>
+                                    handleChange('certCode', e.target.value)
+                                }
                                 className='border-line-300 min-w-0 flex-1 rounded border px-4 py-2 text-sm'
                             />
                             <Button>확인</Button>
@@ -143,7 +185,8 @@ const SignupForm = () => {
                 <Button
                     variant={isFormValid ? 'primary' : 'primaryDisabled'}
                     className='w-full'
-                    onClick={() => navigate('/login')}
+                    disabled={!isFormValid}
+                    // onClick={() => navigate('/login')}
                 >
                     회원가입
                 </Button>
