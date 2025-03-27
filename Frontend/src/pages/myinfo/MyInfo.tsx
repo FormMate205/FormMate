@@ -19,27 +19,29 @@ const MyInfo = () => {
 
     return (
         <div className='flex h-screen flex-col overflow-hidden'>
-            <div className='bg-line-50 scrollbar-none flex h-full flex-col gap-6 overflow-y-auto p-6'>
+            <div className='bg-line-50 scrollbar-none w-full flex-1 overflow-y-auto px-4 py-2'>
+                {' '}
                 <Header title='내 정보' />
-
-                <MyAccount
-                    hasAccount={userData.hasAccount}
-                    userName={userData.userName}
-                    accountNumber={userData.accountNumber}
-                />
-
-                <div className='mt-4'>
-                    <UserInfo
-                        isOAuth={userData.isOAuth}
+                <div className='scrollbar-none flex h-full flex-col gap-6 overflow-y-auto'>
+                    <MyAccount
+                        hasAccount={userData.hasAccount}
                         userName={userData.userName}
-                        phoneNumber={userData.phoneNumber}
-                        email={userData.email}
+                        accountNumber={userData.accountNumber}
                     />
-                    <AddressInfo
-                        zipCode={userData.zipCode}
-                        address={userData.address}
-                        detailAddress={userData.detailAddress}
-                    />
+
+                    <div className='mt-4'>
+                        <UserInfo
+                            isOAuth={userData.isOAuth}
+                            userName={userData.userName}
+                            phoneNumber={userData.phoneNumber}
+                            email={userData.email}
+                        />
+                        <AddressInfo
+                            zipCode={userData.zipCode}
+                            address={userData.address}
+                            detailAddress={userData.detailAddress}
+                        />
+                    </div>
                 </div>
             </div>
             <Footer />

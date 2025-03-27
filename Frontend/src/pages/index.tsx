@@ -1,6 +1,9 @@
+export { default as FormMatch } from './formPartner/FormMatch';
+export { default as FormCheck } from './formPartner/FormCheck';
+export { default as FormDraft } from './formDraft/FormDraft';
 // Contract
+export { default as Contract } from './contract/Contract';
 export { default as ContractDetail } from './contract/ContractDetail';
-export { default as ContractList } from './contract/ContractList';
 export { default as Chat } from './chat/Chat';
 export { default as Home } from './home/Home';
 export { default as Login } from './login/Login';
@@ -12,3 +15,5 @@ export { default as AccountRegist } from './account/AccountRegist';
 export { default as AccountVerify } from './account/AccountVerify';
 export { default as AccountPassword } from './account/AccountPassword';
 export { default as MyInfo } from './myinfo/MyInfo';
+export { default as UserPasswordUpdate } from './myinfo/UserPasswordUpdate';
+export { default as PasswordPhoneVerify } from './myinfo/PasswordPhoneVerify';

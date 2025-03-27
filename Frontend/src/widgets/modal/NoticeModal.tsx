@@ -27,7 +27,7 @@ const NoticeModal = ({
                 <AlertDialogHeader className='flex flex-col items-center'>
                     <Icons
                         name='exclamation'
-                        className='text-primary-500 h-6 w-6'
+                        className='fill-primary-500 h-6 w-6'
                     />
                     <AlertDialogTitle className='text-center'>
                         {title}
