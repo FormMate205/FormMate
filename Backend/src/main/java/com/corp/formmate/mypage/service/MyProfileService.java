@@ -116,6 +116,7 @@ public class MyProfileService {
     /**
      * 비밀번호 수정
      */
+    @Transactional
     public void updateMyPassword(Integer userId, PasswordUpdateRequest request) {
         try {
             // 현재 비밀번호 확인
