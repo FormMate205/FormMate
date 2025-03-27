@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import ArrowListItem from '@/shared/ui/ArrowListItem';
 import { Header } from '@/widgets';
-import SearchListItem from './ui/SearchListItem';
+import SearchListItem from '../../entities/formPartner/ui/SearchListItem';
 
 const FormMatch = () => {
     const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import { ChatMessage } from '@/entities/types/chat';
+import { ChatMessage } from '@/entities/chat/model/types';
 
 const showName = (chatHistory: ChatMessage[]) => {
     return (index: number): boolean => {

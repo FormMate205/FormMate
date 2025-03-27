@@ -1,5 +1,5 @@
 // 계약서
-export interface Form {
+export interface Contract {
     formId: string; // 계약서 id
     status: string; // 계약 현황
     creatorId: string; // 게약 생성자
@@ -35,19 +35,3 @@ export interface SpecialTerm {
     specialTermIndex: string;
     specialTermDetail: string;
 }
-
-// 계약 초안 request
-export type FormDraftRequest = Pick<
-    Form,
-    | 'receiverId'
-    | 'creditorId'
-    | 'debtorId'
-    | 'maturityDate'
-    | 'loanAmount'
-    | 'repaymentMethod'
-    | 'repaymentDay'
-    | 'interestRate'
-    | 'earlyRepaymentFeeRate'
-    | 'overdueInterestRate'
-    | 'overdueLimit'
-> & { specialTermIndexes: string[] };

@@ -1,5 +1,5 @@
-import { FormDraftRequest } from '@/entities/types/form';
-import { BotQuestion } from '../type';
+import { FormDraftRequest } from '@/entities/formDraft/model/types';
+import { Question } from '@/features/formDraft/model/types';
 
 // 범위 검증
 export const validateRange = (
@@ -16,7 +16,7 @@ export const validateRange = (
 // 사용자 응답 유효성 검사 함수
 export const validateUserAnswer = (
     formDraft: FormDraftRequest,
-    question: BotQuestion | null,
+    question: Question | null,
     answer: string,
 ): { isValid: boolean; errorMessage?: string } => {
     if (question == null)
