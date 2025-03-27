@@ -142,8 +142,12 @@ public class FormService {
 
 	// 최근 계약 상대 조회
 	@Transactional(readOnly = true)
-	public Page<FormPartnerResponse> selectFormPartner(Integer userId, Pageable pageable) {
-		Page<UserEntity> userEntities = formRepository.findDistinctContractedUsersByUserId(userId, pageable);
+	public Page<FormPartnerResponse> selectFormPartner(Integer userId, String input, Pageable pageable) {
+
+		String searchInput = (input != null && !input.trim().isEmpty()) ? input.trim() : null;
+
+		Page<UserEntity> userEntities = formRepository.findDistinctContractedUsersByUserId(userId, searchInput,
+			pageable);
 		return userEntities.map(user -> new FormPartnerResponse(
 			user.getId(),
 			user.getUserName(),
