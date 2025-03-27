@@ -12,7 +12,7 @@ const Footer = () => {
 
     // 계약관리로 이동
     const onNavigateContract = () => {
-        navigate('/contract');
+        navigate('/contracts');
     };
 
     // 채팅으로 이동

@@ -28,7 +28,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
 
     // 알림 페이지 이동
     const onNavigateNotify = () => {
-        navigate('/notify');
+        navigate('/notifications');
         return;
     };
 
@@ -55,7 +55,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
                     onClick={onNavigateNotify}
                     className='flex items-center justify-center'
                 >
-                    <Icons name='bell' size={18} className='fill-white' />
+                    <Icons name='bell' size={18} className='fill-line-900' />
                 </button>
             )}
         </div>
