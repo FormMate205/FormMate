@@ -1,16 +1,16 @@
 // 페이지네이션
 export interface Pagenation {
     totalElements: string;
-    totalpages: string;
+    totalPages: string;
     pageable: {
         page: string;
         size: string;
-        sort: Sort;
+        sort?: {
+            sorted: boolean;
+            direction: string;
+        };
     };
 }
 
-// 정렬 방식
-export interface Sort {
-    sorted: boolean;
-    direction?: string;
-}
+// 페이지네이션 request
+export type PagenationRequest = Pick<Pagenation, 'pageable'>;
