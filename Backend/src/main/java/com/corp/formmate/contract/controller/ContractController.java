@@ -58,7 +58,7 @@ public class ContractController {
 		return ResponseEntity.ok(contractService.selectContractDetail(formId));
 	}
 
-	@Operation(summary = "납부 예정 금액 조회", description = "이번 달 남은 상환 금액(연체액 포함 금액) / 중도상환수수료")
+	@Operation(summary = "납부 예정 금액 조회(송금 화면)", description = "이번 달 남은 상환 금액(연체액 포함 금액) / 중도상환수수료")
 	@ApiResponses({
 		@ApiResponse(
 			responseCode = "200",

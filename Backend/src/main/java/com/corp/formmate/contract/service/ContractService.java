@@ -65,6 +65,7 @@ public class ContractService {
 			}
 		}
 		contractDetail.setTotalEarlyRepaymentCharge(totalEarlyRepaymentCharge);
+		contractDetail.setOverdueLimit(form.getOverdueLimit());
 
 		return contractDetail;
 	}
@@ -153,6 +154,7 @@ public class ContractService {
 			.paidPrincipalAmount(paidPrincipalAmount)
 			.paidInterestAmount(contract.getInterestAmount())
 			.paidOverdueInterestAmount(contract.getOverdueInterestAmount())
+			.totalEarlyRepaymentFee(contract.getTotalEarlyRepaymentFee())
 			.unpaidAmount(unpaidAmount)
 			.expectedPaymentAmountAtMaturity(expectedMaturityPayment)
 			.expectedPrincipalAmountAtMaturity(expectedPrincipalAmountAtMaturity)

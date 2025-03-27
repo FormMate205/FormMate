@@ -2,6 +2,7 @@ package com.corp.formmate.contract.dto;
 
 import java.math.BigDecimal;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ExpectedPaymentAmountResponse {
+
+	@Schema(
+		description = "이번 달(회차) 남은 상환 금액",
+		example = "200000",
+		required = true
+	)
 	private Long monthlyRemainingPayment;
+
+	@Schema(
+		description = "중도상환 수수료",
+		example = "0.5",
+		required = true
+	)
 	private BigDecimal earlyRepaymentFeeRate;
 }
