@@ -1,6 +1,7 @@
 package com.corp.formmate.contract.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.corp.formmate.contract.dto.ContractDetailResponse;
+import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
 import com.corp.formmate.contract.entity.ContractEntity;
@@ -67,9 +69,7 @@ public class ContractService {
 	public ExpectedPaymentAmountResponse selectExpectedPaymentAmount(Integer formId) {
 		/**
 		 * 1. 계약서 기반으로 해당 회차에 납부할 금액 추출
-		 * 2. 해당 회차 납부 금액 + 연체액
-		 * 2.1. 중도상환 금액이 있을 경우 2에서 차감 + 중도상환수수료 추가
-		 * 3. 중도상환 수수료 더해서 추출
+		 * 2. 중도상환 수수료율 더해서 추출
 		 */
 		// 계약서와 계약관리 정보 생성
 		ExpectedPaymentAmountResponse expectedPaymentAmountResponse = null;
@@ -78,23 +78,12 @@ public class ContractService {
 		ContractEntity contract = contractRepository.findByForm(form)
 			.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
 
-		if (contract.getTotalEarlyRepaymentFee() > 0) {
-			// 중도상환액이 있으면
-			// 계약일을 오늘, 대출 금액을 계약관리 Entity의 잔여원금(원금 + 연체액 + 중도상환수수료)으로 바꿔서 예상 납부 금액 메소드 호출
-			form.setContractDate(LocalDateTime.now());
-			form.setLoanAmount(contract.getRemainingPrincipal());
-		}
-		// 없으면 원래 계약의 (균등)상환액에서 연체액만 더함
-		PaymentPreviewRequest paymentPreview = new PaymentPreviewRequest(form);
+		Page<PaymentScheduleResponse> paymentSchedulePage = getPaymentScheduleResponses(
+			contract, form);
 
-		PaymentPreviewResponse paymentPreviewResponse = paymentPreviewService.calculatePaymentPreview(paymentPreview,
-			PageRequest.of(0, 10000));
-
-		Page<PaymentScheduleResponse> paymentSchedulePage = paymentPreviewResponse.getSchedulePage();
-
-		// 중도상환액이 있을 경우 잔여원금에 연체액과 중도상환수수료도 이미 계산되어 있는 상태에서 납부 예정 금액을 다시 산정하기 때문에 전처리
+		// 중도상환액이 있을 경우 예상 납부 금액을 다시 산정하기 때문에 첫째 달로 선정
 		Integer currentPaymentRound = contract.getTotalEarlyRepaymentFee() > 0 ? 1 : contract.getCurrentPaymentRound();
-		Long overdueAmount = contract.getTotalEarlyRepaymentFee() > 0 ? 0 : contract.getOverdueAmount();
+		Long overdueAmount = contract.getOverdueAmount();
 
 		for (PaymentScheduleResponse p : paymentSchedulePage) {
 			if (p.getInstallmentNumber().equals(currentPaymentRound)) {
@@ -166,13 +155,75 @@ public class ContractService {
 			.build();
 	}
 
+	public List<ContractWithPartnerResponse> selectContractWithPartner(Integer userId, Integer partnerId) {
+		List<ContractWithPartnerResponse> list = new ArrayList<>();
+
+		Page<FormEntity> userIsCreditorSideForms = formRepository.findUserIsCreditorSideForms(userId, partnerId,
+			PageRequest.of(0, 10000));
+		Page<FormEntity> userIsDebtorSideForms = formRepository.findUserIsDebtorSideForms(userId, partnerId,
+			PageRequest.of(0, 10000));
+
+		LocalDateTime now = LocalDateTime.now();
+
+		for (FormEntity f : userIsCreditorSideForms) {
+			if (f.getMaturityDate().isAfter(now)) {
+				ExpectedPaymentAmountResponse expectedPaymentAmountResponse = selectExpectedPaymentAmount(f.getId());
+				ContractEntity contract = contractRepository.findByForm(f)
+					.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
+				String contractDuration = f.getContractDate().toLocalDate().toString() + " ~ " + f.getMaturityDate().toLocalDate().toString();
+
+				list.add(ContractWithPartnerResponse.builder()
+						.userIsCreditor(true)
+						.nextRepaymentAmount(expectedPaymentAmountResponse.getMonthlyRemainingPayment())
+						.nextRepaymentDate(contract.getNextRepaymentDate())
+						.contractDuration(contractDuration)
+						.build());
+			}
+		}
+
+		for (FormEntity f : userIsDebtorSideForms) {
+			if (f.getMaturityDate().isAfter(now)) {
+				ExpectedPaymentAmountResponse expectedPaymentAmountResponse = selectExpectedPaymentAmount(f.getId());
+				ContractEntity contract = contractRepository.findByForm(f)
+					.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
+				String contractDuration = f.getContractDate().toLocalDate().toString() + " ~ " + f.getMaturityDate().toLocalDate().toString();
+
+				list.add(ContractWithPartnerResponse.builder()
+					.userIsCreditor(false)
+					.nextRepaymentAmount(expectedPaymentAmountResponse.getMonthlyRemainingPayment())
+					.nextRepaymentDate(contract.getNextRepaymentDate())
+					.contractDuration(contractDuration)
+					.build());
+			}
+		}
+
+		return list;
+	}
+
+	private Page<PaymentScheduleResponse> getPaymentScheduleResponses(ContractEntity contract, FormEntity form) {
+		if (contract.getTotalEarlyRepaymentFee() > 0) {
+			// 중도상환액이 있으면
+			// 계약일을 오늘, 대출 금액을 계약관리 Entity의 잔여원금(원금 + 연체액)으로 바꿔서 예상 납부 금액 메소드 호출
+			form.setContractDate(LocalDateTime.now());
+			form.setLoanAmount(contract.getRemainingPrincipal());
+		}
+		// 없으면 원래 계약의 (균등)상환액에서 연체액만 더함
+		PaymentPreviewRequest paymentPreview = new PaymentPreviewRequest(form);
+
+		PaymentPreviewResponse paymentPreviewResponse = paymentPreviewService.calculatePaymentPreview(paymentPreview,
+			PageRequest.of(0, 10000));
+
+		Page<PaymentScheduleResponse> paymentSchedulePage = paymentPreviewResponse.getSchedulePage();
+		return paymentSchedulePage;
+	}
+
 	// TODO: 송금 API에서 사용할 계약관리 테이블 업데이트 메소드(중도상환액, 연체액, 잔여원금, 중도상환수수료 등) 만들기 -> 동욱이형 API 짤 때 합의
 	// TODO: 공통) 잔여원금, 이자 금액, 연체 이자 금액 업데이트
 	// TODO: - 연체 금액 있을 경우: 잔여원금-연체금액(연체금액 있을 경우), 연체 금액도 업데이트
 	// TODO: 중도상환) 잔여원금(중도상환수수료 추가), 중도상환 횟수/금액, 만기일 예상 납부 금액/이자 업데이트
 
 	// TODO: 납부일 다음 날 스케줄러 업데이트 메소드 제작
-	// TODO: 공통) 현재 회차 업데이트
+	// TODO: 공통) 현재 회차, 다음 상환 날짜 업데이트
 	// TODO: 연체 시) 연체 횟수/금액, 이자 금액, 연체 이자 금액 업데이트
 	// TODO: 연체 금액 필드는 현재 연체액을 나타내므로 (연체액 + 연체 이자)를 더하기
 }
