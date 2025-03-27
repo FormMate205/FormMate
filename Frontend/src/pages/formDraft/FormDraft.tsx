@@ -72,7 +72,7 @@ const FormDraft = () => {
 
             {/* 채팅 내용 */}
             <div
-                className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
+                className='scrollbar-none my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
                 ref={chatContainerRef}
             >
                 {chatHistory.length > 0 &&
