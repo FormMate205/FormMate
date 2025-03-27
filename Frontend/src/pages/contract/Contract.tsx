@@ -5,7 +5,7 @@ import ContractChart from '@/features/contract/ui/charts/ContractChart';
 import ContractList from '@/features/contract/ui/ContractList';
 import ContractSelect from '@/features/contract/ui/ContractSelect';
 import { Footer, Header } from '@/widgets';
-import StatusSummary from '../../features/contract/ui/StatusSummary';
+import ContractStatusSummary from '../../entities/contract/ui/ContractStatusSummary';
 
 export interface ContractCardProps {
     name: string;
@@ -30,7 +30,7 @@ const Contract = () => {
                 <Header title='계약 관리' />
                 <div className='flex flex-col gap-4'>
                     {/* 계약 현황 */}
-                    <StatusSummary />
+                    <ContractStatusSummary />
                     {/* 체결된 계약 */}
                     <ContractChart />
                     {/* 계약 내역 */}

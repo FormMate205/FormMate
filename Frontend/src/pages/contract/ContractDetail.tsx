@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
+import DetailSummaryItem from '@/entities/contract/ui/DetailSummaryItem';
 import ContractTabs from '@/features/contract/ui/tabs/ContractTabs';
 import { Header } from '@/widgets';
 import ProgressBar from '../../entities/contract/ui/ProgressBar';
 import EarlyTerminateAlert from '../../features/contract/ui/EarlyTerminateAlert';
-import SummaryItem from '../../features/contract/ui/SummaryItem';
 
 const summaryData = [
     {
@@ -46,7 +46,7 @@ const ContractDetail = () => {
                             <div className='flex flex-col gap-2'>
                                 <div className='flex flex-col gap-2'>
                                     {summaryData.map((item, idx) => (
-                                        <SummaryItem
+                                        <DetailSummaryItem
                                             key={idx}
                                             tagText={item.tag}
                                             color={item.color}

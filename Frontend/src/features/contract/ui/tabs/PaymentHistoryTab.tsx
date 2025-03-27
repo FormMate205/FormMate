@@ -62,7 +62,7 @@ const PaymentHistoryTab = () => {
             : paymentList.filter((item) => item.tagText === selectedTag);
 
     return (
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-2'>
             <Select
                 onValueChange={(value) => {
                     if (value === 'default') setSelectedTag('전체');
@@ -84,7 +84,8 @@ const PaymentHistoryTab = () => {
                     <SelectItem value='end'>중도</SelectItem>
                 </SelectContent>
             </Select>
-
+            <hr className='border-line-200' />
+            {/* Payment List */}
             {filteredList.map((item, idx) => (
                 <PaymentItem key={idx} {...item} />
             ))}
