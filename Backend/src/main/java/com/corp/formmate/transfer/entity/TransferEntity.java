@@ -55,6 +55,7 @@ public class TransferEntity implements Serializable {
 	private Integer currentRound;
 
 	@Column(name = "payment_difference", nullable = false)
+	@Builder.Default
 	private Long paymentDifference = 0L;
 
 	// status ENUM('연체','납부','중도상환')
