@@ -28,7 +28,7 @@ const summaryData = [
 
 const ContractDetail = () => {
     return (
-        <>
+        <div className='flex h-screen flex-col'>
             <div className='bg-line-50 flex flex-col px-4 py-2'>
                 <Header title='계약 상세' />
                 <div className='flex h-full flex-col gap-2'>
@@ -79,7 +79,7 @@ const ContractDetail = () => {
             </div>
             {/* ContractDetailTabs */}
             <ContractDetailTabs />
-        </>
+        </div>
     );
 };
 
