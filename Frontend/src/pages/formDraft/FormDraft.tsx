@@ -4,7 +4,7 @@ import getName from '@/features/chat/model/getName';
 import showName from '@/features/chat/model/showName';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
-import FormSelector from '@/features/formDraft/ui/formSelector';
+import FormSelector from '@/features/formDraft/ui/FormSelector';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 import NotiContainer from '../../entities/formDraft/ui/NotiContainer';
