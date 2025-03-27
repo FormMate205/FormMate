@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Option } from '@/features/chatBot/type';
+import { Option } from '@/features/formDraft/model/types';
 
 interface RepaymentMethodSelectorProps {
     options: Option[];

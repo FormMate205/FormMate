@@ -1,4 +1,4 @@
-import { BotQuestion } from '../type';
+import { Question } from '@/features/formDraft/model/types';
 
 // 특약 조항
 export const specialTermsInfo = [
@@ -29,7 +29,7 @@ export const specialTermsInfo = [
 ];
 
 // 질문 리스트
-export const chatBotQuestions: Record<string, BotQuestion> = {
+export const formDraftQuestions: Record<string, Question> = {
     role: {
         id: 'role',
         question: '당신은 채권자인가요, 채무자인가요?',

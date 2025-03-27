@@ -2,19 +2,20 @@ import { format } from 'date-fns';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CalendarButton } from '@/components/ui/calendarButton';
-import { getName, showName } from '@/features';
-import { useChatBot } from '@/features/chatBot/useChatBot';
-import { BOT_ID } from '@/shared/constant';
+import { BOT_ID } from '@/entities/formDraft/config/constant';
+import getName from '@/features/chat/model/getName';
+import showName from '@/features/chat/model/showName';
+import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
 import { DatePicker } from '@/shared/ui/DatePicker';
 import { Header } from '@/widgets';
-import ChatBox from './ui/ChatBox';
-import ChatInput from './ui/ChatInput';
-import NotiContainer from './ui/NotiContainer';
-import RepaymentMethodSelector from './ui/RepaymentMethodSelector';
-import RoleSelector from './ui/RoleSelector';
-import SpecialTermsSelector from './ui/SpecialTermSelector';
+import ChatBox from '../../entities/chat/ui/ChatBox';
+import ChatInput from '../../entities/chat/ui/ChatInput';
+import NotiContainer from '../../entities/formDraft/ui/NotiContainer';
+import RepaymentMethodSelector from '../../entities/formDraft/ui/RepaymentMethodSelector';
+import RoleSelector from '../../entities/formDraft/ui/RoleSelector';
+import SpecialTermsSelector from '../../entities/formDraft/ui/SpecialTermSelector';
 
-const FormCreate = () => {
+const FormDraft = () => {
     const userId = '1';
     const receiverId = '2';
     const receiverName = '윤이영';
@@ -36,7 +37,7 @@ const FormCreate = () => {
         handleRepaymentMethodSelect,
         handleSpecialTermSelect,
         currentTermIndex,
-    } = useChatBot({
+    } = useFormDraftCreate({
         userId,
         initialReceiverId: receiverId,
     });
@@ -191,4 +192,4 @@ const FormCreate = () => {
     );
 };
 
-export default FormCreate;
+export default FormDraft;

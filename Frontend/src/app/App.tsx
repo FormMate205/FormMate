@@ -15,8 +15,8 @@ import {
     AccountPassword,
     MyInfo,
     FormCheck,
-    FormCreate,
 } from '@/pages';
+import FormDraft from '@/pages/formDraft/FormDraft';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
 
@@ -42,7 +42,7 @@ const App = () => {
                         path='/login/findPw/reset'
                         element={<PasswordReset />}
                     />
-                    <Route path='/form/create' element={<FormCreate />} />
+                    <Route path='/draft' element={<FormDraft />} />
                     <Route path='/chat' element={<Chat />} />
                     <Route path='/account' element={<AccountRegist />} />
                     <Route path='/account/verify' element={<AccountVerify />} />

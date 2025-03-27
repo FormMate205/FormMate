@@ -1,10 +1,7 @@
-export { default as FormCheck } from './form/FormCheck';
-export { default as FormMatch } from './form/FormMatch';
 // Contract
 export { default as ContractDetail } from './contract/ContractDetail';
 export { default as ContractList } from './contract/ContractList';
 export { default as Chat } from './chat/Chat';
-export { default as FormCreate } from './chat/FormCreate';
 export { default as Home } from './home/Home';
 export { default as Login } from './login/Login';
 export { default as Landing } from './login/Landing';

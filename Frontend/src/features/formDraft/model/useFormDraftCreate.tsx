@@ -1,30 +1,30 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChatMessage } from '@/entities/types/chat';
-import { FormDraftRequest } from '@/entities/types/form';
-import { BotQuestion } from '@/features/chatBot/type';
+import { ChatMessage } from '@/entities/chat/model/types';
+import { BOT_ID } from '@/entities/formDraft/config/constant';
 import {
-    chatBotQuestions,
+    formDraftQuestions,
     specialTermsInfo,
-} from '@/features/chatBot/utils/chatBotQuestions';
-import { BOT_ID } from '@/shared/constant';
-import { formatDate } from '@/shared/utils/formatDate';
-import { validateUserAnswer } from './utils/chatValid';
+} from '@/entities/formDraft/config/formDraftQuestions';
+import { FormDraftRequest } from '@/entities/formDraft/model/types';
+import { formatDate } from '@/shared/model/formatDate';
+import { validateUserAnswer } from './answerValid';
+import { Question } from './types';
 
-interface UseChatBotParams {
+interface UseFormDraftCreateProps {
     userId: string;
     initialReceiverId?: string;
 }
 
-export const useChatBot = ({
+export const useFormDraftCreate = ({
     userId,
     initialReceiverId = '',
-}: UseChatBotParams) => {
+}: UseFormDraftCreateProps) => {
     // 채팅 내역
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
     // 질문 상태
     const [currentQuestionId, setCurrentQuestionId] = useState<string>('role');
-    const [currentQuestion, setCurrentQuestion] = useState<BotQuestion | null>(
+    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
         null,
     );
     const [inputEnabled, setInputEnabled] = useState<boolean>(false);
@@ -55,7 +55,7 @@ export const useChatBot = ({
     // 현재 질문 업데이트
     useEffect(() => {
         if (currentQuestionId) {
-            const question = chatBotQuestions[currentQuestionId];
+            const question = formDraftQuestions[currentQuestionId];
             setCurrentQuestion(question);
 
             if (question) {
@@ -276,7 +276,7 @@ export const useChatBot = ({
         }));
     };
 
-    // 특약사항 선택 처리S
+    // 특약사항 선택 처리
     const handleSpecialTermSelect = (termId: string, isSelected: boolean) => {
         const response = isSelected ? '네' : '아니오';
 

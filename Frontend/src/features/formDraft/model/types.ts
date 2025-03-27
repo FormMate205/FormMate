@@ -15,7 +15,7 @@ export interface Option {
 }
 
 // 질문 타입 정의
-export interface BotQuestion {
+export interface Question {
     id: string;
     question: string;
     type: InputType;
