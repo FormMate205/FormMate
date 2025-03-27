@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import ContractDetailTabs from '@/features/contract/ui/tabs/ContractDetailTabs';
+import ContractTabs from '@/features/contract/ui/tabs/ContractTabs';
 import { Header } from '@/widgets';
 import ProgressBar from '../../entities/contract/ui/ProgressBar';
 import EarlyTerminateAlert from '../../features/contract/ui/EarlyTerminateAlert';
@@ -78,7 +78,7 @@ const ContractDetail = () => {
                 </div>
             </div>
             {/* ContractDetailTabs */}
-            <ContractDetailTabs />
+            <ContractTabs />
         </div>
     );
 };

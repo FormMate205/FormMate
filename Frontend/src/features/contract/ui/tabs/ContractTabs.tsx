@@ -1,19 +1,22 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ContractDetailTab from './ContractDetailTab';
 import InterestInfoTab from './InterestInfoTab';
 import PaymentHistoryTab from './PaymentHistoryTab';
-import SummaryTab from './SummaryTab';
 
-const ContractDetailTabs = () => {
+const ContractTabs = () => {
     return (
         <section className='flex h-full flex-col bg-white'>
-            <Tabs defaultValue='contract flex'>
+            <Tabs defaultValue='contract'>
                 <TabsList>
                     <TabsTrigger value='contract'>차용증</TabsTrigger>
                     <TabsTrigger value='history'>납부 내역</TabsTrigger>
                     <TabsTrigger value='interest'>납부 요약</TabsTrigger>
                 </TabsList>
-                <TabsContent className='px-6' value='contract'>
-                    <SummaryTab />
+                <TabsContent
+                    value='contract'
+                    className='bg-line-50 h-full px-4'
+                >
+                    <ContractDetailTab />
                 </TabsContent>
                 <TabsContent value='history'>
                     <PaymentHistoryTab />
@@ -26,4 +29,4 @@ const ContractDetailTabs = () => {
     );
 };
 
-export default ContractDetailTabs;
+export default ContractTabs;

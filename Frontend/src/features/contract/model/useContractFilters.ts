@@ -1,8 +1,9 @@
 import { useState } from 'react';
+
 import {
-    ContractCardProps,
     ContractStatus,
-} from '../../../entities/contract/types';
+    ContractCardProps,
+} from '@/entities/contract/model/types';
 
 const dummyContracts: ContractCardProps[] = [
     {

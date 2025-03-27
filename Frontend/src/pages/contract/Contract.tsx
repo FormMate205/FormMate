@@ -1,5 +1,5 @@
 import { Input } from '@/components/ui/input';
-import { ContractStatus } from '@/entities/contract/types';
+import { ContractStatus } from '@/entities/contract/model/types';
 import { useContractFilters } from '@/features/contract/model/useContractFilters';
 import ContractChart from '@/features/contract/ui/charts/ContractChart';
 import ContractList from '@/features/contract/ui/ContractList';

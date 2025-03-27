@@ -1,4 +1,4 @@
-import { ContractCardProps } from '../../../entities/contract/types';
+import { ContractCardProps } from '@/entities/contract/model/types';
 import ContractCard from '../../../entities/contract/ui/ContractCard';
 
 const ContractList = ({ contracts }: { contracts: ContractCardProps[] }) => {
