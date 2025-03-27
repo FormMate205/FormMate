@@ -28,17 +28,20 @@ import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ContractService {
 
+	// TODO: Repository 함수 예외 처리 등 중복 요소 service 단으로 빼서 리팩토링
 	private final ContractRepository contractRepository;
 	private final FormRepository formRepository;
 	private final TransferRepository transferRepository;
 	private final PaymentPreviewService paymentPreviewService;
 
+	@Transactional
 	public ContractDetailResponse selectContractDetail(Integer formId) {
 		// formId에 맞는 계약서 찾기
 		FormEntity form = formRepository.findById(formId)
@@ -66,6 +69,7 @@ public class ContractService {
 		return contractDetail;
 	}
 
+	@Transactional
 	public ExpectedPaymentAmountResponse selectExpectedPaymentAmount(Integer formId) {
 		/**
 		 * 1. 계약서 기반으로 해당 회차에 납부할 금액 추출
@@ -96,6 +100,7 @@ public class ContractService {
 		return expectedPaymentAmountResponse;
 	}
 
+	@Transactional
 	public InterestResponse selectInterestResponse(Integer formId) {
 		/**
 		 * 공통)
@@ -155,6 +160,7 @@ public class ContractService {
 			.build();
 	}
 
+	@Transactional
 	public List<ContractWithPartnerResponse> selectContractWithPartner(Integer userId, Integer partnerId) {
 		List<ContractWithPartnerResponse> list = new ArrayList<>();
 
@@ -200,7 +206,8 @@ public class ContractService {
 		return list;
 	}
 
-	private Page<PaymentScheduleResponse> getPaymentScheduleResponses(ContractEntity contract, FormEntity form) {
+
+	public Page<PaymentScheduleResponse> getPaymentScheduleResponses(ContractEntity contract, FormEntity form) {
 		if (contract.getTotalEarlyRepaymentFee() > 0) {
 			// 중도상환액이 있으면
 			// 계약일을 오늘, 대출 금액을 계약관리 Entity의 잔여원금(원금 + 연체액)으로 바꿔서 예상 납부 금액 메소드 호출

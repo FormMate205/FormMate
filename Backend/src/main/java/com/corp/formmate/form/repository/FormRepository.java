@@ -46,8 +46,6 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 
 	@Query("SELECT f\n"
 		+ "FROM FormEntity f\n"
-		+ "JOIN UserEntity u\n"
-		+ "    ON f.creditor = u.id\n"
 		+ "WHERE f.creditor = :userId\n"
 		+ "  AND f.debtor = :partnerId\n"
 		+ "ORDER BY f.contractDate\n")
@@ -55,8 +53,6 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 
 	@Query("SELECT f\n"
 		+ "FROM FormEntity f\n"
-		+ "JOIN UserEntity u\n"
-		+ "    ON f.creditor = u.id\n"
 		+ "WHERE f.creditor = :partnerId\n"
 		+ "  AND f.debtor = :userId\n"
 		+ "ORDER BY f.contractDate\n")
