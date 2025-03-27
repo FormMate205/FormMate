@@ -1,5 +1,5 @@
-import { FormDraftRequest } from '@/entities/types/form';
-import { formatDate } from '@/shared/utils/formatDate';
+import { FormDraftRequest } from '@/entities/formDraft/model/types';
+import { formatDate } from '@/shared/model/formatDate';
 
 // 채권자, 채무자 설정
 export const setRoleIds = (

@@ -1,8 +1,9 @@
 import { ChangeEvent, useState } from 'react';
-import { getName, showName } from '@/features';
+import getName from '@/features/chat/model/getName';
+import showName from '@/features/chat/model/showName';
 import { Header } from '@/widgets';
-import ChatBox from './ui/ChatBox';
-import ChatInput from './ui/ChatInput';
+import ChatBox from '../../entities/chat/ui/ChatBox';
+import ChatInput from '../../entities/chat/ui/ChatInput';
 
 const Chat = () => {
     const userId = '1';

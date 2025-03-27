@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { specialTermsInfo } from '@/features/chatBot/utils/chatBotQuestions';
+import { specialTermsInfo } from '../config/formDraftQuestions';
 
 interface SpecialTermsSelectorProps {
     currentTermIndex: number;

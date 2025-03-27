@@ -1,30 +1,30 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChatMessage } from '@/entities/types/chat';
-import { FormDraftRequest } from '@/entities/types/form';
-import { BotQuestion } from '@/features/chatBot/type';
+import { ChatMessage } from '@/entities/chat/model/types';
+import { BOT_ID } from '@/entities/formDraft/config/constant';
 import {
-    chatBotQuestions,
+    formDraftQuestions,
     specialTermsInfo,
-} from '@/features/chatBot/utils/chatBotQuestions';
-import { BOT_ID } from '@/shared/constant';
-import { formatDate } from '@/shared/utils/formatDate';
-import { validateUserAnswer } from './utils/chatValid';
+} from '@/entities/formDraft/config/formDraftQuestions';
+import { FormDraftRequest } from '@/entities/formDraft/model/types';
+import { formatDate } from '@/shared/model/formatDate';
+import { validateUserAnswer } from './answerValid';
+import { Question } from './types';
 
-interface UseChatBotParams {
+interface UseFormDraftCreateProps {
     userId: string;
     initialReceiverId?: string;
 }
 
-export const useChatBot = ({
+export const useFormDraftCreate = ({
     userId,
     initialReceiverId = '',
-}: UseChatBotParams) => {
+}: UseFormDraftCreateProps) => {
     // 채팅 내역
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
     // 질문 상태
     const [currentQuestionId, setCurrentQuestionId] = useState<string>('role');
-    const [currentQuestion, setCurrentQuestion] = useState<BotQuestion | null>(
+    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
         null,
     );
     const [inputEnabled, setInputEnabled] = useState<boolean>(false);
@@ -52,50 +52,10 @@ export const useChatBot = ({
         specialTermIndexes: [],
     });
 
-    // 초기 질문 표시
-    useEffect(() => {
-        if (chatHistory.length === 0) {
-            const startQuestion = chatBotQuestions['role'];
-            setCurrentQuestion(startQuestion);
-
-            const firstMessage: ChatMessage = {
-                id: '1',
-                writerId: BOT_ID,
-                content: startQuestion.question,
-            };
-
-            setChatHistory([firstMessage]);
-        }
-    }, []);
-
-    // 특약 인덱스 업데이트
-    useEffect(() => {
-        // 모든 특약 처리가 완료된 후
-        if (isLastTermProcessed) {
-            setFormDraft((prev) => ({
-                ...prev,
-                specialTermIndexes: selectedTerms,
-            }));
-
-            // 마지막 질문으로 이동
-            setTimeout(() => {
-                if (currentQuestion && currentQuestion.next) {
-                    const nextQuestionId = currentQuestion.next;
-                    if (nextQuestionId) {
-                        setCurrentQuestionId(nextQuestionId);
-                    }
-                }
-            }, 500);
-
-            // 플래그 초기화
-            setIsLastTermProcessed(false);
-        }
-    }, [selectedTerms, isLastTermProcessed, currentQuestion]);
-
     // 현재 질문 업데이트
     useEffect(() => {
         if (currentQuestionId) {
-            const question = chatBotQuestions[currentQuestionId];
+            const question = formDraftQuestions[currentQuestionId];
             setCurrentQuestion(question);
 
             if (question) {
@@ -141,9 +101,44 @@ export const useChatBot = ({
         }
     }, [currentQuestionId]);
 
+    // 특약 인덱스 업데이트
+    useEffect(() => {
+        // 모든 특약 처리가 완료된 후
+        if (isLastTermProcessed) {
+            setFormDraft((prev) => ({
+                ...prev,
+                specialTermIndexes: selectedTerms,
+            }));
+
+            // 마지막 질문으로 이동
+            setTimeout(() => {
+                if (currentQuestion && currentQuestion.next) {
+                    const nextQuestionId = currentQuestion.next;
+                    if (nextQuestionId) {
+                        setCurrentQuestionId(nextQuestionId);
+                    }
+                }
+            }, 500);
+
+            // 플래그 초기화
+            setIsLastTermProcessed(false);
+        }
+    }, [selectedTerms, isLastTermProcessed, currentQuestion]);
+
     // 메시지 전송 함수
     const sendMessage = (content: string) => {
-        if (!content.trim()) return;
+        if (!content.trim()) {
+            // 챗봇 메시지 추가
+            messageIdCounterRef.current += 1;
+            const newMessage: ChatMessage = {
+                id: messageIdCounterRef.current.toString(),
+                writerId: BOT_ID,
+                content: '값을 입력해주세요.',
+            };
+
+            setChatHistory((prev) => [...prev, newMessage]);
+            return;
+        }
 
         const { isValid, errorMessage } = validateUserAnswer(
             formDraft,
@@ -281,7 +276,7 @@ export const useChatBot = ({
         }));
     };
 
-    // 특약사항 선택 처리S
+    // 특약사항 선택 처리
     const handleSpecialTermSelect = (termId: string, isSelected: boolean) => {
         const response = isSelected ? '네' : '아니오';
 
