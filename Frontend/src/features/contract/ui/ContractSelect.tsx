@@ -5,7 +5,7 @@ import {
     SelectContent,
     SelectItem,
 } from '@/components/ui/select';
-import { ContractStatus } from '@/entities/contract/types';
+import { ContractStatus } from '@/entities/contract/model/types';
 
 const ContractSelect = ({
     value,

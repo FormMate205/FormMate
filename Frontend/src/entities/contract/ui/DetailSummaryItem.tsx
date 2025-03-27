@@ -17,7 +17,7 @@ interface SummaryItemProps {
     withIcon?: boolean;
 }
 
-const SummaryItem = ({
+const DetailSummaryItem = ({
     tagText,
     color,
     mainText,
@@ -51,4 +51,4 @@ const SummaryItem = ({
     );
 };
 
-export default SummaryItem;
+export default DetailSummaryItem;

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { TagItem } from '@/shared';
-import { ContractCardProps, ContractStatus, TagColor } from '../types';
+import { ContractStatus, ContractCardProps, TagColor } from '../model/types';
 
 interface StatusStyle {
     color: TagColor;
@@ -37,7 +37,7 @@ const ContractCard = ({
 }: ContractCardProps) => {
     const statusInfo = statusMap[status];
     return (
-        <Link to={`/contract/${id}`} className='block cursor-pointer'>
+        <Link to={`/contracts/${id}`} className='block cursor-pointer'>
             <div className='border-line-200 flex h-42 flex-col gap-3 rounded-xl border p-4 shadow-sm'>
                 <div className='flex items-center gap-2'>
                     <span className='text-lg font-medium'>{name}</span>
