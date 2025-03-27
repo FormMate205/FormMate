@@ -98,7 +98,7 @@ const FormMatch = () => {
                 />
 
                 <div className='mt-4'>
-                    {searchResults!.length > 0 && (
+                    {searchResults && (
                         <div className='flex flex-col gap-2'>
                             {searchResults!.map((result) => (
                                 <SearchListItem
