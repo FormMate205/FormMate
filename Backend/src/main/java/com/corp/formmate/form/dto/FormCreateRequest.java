@@ -210,12 +210,12 @@ public class FormCreateRequest {
 			.creditorName(creditor.getUserName())
 			.creditorAddress(creditor.getAddress())
 			.creditorPhone(creditor.getPhoneNumber())
-			.creditorBank(creditor.getBankCode().toString()) // 여기 바꿔야해용
+			.creditorBank(creditor.getBankName()) // 여기 바꿔야해용
 			.creditorAccount(creditor.getAccountNumber())
 			.debtorName(debtor.getUserName())
 			.debtorAddress(debtor.getAddress())
 			.debtorPhone(debtor.getPhoneNumber())
-			.debtorBank(debtor.getBankCode().toString())
+			.debtorBank(debtor.getBankName())
 			.debtorAccount(debtor.getAccountNumber()) // 여기 바꿔야해용
 			.contractDate(LocalDateTime.now())
 			.maturityDate(formCreateRequest.getMaturityDate())
