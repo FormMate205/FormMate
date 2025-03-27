@@ -21,6 +21,7 @@ import com.corp.formmate.form.service.PaymentPreviewService;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.ContractException;
 import com.corp.formmate.global.error.exception.FormException;
+import com.corp.formmate.global.error.exception.TransferException;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
@@ -48,7 +49,8 @@ public class ContractService {
 		ContractDetailResponse contractDetail = new ContractDetailResponse(contract);
 
 		// 계약서와 관련된 거래내역들 찾기
-		List<TransferEntity> transfers = transferRepository.findByForm(form);
+		List<TransferEntity> transfers = transferRepository.findByForm(form)
+			.orElseThrow(() -> new TransferException(ErrorCode.TRANSFER_NOT_FOUND));
 
 		// 찾은 거래내역들 기반으로 중도상환 수수료 총액 계산후 필드에 주입
 		Long totalEarlyRepaymentCharge = 0L;
@@ -107,15 +109,14 @@ public class ContractService {
 
 	public InterestResponse selectInterestResponse(Integer formId) {
 		/**
-		 * 1. 중도상환액 + 현재 연체액이 없을 때
-		 * - Page<PaymentScheduleResponse>에서 전 회차 정보의 원금,이자 합산해서 생성
-		 * 2. 중도상환액만 있을 때
-		 * - 1에 중도상환 수수료 합산해서
-		 * 3. 연체액만 있을 때
-		 * - 1처럼 뽑되, 계약서에서 계약금액을 contract.getRemainingPrincipal()로 뽑아서
-		 * - 현재 미납부 금액 필드에 연체액
+		 * 공통)
+		 * - 이번 회차 미납 금액 -> 이번 회차 거래 있는지 확인하고, 있으면 회차
+		 * - 원금(계약 금액 - 잔여 원금)
+		 * - 이자 2개 / 중도상환수수료 / 만기일 예상 납부 금액(+그 중 이자)
+		 * - 만기일 예상 납부 금액 중 원금(만기일 예상 납부 금액 - 그 중 이자)
+		 * 1) 현재 연체액 있을 때
+		 * - 공통처럼 뽑되, 이번 회차 미납 금액에 연체액 추가, 이번 회차 거래액 차감 X (분기 로직 추가)
 		 */
-		InterestResponse interestResponse = new InterestResponse();
 		FormEntity form = formRepository.findById(formId)
 			.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
 		ContractEntity contract = contractRepository.findByForm(form)
@@ -123,32 +124,46 @@ public class ContractService {
 
 		Long totalEarlyRepaymentFee = contract.getTotalEarlyRepaymentFee();
 		Long overdueAmount = contract.getOverdueAmount();
+		Integer currentPaymentRound = contract.getCurrentPaymentRound();
 
-		if (totalEarlyRepaymentFee == 0 && overdueAmount == 0) {
-			PaymentPreviewRequest paymentPreview = new PaymentPreviewRequest(form);
+		Long paidPrincipalAmount = form.getLoanAmount() - contract.getRemainingPrincipal();
+		Long expectedMaturityPayment = contract.getExpectedMaturityPayment();
+		Long expectedInterestAmountAtMaturity = contract.getExpectedInterestAmountAtMaturity();
+		Long expectedPrincipalAmountAtMaturity = expectedMaturityPayment - expectedInterestAmountAtMaturity;
+		Long unpaidAmount = 0L;
 
-			PaymentPreviewResponse paymentPreviewResponse = paymentPreviewService.calculatePaymentPreview(paymentPreview,
-				PageRequest.of(0, 10000));
+		// TODO: 메소드 내에서 계산하는 만기일 예상 납부 금액과 DB에 저장된 만기일 예상 납부 금액 비교 로직 추가
+		PaymentPreviewRequest paymentPreview = new PaymentPreviewRequest(form);
+		PaymentPreviewResponse paymentPreviewResponse = paymentPreviewService.calculatePaymentPreview(paymentPreview,
+			PageRequest.of(0, 10000));
 
-			Page<PaymentScheduleResponse> paymentSchedulePage = paymentPreviewResponse.getSchedulePage();
-
-			Integer currentPaymentRound = contract.getCurrentPaymentRound();
-			Long paidPrincipalAmount = 0L;
-			Long paidInterestAmount = 0L;
-			for (PaymentScheduleResponse p : paymentSchedulePage) {
-				// 현재 회차일 때
-				if (p.getInstallmentNumber().equals(currentPaymentRound)) break;
-				paidPrincipalAmount += p.getPaymentAmount();
-				paidInterestAmount += p.getInterest();
+		for (PaymentScheduleResponse p : paymentPreviewResponse.getSchedulePage()) {
+			if (p.getInstallmentNumber().equals(currentPaymentRound)) {
+				unpaidAmount = p.getPaymentAmount();
 			}
-		} else if (totalEarlyRepaymentFee > 0) {
-
-		} else if (overdueAmount > 0) {
-
 		}
 
-		// 중도상환액, 연체액 음수일 때 터짐
-		throw new ContractException(ErrorCode.INTERNAL_SERVER_ERROR);
+		if (overdueAmount == 0) {
+			List<TransferEntity> transfers = transferRepository.findByForm(form)
+				.orElseThrow(() -> new TransferException(ErrorCode.TRANSFER_NOT_FOUND));
+			for (TransferEntity t : transfers) {
+				if (t.getCurrentRound().equals(currentPaymentRound)) {
+					unpaidAmount -= t.getAmount();
+				}
+			}
+		} else {
+			unpaidAmount += overdueAmount;
+		}
+
+		return InterestResponse.builder()
+			.paidPrincipalAmount(paidPrincipalAmount)
+			.paidInterestAmount(contract.getInterestAmount())
+			.paidOverdueInterestAmount(contract.getOverdueInterestAmount())
+			.unpaidAmount(unpaidAmount)
+			.expectedPaymentAmountAtMaturity(expectedMaturityPayment)
+			.expectedPrincipalAmountAtMaturity(expectedPrincipalAmountAtMaturity)
+			.expectedInterestAmountAtMaturity(expectedInterestAmountAtMaturity)
+			.build();
 	}
 
 	// TODO: 송금 API에서 사용할 계약관리 테이블 업데이트 메소드(중도상환액, 연체액, 잔여원금, 중도상환수수료 등) 만들기 -> 동욱이형 API 짤 때 합의
