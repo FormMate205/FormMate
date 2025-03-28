@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import useFormPartnerStore from '@/entities/formPartner/model/formPartnerStore';
+import { maskUserName } from '@/shared/model/maskUserName';
 import Header from '@/widgets/layout/header/Header';
 
 const FormCheck = () => {
     const navigate = useNavigate();
+    const { partner } = useFormPartnerStore();
 
-    // 더미데이터
-    const name = '강지은';
+    // 계약 상대 미지정 시 돌아가기
+    if (!partner) return navigate(-1);
 
     const onClick = () => {
         console.log('계약서 생성');
@@ -27,11 +30,15 @@ const FormCheck = () => {
 
                     <div className='flex flex-col items-center gap-4'>
                         <p className='text-2xl font-semibold'>
-                            {name}님과 계약서를 협의할까요?
+                            {maskUserName(partner?.userName)}님과 계약서를
+                            협의할까요?
                         </p>
                         <div className='text-line-500 flex flex-col items-center'>
                             <p>계약서 초안을 생성해드릴게요.</p>
-                            <p>{name}님과 채팅을 통해 계약서 수정 및 계약</p>
+                            <p>
+                                {maskUserName(partner?.userName)}님과 채팅을
+                                통해 계약서 수정 및 계약
+                            </p>
                             <p>최종 수락해주세요.</p>
                         </div>
                     </div>
