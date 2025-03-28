@@ -16,7 +16,9 @@ const TransactionItem = ({
                 <span className='text-line-700 font-medium'>
                     {transactionType}
                 </span>
-                <span className='text-primary-500 font-semibold'>{amount}</span>
+                <span className='text-primary-500 font-semibold'>
+                    {amount}원
+                </span>
             </div>
         </div>
     );
