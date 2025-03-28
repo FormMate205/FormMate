@@ -2,12 +2,14 @@ package com.corp.formmate.user.service;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
 /**
  * 다양한 OAuth2 제공자로부터 받은 사용자 정보를 표준화하는 클래스
  */
+@Slf4j
 @Getter
 public class OAuth2UserInfo {
 
@@ -54,9 +56,19 @@ public class OAuth2UserInfo {
         // 네이버는 response 안에 사용자 정보가 있음
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
 
+        // 디버깅 로그 추가
+        log.debug("Naver OAuth2 attributes: {}", response);
+
+        String email = (String) response.get("email");
+        // 이메일이 없으면 기본값(예: 네이버ID@naver.com) 사용
+        if (email == null || email.isEmpty()) {
+            String naverId = (String) response.get("id");
+            email = naverId + "@naver.com"; // 임시 이메일 생성
+        }
+
         return OAuth2UserInfo.builder()
                 .id((String) response.get("id"))
-                .email((String) response.get("email"))
+                .email(email)
                 .name((String) response.get("name"))
                 .build();
     }
