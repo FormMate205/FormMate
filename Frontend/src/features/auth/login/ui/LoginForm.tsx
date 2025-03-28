@@ -16,10 +16,10 @@ const LoginForm = () => {
 
     const onSubmit = async (data: LoginFormSchema) => {
         try {
-            const res = await login(data); // mock login 함수
+            const res = await login(data);
             // 1. 토큰 저장
             localStorage.setItem('accessToken', res.token);
-            // 2. 유저 쿼리 갱신
+            // 2. 유저 정보 갱신
             await queryClient.invalidateQueries({ queryKey: ['user'] });
             // 3. 이동
             navigate('/');

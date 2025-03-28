@@ -9,7 +9,7 @@ export const useUserQuery = () => {
         queryFn: getUser,
         enabled: !!token, // 토큰 있을 때만 fetch
         staleTime: 1000 * 60 * 10, // 10분
-        retry: 1,
+        retry: false,
         refetchOnWindowFocus: false,
     });
 };
