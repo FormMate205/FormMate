@@ -12,7 +12,7 @@ import lombok.Data;
  * 계약자 이름
  * 계약 만기일
  * 이번 달 보낼 금액
- * 지금까지 상환한 총액
+ * 지금까지 상환한(받은) 총액
  * 상환 총액(지금까지 상환 금액 + 만기일 예상 납부 금액)
  */
 @Data
@@ -54,7 +54,7 @@ public class ContractPreviewResponse {
 	private Long nextRepaymentAmount;
 
 	@Schema(
-		description = "지금까지 상환한 총 금액",
+		description = "지금까지 상환한(받은) 총 금액",
 		example = "800000",
 		required = true
 	)

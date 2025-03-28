@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.corp.formmate.contract.dto.AmountResponse;
 import com.corp.formmate.contract.dto.ContractDetailResponse;
 import com.corp.formmate.contract.dto.ContractPreviewResponse;
 import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
@@ -265,6 +266,29 @@ public class ContractService {
 		}
 
 		return list;
+	}
+
+	@Transactional
+	public AmountResponse selectAmounts(AuthUser authUser) {
+		AmountResponse amountResponse = new AmountResponse();
+		Long paidAmount = 0L;
+		Long receivedAmount = 0L;
+		Page<FormEntity> allWithFilters = formRepository.findAllWithFilters(authUser.getId(), null, null,
+			PageRequest.of(0, 10000));
+
+		String username = authUser.getUsername();
+		for (FormEntity f : allWithFilters) {
+			InterestResponse interestResponse = selectInterestResponse(f.getId());
+			if (f.getCreditorName().equals(username)) {
+				receivedAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+			} else if (f.getDebtorName().equals(username)) {
+				paidAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+			}
+		}
+
+		amountResponse.setPaidAmount(paidAmount);
+		amountResponse.setReceivedAmount(receivedAmount);
+		return amountResponse;
 	}
 
 	// TODO: 송금 API에서 사용할 계약관리 테이블 업데이트 메소드(중도상환액, 연체액, 잔여원금, 중도상환수수료 등) 만들기 -> 동욱이형 API 짤 때 합의
