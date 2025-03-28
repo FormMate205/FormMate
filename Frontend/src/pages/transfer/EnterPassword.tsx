@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import NumberPad from '@/shared/ui/NumberPad';
+import PasswordDots from '@/shared/ui/PasswordDots';
 import { Header } from '@/widgets';
 
 const EnterPassword = () => {
@@ -15,44 +17,21 @@ const EnterPassword = () => {
     };
 
     return (
-        <div className='flex flex-col px-4 py-2'>
+        <div className='relative flex h-full flex-col justify-between px-4 py-2'>
             <Header title='송금 비밀번호 입력' />
-            <div className='fixed bottom-0 left-0 w-full px-6 pb-6'>
+
+            <div className='flex flex-col justify-center p-6'>
+                <span className='text-center text-xl font-semibold'>
+                    결제 비밀번호를 입력하세요
+                </span>
+                <PasswordDots inputValue={inputValue} />
+            </div>
+            <div className='sticky bottom-0 left-0 mx-auto flex w-full max-w-[640px] flex-col gap-6 pb-6'>
                 {/* 숫자 키패드 */}
-                <div className='mb-10 grid grid-cols-3 gap-8 text-center text-2xl'>
-                    {[
-                        '1',
-                        '2',
-                        '3',
-                        '4',
-                        '5',
-                        '6',
-                        '7',
-                        '8',
-                        '9',
-                        '',
-                        '0',
-                        '←',
-                    ].map((num) =>
-                        num === '←' ? (
-                            <div
-                                key={num}
-                                onClick={handleDelete}
-                                className='cursor-pointer'
-                            >
-                                ←
-                            </div>
-                        ) : (
-                            <div
-                                key={num}
-                                onClick={() => handleNumberClick(num)}
-                                className='cursor-pointer'
-                            >
-                                {num}
-                            </div>
-                        ),
-                    )}
-                </div>
+                <NumberPad
+                    onDelete={handleDelete}
+                    onNumberClick={handleNumberClick}
+                />
 
                 <Button
                     variant='primary'

@@ -20,34 +20,36 @@ const keyPadItems = [
 
 const NumberPad = ({ onNumberClick, onDelete }: NumberPadProps) => {
     return (
-        <div className='grid grid-cols-3 gap-8 text-center text-2xl'>
-            {keyPadItems.map((item, index) => {
-                if (item.type === 'empty') {
-                    return <div key={`empty-${index}`} />;
-                }
+        <div className='w-full max-w-[640px]'>
+            <div className='grid grid-cols-3 gap-8 text-center text-2xl'>
+                {keyPadItems.map((item, index) => {
+                    if (item.type === 'empty') {
+                        return <div key={`empty-${index}`} />;
+                    }
 
-                if (item.type === 'delete') {
+                    if (item.type === 'delete') {
+                        return (
+                            <div
+                                key={`delete`}
+                                onClick={onDelete}
+                                className='cursor-pointer'
+                            >
+                                {item.label}
+                            </div>
+                        );
+                    }
+
                     return (
                         <div
-                            key={`delete`}
-                            onClick={onDelete}
+                            key={`num-${item.label}`}
+                            onClick={() => onNumberClick(item.label)}
                             className='cursor-pointer'
                         >
                             {item.label}
                         </div>
                     );
-                }
-
-                return (
-                    <div
-                        key={`num-${item.label}`}
-                        onClick={() => onNumberClick(item.label)}
-                        className='cursor-pointer'
-                    >
-                        {item.label}
-                    </div>
-                );
-            })}
+                })}
+            </div>
         </div>
     );
 };
