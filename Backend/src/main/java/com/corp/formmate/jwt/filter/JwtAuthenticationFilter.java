@@ -151,7 +151,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private boolean isDevelopmentMode() {
 		// 여기서 개발 모드인지 확인하는 로직 구현
 		// 예: 특정 시스템 프로퍼티 확인, 환경 변수 확인 등
-		return true; // 지금은 항상 개발 모드로 간주 (배포 전에 수정 필요)
+		return false; // 지금은 항상 개발 모드로 간주 (배포 전에 수정 필요)
 	}
 
 	// 에러 응답 메서드 추가
