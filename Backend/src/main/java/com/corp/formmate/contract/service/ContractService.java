@@ -263,8 +263,11 @@ public class ContractService {
 
 			InterestResponse interestResponse = selectInterestResponse(f.getId());
 			contractPreviewResponse.setNextRepaymentAmount(interestResponse.getUnpaidAmount());
-			contractPreviewResponse.setTotalAmountDue(interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
-			contractPreviewResponse.setTotalRepaymentAmount(contractPreviewResponse.getTotalAmountDue() + interestResponse.getExpectedPaymentAmountAtMaturity());
+			contractPreviewResponse.setTotalAmountDue(
+				interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount()
+					+ interestResponse.getPaidOverdueInterestAmount());
+			contractPreviewResponse.setTotalRepaymentAmount(
+				contractPreviewResponse.getTotalAmountDue() + interestResponse.getExpectedPaymentAmountAtMaturity());
 
 			list.add(contractPreviewResponse);
 		}
@@ -284,15 +287,18 @@ public class ContractService {
 		for (FormEntity f : allWithFilters) {
 			InterestResponse interestResponse = selectInterestResponse(f.getId());
 			if (f.getCreditorName().equals(username)) {
-				receivedAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+				receivedAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount()
+					+ interestResponse.getPaidOverdueInterestAmount());
 			} else if (f.getDebtorName().equals(username)) {
-				paidAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+				paidAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount()
+					+ interestResponse.getPaidOverdueInterestAmount());
 			}
 		}
 
 		amountResponse.setPaidAmount(paidAmount);
 		amountResponse.setReceivedAmount(receivedAmount);
 		return amountResponse;
+	}
 
 	public ContractEntity selectTransferByForm(FormEntity form) {
 		ContractEntity contractEntity = contractRepository.findByForm(form).orElse(null);
