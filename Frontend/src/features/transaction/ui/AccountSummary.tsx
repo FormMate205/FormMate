@@ -1,11 +1,6 @@
 import { Button } from '@/components/ui/button';
+import { AccountInfo } from '@/entities/account/model/types';
 import { Icons } from '@/shared';
-
-interface AccountInfo {
-    bankName: string;
-    accountNumber: string;
-    balance: string;
-}
 
 interface AccountSummaryProps {
     accountInfo: AccountInfo;
