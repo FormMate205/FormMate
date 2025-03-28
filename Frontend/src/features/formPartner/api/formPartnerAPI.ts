@@ -1,6 +1,6 @@
 import { useQuery, useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { FormPartner } from '@/entities/formDraft/model/types';
-import { api } from '@/shared/api/instance';
+import api from '@/shared/api/instance';
 import { useIntersection } from '@/shared/model/useIntersection';
 import {
     RecentFormPartnerResponse,
