@@ -1,21 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FormPartner } from '@/entities/formDraft/model/types';
+import useFormPartnerStore from '@/entities/formPartner/model/formPartnerStore';
 import { useGetRecentFormPartner } from '@/features/formPartner/api/formPartnerAPI';
 import ArrowListItem from '@/shared/ui/ArrowListItem';
 
 interface RecentPartnersProps {
     searchValue: string;
-    title: string;
 }
 
-const RecentPartners = ({ searchValue, title }: RecentPartnersProps) => {
+const RecentPartners = ({ searchValue }: RecentPartnersProps) => {
     const navigate = useNavigate();
+    const { setPartner } = useFormPartnerStore();
 
     // 최근 계약 상대 리스트
     const [recentList, setRecentList] = useState<FormPartner[] | null>();
 
-    const { partners, error, refetch, lastItemRef } = useGetRecentFormPartner({
+    const { partners, refetch, lastItemRef } = useGetRecentFormPartner({
         pageable: {
             page: '0',
             size: '10',
@@ -29,9 +30,10 @@ const RecentPartners = ({ searchValue, title }: RecentPartnersProps) => {
         }
     }, [partners]);
 
-    const handleItemClick = (result: FormPartner) => {
-        console.log('선택된 항목:', result);
+    const handleItemClick = (partner: FormPartner) => {
+        setPartner(partner);
         navigate('/form/check');
+        return;
     };
 
     // 검색어가 변경되면 데이터를 다시 가져옴
@@ -46,16 +48,7 @@ const RecentPartners = ({ searchValue, title }: RecentPartnersProps) => {
     }, [searchValue, refetch]);
 
     return (
-        <div className='flex flex-1 flex-col'>
-            <div className='text-lg font-medium'>{title}</div>
-
-            {/* 에러 표시 */}
-            {error && (
-                <div className='py-4 text-red-500'>
-                    데이터를 불러오는데 실패했습니다.
-                </div>
-            )}
-
+        <div>
             {/* 데이터 목록 표시 */}
             {recentList && recentList.length > 0 ? (
                 <div className='flex flex-col'>
@@ -77,7 +70,9 @@ const RecentPartners = ({ searchValue, title }: RecentPartnersProps) => {
                     ))}
                 </div>
             ) : (
-                <div className='py-4 text-center'>계약 상대가 없습니다.</div>
+                <div className='py-4 text-center'>
+                    최근 계약 상대에 {searchValue}님은 없습니다.
+                </div>
             )}
         </div>
     );

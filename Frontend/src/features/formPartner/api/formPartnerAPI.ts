@@ -1,4 +1,5 @@
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import { FormPartner } from '@/entities/formDraft/model/types';
 import { api } from '@/shared/api/instance';
 import { useIntersection } from '@/shared/model/useIntersection';
 import {
@@ -21,7 +22,7 @@ export const useGetRecentFormPartner = ({
     pageable,
     input,
 }: SearchRecentFormPartnerRequest) => {
-    const { data, error, fetchNextPage, hasNextPage, refetch } =
+    const { data, fetchNextPage, hasNextPage, refetch } =
         useSuspenseInfiniteQuery({
             queryKey: ['recentFormPartners', input],
             queryFn: async ({ pageParam }) => {
@@ -62,10 +63,24 @@ export const useGetRecentFormPartner = ({
 
     return {
         partners,
-        error,
         hasNextPage,
         fetchNextPage,
         refetch,
         lastItemRef,
     };
+};
+
+// 새로운 계약 상대 검색 API
+const getNewFormPartner = async (phoneNumber: string): Promise<FormPartner> => {
+    const response = await api.get('/users/', { params: phoneNumber });
+    return response.data;
+};
+
+export const useGetNewFormPartner = (phoneNumber: string) => {
+    const { data } = useQuery({
+        queryKey: ['newFormPartner', phoneNumber],
+        queryFn: () => getNewFormPartner(phoneNumber),
+    });
+
+    return { data };
 };
