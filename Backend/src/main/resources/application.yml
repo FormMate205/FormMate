@@ -54,7 +54,8 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: https://j12a205.p.ssafy.io/login/oauth2/code/google
+            redirect-uri: http://localhost:8088/api/login/oauth2/code/google
+#            redirect-uri: https://j12a205.p.ssafy.io/login/oauth2/code/google
             scope:
               - email
               - profile
@@ -67,7 +68,6 @@ spring:
             scope:
               - name
               - email
-              - profile_image
         provider:
           naver:
             authorization-uri: https://nid.naver.com/oauth2.0/authorize
