@@ -9,7 +9,10 @@ const FormCheck = () => {
     const { partner } = useFormPartnerStore();
 
     // 계약 상대 미지정 시 돌아가기
-    if (!partner) return navigate(-1);
+    if (!partner) {
+        navigate(-1);
+        return null;
+    }
 
     const name = maskUserName(partner.userName);
 
