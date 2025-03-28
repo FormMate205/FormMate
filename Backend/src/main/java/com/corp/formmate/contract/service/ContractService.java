@@ -8,7 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.corp.formmate.contract.dto.AmountResponse;
 import com.corp.formmate.contract.dto.ContractDetailResponse;
+import com.corp.formmate.contract.dto.ContractPreviewResponse;
 import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
@@ -18,6 +20,7 @@ import com.corp.formmate.form.dto.PaymentPreviewRequest;
 import com.corp.formmate.form.dto.PaymentPreviewResponse;
 import com.corp.formmate.form.dto.PaymentScheduleResponse;
 import com.corp.formmate.form.entity.FormEntity;
+import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.repository.FormRepository;
 import com.corp.formmate.form.service.FormService;
 import com.corp.formmate.form.service.PaymentPreviewService;
@@ -28,6 +31,7 @@ import com.corp.formmate.global.error.exception.TransferException;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
+import com.corp.formmate.user.dto.AuthUser;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -228,6 +232,67 @@ public class ContractService {
 		Page<PaymentScheduleResponse> paymentSchedulePage = paymentPreviewResponse.getSchedulePage();
 		return paymentSchedulePage;
 	}
+
+	/**
+	 * 사용자와 관련된 계약서 다 뽑음
+	 * 계약서에서 userName이 채권자에 있으면 채무자, 채무자에 있으면 채권자로 주입
+	 * 계약서에서 계약 만기일 추출
+	 * 나머지 필드 -> InterestResponse(납부 요약 Response에서 추출
+	 */
+	@Transactional
+	public List<ContractPreviewResponse> selectAllContractByStatus(FormStatus formStatus, AuthUser authUser) {
+		List<ContractPreviewResponse> list = new ArrayList<>();
+		Page<FormEntity> allWithFilters = formRepository.findAllWithFilters(authUser.getId(), formStatus, null,
+			PageRequest.of(0, 10000));
+
+		String username = authUser.getUsername();
+
+		for (FormEntity f : allWithFilters) {
+			ContractPreviewResponse contractPreviewResponse = new ContractPreviewResponse();
+			contractPreviewResponse.setStatus(formStatus);
+
+			if (f.getCreditorName().equals(username)) {
+				contractPreviewResponse.setUserIsCreditor(true);
+				contractPreviewResponse.setContracteeName(f.getDebtorName());
+			} else if (f.getDebtorName().equals(username)) {
+				contractPreviewResponse.setUserIsCreditor(false);
+				contractPreviewResponse.setContracteeName(f.getCreditorName());
+			}
+
+			contractPreviewResponse.setMaturityDate(f.getMaturityDate().toLocalDate());
+
+			InterestResponse interestResponse = selectInterestResponse(f.getId());
+			contractPreviewResponse.setNextRepaymentAmount(interestResponse.getUnpaidAmount());
+			contractPreviewResponse.setTotalAmountDue(interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+			contractPreviewResponse.setTotalRepaymentAmount(contractPreviewResponse.getTotalAmountDue() + interestResponse.getExpectedPaymentAmountAtMaturity());
+
+			list.add(contractPreviewResponse);
+		}
+
+		return list;
+	}
+
+	@Transactional
+	public AmountResponse selectAmounts(AuthUser authUser) {
+		AmountResponse amountResponse = new AmountResponse();
+		Long paidAmount = 0L;
+		Long receivedAmount = 0L;
+		Page<FormEntity> allWithFilters = formRepository.findAllWithFilters(authUser.getId(), null, null,
+			PageRequest.of(0, 10000));
+
+		String username = authUser.getUsername();
+		for (FormEntity f : allWithFilters) {
+			InterestResponse interestResponse = selectInterestResponse(f.getId());
+			if (f.getCreditorName().equals(username)) {
+				receivedAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+			} else if (f.getDebtorName().equals(username)) {
+				paidAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+			}
+		}
+
+		amountResponse.setPaidAmount(paidAmount);
+		amountResponse.setReceivedAmount(receivedAmount);
+		return amountResponse;
 
 	public ContractEntity selectTransferByForm(FormEntity form) {
 		ContractEntity contractEntity = contractRepository.findByForm(form).orElse(null);
