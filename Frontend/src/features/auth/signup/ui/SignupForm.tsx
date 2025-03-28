@@ -8,7 +8,7 @@ import {
     verifyCode,
     registerUser,
 } from '../api/signup';
-import { useSignupForm } from '../model/useSignupForm';
+import { useSignupForm } from '../model/signupFormStore';
 import {
     RegisterUserRequest,
     ApiErrorResponse,
