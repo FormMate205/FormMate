@@ -5,6 +5,7 @@ import showName from '@/features/chat/model/showName';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
 import FormSelector from '@/features/formDraft/ui/FormSelector';
+import { maskUserName } from '@/shared/model/maskUserName';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 import NotiContainer from '../../entities/formDraft/ui/NotiContainer';
@@ -65,56 +66,64 @@ const FormDraft = () => {
     };
 
     return (
-        <div className='bg-line-50 flex h-screen w-full flex-col items-center justify-between px-4 py-2'>
-            <Header title='계약 생성' />
-
-            <NotiContainer name={receiverName} />
-
-            {/* 채팅 내용 */}
-            <div
-                className='scrollbar-none my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
-                ref={chatContainerRef}
-            >
-                {chatHistory.length > 0 &&
-                    chatHistory.map((chat, index) => {
-                        return (
-                            <ChatBox
-                                key={chat.id}
-                                writerId={chat.writerId}
-                                content={chat.content}
-                                name={
-                                    chat.writerId !== userId &&
-                                    displayProfile(index)
-                                        ? getName(writers, chat.writerId)
-                                        : undefined
-                                }
-                            />
-                        );
-                    })}
-
-                {/* 입력 유형에 따른 컴포넌트 렌더링 */}
-                {(currentQuestion?.type === 'specialTerms' ||
-                    renderSelector) && (
-                    <FormSelector
-                        currentQuestion={currentQuestion}
-                        handleRoleSelect={handleRoleSelect}
-                        handleRepaymentMethodSelect={
-                            handleRepaymentMethodSelect
-                        }
-                        handleSpecialTermSelect={handleSpecialTermSelect}
-                        sendMessage={sendMessage}
-                        currentTermIndex={currentTermIndex}
-                    />
-                )}
+        <div className='bg-line-50 relative flex h-screen w-full'>
+            {/* 배경 도형 */}
+            <div className='aria-hidden absolute top-0 left-0 z-0 h-full w-full overflow-hidden'>
+                <div className='bg-primary-50 absolute top-3/4 left-7/8 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-80'></div>
+                <div className='bg-line-50 absolute top-3/4 left-7/8 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full'></div>
             </div>
 
-            {/* 채팅 입력창 */}
-            <ChatInput
-                isActive={inputEnabled}
-                value={inputValue}
-                onChange={onChange}
-                onClick={onClick}
-            />
+            <div className='z-10 flex w-full flex-col items-center justify-between px-4 py-2'>
+                <Header title='계약 생성' />
+
+                <NotiContainer name={maskUserName(receiverName)} />
+
+                {/* 채팅 내용 */}
+                <div
+                    className='scrollbar-none my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
+                    ref={chatContainerRef}
+                >
+                    {chatHistory.length > 0 &&
+                        chatHistory.map((chat, index) => {
+                            return (
+                                <ChatBox
+                                    key={chat.id}
+                                    writerId={chat.writerId}
+                                    content={chat.content}
+                                    name={
+                                        chat.writerId !== userId &&
+                                        displayProfile(index)
+                                            ? getName(writers, chat.writerId)
+                                            : undefined
+                                    }
+                                />
+                            );
+                        })}
+
+                    {/* 입력 유형에 따른 컴포넌트 렌더링 */}
+                    {(currentQuestion?.type === 'specialTerms' ||
+                        renderSelector) && (
+                        <FormSelector
+                            currentQuestion={currentQuestion}
+                            handleRoleSelect={handleRoleSelect}
+                            handleRepaymentMethodSelect={
+                                handleRepaymentMethodSelect
+                            }
+                            handleSpecialTermSelect={handleSpecialTermSelect}
+                            sendMessage={sendMessage}
+                            currentTermIndex={currentTermIndex}
+                        />
+                    )}
+                </div>
+
+                {/* 채팅 입력창 */}
+                <ChatInput
+                    isActive={inputEnabled}
+                    value={inputValue}
+                    onChange={onChange}
+                    onClick={onClick}
+                />
+            </div>
         </div>
     );
 };

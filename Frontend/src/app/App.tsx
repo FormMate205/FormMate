@@ -23,6 +23,7 @@ import {
     SelectRecipient,
     EnterAmount,
     EnterPassword,
+    FormDraftLanding,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -49,6 +50,10 @@ const App = () => {
                     <Route
                         path='/login/findPw/reset'
                         element={<PasswordReset />}
+                    />
+                    <Route
+                        path='/draft/landing'
+                        element={<FormDraftLanding />}
                     />
                     <Route path='/draft' element={<FormDraft />} />
                     <Route path='/chat' element={<Chat />} />

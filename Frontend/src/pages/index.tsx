@@ -1,5 +1,6 @@
 export { default as FormMatch } from './formPartner/FormMatch';
 export { default as FormCheck } from './formPartner/FormCheck';
+export { default as FormDraftLanding } from './formDraft/FormDraftLanding';
 export { default as FormDraft } from './formDraft/FormDraft';
 // Contract
 export { default as Contracts } from './contract/Contracts';

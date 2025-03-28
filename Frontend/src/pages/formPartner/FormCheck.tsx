@@ -18,7 +18,7 @@ const FormCheck = () => {
 
     const onClick = () => {
         console.log('계약서 생성');
-        navigate('/draft');
+        navigate('/draft/landing');
     };
 
     return (

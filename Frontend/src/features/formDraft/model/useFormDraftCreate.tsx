@@ -6,6 +6,7 @@ import {
     specialTermsInfo,
 } from '@/entities/formDraft/config/formDraftQuestions';
 import { FormDraftRequest } from '@/entities/formDraft/model/types';
+import { formatCurrency } from '@/shared/model/formatCurrency';
 import { formatDate } from '@/shared/model/formatDate';
 import { validateUserAnswer } from './answerValid';
 import { Question } from './types';
@@ -161,13 +162,23 @@ export const useFormDraftCreate = ({
 
         // 사용자 메시지 추가
         messageIdCounterRef.current += 1;
-        const newMessage: ChatMessage = {
-            id: messageIdCounterRef.current.toString(),
-            writerId: userId,
-            content,
-        };
+        if (currentQuestion?.id === 'loanAmount') {
+            // 대출 금액은 원화로 표시
+            const newMessage: ChatMessage = {
+                id: messageIdCounterRef.current.toString(),
+                writerId: userId,
+                content: formatCurrency(content),
+            };
+            setChatHistory((prev) => [...prev, newMessage]);
+        } else {
+            const newMessage: ChatMessage = {
+                id: messageIdCounterRef.current.toString(),
+                writerId: userId,
+                content,
+            };
+            setChatHistory((prev) => [...prev, newMessage]);
+        }
 
-        setChatHistory((prev) => [...prev, newMessage]);
         setInputValue('');
 
         // 현재 질문에 대한 응답 처리
