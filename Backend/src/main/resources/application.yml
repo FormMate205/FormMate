@@ -12,7 +12,7 @@ spring:
       pool:
         size: 5
       thread-name-prefix: formmate-scheduler-
-  autoconfigure:
+#  autoconfigure:
   #    exclude:
   #      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
   servlet:
