@@ -41,7 +41,7 @@ const TodaySettlement = ({
                         </div>
                         <Button
                             variant='sendMinus'
-                            onClick={() => navigate('/송금화면')}
+                            onClick={() => navigate('/transfer')}
                         >
                             송금
                         </Button>
