@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.corp.formmate.contract.dto.ContractDetailResponse;
+import com.corp.formmate.contract.dto.ContractPreviewResponse;
 import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
 import com.corp.formmate.contract.service.ContractService;
+import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.global.annotation.CurrentUser;
 import com.corp.formmate.global.error.dto.ErrorResponse;
 import com.corp.formmate.user.dto.AuthUser;
@@ -132,5 +134,29 @@ public class ContractController {
 		AuthUser authUser) {
 		Integer currentUserId = authUser.getId();
 		return ResponseEntity.ok(contractService.selectContractWithPartner(currentUserId, userId));
+	}
+
+	@Operation(summary = "상태별 전체 계약 조회", description = "계약관리-목록 화면")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "상태별 전체 계약 조회 성공",
+			content = @Content(
+				mediaType = "application/json",
+				array = @ArraySchema(schema = @Schema(implementation = ContractPreviewResponse.class))
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 입력값",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@GetMapping("/{status}")
+	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@PathVariable FormStatus formStatus, @CurrentUser AuthUser authUser) {
+		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatus, authUser));
 	}
 }
