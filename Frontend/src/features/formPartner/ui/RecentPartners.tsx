@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FormPartner } from '@/entities/formDraft/model/types';
 import useFormPartnerStore from '@/entities/formPartner/model/formPartnerStore';
 import { useGetRecentFormPartner } from '@/features/formPartner/api/formPartnerAPI';
+import { maskUserName } from '@/shared/model/maskUserName';
 import ArrowListItem from '@/shared/ui/ArrowListItem';
 
 interface RecentPartnersProps {
@@ -62,7 +63,7 @@ const RecentPartners = ({ searchValue }: RecentPartnersProps) => {
                             }
                         >
                             <ArrowListItem
-                                title={item.userName}
+                                title={maskUserName(item.userName)}
                                 subString={item.phoneNumber}
                                 onClick={() => handleItemClick(item)}
                             />

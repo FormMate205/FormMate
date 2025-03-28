@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { FormPartner } from '@/entities/formDraft/model/types';
 import useFormPartnerStore from '@/entities/formPartner/model/formPartnerStore';
 import SearchListItem from '@/entities/formPartner/ui/SearchListItem';
+import { maskUserName } from '@/shared/model/maskUserName';
 import { useGetNewFormPartner } from '../api/formPartnerAPI';
 
 const NewPartnerDrawer = () => {
@@ -64,7 +65,7 @@ const NewPartnerDrawer = () => {
                         {searchValue &&
                             (data ? (
                                 <SearchListItem
-                                    name={data.userName}
+                                    name={maskUserName(data.userName)}
                                     phonenumber={data.phoneNumber}
                                     onClick={() => handleSelectPartner(data)}
                                 />
