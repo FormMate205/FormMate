@@ -19,3 +19,8 @@ export { default as UserPasswordUpdate } from './myinfo/UserPasswordUpdate';
 export { default as PasswordPhoneVerify } from './myinfo/PasswordPhoneVerify';
 // Notifications
 export { default as Notifications } from './notification/Notifiactions';
+// Transfer
+export { default as SelectRecipient } from './transfer/SelectRecipient';
+export { default as TransferComplete } from './transfer/TransferComplete';
+export { default as EnterAmount } from './transfer/EnterAmount';
+export { default as EnterPassword } from './transfer/EnterPassword';
