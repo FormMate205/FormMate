@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/drawer';
 import { Icons } from '@/shared';
 import FilterTab from './FilterTab';
+import RangeDatePicker from './RangeDatePicker';
 
 interface FilterValues {
     period: string;
@@ -42,9 +43,11 @@ const FilterDrawer = ({ defaultValues, onConfirm }: FilterDrawerProps) => {
         setOpen(false);
     };
 
-    const periods = ['1개월', '3개월', '지난달'];
+    const periods = ['1개월', '3개월', '직접 설정'];
     const types = ['전체', '입금만', '출금만'];
     const orders = ['최신순', '과거순'];
+    const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+    const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
@@ -53,18 +56,30 @@ const FilterDrawer = ({ defaultValues, onConfirm }: FilterDrawerProps) => {
                     {defaultValues.period}•{defaultValues.type}•
                     {defaultValues.order}
                 </span>
+
                 <Icons name='chev-down' size={14} className='fill-line-950' />
             </DrawerTrigger>
 
-            <DrawerContent>
-                <DrawerTitle />
-                <div className='flex flex-col p-4 font-semibold'>
-                    <FilterTab
-                        label='조회 기간'
-                        options={periods}
-                        selected={period}
-                        onChange={setPeriod}
-                    />
+            <DrawerContent className='p-4'>
+                <DrawerTitle className='text-xl'>조회 조건 설정</DrawerTitle>
+                <div className='mt-6 flex flex-col gap-10 font-semibold'>
+                    <div className='flex flex-col gap-4'>
+                        <FilterTab
+                            label='조회 기간'
+                            options={periods}
+                            selected={period}
+                            onChange={setPeriod}
+                        />
+                        {period === '직접 설정' && (
+                            <RangeDatePicker
+                                startDate={startDate}
+                                endDate={endDate}
+                                onStartDateChange={setStartDate}
+                                onEndDateChange={setEndDate}
+                            />
+                        )}
+                    </div>
+
                     <FilterTab
                         label='거래 유형'
                         options={types}
@@ -78,8 +93,10 @@ const FilterDrawer = ({ defaultValues, onConfirm }: FilterDrawerProps) => {
                         onChange={setOrder}
                     />
                 </div>
-                <DrawerFooter>
-                    <Button onClick={handleConfirm}>확인</Button>
+                <DrawerFooter className='mt-10 p-0'>
+                    <Button variant='primary' onClick={handleConfirm}>
+                        확인
+                    </Button>
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>

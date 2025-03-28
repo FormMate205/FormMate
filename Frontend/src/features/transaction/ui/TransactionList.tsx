@@ -1,4 +1,4 @@
-import TransactionItem from './TransactionItem';
+import TransactionItem from '@/entities/transaction/ui/TransactionItem';
 
 interface TransactionListProps {
     transactions: Transaction[];
