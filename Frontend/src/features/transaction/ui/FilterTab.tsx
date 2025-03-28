@@ -9,7 +9,7 @@ interface FilterTabProps {
 
 const FilterTab = ({ label, options, selected, onChange }: FilterTabProps) => {
     return (
-        <div className='mb-6'>
+        <div className='flex flex-col gap-2'>
             <p className='mb-2 text-lg font-semibold'>{label}</p>
             <div className='flex justify-between rounded-xl bg-gray-100 p-1'>
                 {options.map((item) => (
