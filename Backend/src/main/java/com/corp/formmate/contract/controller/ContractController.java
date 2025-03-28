@@ -137,6 +137,7 @@ public class ContractController {
 		return ResponseEntity.ok(contractService.selectContractWithPartner(currentUserId, userId));
 	}
 
+	// TODO: 계약관리-목록 테스트 코드 작성
 	@Operation(summary = "상태별 전체 계약 조회", description = "계약관리-목록 화면")
 	@ApiResponses({
 		@ApiResponse(
