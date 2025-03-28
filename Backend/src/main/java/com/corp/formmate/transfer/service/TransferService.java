@@ -11,10 +11,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.form.entity.FormEntity;
+import com.corp.formmate.form.service.FormService;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.TransferException;
+import com.corp.formmate.transfer.dto.TransferFormListResponse;
 import com.corp.formmate.transfer.dto.TransferListResponse;
 import com.corp.formmate.transfer.entity.TransferEntity;
+import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.UserService;
@@ -30,17 +34,22 @@ public class TransferService {
 
 	private final TransferRepository transferRepository;
 
+	private final FormService formService;
+
 	private final UserService userService;
 
 	@Transactional(readOnly = true)
 	public Page<TransferListResponse> selectTransfers(Integer userId, String period, String transferType,
-		Boolean latestFirst, Pageable pageable) {
+		String sortDirection, Pageable pageable) {
 
 		UserEntity user = userService.selectById(userId);
 
-		Sort sort = latestFirst
-			? Sort.by("transactionDate").descending()
-			: Sort.by("transactionDate").ascending();
+		Sort sort;
+		if (sortDirection.equals("과거순")) {
+			sort = Sort.by("transactionDate").ascending();
+		} else {
+			sort = Sort.by("transactionDate").descending();
+		}
 
 		Pageable pageableWithSort = PageRequest.of(
 			pageable.getPageNumber(),
@@ -51,10 +60,10 @@ public class TransferService {
 		LocalDateTime startDate = null;
 		LocalDateTime endDate = LocalDateTime.now();
 
-		if (period.equals("1m")) {
+		if (period.equals("1개월")) {
 			// 1개월
 			startDate = endDate.minusMonths(1);
-		} else if (period.equals("3m")) {
+		} else if (period.equals("3개월")) {
 			// 3개월
 			startDate = endDate.minusMonths(3);
 		} else if (period.contains("~")) {
@@ -79,11 +88,11 @@ public class TransferService {
 
 		Page<TransferEntity> transfers;
 
-		if ("ALL".equals(transferType)) {
+		if ("전체".equals(transferType)) {
 			// 모든 거래내역 (송금 + 수신)
 			transfers = transferRepository.findBySenderOrReceiverAndTransactionDateBetween(
 				user, user, startDate, endDate, pageableWithSort);
-		} else if ("SEND".equals(transferType)) {
+		} else if ("출금만".equals(transferType)) {
 			// 송금한 내역 (출금)
 			transfers = transferRepository.findBySenderAndTransactionDateBetween(
 				user, startDate, endDate, pageableWithSort);
@@ -93,6 +102,24 @@ public class TransferService {
 				user, startDate, endDate, pageableWithSort);
 		}
 		return transfers.map(transfer -> TransferListResponse.fromEntity(transfer, user));
+	}
+
+	@Transactional(readOnly = true)
+	public Page<TransferFormListResponse> selectFormTransfers(Integer formId, String transferStatus,
+		Pageable pageable) {
+
+		Page<TransferEntity> transfers;
+		FormEntity formEntity = formService.selectById(formId);
+
+		if ("전체".equals(transferStatus)) {
+			transfers = transferRepository.findByFormAndCurrentRoundGreaterThan(formEntity, 0, pageable);
+		} else {
+			TransferStatus status = TransferStatus.fromKorName(transferStatus);
+			transfers = transferRepository.findByFormAndStatusAndCurrentRoundGreaterThan(formEntity, status, 0,
+				pageable);
+		}
+
+		return transfers.map(TransferFormListResponse::fromEntity);
 	}
 }
 
