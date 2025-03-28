@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { SignupFormState } from '../types';
+import { SignupFormState } from './types';
 
 interface SignupFormStore extends SignupFormState {
     setField: (key: keyof SignupFormState, value: string | boolean) => void;

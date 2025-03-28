@@ -1,5 +1,5 @@
 import axios from '@/shared/api/instance';
-import { LoginFormSchema } from '../types';
+import { LoginFormSchema } from '../model/types';
 
 export const login = async ({ email, password }: LoginFormSchema) => {
     const response = await axios.post('/auth/email/login', {

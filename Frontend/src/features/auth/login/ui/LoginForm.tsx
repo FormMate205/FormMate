@@ -2,8 +2,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { login } from '../api/login';
+import { LoginFormSchema } from '../model/types';
 import { useLoginForm } from '../model/useLoginForm';
-import { LoginFormSchema } from '../types';
 
 const LoginForm = () => {
     const navigate = useNavigate();
