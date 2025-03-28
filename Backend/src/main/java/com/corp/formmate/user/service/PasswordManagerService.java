@@ -43,7 +43,7 @@ public class PasswordManagerService {
     }
 
     /**
-     * 이름과 전봐번호로 사용자 찾기
+     * 이름과 전화번호로 사용자 찾기
      * @param userName 사용자 이름
      * @param phoneNumber 전화번호
      * @return 사용자 엔티티
