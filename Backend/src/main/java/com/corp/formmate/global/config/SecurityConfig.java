@@ -107,6 +107,10 @@ public class SecurityConfig {
 
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+
+		// 클라이언트에 노출할 응답 헤더 지정
+		configuration.setExposedHeaders(Arrays.asList("Authorization"));
+
 		configuration.setAllowCredentials(true);
 		// 1시간동안 preflight 결과 캐싱
 		configuration.setMaxAge(3600L);
