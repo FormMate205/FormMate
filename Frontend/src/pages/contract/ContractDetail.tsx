@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
+import ProgressBar from '@/entities/contract/ui/charts/ProgressBar';
 import DetailSummaryItem from '@/entities/contract/ui/DetailSummaryItem';
-import ProgressBar from '@/entities/contract/ui/ProgressBar';
 import EarlyTerminateAlert from '@/features/contract/ui/EarlyTerminateAlert';
 import ContractTabs from '@/features/contract/ui/tabs/ContractTabs';
 import { Header } from '@/widgets';

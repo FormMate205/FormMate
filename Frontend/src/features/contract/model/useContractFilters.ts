@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 
 import {
     ContractStatus,
@@ -45,14 +45,23 @@ const dummyContracts: ContractCardProps[] = [
 
 export const useContractFilters = () => {
     const [filter, setFilter] = useState<ContractStatus | '전체'>('전체');
+    const [search, setSearch] = useState('');
+    const onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value.trim());
+    };
 
-    const filteredContracts = dummyContracts.filter((contract) =>
-        filter === '전체' ? true : contract.status === filter,
-    );
+    const filteredContracts = dummyContracts
+        .filter((contract) =>
+            filter === '전체' ? true : contract.status === filter,
+        )
+        .filter((contract) => contract.name.includes(search));
 
     return {
         filter,
         setFilter,
         filteredContracts,
+        search,
+        setSearch,
+        onChangeSearch,
     };
 };

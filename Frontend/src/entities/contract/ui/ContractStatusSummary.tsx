@@ -1,24 +1,31 @@
-import { Fragment } from 'react/jsx-runtime';
-
-const summaryData = [
-    {
-        label: '대기',
-        value: '2',
-        className: 'border-line-300',
-    },
-    {
-        label: '진행',
-        value: '10',
-        className: 'border-primary-500 text-primary-500 border',
-    },
-    {
-        label: '완료',
-        value: '5',
-        className: 'bg-line-50 text-line-500 border-line-300',
-    },
-];
+import { Fragment } from 'react';
 
 const ContractStatusSummary = () => {
+    // dummy
+    const data = {
+        formPendingCount: 1,
+        formActiveCount: 3,
+        formCompletedCount: 2,
+    };
+
+    const summaryData = [
+        {
+            label: '대기',
+            value: data.formPendingCount,
+            className: 'border-line-300',
+        },
+        {
+            label: '진행',
+            value: data.formActiveCount,
+            className: 'border-primary-500 text-primary-500 border',
+        },
+        {
+            label: '완료',
+            value: data.formCompletedCount,
+            className: 'bg-line-50 text-line-500 border-line-300',
+        },
+    ];
+
     return (
         <div className='flex flex-col gap-2'>
             <span className='text-lg font-medium'>계약 현황</span>
@@ -34,10 +41,9 @@ const ContractStatusSummary = () => {
                                 </div>
                                 <span>{item.label}</span>
                             </div>
-
                             {index < summaryData.length - 1 && (
                                 <div className='flex h-full flex-1'>
-                                    <div className='bg-line-300 mt-7 flex h-0.5 flex-1 justify-center'></div>
+                                    <div className='bg-line-300 mt-7 flex h-0.5 flex-1 justify-center' />
                                 </div>
                             )}
                         </Fragment>
