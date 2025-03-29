@@ -116,3 +116,20 @@
     -ms-overflow-style: none; /* IE, Edge */
     scrollbar-width: none; /* Firefox */
 }
+
+/* 위아래로 움직이는 애니메이션 */
+@keyframes float {
+    from {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+    to {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 1.5s ease-in-out infinite;
+}
