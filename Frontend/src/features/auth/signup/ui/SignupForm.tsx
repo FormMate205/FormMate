@@ -13,7 +13,7 @@ import {
     RegisterUserRequest,
     ApiErrorResponse,
     SignupFormState,
-} from '../types';
+} from '../model/types';
 
 declare global {
     interface Window {
