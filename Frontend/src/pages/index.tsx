@@ -1,4 +1,5 @@
 export { default as FormMatch } from './formPartner/FormMatch';
+
 export { default as FormCheck } from './formPartner/FormCheck';
 export { default as FormDraft } from './formDraft/FormDraft';
 // Contract
@@ -9,6 +10,7 @@ export { default as Home } from './home/Home';
 export { default as Login } from './login/Login';
 export { default as Landing } from './login/LandingPage';
 export { default as Signup } from './signup/Signup';
+export { default as OauthAddInfoPage } from './signup/OauthAddInfo';
 export { default as PasswordReset } from './password/PasswordReset';
 export { default as PhoneVerify } from './password/PhoneVerify';
 export { default as AccountRegist } from './account/AccountRegist';

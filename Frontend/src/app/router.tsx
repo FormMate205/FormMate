@@ -23,6 +23,7 @@ import {
     SelectRecipient,
     EnterAmount,
     EnterPassword,
+    OauthAddInfoPage,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import FormDraftLanding from '@/widgets/landing/FormDraftLanding';
@@ -33,8 +34,31 @@ export const router = createBrowserRouter([
         path: '/',
         element: <LayoutProvider />,
         children: [
+            // 홈, 회원가입, 로그인
+            { path: '/', element: <Home userName='' /> },
+            { path: '/landing', element: <Landing /> },
+            { path: '/landing/signup', element: <Signup /> },
+            { path: '/login', element: <Login /> },
+            { path: '/login/findPw', element: <PhoneVerify /> },
+            {
+                path: '/login/findPw/reset',
+                element: <PasswordReset />,
+            },
+            {
+                path: '/login/oauthInfo',
+                element: <OauthAddInfoPage />,
+            },
+            // 계약 생성
             { path: '/form', element: <FormMatch /> },
             { path: '/form/check', element: <FormCheck /> },
+            {
+                path: '/draft/landing',
+                element: <FormDraftLanding />,
+            },
+            { path: '/draft', element: <FormDraft /> },
+            // 채팅
+            { path: '/chat', element: <Chat /> },
+            // 계약 관리
             { path: '/transaction', element: <Transaction /> },
             { path: '/contracts', element: <Contracts /> },
             {
@@ -42,21 +66,6 @@ export const router = createBrowserRouter([
                 element: <ContractDetail />,
             },
             { path: '/notifications', element: <Notifications /> },
-            { path: '/', element: <Home userName='' /> },
-            { path: '/landing', element: <Landing /> },
-            { path: '/login', element: <Login /> },
-            { path: '/landing/signup', element: <Signup /> },
-            { path: '/login/findPw', element: <PhoneVerify /> },
-            {
-                path: '/login/findPw/reset',
-                element: <PasswordReset />,
-            },
-            {
-                path: '/draft/landing',
-                element: <FormDraftLanding />,
-            },
-            { path: '/draft', element: <FormDraft /> },
-            { path: '/chat', element: <Chat /> },
             { path: '/account', element: <AccountRegist /> },
             { path: '/account/verify', element: <AccountVerify /> },
             {

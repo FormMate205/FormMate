@@ -1,14 +1,28 @@
-import { LoginFormSchema } from '../types';
+import axios from '@/shared/api/instance';
+import { LoginFormSchema } from '../model/types';
 
-// 임시 mock 데이터
 export const login = async ({ email, password }: LoginFormSchema) => {
-    if (email === 'test@test.com' && password === 'test123!') {
-        return {
-            success: true,
-            token: 'mock-token-1234',
-            user: { email, name: '홍길동' },
-        };
-    } else {
-        throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+    const response = await axios.post('/auth/email/login', {
+        email,
+        password,
+    });
+
+    const data = response.data;
+    const token =
+        response.headers['authorization'] || response.headers['Authorization'];
+
+    if (!token) {
+        throw new Error('Access Token이 응답에 포함되어 있지 않습니다.');
     }
+
+    localStorage.setItem('accessToken', token);
+
+    return {
+        success: true,
+        token,
+        user: {
+            email: data.email,
+            name: data.userName,
+        },
+    };
 };
