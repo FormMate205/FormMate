@@ -6,12 +6,15 @@ import ChatBox from '@/features/chat/ui/ChatBox';
 import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
 import FormSelector from '@/features/formDraft/ui/FormSelector';
 import { maskUserName } from '@/shared/model/maskUserName';
+import useNavigationGuard from '@/shared/model/useNavigationGuard';
 import { Header } from '@/widgets';
+import NavigationGuardModal from '@/widgets/modal/NavigationGuardModal';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 import NotiContainer from '../../entities/formDraft/ui/NotiContainer';
 
 const FormDraft = () => {
     const userId = '1';
+    // 추후에 partner store 값으로 바꿔야함 (지금 바꾸면 값이 없어서 화면에 아무것도 안 보임ㅜㅜ)
     const receiverId = '2';
     const receiverName = '윤이영';
 
@@ -64,6 +67,10 @@ const FormDraft = () => {
     const onClick = () => {
         sendMessage(inputValue);
     };
+
+    // 경로 이탈 감지 모달
+    const { showModal, confirmNavigation, cancelNavigation } =
+        useNavigationGuard();
 
     return (
         <div className='bg-line-50 relative flex h-screen w-full'>
@@ -124,6 +131,14 @@ const FormDraft = () => {
                     onClick={onClick}
                 />
             </div>
+
+            <NavigationGuardModal
+                title='계약 생성을 그만두시겠습니까?'
+                description='페이지를 벗어나면 지금까지 입력한 모든 내용이 사라집니다.'
+                isOpen={showModal}
+                onConfirm={confirmNavigation}
+                onCancel={cancelNavigation}
+            />
         </div>
     );
 };

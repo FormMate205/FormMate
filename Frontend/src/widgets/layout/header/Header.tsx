@@ -4,6 +4,7 @@ import { Icons } from '@/shared';
 interface HeaderProps {
     isHome?: boolean;
     title: string;
+    isPrevented?: boolean;
 }
 
 const Header = ({ isHome = false, title }: HeaderProps) => {
@@ -33,7 +34,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
     };
 
     return (
-        <div className='flex w-full items-center justify-between py-4'>
+        <div className='flex items-center justify-between w-full py-4'>
             {/* 경로 표시 */}
             <div className='flex items-center gap-3'>
                 {!isHome && (

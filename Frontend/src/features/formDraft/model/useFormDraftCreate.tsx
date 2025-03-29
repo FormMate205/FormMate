@@ -8,6 +8,7 @@ import {
 import { FormDraftRequest } from '@/entities/formDraft/model/types';
 import { formatCurrency } from '@/shared/model/formatCurrency';
 import { formatDate } from '@/shared/model/formatDate';
+import { usePostFormDraft } from '../api/formDraftAPI';
 import { validateUserAnswer } from './answerValid';
 import { Question } from './types';
 
@@ -20,6 +21,9 @@ export const useFormDraftCreate = ({
     userId,
     initialReceiverId = '',
 }: UseFormDraftCreateProps) => {
+    // 계약서 생성 API
+    const { mutate } = usePostFormDraft();
+
     // 채팅 내역
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
@@ -339,6 +343,7 @@ export const useFormDraftCreate = ({
             setCurrentQuestion(null);
             setInputEnabled(false);
 
+            mutate(formDraft);
             console.log('계약서 생성:', formDraft);
         } catch (error) {
             console.error('계약서 생성 오류:', error);
