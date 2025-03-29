@@ -4,7 +4,6 @@ import { Icons } from '@/shared';
 interface HeaderProps {
     isHome?: boolean;
     title: string;
-    isPrevented?: boolean;
 }
 
 const Header = ({ isHome = false, title }: HeaderProps) => {
