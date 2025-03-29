@@ -23,6 +23,7 @@ import {
     SelectRecipient,
     EnterAmount,
     EnterPassword,
+    OauthAddInfoPage,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -44,6 +45,10 @@ const App = () => {
                     <Route path='/' element={<Home userName='' />} />
                     <Route path='/landing' element={<Landing />} />
                     <Route path='/login' element={<Login />} />
+                    <Route
+                        path='/login/oauthInfo'
+                        element={<OauthAddInfoPage />}
+                    />
                     <Route path='/landing/signup' element={<Signup />} />
                     <Route path='/login/findPw' element={<PhoneVerify />} />
                     <Route

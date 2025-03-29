@@ -1,5 +1,5 @@
 import axios from '@/shared/api/instance';
-import { RegisterUserRequest, VerifyCodeRequest } from '../types';
+import { RegisterUserRequest, VerifyCodeRequest } from '../model/types';
 
 // 이메일 중복 확인
 export const checkEmail = async (email: string): Promise<boolean> => {

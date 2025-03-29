@@ -2,8 +2,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { login } from '../api/login';
+import { LoginFormSchema } from '../model/types';
 import { useLoginForm } from '../model/useLoginForm';
-import { LoginFormSchema } from '../types';
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -16,10 +16,10 @@ const LoginForm = () => {
 
     const onSubmit = async (data: LoginFormSchema) => {
         try {
-            const res = await login(data); // mock login 함수
+            const res = await login(data);
             // 1. 토큰 저장
             localStorage.setItem('accessToken', res.token);
-            // 2. 유저 쿼리 갱신
+            // 2. 유저 정보 갱신
             await queryClient.invalidateQueries({ queryKey: ['user'] });
             // 3. 이동
             navigate('/');
