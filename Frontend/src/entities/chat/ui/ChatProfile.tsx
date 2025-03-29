@@ -1,0 +1,22 @@
+interface ChatProfileProps {
+    isBot: boolean;
+    name: string;
+}
+
+const ChatProfile = ({ isBot, name }: ChatProfileProps) => {
+    return (
+        <div className='flex items-center gap-3'>
+            {isBot ? (
+                <img
+                    src='/public/assets/images/chatbot-profile.png'
+                    width={28}
+                />
+            ) : (
+                <img src='/public/assets/images/avatar.png' width={24} />
+            )}
+            <p className='text-lg font-medium'>{name}</p>
+        </div>
+    );
+};
+
+export default ChatProfile;

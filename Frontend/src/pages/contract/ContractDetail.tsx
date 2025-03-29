@@ -1,13 +1,9 @@
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DetailSummaryItem from '@/entities/contract/ui/DetailSummaryItem';
+import ProgressBar from '@/entities/contract/ui/ProgressBar';
+import EarlyTerminateAlert from '@/features/contract/ui/EarlyTerminateAlert';
+import ContractTabs from '@/features/contract/ui/tabs/ContractTabs';
 import { Header } from '@/widgets';
-
-import InterestInfoTab from './ui/ContractTabs/InterestInfoTab';
-import PaymentHistoryTab from './ui/ContractTabs/PaymentHistoryTab';
-import SummaryTab from './ui/ContractTabs/SummaryTab';
-import EarlyTerminateAlert from './ui/EarlyTerminateAlert';
-import ProgressBar from './ui/ProgressBar';
-import SummaryItem from './ui/SummaryItem';
 
 const summaryData = [
     {
@@ -32,11 +28,11 @@ const summaryData = [
 
 const ContractDetail = () => {
     return (
-        <>
-            <div className='flex h-full flex-col'>
-                <div className='bg-line-50 flex h-full flex-col gap-5'>
-                    <section className='px-4'>
-                        <Header title='계약 상세' />
+        <div className='flex h-screen flex-col'>
+            <div className='bg-line-50 flex flex-col px-4 py-2'>
+                <Header title='계약 상세' />
+                <div className='flex h-full flex-col gap-2'>
+                    <section className=''>
                         <div className='border-line-200 flex items-center justify-between border-b pb-3'>
                             <div className='text-lg font-medium'>
                                 <span className='text-primary-500 text-xl'>
@@ -50,7 +46,7 @@ const ContractDetail = () => {
                             <div className='flex flex-col gap-2'>
                                 <div className='flex flex-col gap-2'>
                                     {summaryData.map((item, idx) => (
-                                        <SummaryItem
+                                        <DetailSummaryItem
                                             key={idx}
                                             tagText={item.tag}
                                             color={item.color}
@@ -65,7 +61,8 @@ const ContractDetail = () => {
                             <ProgressBar amount={48000} goal={100000} />
                         </div>
                     </section>
-                    <div className='flex flex-col items-center gap-3'>
+                    {/* ContractActionButtons */}
+                    <div className='flex flex-col items-center gap-3 py-2'>
                         <div className='flex w-full justify-center gap-4'>
                             <Button variant={'choiceEmpty'}>채팅하기</Button>
                             <Button variant={'choiceFill'}>이체하기</Button>
@@ -78,33 +75,11 @@ const ContractDetail = () => {
                             />
                         </div>
                     </div>
-                    <section className='bg-white'>
-                        <Tabs defaultValue='contract'>
-                            <TabsList>
-                                <TabsTrigger value='contract'>
-                                    차용증
-                                </TabsTrigger>
-                                <TabsTrigger value='history'>
-                                    납부 내역
-                                </TabsTrigger>
-                                <TabsTrigger value='interest'>
-                                    이자 조회
-                                </TabsTrigger>
-                            </TabsList>
-                            <TabsContent value='contract'>
-                                <SummaryTab />
-                            </TabsContent>
-                            <TabsContent value='history'>
-                                <PaymentHistoryTab />
-                            </TabsContent>
-                            <TabsContent value='interest'>
-                                <InterestInfoTab />
-                            </TabsContent>
-                        </Tabs>
-                    </section>
                 </div>
             </div>
-        </>
+            {/* ContractDetailTabs */}
+            <ContractTabs />
+        </div>
     );
 };
 

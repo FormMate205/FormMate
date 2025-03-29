@@ -1,21 +1,28 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import {
     Chat,
-    FormMatch,
     Home,
     Login,
     Landing,
     Signup,
     PasswordReset,
     PhoneVerify,
-    ContractList,
     ContractDetail,
     AccountRegist,
     AccountVerify,
     AccountPassword,
     MyInfo,
+    UserPasswordUpdate,
+    PasswordPhoneVerify,
+    FormMatch,
     FormCheck,
-    FormCreate,
+    FormDraft,
+    Contracts,
+    Notifications,
+    TransferComplete,
+    SelectRecipient,
+    EnterAmount,
+    EnterPassword,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import LayoutProvider from './provider/LayoutProvider';
@@ -28,21 +35,22 @@ const App = () => {
                     <Route path='/form' element={<FormMatch />} />
                     <Route path='/form/check' element={<FormCheck />} />
                     <Route path='/transaction' element={<Transaction />} />
-                    <Route path='/contract' element={<ContractList />} />
+                    <Route path='/contracts' element={<Contracts />} />
                     <Route
-                        path='/contract/detail'
+                        path='/contracts/:contractId'
                         element={<ContractDetail />}
                     />
-                    <Route path='/' element={<Home />} />
+                    <Route path='/notifications' element={<Notifications />} />
+                    <Route path='/' element={<Home userName='' />} />
                     <Route path='/landing' element={<Landing />} />
                     <Route path='/login' element={<Login />} />
-                    <Route path='/login/signup' element={<Signup />} />
+                    <Route path='/landing/signup' element={<Signup />} />
                     <Route path='/login/findPw' element={<PhoneVerify />} />
                     <Route
                         path='/login/findPw/reset'
                         element={<PasswordReset />}
                     />
-                    <Route path='/form/create' element={<FormCreate />} />
+                    <Route path='/draft' element={<FormDraft />} />
                     <Route path='/chat' element={<Chat />} />
                     <Route path='/account' element={<AccountRegist />} />
                     <Route path='/account/verify' element={<AccountVerify />} />
@@ -51,6 +59,24 @@ const App = () => {
                         element={<AccountPassword />}
                     />
                     <Route path='/myinfo' element={<MyInfo />} />
+                    <Route
+                        path='/myinfo/password'
+                        element={<UserPasswordUpdate />}
+                    />
+                    <Route
+                        path='/myinfo/password/findPw'
+                        element={<PasswordPhoneVerify />}
+                    />
+                    <Route path='/transfer' element={<SelectRecipient />} />
+                    <Route
+                        path='/transfer/complete'
+                        element={<TransferComplete />}
+                    />
+                    <Route
+                        path='/transfer/password'
+                        element={<EnterPassword />}
+                    />
+                    <Route path='/transfer/amount' element={<EnterAmount />} />
                 </Route>
             </Routes>
         </BrowserRouter>

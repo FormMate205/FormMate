@@ -19,6 +19,9 @@ const buttonVariants = cva(
                 choiceFill:
                     'bg-primary-500 border border-primary-500 text-white text-sm font-medium rounded-[4px] px-3 py-2',
                 light: 'bg-primary-50 text-primary-500 mt-4 w-full rounded py-2',
+                sendPlus: 'bg-primary-500 px-6 py-2 text-white',
+                sendMinus: 'bg-subPink-600 px-6 py-2 text-white',
+                logout: 'border border-line-200 px-8 py-1.5 text-sm text-line-400',
             },
         },
         defaultVariants: {

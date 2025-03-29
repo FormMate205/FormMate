@@ -68,9 +68,9 @@
     <symbol id="copy" width="24" height="24" fill="current" viewBox="0 0 24 24">
       <path fill="current" fill-rule="evenodd" d="M12.065 4.24c0-.217.175-.392.392-.392h7.304a.39.39 0 0 1 .391.391v7.304a.391.391 0 0 1-.391.392h-2.609a1.174 1.174 0 1 0 0 2.348h2.609a2.74 2.74 0 0 0 2.739-2.74V4.24a2.74 2.74 0 0 0-2.74-2.74h-7.304a2.74 2.74 0 0 0-2.739 2.74v2.608a1.174 1.174 0 0 0 2.348 0V4.239ZM3.848 20.151v-7.826h7.826v7.826H3.848ZM1.5 11.543c0-.864.7-1.565 1.565-1.565h9.392c.864 0 1.565.701 1.565 1.566v9.39c0 .865-.701 1.566-1.566 1.566h-9.39c-.865 0-1.566-.7-1.566-1.565v-9.391Z" clip-rule="evenodd"/>
     </symbol>
-    <symbol id="bell" width="24" height="24" fill="current" viewBox="0 0 24 24">
-      <path stroke="current" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19a3 3 0 0 1-6 0m3.721-13.997L11.255 5c-3.344-.008-6.247 2.709-6.27 6v3.79c0 .79-.1 1.561-.53 2.218l-.288.438C3.73 18.11 4.2 19 4.985 19h14.03c.785 0 1.254-.89.818-1.554l-.287-.438c-.43-.657-.53-1.429-.53-2.219v-3.788c-.04-3.292-2.95-5.99-6.295-5.998Z"/>
-      <path stroke="current" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a2 2 0 0 1 2 2v1h-4V4a2 2 0 0 1 2-2Z"/>
+    <symbol id="bell" width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <path stroke="#4E4B5D" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19a3 3 0 0 1-6 0m3.721-13.997L11.255 5c-3.344-.008-6.247 2.709-6.27 6v3.79c0 .79-.1 1.561-.53 2.218l-.288.438C3.73 18.11 4.2 19 4.985 19h14.03c.785 0 1.254-.89.818-1.554l-.287-.438c-.43-.657-.53-1.429-.53-2.219v-3.788c-.04-3.292-2.95-5.99-6.295-5.998Z"/>
+      <path stroke="#4E4B5D" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a2 2 0 0 1 2 2v1h-4V4a2 2 0 0 1 2-2Z"/>
     </symbol>
     <symbol id="chev-down" width="24" height="24" fill="current" viewBox="0 0 24 24">
       <path fill="current" fill-rule="evenodd" d="M2.253 7.347a.977.977 0 0 1 1.411-.086L12 14.93l8.336-7.669a.977.977 0 0 1 1.411.086 1.06 1.06 0 0 1-.083 1.462l-8.335 7.668a1.95 1.95 0 0 1-2.658 0L2.336 8.81a1.06 1.06 0 0 1-.083-1.462Z" clip-rule="evenodd"/>

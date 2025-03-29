@@ -16,7 +16,7 @@ const ArrowListItem = ({
 }: ArrowListItemProps) => {
     return (
         <button
-            className='border-line-100 flex w-full items-center justify-between border-b py-2'
+            className='border-line-100 flex w-full cursor-pointer items-center justify-between border-b py-2'
             onClick={onClick}
         >
             <div className='flex items-center gap-4'>

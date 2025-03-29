@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { NoticeModal, ToastModal } from '@/widgets';
+import NumberPad from '@/shared/ui/NumberPad';
+import PasswordDots from '@/shared/ui/PasswordDots';
+import { Header, NoticeModal, ToastModal } from '@/widgets';
 
 const AccountPasswordForm = () => {
     const navigate = useNavigate();
@@ -46,10 +48,11 @@ const AccountPasswordForm = () => {
     };
 
     return (
-        <div className='flex h-screen flex-col'>
-            {/* 상단 영역 */}
-            <div className='p-6'>
-                <h2 className='mt-8 text-center text-lg font-semibold'>
+        <div className='relative flex h-full flex-col justify-between px-4 py-2'>
+            <Header title='결제 비밀번호 등록' />
+
+            <div className='flex flex-col justify-center p-6'>
+                <h2 className='text-center text-xl font-semibold'>
                     {step === 'input' ? '결제 비밀번호' : '비밀번호 확인'}
                 </h2>
                 <p className='text-line-500 text-center'>
@@ -57,61 +60,16 @@ const AccountPasswordForm = () => {
                         ? '결제 비밀번호를 입력하세요'
                         : '확인을 위해 한 번 더 입력해주세요'}
                 </p>
-
-                {/* 비밀번호 시각화 */}
-                <div className='mt-10 mb-8 flex justify-center gap-3'>
-                    {[...Array(6)].map((_, idx) => (
-                        <div
-                            key={idx}
-                            className={`h-8 w-8 border-b-1 text-center text-2xl font-semibold ${
-                                inputValue[idx]
-                                    ? 'border-primary-500'
-                                    : 'border-line-200'
-                            }`}
-                        >
-                            {inputValue[idx] ? '•' : ''}
-                        </div>
-                    ))}
-                </div>
+                <PasswordDots inputValue={inputValue} />
             </div>
 
             {/* 숫자패드 + 버튼 */}
-            <div className='fixed bottom-0 left-0 w-full px-6 pb-6'>
+            <div className='sticky bottom-0 left-0 mx-auto flex w-full max-w-[640px] flex-col gap-6 pb-6'>
                 {/* 숫자 키패드 */}
-                <div className='mb-10 grid grid-cols-3 gap-8 text-center text-2xl'>
-                    {[
-                        '1',
-                        '2',
-                        '3',
-                        '4',
-                        '5',
-                        '6',
-                        '7',
-                        '8',
-                        '9',
-                        '',
-                        '0',
-                        '←',
-                    ].map((num) =>
-                        num === '←' ? (
-                            <div
-                                key={num}
-                                onClick={handleDelete}
-                                className='cursor-pointer'
-                            >
-                                ←
-                            </div>
-                        ) : (
-                            <div
-                                key={num}
-                                onClick={() => handleNumberClick(num)}
-                                className='cursor-pointer'
-                            >
-                                {num}
-                            </div>
-                        ),
-                    )}
-                </div>
+                <NumberPad
+                    onDelete={handleDelete}
+                    onNumberClick={handleNumberClick}
+                />
 
                 {/* 하단 버튼 */}
                 <Button

@@ -28,14 +28,12 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
 
     // 알림 페이지 이동
     const onNavigateNotify = () => {
-        navigate('/notify');
+        navigate('/notifications');
         return;
     };
 
     return (
-        <div
-            className={`flex w-full items-center justify-between ${isHome ? 'p-4' : 'py-4'}`}
-        >
+        <div className='flex w-full items-center justify-between py-4'>
             {/* 경로 표시 */}
             <div className='flex items-center gap-3'>
                 {!isHome && (
@@ -57,7 +55,7 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
                     onClick={onNavigateNotify}
                     className='flex items-center justify-center'
                 >
-                    <Icons name='bell' size={18} className='fill-white' />
+                    <Icons name='bell' size={18} className='fill-line-900' />
                 </button>
             )}
         </div>
