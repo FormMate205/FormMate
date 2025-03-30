@@ -72,7 +72,9 @@ const ContractDetailTab = () => {
         <div className='flex flex-col gap-4'>
             <div className='flex justify-end'>
                 {/* Todo: PDF 내보내기 */}
-                <Button variant='choiceEmpty'>PDF로 내보내기</Button>
+                <Button variant='choiceEmpty' onClick={() => {}}>
+                    PDF로 내보내기
+                </Button>
             </div>
             <div className='flex flex-col gap-4 bg-white px-6 py-4 shadow-sm'>
                 <div className='flex flex-col'>
@@ -185,9 +187,20 @@ const ContractDetailTab = () => {
                     <div className='flex justify-center pt-4 text-lg font-medium'>
                         {format(new Date(), 'yyyy.MM.dd')}
                     </div>
-                    <div className='flex flex-col items-end font-medium'>
-                        <span>{creditorName} (인)</span>
-                        <span>{debtorName} (인)</span>
+                    {/* Todo: 싸인 처리 어떻게 할건지...? */}
+                    <div className='flex flex-col items-end justify-center text-right font-medium'>
+                        <div>
+                            <span>{creditorName}</span>
+                            <span className='text-line-700 ml-2 text-sm'>
+                                (PASS 전자서명 완료)
+                            </span>
+                        </div>
+                        <div>
+                            <span>{debtorName}</span>
+                            <span className='text-line-700 ml-2 text-sm'>
+                                (PASS 전자서명 완료)
+                            </span>
+                        </div>
                     </div>
                 </article>
             </div>

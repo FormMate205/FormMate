@@ -1,6 +1,6 @@
 import ProgressBar from '@/entities/contract/ui/charts/ProgressBar';
 import DetailOverviewItem from '@/entities/contract/ui/DetailOverviewItem';
-import { getDday } from '@/shared/lib/date'; // formatDate도 함께 사용 추천
+import { getDday } from '@/shared/lib/date';
 
 // dummy
 const data = {
