@@ -71,6 +71,7 @@ const ContractDetailTab = () => {
     return (
         <div className='flex flex-col gap-4'>
             <div className='flex justify-end'>
+                {/* Todo: PDF 내보내기 */}
                 <Button variant='choiceEmpty'>PDF로 내보내기</Button>
             </div>
             <div className='flex flex-col gap-4 bg-white px-6 py-4 shadow-sm'>
@@ -103,7 +104,7 @@ const ContractDetailTab = () => {
                         <span className='text-line-700 font-medium'>
                             입금계좌
                         </span>
-                        <div className='flex flex-col items-end'>
+                        <div className='flex items-end gap-2'>
                             <span>{creditorBank}</span>
                             <span>{creditorAccount}</span>
                         </div>

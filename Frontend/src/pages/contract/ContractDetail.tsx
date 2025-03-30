@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import ProgressBar from '@/entities/contract/ui/charts/ProgressBar';
 import DetailSummaryItem from '@/entities/contract/ui/DetailSummaryItem';
@@ -27,6 +28,7 @@ const summaryData = [
 ];
 
 const ContractDetail = () => {
+    const navigate = useNavigate();
     return (
         <div className='flex h-screen flex-col'>
             <div className='bg-line-50 flex flex-col px-4 py-2'>
@@ -64,8 +66,18 @@ const ContractDetail = () => {
                     {/* ContractActionButtons */}
                     <div className='flex flex-col items-center gap-3 py-2'>
                         <div className='flex w-full justify-center gap-4'>
-                            <Button variant={'choiceEmpty'}>채팅하기</Button>
-                            <Button variant={'choiceFill'}>이체하기</Button>
+                            <Button
+                                variant={'choiceEmpty'}
+                                onClick={() => navigate('/chat')}
+                            >
+                                채팅하기
+                            </Button>
+                            <Button
+                                variant={'choiceFill'}
+                                onClick={() => navigate('/transfer')}
+                            >
+                                이체하기
+                            </Button>
                         </div>
                         <div className='text-line-700'>
                             <EarlyTerminateAlert
