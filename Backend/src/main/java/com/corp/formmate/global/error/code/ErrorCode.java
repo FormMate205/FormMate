@@ -80,6 +80,8 @@ public enum ErrorCode {
 	NEGATIVE_LOAN_AMOUNT(400, "대출 금액은 0보다 커야 합니다"),
 	INVALID_INTEREST_AND_OVERDUE(400, "이자율과 연체이자율의 합은 20% 초과될 수 없습니다."),
 	INVALID_CREATOR_ID(400, "요청자와 차용증 생성사의 ID가 다릅니다."),
+	CREDITOR_ACCOUNT_NOT_FOUND(404, "채권자의 계좌 정보를 찾을 수 없습니다"),
+	DEBTOR_ACCOUNT_NOT_FOUND(404, "채무자의 계좌 정보를 찾을 수 없습니다"),
 
 	// 특약 관련
 	SPECIAL_TERM_NOT_FOUND(404, "특약 조항을 찾을 수 없습니다"),
