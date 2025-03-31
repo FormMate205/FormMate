@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import ContractDocument from '@/entities/contract/ui/ContractDocument';
+import { exportToPdf } from '@/shared/lib/exportToPdf';
 
 const ContractDetailTab = () => {
     // dummy
@@ -49,7 +50,12 @@ const ContractDetailTab = () => {
         <div className='flex flex-col gap-4'>
             <div className='flex justify-end'>
                 {/* Todo: PDF 내보내기 */}
-                <Button variant='choiceEmpty' onClick={() => {}}>
+                <Button
+                    variant='choiceEmpty'
+                    onClick={() =>
+                        exportToPdf('contract-document', '차용증.pdf')
+                    }
+                >
                     PDF로 내보내기
                 </Button>
             </div>
