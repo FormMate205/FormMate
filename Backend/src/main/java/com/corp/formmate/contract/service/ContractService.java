@@ -22,7 +22,6 @@ import com.corp.formmate.form.dto.PaymentScheduleResponse;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.repository.FormRepository;
-import com.corp.formmate.form.service.FormService;
 import com.corp.formmate.form.service.PaymentPreviewService;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.ContractException;
@@ -45,7 +44,6 @@ public class ContractService {
 	private final FormRepository formRepository;
 	private final TransferRepository transferRepository;
 	private final PaymentPreviewService paymentPreviewService;
-	private final FormService formService;
 
 	@Transactional
 	public ContractDetailResponse selectContractDetail(Integer formId) {

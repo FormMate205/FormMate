@@ -1,5 +1,7 @@
 package com.corp.formmate.form.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -57,13 +59,16 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 		+ "WHERE f.creditor = :userId\n"
 		+ "  AND f.debtor = :partnerId\n"
 		+ "ORDER BY f.contractDate\n")
-	Page<FormEntity> findUserIsCreditorSideForms(@Param("userId") Integer userId, @Param("partnerId") Integer partnerId, Pageable pageable);
+	Page<FormEntity> findUserIsCreditorSideForms(@Param("userId") Integer userId, @Param("partnerId") Integer partnerId,
+		Pageable pageable);
 
 	@Query("SELECT f\n"
 		+ "FROM FormEntity f\n"
 		+ "WHERE f.creditor = :partnerId\n"
 		+ "  AND f.debtor = :userId\n"
 		+ "ORDER BY f.contractDate\n")
-	Page<FormEntity> findUserIsDebtorSideForms(@Param("userId") Integer userId, @Param("partnerId") Integer partnerId, Pageable pageable);
+	Page<FormEntity> findUserIsDebtorSideForms(@Param("userId") Integer userId, @Param("partnerId") Integer partnerId,
+		Pageable pageable);
 
+	List<FormEntity> findAllByCreditorIdOrDebtorId(Integer creditorId, Integer debtorId);
 }
