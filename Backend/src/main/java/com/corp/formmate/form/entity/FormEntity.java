@@ -151,4 +151,8 @@ public class FormEntity implements Serializable {
 		this.overdueInterestRate = request.getOverdueInterestRateAsBigDecimal();
 		this.overdueLimit = overdueLimit;
 	}
+
+	public void updateStatus(FormStatus status) {
+		this.status = status;
+	}
 }

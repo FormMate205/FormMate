@@ -6,6 +6,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.corp.formmate.form.dto.FormConfirmRequest;
+import com.corp.formmate.form.dto.FormConfirmVerifyRequest;
+import com.corp.formmate.form.dto.FormConfirmVerifyResponse;
 import com.corp.formmate.form.dto.FormCountResponse;
 import com.corp.formmate.form.dto.FormCreateRequest;
 import com.corp.formmate.form.dto.FormDetailResponse;
@@ -378,4 +382,177 @@ public class FormController {
 		Page<FormPartnerResponse> response = formService.selectFormPartner(userId, input, pageable);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
+
+	@Operation(summary = "채무자 인증번호 요청", description = "채무자 본인 확인을 위한 인증번호를 요청합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "인증번호 요청 성공",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(type = "boolean")
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 입력값",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "계약서 또는 사용자를 찾을 수 없음",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@PostMapping("/confirm/debtor")
+	public ResponseEntity<Boolean> confirmRequestDebtorFormStatus(
+		@CurrentUser AuthUser authUser,
+
+		@io.swagger.v3.oas.annotations.parameters.RequestBody(
+			description = "채무자 인증번호 확인 요청 정보",
+			required = true,
+			content = @Content(schema = @Schema(implementation = FormConfirmRequest.class))
+		)
+		@Valid @RequestBody FormConfirmRequest request) {
+
+		Integer userId = authUser.getId();
+		Boolean response = formService.confirmRequestDebtorFormStatus(userId, request);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@Operation(summary = "채무자 인증번호 확인", description = "채무자가 받은 인증번호를 확인하고 계약 상태를 '상대승인후'로 변경합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "인증번호 확인 성공 및 계약 상태 변경 완료",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = FormConfirmVerifyResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 입력값 또는 인증번호 불일치",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "계약서 또는 사용자를 찾을 수 없음",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@PatchMapping("/confirm/debtor")
+	public ResponseEntity<FormConfirmVerifyResponse> confirmVerifyDebtorFormStatus(
+		@CurrentUser AuthUser authUser,
+
+		@io.swagger.v3.oas.annotations.parameters.RequestBody(
+			description = "채무자 인증번호 확인 요청 정보",
+			required = true,
+			content = @Content(schema = @Schema(implementation = FormConfirmVerifyRequest.class))
+		)
+		@Valid @RequestBody FormConfirmVerifyRequest request) {
+
+		Integer userId = authUser.getId();
+		FormConfirmVerifyResponse response = formService.confirmVerifyDebtorFormStatus(userId, request);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@Operation(summary = "채권자 인증번호 요청", description = "채권자 본인 확인을 위한 인증번호를 요청합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "인증번호 요청 성공",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(type = "boolean")
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 입력값",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "계약서 또는 사용자를 찾을 수 없음",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@PostMapping("/confirm/creditor")
+	public ResponseEntity<Boolean> confirmRequestCreditorFormStatus(
+		@CurrentUser AuthUser authUser,
+
+		@io.swagger.v3.oas.annotations.parameters.RequestBody(
+			description = "채무자 인증번호 확인 요청 정보",
+			required = true,
+			content = @Content(schema = @Schema(implementation = FormConfirmRequest.class))
+		)
+		@Valid @RequestBody FormConfirmRequest request) {
+
+		Integer userId = authUser.getId();
+		Boolean response = formService.confirmRequestCreditorFormStatus(userId, request);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@Operation(summary = "채권자 인증번호 확인", description = "채권자가 받은 인증번호를 확인하고 계약 상태를 '진행중'으로 변경합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "인증번호 확인 성공 및 계약 상태 변경 완료",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = FormConfirmVerifyResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 입력값 또는 인증번호 불일치",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "계약서 또는 사용자를 찾을 수 없음",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@PatchMapping("/confirm/creditor")
+	public ResponseEntity<FormConfirmVerifyResponse> confirmVerifyCreditorFormStatus(
+		@CurrentUser AuthUser authUser,
+
+		@io.swagger.v3.oas.annotations.parameters.RequestBody(
+			description = "채무자 인증번호 확인 요청 정보",
+			required = true,
+			content = @Content(schema = @Schema(implementation = FormConfirmVerifyRequest.class))
+		)
+		@Valid @RequestBody FormConfirmVerifyRequest request) {
+
+		Integer userId = authUser.getId();
+		FormConfirmVerifyResponse response = formService.confirmVerifyCreditorFormStatus(userId, request);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
 }
