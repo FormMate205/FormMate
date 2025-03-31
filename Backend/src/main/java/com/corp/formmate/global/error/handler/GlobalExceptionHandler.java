@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -66,5 +67,20 @@ public class GlobalExceptionHandler {
 
 		return ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
 	}
+
+	// 인증 실패 예외 처리
+	@ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+	protected ResponseEntity<ErrorResponse> handleAuthenticationCredentialsNotFoundException(
+		AuthenticationCredentialsNotFoundException ex) {
+		log.warn("Authentication failed: {}", ex.getMessage());
+
+		ErrorResponse response = ErrorResponse.builder()
+			.status(HttpStatus.UNAUTHORIZED.value())
+			.message("로그인이 필요합니다.") // 혹은 ex.getMessage() 그대로 반환해도 돼
+			.build();
+
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+	}
+
 }
 
