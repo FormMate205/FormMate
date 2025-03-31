@@ -1,14 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { getUser } from '../api/getUser';
+import { User } from '../model/types';
+import { useUserStore } from '../store/userStore';
 
 export const useUserQuery = () => {
-    const token = localStorage.getItem('accessToken');
+    const setUser = useUserStore((state) => state.setUser);
 
     return useQuery({
         queryKey: ['user'],
         queryFn: getUser,
-        enabled: !!token, // 토큰 있을 때만 fetch
-        staleTime: 1000 * 60 * 10, // 10분
+        select: (data: User) => {
+            setUser(data);
+            return data;
+        },
+        enabled:
+            typeof window !== 'undefined' &&
+            !!localStorage.getItem('accessToken'),
+        staleTime: 1000 * 60 * 10,
         retry: false,
         refetchOnWindowFocus: false,
     });
