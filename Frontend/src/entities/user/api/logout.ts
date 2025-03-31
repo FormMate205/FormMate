@@ -1,11 +1,19 @@
-import { NavigateFunction } from 'react-router-dom';
 import { queryClient } from '@/app/provider/queryClient';
+import api from '@/shared/api/instance';
+import { removeAccessToken } from '@/shared/api/token';
+import { useUserStore } from '../model/userStore';
 
-export const logout = (navigate?: NavigateFunction) => {
-    // 1. 토큰 제거
-    localStorage.removeItem('accessToken');
-    // 2. 유저 쿼리 제거 (전역 캐시 삭제)
-    queryClient.removeQueries({ queryKey: ['user'] });
-
-    if (navigate) navigate('/login');
+export const logout = async () => {
+    try {
+        await api.post('/auth/logout');
+    } catch (e) {
+        console.warn('로그아웃 실패', e);
+    } finally {
+        removeAccessToken(); // 토큰 제거
+        const store = useUserStore.getState();
+        store.clearUser();
+        store.setLoggedIn(false);
+        queryClient.removeQueries({ queryKey: ['user'] });
+        window.location.href = '/login';
+    }
 };
