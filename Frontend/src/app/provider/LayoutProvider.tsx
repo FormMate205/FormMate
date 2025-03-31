@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { useUserQuery } from '@/entities/user/hooks/useUserQuery';
+import { useUserQuery } from '@/entities/user/model/useUserQuery';
 
 const LayoutProvider = () => {
     // 사용자 인증 상태 확인
