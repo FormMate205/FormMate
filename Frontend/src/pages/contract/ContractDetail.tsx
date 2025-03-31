@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import ContractDetailOverview from '@/features/contract/ui/ContractDetailOverview';
 import EarlyTerminateAlert from '@/features/contract/ui/EarlyTerminateAlert';
@@ -7,6 +7,7 @@ import { Header } from '@/widgets';
 
 const ContractDetail = () => {
     const navigate = useNavigate();
+    const { formId } = useParams();
     return (
         <div className='flex h-screen flex-col'>
             <div className='bg-line-50 flex flex-col px-4 py-2'>
@@ -18,7 +19,7 @@ const ContractDetail = () => {
                         <div className='flex w-full justify-center gap-4'>
                             <Button
                                 variant={'choiceEmpty'}
-                                onClick={() => navigate('/chat')}
+                                onClick={() => navigate(`/chat/${formId}`)}
                             >
                                 채팅하기
                             </Button>
@@ -31,9 +32,7 @@ const ContractDetail = () => {
                         </div>
                         <div className='text-line-700'>
                             <EarlyTerminateAlert
-                                onConfirm={() => {
-                                    console.log('조기 종료 신청됨!');
-                                }}
+                                onConfirm={() => navigate(`/chat/${formId}`)}
                             />
                         </div>
                     </div>

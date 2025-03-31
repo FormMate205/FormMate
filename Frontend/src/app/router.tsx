@@ -62,7 +62,7 @@ export const router = createBrowserRouter([
             { path: '/transaction', element: <Transaction /> },
             { path: '/contracts', element: <Contracts /> },
             {
-                path: '/contracts/:contractId',
+                path: '/contracts/:formId',
                 element: <ContractDetail />,
             },
             { path: '/notifications', element: <Notifications /> },
