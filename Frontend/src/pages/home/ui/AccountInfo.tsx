@@ -41,7 +41,7 @@ const AccountInfo = () => {
                     <Icons
                         name='chev-right'
                         className='fill-white'
-                        onClick={() => navigate('/transaction')}
+                        onClick={() => navigate('/account')}
                     />
                 </div>
             </div>
