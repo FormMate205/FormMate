@@ -109,13 +109,13 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		// 프로덕션 환경에서는 명시적으로 허용된 도메인만 지정
-//		configuration.setAllowedOriginPatterns(List.of("*"));
-		configuration.setAllowedOrigins(Arrays.asList(
-				"https://j12a205.p.ssafy.io",
-				"http://localhost:5173",
-				"http://localhost:8088",
-				"http://localhost:*"
-		));
+		configuration.setAllowedOriginPatterns(List.of("*"));
+//		configuration.setAllowedOrigins(Arrays.asList(
+//				"https://j12a205.p.ssafy.io",
+//				"http://localhost:5173",
+//				"http://localhost:8088",
+//				"http://localhost:*"
+//		));
 
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
