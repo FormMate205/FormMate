@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChatMessage } from '@/entities/chat/model/types';
 import { BOT_ID } from '@/entities/formDraft/config/constant';
 import {
@@ -14,15 +15,17 @@ import { Question } from './types';
 
 interface UseFormDraftCreateProps {
     userId: string;
+    userName: string;
     initialReceiverId?: string;
 }
 
 export const useFormDraftCreate = ({
     userId,
+    userName,
     initialReceiverId = '',
 }: UseFormDraftCreateProps) => {
     // 계약서 생성 API
-    const { mutate } = usePostFormDraft();
+    const { data, mutate } = usePostFormDraft();
 
     // 채팅 내역
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -57,6 +60,8 @@ export const useFormDraftCreate = ({
         specialTermIndexes: [],
     });
 
+    const navigate = useNavigate();
+
     // 현재 질문 업데이트
     useEffect(() => {
         if (currentQuestionId) {
@@ -70,6 +75,7 @@ export const useFormDraftCreate = ({
                     const newMessage: ChatMessage = {
                         id: messageIdCounterRef.current.toString(),
                         writerId: BOT_ID,
+                        writerName: '페이봇',
                         content: question.question,
                     };
 
@@ -82,6 +88,7 @@ export const useFormDraftCreate = ({
                             const conditionMessage: ChatMessage = {
                                 id: messageIdCounterRef.current.toString(),
                                 writerId: BOT_ID,
+                                writerName: '페이봇',
                                 content: question.condition!.join('\n'),
                             };
                             setChatHistory((prev) => [
@@ -138,6 +145,7 @@ export const useFormDraftCreate = ({
             const newMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
+                writerName: '페이봇',
                 content: '값을 입력해주세요.',
             };
 
@@ -157,6 +165,7 @@ export const useFormDraftCreate = ({
             const newMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
+                writerName: '페이봇',
                 content: errorMessage || '다시 입력해주세요.',
             };
 
@@ -171,6 +180,7 @@ export const useFormDraftCreate = ({
             const newMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: userId,
+                writerName: userName,
                 content: formatCurrency(content),
             };
             setChatHistory((prev) => [...prev, newMessage]);
@@ -178,6 +188,7 @@ export const useFormDraftCreate = ({
             const newMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: userId,
+                writerName: userName,
                 content,
             };
             setChatHistory((prev) => [...prev, newMessage]);
@@ -198,6 +209,7 @@ export const useFormDraftCreate = ({
                     const finalMessage: ChatMessage = {
                         id: messageIdCounterRef.current.toString(),
                         writerId: BOT_ID,
+                        writerName: '페이봇',
                         content: '계약서 생성을 취소했습니다.',
                     };
                     setChatHistory((prev) => [...prev, finalMessage]);
@@ -299,6 +311,7 @@ export const useFormDraftCreate = ({
         const userMessage: ChatMessage = {
             id: messageIdCounterRef.current.toString(),
             writerId: userId,
+            writerName: userName,
             content: response,
         };
         setChatHistory((prev) => [...prev, userMessage]);
@@ -334,6 +347,7 @@ export const useFormDraftCreate = ({
             const completeMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
+                writerName: '페이봇',
                 content: '계약서가 성공적으로 생성되었습니다!',
             };
 
@@ -344,7 +358,14 @@ export const useFormDraftCreate = ({
             setInputEnabled(false);
 
             mutate(formDraft);
-            console.log('계약서 생성:', formDraft);
+
+            if (!data) {
+                console.log('계약서 생성 중');
+            } else {
+                navigate(`/chat/${data?.formId}`);
+            }
+
+            console.log('계약서 생성 ', formDraft);
         } catch (error) {
             console.error('계약서 생성 오류:', error);
 
@@ -352,6 +373,7 @@ export const useFormDraftCreate = ({
             const errorMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
+                writerName: '페이봇',
                 content:
                     '계약서 생성 중 오류가 발생했습니다. 다시 시도해주세요.',
             };
