@@ -1,12 +1,11 @@
 import { TagItem } from '@/shared';
-
-type TagColor = 'default' | 'purple' | 'red' | 'gray';
+import { TagColor } from '@/shared/model/types';
 
 const tagColorMap: Record<string, TagColor> = {
-    중도: 'purple',
-    납부: 'default',
-    연체: 'red',
-    이자: 'gray',
+    중도: 'subPurple',
+    납부: 'primary',
+    연체: 'subPink',
+    이자: 'line',
 };
 
 interface PaymentItemProps {

@@ -1,15 +1,15 @@
+import { cn } from '@/lib/utils';
 import { Icons, TagItem } from '@/shared';
-
-type TagColor = 'default' | 'purple' | 'red' | 'gray';
+import { TagColor } from '@/shared/model/types';
 
 const tagColorMap: Record<string, TagColor> = {
-    중도: 'purple',
-    납부: 'default',
-    연체: 'red',
-    이자: 'gray',
+    중도: 'subPurple',
+    진행: 'primary',
+    연체: 'subPink',
+    이자: 'line',
 };
 
-interface SummaryItemProps {
+interface DetailOverviewItemProps {
     tagText: string;
     color?: string;
     mainText: string;
@@ -17,24 +17,18 @@ interface SummaryItemProps {
     withIcon?: boolean;
 }
 
-const DetailSummaryItem = ({
+const DetailOverviewItem = ({
     tagText,
-    color,
     mainText,
     subText,
     withIcon,
-}: SummaryItemProps) => {
+}: DetailOverviewItemProps) => {
+    const color = tagColorMap[tagText] || 'primary';
     return (
         <div className='flex items-center gap-2'>
-            <TagItem text={tagText} color={tagColorMap[tagText]} />
+            <TagItem text={tagText} color={color} />
             <div className='text-line-900 flex items-center gap-1'>
-                <span
-                    className={
-                        color
-                            ? `font-medium text-${color}-600`
-                            : 'text-primary-500 font-medium'
-                    }
-                >
+                <span className={cn('font-medium', `text-${color}-600`)}>
                     {mainText}
                 </span>
                 <span>|</span>
@@ -51,4 +45,4 @@ const DetailSummaryItem = ({
     );
 };
 
-export default DetailSummaryItem;
+export default DetailOverviewItem;

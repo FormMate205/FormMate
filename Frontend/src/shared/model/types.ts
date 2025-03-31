@@ -14,3 +14,5 @@ export interface Pagenation {
 
 // 페이지네이션 request
 export type PagenationRequest = Pick<Pagenation, 'pageable'>;
+
+export type TagColor = 'primary' | 'subPurple' | 'subPink' | 'line';
