@@ -3,6 +3,7 @@ package com.corp.formmate.chat.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.corp.formmate.chat.dto.ChatResponse;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.global.constants.SystemConstants;
 import com.corp.formmate.user.entity.UserEntity;
