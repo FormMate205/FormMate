@@ -142,31 +142,31 @@ public class JwtTokenService {
      */
     public void setRefreshTokenCookie(HttpServletResponse response, String refreshToken, boolean secure) {
         try {
-//            Cookie cookie = new Cookie("refresh_token", refreshToken);
-//            cookie.setHttpOnly(true); // JavaScript에서 접근 불가능하게 설정
-//            cookie.setSecure(secure); // HTTPS에서만 전송(프로덕션 환경에서는 true로 설정)
-//            cookie.setPath("/"); // 모든 경로에서 쿠키 접근 가능
-//            cookie.setMaxAge((int) (jwtTokenProvider.getRefreshTokenExpiration() /1000)); // 초 단위로 설정
-//
-//            // SamSite 속성 설정
-//            response.addHeader("Set-Cookie", cookie.getName() + "=" + cookie.getValue()
-//            + "; Max-Age=" + cookie.getMaxAge()
-//            + "; Path=" + cookie.getPath()
-//            + (cookie.isHttpOnly() ? "; HttpOnly" : "")
-//            + (secure ? "; Secure" : "")
-//            + "; SamSite=None");
+            Cookie cookie = new Cookie("refresh_token", refreshToken);
+            cookie.setHttpOnly(true); // JavaScript에서 접근 불가능하게 설정
+            cookie.setSecure(secure); // HTTPS에서만 전송(프로덕션 환경에서는 true로 설정)
+            cookie.setPath("/"); // 모든 경로에서 쿠키 접근 가능
+            cookie.setMaxAge((int) (jwtTokenProvider.getRefreshTokenExpiration() /1000)); // 초 단위로 설정
+
+            // SamSite 속성 설정
+            response.addHeader("Set-Cookie", cookie.getName() + "=" + cookie.getValue()
+            + "; Max-Age=" + cookie.getMaxAge()
+            + "; Path=" + cookie.getPath()
+            + (cookie.isHttpOnly() ? "; HttpOnly" : "")
+            + (secure ? "; Secure" : "")
+            + "; SamSite=None");
 //
 //            response.addCookie(cookie);
 
-            ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                    .httpOnly(true)
-                    .secure(secure)
-                    .path("/")
-                    .maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000)
-                    .sameSite(secure ? "None" : "Lax")  // HTTPS일 때는 None, 아닐 때는 Lax
-                    .build();
-
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+//            ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+//                    .httpOnly(true)
+//                    .secure(secure)
+//                    .path("/")
+//                    .maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000)
+//                    .sameSite(secure ? "None" : "Lax")  // HTTPS일 때는 None, 아닐 때는 Lax
+//                    .build();
+//
+//            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         } catch (Exception e) {
             log.error("Setting refresh token cookie failed: {}", e.getMessage());
             throw new TokenException(ErrorCode.INTERNAL_SERVER_ERROR);
