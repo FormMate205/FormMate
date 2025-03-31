@@ -13,13 +13,13 @@ import ChatInput from '../../entities/chat/ui/ChatInput';
 import NotiContainer from '../../entities/formDraft/ui/NotiContainer';
 
 const FormDraft = () => {
-    const userId = '1';
+    const userId = '7';
     // 추후에 partner store 값으로 바꿔야함 (지금 바꾸면 값이 없어서 화면에 아무것도 안 보임ㅜㅜ)
     const receiverId = '2';
-    const receiverName = '윤이영';
+    const receiverName = '이폼폼';
 
     const writers = [
-        { writerId: userId, name: '강지은' },
+        { writerId: userId, name: '오은지' },
         { writerId: BOT_ID, name: '페이봇' },
     ];
 
