@@ -1,5 +1,11 @@
 import axios from 'axios';
-import { getAccessToken, removeAccessToken, saveAccessToken } from './token';
+import { useUserStore } from '@/entities/user/model/userStore';
+import {
+    getAccessToken,
+    setAccessToken,
+    refreshToken,
+    clearToken,
+} from './token';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_BASE_URI,
@@ -9,19 +15,11 @@ const api = axios.create({
     },
 });
 
-// 요청 시 Authorization 헤더 설정
+// 요청 시 accessToken 붙이기
 api.interceptors.request.use((config) => {
-    const token = getAccessToken();
-
-    // 로그인 요청은 제외
-    const isAuthRequest =
-        config.url?.includes('/auth/email/login') ||
-        config.url?.includes('/auth/refresh');
-
-    if (token && !isAuthRequest) {
-        config.headers.Authorization = token.startsWith('Bearer')
-            ? token
-            : `Bearer ${token}`;
+    const accessToken = getAccessToken();
+    if (accessToken && config.headers) {
+        config.headers.Authorization = accessToken;
     }
     return config;
 });
@@ -30,25 +28,23 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const originalRequest = error.config;
+        const { config, response } = error;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-
+        if (response?.status === 401 && !config._retry) {
+            config._retry = true;
             try {
-                const refreshRes = await axios.post(
-                    `${import.meta.env.VITE_BASE_URI}/auth/refresh`,
-                    {},
-                    { withCredentials: true },
-                );
+                const { accessToken } = await refreshToken();
+                setAccessToken(accessToken);
 
-                const newAccessToken = refreshRes.data.accessToken;
-                saveAccessToken(newAccessToken);
-
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-                return api(originalRequest);
+                config.headers.Authorization = accessToken;
+                return api(config); // 원래 요청 재시도
             } catch (refreshError) {
-                removeAccessToken();
+                clearToken();
+
+                const store = useUserStore.getState();
+                store.clearUser();
+                store.setLoggedIn(false);
+
                 window.location.href = '/login';
                 return Promise.reject(refreshError);
             }
