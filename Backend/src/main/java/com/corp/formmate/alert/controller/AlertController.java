@@ -1,8 +1,7 @@
 package com.corp.formmate.alert.controller;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +13,6 @@ import com.corp.formmate.alert.service.AlertService;
 import com.corp.formmate.global.annotation.CurrentUser;
 import com.corp.formmate.user.dto.AuthUser;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,15 +27,12 @@ public class AlertController {
 	private final AlertService alertService;
 
 	@GetMapping("/unread")
-	public ResponseEntity<Page<AlertUnreadResponse>> selectUnreadAlerts(
-		@CurrentUser AuthUser authUser,
-
-		@Parameter(description = "페이징 정보")
-		@PageableDefault Pageable pageable) {
+	public ResponseEntity<List<AlertUnreadResponse>> selectUnreadAlerts(
+		@CurrentUser AuthUser authUser) {
 
 		Integer userId = authUser.getId();
 
-		Page<AlertUnreadResponse> responses = alertService.selectUnreadAlerts(userId, pageable);
+		List<AlertUnreadResponse> responses = alertService.selectUnreadAlerts(userId);
 		return ResponseEntity.status(HttpStatus.OK).body(responses);
 	}
 }

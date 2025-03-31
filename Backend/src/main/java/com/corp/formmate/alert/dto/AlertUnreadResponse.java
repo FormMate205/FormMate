@@ -45,7 +45,7 @@ public class AlertUnreadResponse {
 		description = "알림이 생성된 시간",
 		example = "2025-03-21T00:00:00"
 	)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime createdAt;
 
 }

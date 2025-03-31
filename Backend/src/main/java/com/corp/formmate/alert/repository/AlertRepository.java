@@ -1,5 +1,7 @@
 package com.corp.formmate.alert.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,8 +17,8 @@ import com.corp.formmate.user.entity.UserEntity;
 public interface AlertRepository extends JpaRepository<AlertEntity, Integer> {
 
 	// 특정 사용자의 읽지 않은 알림 조회 isDeleted가 false이고 isRead가 false인 알림만 조회
-	Page<AlertEntity> findByUserAndIsDeletedFalseAndIsReadFalseOrderByCreatedAtDesc(
-		UserEntity user, Pageable pageable);
+	List<AlertEntity> findByUserAndIsDeletedFalseAndIsReadFalseOrderByCreatedAtDesc(
+		UserEntity user);
 
 	// 특정 알림 ID보다 작은 ID를 가진 알림 조회 (페이징) isDeleted가 false인 알림만 조회
 	@Query("SELECT a FROM AlertEntity a WHERE a.user = :user AND a.isDeleted = false " +

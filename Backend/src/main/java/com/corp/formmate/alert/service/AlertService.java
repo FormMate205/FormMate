@@ -1,7 +1,7 @@
 package com.corp.formmate.alert.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +24,8 @@ public class AlertService {
 	private final UserService userService;
 
 	@Transactional(readOnly = true)
-	public Page<AlertUnreadResponse> selectUnreadAlerts(Integer userId, Pageable pageable) {
+	public List<AlertUnreadResponse> selectUnreadAlerts(Integer userId) {
 		UserEntity userEntity = userService.selectById(userId);
+		
 	}
 }
