@@ -133,14 +133,14 @@ public class FormDetailResponse {
 		description = "계약 체결일",
 		example = "2025-03-21T00:00:00"
 	)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime contractDate;
 
 	@Schema(
 		description = "계약 체결일",
 		example = "2025-03-21T00:00:00"
 	)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime maturityDate;
 
 	@Schema(
