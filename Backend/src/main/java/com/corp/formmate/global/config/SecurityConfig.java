@@ -114,7 +114,7 @@ public class SecurityConfig {
 				"http://localhost:5173"
 		));
 
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
 
 		// 클라이언트에 노출할 응답 헤더 지정
