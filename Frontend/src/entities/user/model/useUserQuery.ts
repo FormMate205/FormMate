@@ -8,7 +8,7 @@ export const useUserQuery = () => {
         enabled:
             typeof window !== 'undefined' &&
             !!localStorage.getItem('accessToken'),
-        staleTime: 1000 * 60 * 10,
+        staleTime: 1000 * 60 * 10, // 10분
         retry: false,
         refetchOnWindowFocus: false,
     });
