@@ -147,8 +147,8 @@ public class JwtTokenService {
 //            cookie.setSecure(secure); // HTTPS에서만 전송(프로덕션 환경에서는 true로 설정)
 //            cookie.setPath("/"); // 모든 경로에서 쿠키 접근 가능
 //            cookie.setMaxAge((int) (jwtTokenProvider.getRefreshTokenExpiration() /1000)); // 초 단위로 설정
-//
-//            // SamSite 속성 설정
+
+            // SamSite 속성 설정
 //            response.addHeader("Set-Cookie", cookie.getName() + "=" + cookie.getValue()
 //            + "; Max-Age=" + cookie.getMaxAge()
 //            + "; Path=" + cookie.getPath()
