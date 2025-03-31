@@ -1,6 +1,5 @@
 import { ChangeEvent, useEffect, useRef } from 'react';
 import { BOT_ID } from '@/entities/formDraft/config/constant';
-import getName from '@/features/chat/model/getName';
 import showName from '@/features/chat/model/showName';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
@@ -14,14 +13,10 @@ import NotiContainer from '../../entities/formDraft/ui/NotiContainer';
 
 const FormDraft = () => {
     const userId = '7';
+    const userName = '오은지';
     // 추후에 partner store 값으로 바꿔야함 (지금 바꾸면 값이 없어서 화면에 아무것도 안 보임ㅜㅜ)
     const receiverId = '2';
     const receiverName = '이폼폼';
-
-    const writers = [
-        { writerId: userId, name: '오은지' },
-        { writerId: BOT_ID, name: '페이봇' },
-    ];
 
     // 챗봇 로직 분리
     const {
@@ -37,6 +32,7 @@ const FormDraft = () => {
         currentTermIndex,
     } = useFormDraftCreate({
         userId,
+        userName,
         initialReceiverId: receiverId,
     });
 
@@ -100,7 +96,7 @@ const FormDraft = () => {
                                     name={
                                         chat.writerId !== userId &&
                                         displayProfile(index)
-                                            ? getName(writers, chat.writerId)
+                                            ? chat.writerName
                                             : undefined
                                     }
                                 />

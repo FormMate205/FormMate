@@ -10,10 +10,10 @@ const postFormDraft = async (form: FormDraftRequest): Promise<Contract> => {
 };
 
 export const usePostFormDraft = () => {
-    const { mutate } = useMutation({
+    const mutation = useMutation({
         mutationFn: (form: FormDraftRequest) => postFormDraft(form),
         mutationKey: ['formDraft'],
     });
 
-    return { mutate };
+    return mutation;
 };
