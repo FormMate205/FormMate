@@ -1,4 +1,5 @@
 import axios from '@/shared/api/instance';
+import { setAccessToken } from '@/shared/api/token';
 import { LoginFormSchema } from '../model/types';
 
 export const login = async ({ email, password }: LoginFormSchema) => {
@@ -15,7 +16,7 @@ export const login = async ({ email, password }: LoginFormSchema) => {
         throw new Error('Access Token이 응답에 포함되어 있지 않습니다.');
     }
 
-    localStorage.setItem('accessToken', token);
+    setAccessToken(token);
 
     return {
         success: true,
