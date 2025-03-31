@@ -26,9 +26,16 @@ public class UserBasicInformationService {
         try {
             UserEntity user = userService.selectById(userId);
 
+            // 계좌 정보가 모두 존재하면 true, 하나라도 null이면 false
+            boolean hasAccount = user.getBankName() != null
+                    && user.getAccountNumber() != null
+                    && user.getAccountPassword() != null;
+
             return new UserBasicInformationResponse(
+                    userId,
                     user.getUserName(),
-                    user.getEmail()
+                    user.getEmail(),
+                    hasAccount
             );
         } catch (UserException e) {
             log.error("로그인 사용자 정보 조회 실패: {}", e.getMessage());
