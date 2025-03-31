@@ -43,11 +43,12 @@ public class UserBasicInformationController {
                             schema = @Schema(implementation = UserBasicInformationResponse.class),
                             examples = @ExampleObject(
                                     value = """
-                        {
-                            "userName": "홍길동",
-                            "email": "user@example.com"
-                        }
-                    """
+                    {
+                        "userName": "홍길동",
+                        "email": "user@example.com",
+                        "hasAccount": true
+                    }
+                """
                             )
                     )
             ),
@@ -59,13 +60,13 @@ public class UserBasicInformationController {
                             schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
                                     value = """
-                        {
-                            "timestamp": "2024-03-28T14:00:00",
-                            "status": 401,
-                            "message": "인증되지 않은 접근입니다",
-                            "errors": []
-                        }
-                    """
+                    {
+                        "timestamp": "2024-03-28T14:00:00",
+                        "status": 401,
+                        "message": "인증되지 않은 접근입니다",
+                        "errors": []
+                    }
+                """
                             )
                     )
             ),
@@ -77,13 +78,13 @@ public class UserBasicInformationController {
                             schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
                                     value = """
-                        {
-                            "timestamp": "2024-03-28T14:00:00",
-                            "status": 404,
-                            "message": "사용자를 찾을 수 없습니다",
-                            "errors": []
-                        }
-                    """
+                    {
+                        "timestamp": "2024-03-28T14:00:00",
+                        "status": 404,
+                        "message": "사용자를 찾을 수 없습니다",
+                        "errors": []
+                    }
+                """
                             )
                     )
             ),
@@ -95,13 +96,13 @@ public class UserBasicInformationController {
                             schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(
                                     value = """
-                        {
-                            "timestamp": "2024-03-28T14:00:00",
-                            "status": 500,
-                            "message": "사용자 정보 조회 중 오류가 발생했습니다",
-                            "errors": []
-                        }
-                    """
+                    {
+                        "timestamp": "2024-03-28T14:00:00",
+                        "status": 500,
+                        "message": "사용자 정보 조회 중 오류가 발생했습니다",
+                        "errors": []
+                    }
+                """
                             )
                     )
             )
