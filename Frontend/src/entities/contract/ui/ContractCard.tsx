@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { TagItem } from '@/shared';
-import { ContractStatus, ContractCardProps, TagColor } from '../model/types';
+import { TagColor } from '@/shared/model/types';
+import { ContractStatus, ContractCardProps } from '../model/types';
 
 interface StatusStyle {
     color: TagColor;
@@ -10,17 +11,17 @@ interface StatusStyle {
 
 const statusMap: Record<ContractStatus, StatusStyle> = {
     대기: {
-        color: 'purple',
+        color: 'subPurple',
         description: '상대방의 승인을 기다리는 중이에요!',
     },
     진행: {
-        color: 'default',
+        color: 'primary',
     },
     연체: {
-        color: 'red',
+        color: 'subPink',
     },
     완료: {
-        color: 'gray',
+        color: 'line',
         description: '계약이 완료되었어요.',
     },
 };
