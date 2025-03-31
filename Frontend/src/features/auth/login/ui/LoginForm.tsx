@@ -16,15 +16,17 @@ const LoginForm = () => {
 
     const onSubmit = async (data: LoginFormSchema) => {
         try {
-            const res = await login(data);
-            // 1. 토큰 저장
-            localStorage.setItem('accessToken', res.token);
-            // 2. 유저 정보 갱신
+            await login(data);
+
+            // 유저 정보 쿼리 갱신
             await queryClient.invalidateQueries({ queryKey: ['user'] });
-            // 3. 이동
+
+            // 홈으로 이동
             navigate('/');
         } catch (err) {
-            alert(err instanceof Error ? err.message : '로그인 실패');
+            console.log(err);
+            alert('로그인에 실패했습니다. 다시 시도해 주세요.');
+            // 백단 에러 코드 작성 요청 !!
         }
     };
 
