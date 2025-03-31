@@ -1,9 +1,9 @@
 import { Outlet } from 'react-router-dom';
-import { useUserQuery } from '@/entities/user/model/useUserQuery';
+import { useUserService } from '@/entities/user/model/userService';
 
 const LayoutProvider = () => {
     // 사용자 인증 상태 확인
-    useUserQuery();
+    useUserService();
 
     return (
         <div className='flex min-h-screen w-full justify-center'>
