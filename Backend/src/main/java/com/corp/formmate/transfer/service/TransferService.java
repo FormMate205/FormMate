@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.corp.formmate.contract.entity.ContractEntity;
 import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.entity.FormEntity;
-import com.corp.formmate.form.service.FormService;
+import com.corp.formmate.form.repository.FormRepository;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.TransferException;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
@@ -41,7 +41,7 @@ public class TransferService {
 
 	private final TransferRepository transferRepository;
 
-	private final FormService formService;
+	private final FormRepository formRepository;
 
 	private final UserService userService;
 
@@ -120,7 +120,7 @@ public class TransferService {
 		Pageable pageable) {
 
 		Page<TransferEntity> transfers;
-		FormEntity formEntity = formService.selectById(formId);
+		FormEntity formEntity = getFormEntity(formId);
 
 		if ("전체".equals(transferStatus)) {
 			transfers = transferRepository.findByFormAndCurrentRoundGreaterThan(formEntity, 0, pageable);
@@ -138,7 +138,7 @@ public class TransferService {
 
 		UserEntity sender = userService.selectById(userId);
 		UserEntity receiver = userService.selectById(transferCreateRequest.getPartnerId());
-		FormEntity formEntity = formService.selectById(transferCreateRequest.getFormId());
+		FormEntity formEntity = getFormEntity(transferCreateRequest.getFormId());
 		ContractEntity contractEntity = contractService.selectTransferByForm(formEntity);
 		Integer currentRound = contractEntity.getCurrentPaymentRound();
 
@@ -177,6 +177,45 @@ public class TransferService {
 		transferRepository.save(transferEntity);
 
 		return TransferCreateResponse.fromEntity(transferEntity);
+	}
+
+	// 최초 거래 생성(계약 성사 되었을때 채권자가 채무자에게 돈 송금)
+	@Transactional
+	public void createInitialTransfer(FormEntity formEntity) {
+		String depositAccountNo = formEntity.getDebtor().getAccountNumber();  // 입금 계좌
+		Long transactionBalance = formEntity.getLoanAmount(); // 대출금액
+		String withdrawalAccountNo = formEntity.getCreditor().getAccountNumber(); // 출금 계좌
+
+		BankTransferRequest bankTransferRequest = BankTransferRequest.builder()
+			.depositAccountNo(depositAccountNo)
+			.withdrawalAccountNo(withdrawalAccountNo)
+			.transactionBalance(transactionBalance)
+			.build();
+
+		bankService.createBankTransfer(bankTransferRequest);
+
+		TransferEntity transferEntity = TransferEntity.builder()
+			.form(formEntity)
+			.sender(formEntity.getCreditor())
+			.receiver(formEntity.getDebtor())
+			.amount(transactionBalance)
+			.currentRound(0)
+			.paymentDifference(0L)
+			.status(TransferStatus.PAID)
+			.transactionDate(LocalDateTime.now())
+			.build();
+
+		transferRepository.save(transferEntity);
+
+	}
+
+	@Transactional(readOnly = true)
+	protected FormEntity getFormEntity(Integer formId) {
+		FormEntity formEntity = formRepository.findById(formId).orElse(null);
+		if (formEntity == null) {
+			throw new TransferException(ErrorCode.FORM_NOT_FOUND);
+		}
+		return formEntity;
 	}
 
 	private TransferEntity makeTransferEntity(FormEntity form, UserEntity sender, UserEntity receiver, Long amount,

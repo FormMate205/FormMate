@@ -1,12 +1,17 @@
 package com.corp.formmate.form.service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.form.dto.FormConfirmRequest;
+import com.corp.formmate.form.dto.FormConfirmVerifyRequest;
+import com.corp.formmate.form.dto.FormConfirmVerifyResponse;
 import com.corp.formmate.form.dto.FormCountResponse;
 import com.corp.formmate.form.dto.FormCreateRequest;
 import com.corp.formmate.form.dto.FormDetailResponse;
@@ -18,12 +23,17 @@ import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.repository.FormRepository;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
+import com.corp.formmate.global.error.exception.PasswordException;
 import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.specialterm.dto.SpecialTermResponse;
 import com.corp.formmate.specialterm.service.SpecialTermService;
+import com.corp.formmate.transfer.service.TransferService;
 import com.corp.formmate.user.entity.UserEntity;
+import com.corp.formmate.user.service.MessageService;
 import com.corp.formmate.user.service.UserService;
+import com.corp.formmate.user.service.VerificationService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,6 +49,14 @@ public class FormService {
 
 	private final SpecialTermService specialTermService;
 
+	private final MessageService messageService;
+
+	private final VerificationService verificationService;
+
+	private final TransferService transferService;
+
+	private final RedisTemplate<Object, Object> redisTemplate;
+
 	// 계약서 생성
 	@Transactional
 	public FormDetailResponse createForm(Integer userId, FormCreateRequest request) {
@@ -47,6 +65,9 @@ public class FormService {
 		UserEntity receiver = userService.selectById(request.getReceiverId());
 		UserEntity creditor = userService.selectById(request.getCreditorId());
 		UserEntity debtor = userService.selectById(request.getDebtorId());
+
+		checkAccount(creditor.getAccountNumber(), debtor.getAccountNumber());
+
 		FormEntity formEntity = request.toEntity(request, creator, receiver, creditor, debtor);
 		formRepository.save(formEntity);
 		List<SpecialTermResponse> specialTermResponses = specialTermService.createSpecialTerms(formEntity,
@@ -73,6 +94,7 @@ public class FormService {
 		if (userId != formEntity.getCreator().getId()) {
 			throw new FormException(ErrorCode.INVALID_CREATOR_ID);
 		}
+		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
 		formEntity.update(request);
 		formRepository.save(formEntity);
 		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(formEntity,
@@ -153,5 +175,196 @@ public class FormService {
 			user.getUserName(),
 			user.getPhoneNumber()
 		));
+	}
+
+	// 계약 체결 요청 (채무자 - 첫번째 스텝)
+	@Transactional
+	public Boolean confirmRequestDebtorFormStatus(Integer currentUserId, FormConfirmRequest request) {
+
+		Integer formId = request.getFormId();
+		String userName = request.getUserName().trim();
+		String phoneNumber = request.getPhoneNumber().trim();
+
+		UserEntity userEntity = userService.selectById(currentUserId);
+		if (!(userEntity.getUserName().equals(userName) && userEntity.getPhoneNumber().equals(phoneNumber))) {
+			throw new FormException(ErrorCode.INVALID_DEBTOR);
+		}
+
+		FormEntity formEntity = selectById(formId);
+
+		if (formEntity.getDebtor().getId() != currentUserId) {
+			throw new FormException(ErrorCode.INVALID_DEBTOR);
+		}
+
+		confirmRequest(userEntity, formEntity, FormStatus.BEFORE_APPROVAL);
+
+		return true;
+	}
+
+	// 계약 체결 인증 (채무자 - 첫번째 스텝)
+	@Transactional
+	public FormConfirmVerifyResponse confirmVerifyDebtorFormStatus(Integer currentUserId,
+		@Valid FormConfirmVerifyRequest request) {
+
+		Integer formId = request.getFormId();
+		String phoneNumber = request.getPhoneNumber().trim();
+		String verificationCode = request.getVerificationCode().trim();
+
+		UserEntity userEntity = userService.selectById(currentUserId);
+		if (!(userEntity.getPhoneNumber().equals(phoneNumber))) {
+			throw new FormException(ErrorCode.INVALID_DEBTOR);
+		}
+
+		FormEntity formEntity = selectById(formId);
+
+		if (formEntity.getDebtor().getId() != currentUserId) {
+			throw new FormException(ErrorCode.INVALID_DEBTOR);
+		}
+
+		if (formEntity.getStatus() != FormStatus.BEFORE_APPROVAL) {
+			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
+		}
+
+		verifyConfirmRequest(phoneNumber, verificationCode);
+		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
+
+		formEntity.setStatus(FormStatus.AFTER_APPROVAL);
+		formRepository.save(formEntity);
+
+		return FormConfirmVerifyResponse.fromEntity(formEntity);
+	}
+
+	// 계약 체결 요청 (채권자 - 두번째 스텝)
+	@Transactional
+	public Boolean confirmRequestCreditorFormStatus(Integer currentUserId, @Valid FormConfirmRequest request) {
+
+		Integer formId = request.getFormId();
+		String userName = request.getUserName().trim();
+		String phoneNumber = request.getPhoneNumber().trim();
+
+		UserEntity userEntity = userService.selectById(currentUserId);
+		if (!(userEntity.getUserName().equals(userName) && userEntity.getPhoneNumber().equals(phoneNumber))) {
+			throw new FormException(ErrorCode.INVALID_CREDITOR);
+		}
+
+		FormEntity formEntity = selectById(formId);
+
+		if (formEntity.getCreditor().getId() != currentUserId) {
+			throw new FormException(ErrorCode.INVALID_CREDITOR);
+		}
+
+		confirmRequest(userEntity, formEntity, FormStatus.AFTER_APPROVAL);
+
+		return true;
+	}
+
+	// 계약 체결 인증 (채권자 - 두번째 스텝)
+	@Transactional
+	public FormConfirmVerifyResponse confirmVerifyCreditorFormStatus(Integer currentUserId,
+		@Valid FormConfirmVerifyRequest request) {
+
+		Integer formId = request.getFormId();
+		String phoneNumber = request.getPhoneNumber().trim();
+		String verificationCode = request.getVerificationCode().trim();
+
+		UserEntity userEntity = userService.selectById(currentUserId);
+		if (!(userEntity.getPhoneNumber().equals(phoneNumber))) {
+			throw new FormException(ErrorCode.INVALID_CREDITOR);
+		}
+
+		FormEntity formEntity = selectById(formId);
+
+		if (formEntity.getCreditor().getId() != currentUserId) {
+			throw new FormException(ErrorCode.INVALID_CREDITOR);
+		}
+
+		if (formEntity.getStatus() != FormStatus.AFTER_APPROVAL) {
+			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
+		}
+
+		verifyConfirmRequest(phoneNumber, verificationCode);
+		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
+		transferService.createInitialTransfer(formEntity);
+
+		formEntity.setStatus(FormStatus.IN_PROGRESS);
+		formRepository.save(formEntity);
+
+		return FormConfirmVerifyResponse.fromEntity(formEntity);
+	}
+
+	// 인증번호 요청
+	private void confirmRequest(UserEntity userEntity, FormEntity formEntity, FormStatus formStatus) {
+		try {
+
+			if (formEntity.getStatus() != formStatus) {
+				throw new FormException(ErrorCode.INVALID_FORM_STATUS);
+			}
+
+			// 전화번호 정규화
+			String normalizedPhone = messageService.normalizePhoneNumber(userEntity.getPhoneNumber());
+
+			// 인증 코드 생성 및 Redis에 저장
+			String code = verificationService.createAndStoreCode(normalizedPhone);
+
+			// 인증 코드 전송
+			boolean sent = messageService.sendVerificationCode(normalizedPhone, code);
+
+			if (!sent) {
+				log.error("Failed to send verification code to: {}", normalizedPhone);
+				throw new PasswordException(ErrorCode.FAIL_MESSAGE_SEND);
+			}
+			log.info("Password reset verification code sent to: {}", normalizedPhone);
+		} catch (PasswordException e) {
+			log.error("Password error in verification: {}", e.getMessage());
+			throw e;
+		} catch (UserException e) {
+			log.error("Error in password reset verification: {}", e.getMessage());
+			throw e;
+		} catch (Exception e) {
+			log.error("Unexpected error in password reset verification: {}", e.getMessage());
+			throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	// 인증번호 검증
+	private void verifyConfirmRequest(String phoneNumber, String verificationCode) {
+		try {
+			// 전화번호 정규화
+			String normalizedPhone = messageService.normalizePhoneNumber(phoneNumber);
+
+			// 인증 코드 확인
+			verificationService.verifyCode(normalizedPhone, verificationCode);
+
+			try {
+				// 인증 성공 시 Redis에 인증 상태 저장 (예: 10분간 유효)
+				String verifiedKey = "verified:" + normalizedPhone;
+				redisTemplate.opsForValue()
+					.set(verificationService.getVerificationKeyPrefix() + verifiedKey, "true", 10, TimeUnit.MINUTES);
+				log.debug("인증 상태 저장 - 키: {}", verifiedKey);
+			} catch (UserException e) {
+				if (e.getErrorCode() == ErrorCode.USER_NOT_FOUND) {
+					throw new PasswordException(ErrorCode.USER_NOT_FOUND);
+				}
+				throw e;
+			}
+		} catch (PasswordException e) {
+			log.error("Password verification error: {}", e.getMessage());
+			throw e; // 예외를 그대로 던져서 컨트롤러에서 처리하도록
+		} catch (UserException e) {
+			log.error("User error in password verification: {}", e.getMessage());
+			throw e;
+		} catch (Exception e) {
+			log.error("Unexpected error in password verification: {}", e.getMessage());
+			throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private void checkAccount(String creditorAccount, String debtorAccount) {
+		if (creditorAccount == null) {
+			throw new FormException(ErrorCode.CREDITOR_ACCOUNT_NOT_FOUND);
+		}
+		if (debtorAccount == null) {
+			throw new FormException(ErrorCode.DEBTOR_ACCOUNT_NOT_FOUND);
+		}
 	}
 }
