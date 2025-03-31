@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -18,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -37,9 +39,9 @@ public class SecurityConfig {
 
 	@Autowired
 	public SecurityConfig(
-		@Lazy CustomUserDetailsService customUserDetailsService,
-		@Lazy JwtAuthenticationFilter jwtAuthenticationFilter,
-		@Lazy OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
+			@Lazy CustomUserDetailsService customUserDetailsService,
+			@Lazy JwtAuthenticationFilter jwtAuthenticationFilter,
+			@Lazy OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
 		this.customUserDetailsService = customUserDetailsService;
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
 		this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
@@ -49,20 +51,20 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-			.csrf(csrf -> csrf.disable())
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(auth -> auth
-					// 모든 API 경로에 접근 허용 (개발 편의를 위해)
-					.requestMatchers("/api/**", "/oauth2/**", "/login/oauth2/code/**").permitAll()
-					.anyRequest()
-					.authenticated()
-				//				// 공개 API 경로 설정
-				//				.requestMatchers("/api/auth/**", "/api/public/**", "/api/swagger-ui/**", "api/api-docs/**")
-				//				.permitAll()
-				//				// 나머지 경로는 인증 필요
-				//				.anyRequest()
-				//				.authenticated()
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.csrf(csrf -> csrf.disable())
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(auth -> auth
+								// 모든 API 경로에 접근 허용 (개발 편의를 위해)
+								.requestMatchers("/api/**", "/oauth2/**", "/login/oauth2/code/**", "/auth/**").permitAll()
+								.anyRequest()
+								.authenticated()
+						//				// 공개 API 경로 설정
+						//				.requestMatchers("/api/auth/**", "/api/public/**", "/api/swagger-ui/**", "api/api-docs/**")
+						//				.permitAll()
+						//				// 나머지 경로는 인증 필요
+						//				.anyRequest()
+						//				.authenticated()
 				)
 				// OAuth2 로그인 설정 추가
 				.oauth2Login(oauth2 -> oauth2
@@ -72,6 +74,10 @@ public class SecurityConfig {
 						)
 						.defaultSuccessUrl("/")
 						.successHandler(oAuth2LoginSuccessHandler)
+				)
+				// 인증 실패 시 401 응답 반환하도록 설정 (리다이렉트 방지)
+				.exceptionHandling(exceptions -> exceptions
+						.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
 				);
 
 		// Jwt 필터 추가
