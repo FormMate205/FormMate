@@ -29,7 +29,7 @@ export const useConnectWs = ({
         }
 
         try {
-            const socket = new WebSocket('ws://j12a205.p.ssafy.io/ws');
+            const socket = new WebSocket(import.meta.env.VITE_WS_URI);
             stompClient.current = Stomp.over(socket);
 
             stompClient.current.connect({}, () => {
