@@ -1,11 +1,10 @@
 package com.corp.formmate.chat.service;
 
-import com.corp.formmate.chat.dto.ChatRequest;
-import com.corp.formmate.chat.dto.ChatResponse;
-import com.corp.formmate.chat.dto.ChatRoomResponse;
+import com.corp.formmate.chat.dto.*;
 import com.corp.formmate.chat.entity.ChatEntity;
 import com.corp.formmate.chat.repository.ChatRepository;
 import com.corp.formmate.form.entity.FormEntity;
+import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.service.FormService;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.ChatException;
@@ -168,6 +167,97 @@ public class ChatService {
             log.error("채팅방 목록 조회 중 에러 발생", e);
             throw new ChatException(ErrorCode.CHAT_NOT_FOUND);
         }
+    }
+
+    /**
+     * 사용자의 채팅방 목록을 계약 상태(진행중/종료)에 따라 그룹화하여 조회
+     * 각 그룹 내에서는 최신 메세지 날짜 순으로 정렬
+     */
+    @Transactional(readOnly = true)
+    public GroupedChatRoomsResponse selectGroupedChatRooms(Integer userId, int activePage, int completedPage, int size) {
+        try {
+            // 사용자가 참여하고 있는 모든 폼(계약서) 조회
+            List<FormEntity> userForms = formService.selectFormsByUserId(userId);
+
+            // 진행 중인 계약과 종료된 계약으로 분리
+            List<FormEntity> activeForms = new ArrayList<>();
+            List<FormEntity> completedForms = new ArrayList<>();
+
+            for (FormEntity form : userForms) {
+                if (form.getStatus() == FormStatus.COMPLETED) {
+                    completedForms.add(form);
+                } else {
+                    activeForms.add(form);
+                }
+            }
+
+            // 진행 중인 채팅방 목록 생성 및 정렬
+            Slice<ChatRoomResponse> activeChatRoomsSlice = createChatRoomsSlice(activeForms, userId, activePage, size);
+
+            // 종료된 채팅방 목록 생성 및 정렬
+            Slice<ChatRoomResponse> completedChatRoomsSlice = createChatRoomsSlice(completedForms, userId, completedPage, size);
+
+            // 응답 객체 생성
+            return GroupedChatRoomsResponse.builder()
+                    .activeChatRooms(ChatRoomSliceResponse.fromSlice(activeChatRoomsSlice))
+                    .completedChatRooms(ChatRoomSliceResponse.fromSlice(completedChatRoomsSlice))
+                    .build();
+
+        } catch (Exception e) {
+            log.error("그룹화된 채팅방 목록 조회 중 에러 발생", e);
+            throw new ChatException(ErrorCode.CHAT_NOT_FOUND);
+        }
+    }
+
+    /**
+     * 주어진 계약 목록에서 채팅방 목록 생성, 최신 메세지 날짜 순으로 정렬하여 Slice로 반환
+     */
+    private Slice<ChatRoomResponse> createChatRoomsSlice(List<FormEntity> forms, Integer userId, Integer page, Integer size) {
+        // 각 계약 별로 채팅방 정보 생성
+        List<ChatRoomResponse> chatRooms = new ArrayList<>();
+
+        for (FormEntity form : forms) {
+            // 가장 최근 채팅 메시지 조회
+            ChatEntity lastChat = chatRepository.findTopByFormOrderByCreatedAtDesc(form)
+                    .orElse(null);
+
+            // 안 읽은 메시지 수 조회
+            Integer unreadCount = chatRepository.countByFormAndIsReadFalseAndWriterIdNot(form, userId);
+
+            // formTitle은 프론트엔드에서 생성할 것임
+            ChatRoomResponse room = ChatRoomResponse.builder()
+                    .formId(form.getId())
+                    .creditorName(form.getCreditor().getUserName())
+                    .debtorName(form.getDebtor().getUserName())
+                    .lastMessage(lastChat != null ? lastChat.getContent() : "")
+                    .lastMessageTime(lastChat != null ? lastChat.getCreatedAt() : null)
+                    .unreadCount(unreadCount)
+                    .build();
+
+            chatRooms.add(room);
+        }
+
+        // 최신 메시지 시간을 기준으로 정렬 (null 값은 가장 오래된 것으로 처리)
+        chatRooms.sort((a, b) -> {
+            if (a.getLastMessageTime() == null) return 1;
+            if (b.getLastMessageTime() == null) return -1;
+            return b.getLastMessageTime().compareTo(a.getLastMessageTime()); // 내림차순 정렬
+        });
+
+        // 페이지네이션 처리
+        int start = page * size;
+        int end = Math.min(start + size, chatRooms.size());
+
+        // 범위 검사
+        if (start >= chatRooms.size()) {
+            return new SliceImpl<>(Collections.emptyList(),
+                    PageRequest.of(page, size), false);
+        }
+
+        List<ChatRoomResponse> pageContent = chatRooms.subList(start, end);
+        boolean hasNext = end < chatRooms.size();
+
+        return new SliceImpl<>(pageContent, PageRequest.of(page, size), hasNext);
     }
 
     /**
