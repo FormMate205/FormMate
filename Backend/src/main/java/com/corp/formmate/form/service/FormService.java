@@ -292,6 +292,13 @@ public class FormService {
 		return FormConfirmVerifyResponse.fromEntity(formEntity);
 	}
 
+	@Transactional(readOnly = true)
+	public List<FormEntity> selectFormsByUserId(Integer userId) {
+		userService.selectById(userId); // 사용자 존재 여부 확인
+
+		return formRepository.findAllByCreditorIdOrDebtorId(userId, userId);
+	}
+
 	// 인증번호 요청
 	private void confirmRequest(UserEntity userEntity, FormEntity formEntity, FormStatus formStatus) {
 		try {
