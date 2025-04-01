@@ -159,7 +159,17 @@ public class ContractController {
 		)
 	})
 	@GetMapping
-	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam FormStatus formStatus, @CurrentUser AuthUser authUser) {
+	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam String status, @CurrentUser AuthUser authUser) {
+		FormStatus formStatus = null;
+		if (!status.equals("ALL")) {
+			for (FormStatus s : FormStatus.values()) {
+				if (s.name().equals(status)) {
+					formStatus = s;
+					break;
+				}
+			}
+		}
+
 		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatus, authUser));
 	}
 

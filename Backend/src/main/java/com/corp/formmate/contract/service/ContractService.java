@@ -252,7 +252,8 @@ public class ContractService {
 
 		for (FormEntity f : allWithFilters) {
 			ContractPreviewResponse contractPreviewResponse = new ContractPreviewResponse();
-			contractPreviewResponse.setStatus(formStatus);
+			contractPreviewResponse.setFormId(f.getId());
+			contractPreviewResponse.setStatus(f.getStatus());
 
 			if (f.getCreditorName().equals(username)) {
 				contractPreviewResponse.setUserIsCreditor(true);
