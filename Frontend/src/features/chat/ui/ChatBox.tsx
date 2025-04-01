@@ -1,5 +1,6 @@
 import ChatContent from '@/entities/chat/ui/ChatContent';
 import ChatProfile from '@/entities/chat/ui/ChatProfile';
+import { useUserStore } from '@/entities/user/model/userStore';
 
 interface ChatBoxProps {
     writerId: string;
@@ -8,7 +9,8 @@ interface ChatBoxProps {
 }
 
 const ChatBox = ({ writerId, name, content }: ChatBoxProps) => {
-    const userId = '1';
+    const { user } = useUserStore();
+    const userId = user?.userId;
 
     return (
         <div
