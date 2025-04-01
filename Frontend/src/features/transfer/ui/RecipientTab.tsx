@@ -44,7 +44,7 @@ const RecipientTab = () => {
         setDrawerOpen(true);
     };
 
-    const handleSelectContract = (contract: ContractItem) => {
+    const handleSelectContract = () => {
         // store에 값 저장
         navigate('amount');
     };
