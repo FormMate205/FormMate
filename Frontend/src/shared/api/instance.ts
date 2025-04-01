@@ -11,6 +11,9 @@ const api = axios.create({
     },
 });
 
+// 공개 API 경로 목록 (인증이 필요하지 않은 API)
+const publicApiPaths = ['/auth/email/login', '/auth/refresh', '/auth/register'];
+
 // 요청 시 accessToken 붙이기
 api.interceptors.request.use((config) => {
     const accessToken = localStorage.getItem('accessToken');
@@ -31,12 +34,20 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        // 현재 요청 경로 확인
+        const requestPath = originalRequest.url;
+        const isPublicApi = publicApiPaths.some(
+            (path) => requestPath && requestPath.includes(path),
+        );
+
+        // 공개 API에서 401 에러가 발생한 경우 - 토큰 갱신 시도 없이 에러 반환
+        if (error.response?.status === 401 && isPublicApi) {
+            return Promise.reject(error);
+        }
+
         // refreshToken 요청 자체에서 에러가 난 경우
-        if (
-            error.response?.status === 401 &&
-            originalRequest.url === '/auth/refresh'
-        ) {
-            // 인증 만료로 간주하고 로그인 페이지로 리디렉션
+        if (error.response?.status === 401 && requestPath === '/auth/refresh') {
+            // 인증 만료로 간주하고 login 페이지로 리디렉션
             localStorage.removeItem('accessToken');
             useUserStore.getState().clearUser();
             window.location.href = '/login';
@@ -47,9 +58,14 @@ api.interceptors.response.use(
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&
-            originalRequest.url !== '/auth/email/login'
+            !isPublicApi
         ) {
             originalRequest._retry = true;
+
+            // 이미 토큰이 localStorage에 없는 경우, 리프레시 시도 없이 에러 반환
+            if (!localStorage.getItem('accessToken')) {
+                return Promise.reject(error);
+            }
 
             // 진행 중인 리프레시 요청이 없으면 새로 시작
             if (!isRefreshing) {
@@ -69,7 +85,7 @@ api.interceptors.response.use(
                     originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                     return api(originalRequest);
                 } catch (refreshError) {
-                    // 리프레시 실패 시 로그인 페이지로 리디렉션
+                    // 리프레시 실패 시 login 페이지로 리디렉션
                     localStorage.removeItem('accessToken');
                     useUserStore.getState().clearUser();
                     window.location.href = '/login';

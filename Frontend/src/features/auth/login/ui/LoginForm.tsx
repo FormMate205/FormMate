@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { login } from '../../../../entities/auth/api/login';
@@ -24,9 +25,18 @@ const LoginForm = () => {
             // 홈으로 이동
             navigate('/');
         } catch (err) {
-            console.log(err);
-            alert('로그인에 실패했습니다. 다시 시도해 주세요.');
-            // 백단 에러 코드 작성 요청 !!
+            if (err instanceof AxiosError) {
+                // 서버에서 전달한 에러 메시지가 있는 경우
+                if (err.response?.data?.message) {
+                    alert(err.response.data.message);
+                } else {
+                    // 기본 에러 메시지
+                    alert('로그인 중 오류가 발생했습니다.');
+                }
+            } else {
+                // 기타 예상치 못한 에러
+                alert('로그인 중 알 수 없는 오류가 발생했습니다.');
+            }
         }
     };
 
