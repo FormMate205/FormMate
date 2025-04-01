@@ -241,11 +241,6 @@ public class ContractService {
 		return contractEntity;
 	}
 
-	// TODO: 송금 API에서 사용할 계약관리 테이블 업데이트 메소드(중도상환액, 연체액, 잔여원금, 중도상환수수료 등) 만들기 -> 동욱이형 API 짤 때 합의
-	// TODO: 공통) 잔여원금, 이자 금액, 연체 이자 금액 업데이트
-	// TODO: - 연체 금액 있을 경우: 잔여원금-연체금액(연체금액 있을 경우), 연체 금액도 업데이트
-	// TODO: - 중도상환액 있을 경우: 중도상환액 0원으로 업데이트
-	// TODO: 중도상환) 잔여원금(중도상환수수료 추가), 중도상환 횟수/금액, 만기일 예상 납부 금액/이자 업데이트
 	/**
 	 * Input
 	 * 1. 계약서 ID
@@ -257,7 +252,6 @@ public class ContractService {
 	 * 1. 중도상환 송금일 경우 -> 만기일 예상 납부 금액(+이자)는 이 때만 바뀜 (중도상환 수수료 때문에)
 	 * 2. 납부 송금일 경우
 	 * 3. 연체 송금일 경우
-	 *
 	 */
 	@Transactional
 	public void updateContract(TransferCreateRequest request) {
@@ -318,7 +312,6 @@ public class ContractService {
 			}
 		}
 
-		// 연체 관련 필드 save 필요
 		if (diff >= 0) {
 			// 연체, 납부 송금
 			contract.setTotalEarlyRepaymentFee(0L); // 총 중도 상환 금액 필드 0이 됨(중도상환 송금이 아니니)
@@ -344,8 +337,8 @@ public class ContractService {
 			// 이번 달 상환액을 제외한 나머지 금액은 이자 금액, 중도상환수수료를 차감하고 원금을 차감해야 함
 			amount -= repaymentAmount; // 이번 달 상환액을 제외한 나머지 금액
 			interest = BigDecimal.valueOf(amount).multiply(form.getInterestRate()).longValue();
-			long earlyRepaymentFee = BigDecimal.valueOf(amount).multiply(form.getEarlyRepaymentFeeRate()).longValue();
-			long deductedAmount = amount - interest - earlyRepaymentFee;
+			long earlyRepaymentFee = BigDecimal.valueOf(amount).multiply(form.getEarlyRepaymentFeeRate()).longValue(); // 나머지 금액만큼에서 중도상환수수료 계산
+			long deductedAmount = amount - interest - earlyRepaymentFee; // 원금에서 차감할 금액(나머지 금액 - 이자 금액 - 중도상환수수료)
 			contract.setInterestAmount(contract.getInterestAmount() + interest);
 			remainingPrincipal -= deductedAmount;
 			remainingPrincipalMinusOverdue -= deductedAmount;
