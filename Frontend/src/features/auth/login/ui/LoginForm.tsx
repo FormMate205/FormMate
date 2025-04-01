@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { login } from '../api/login';
+import { login } from '../../../../entities/auth/api/login';
 import { LoginFormSchema } from '../model/types';
 import { useLoginForm } from '../model/useLoginForm';
 

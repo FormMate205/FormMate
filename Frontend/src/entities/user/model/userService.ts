@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getAccessToken, isTokenValid } from '@/shared/api/token';
+import { isTokenValid } from '@/entities/auth/model/authService';
 import { useUserStore } from './userStore';
 import { useUserQuery } from './useUserQuery';
 
@@ -13,7 +13,7 @@ export const useUserService = () => {
     const setLoggedIn = useUserStore((state) => state.setLoggedIn);
     const clearUser = useUserStore((state) => state.clearUser);
 
-    const token = getAccessToken();
+    const token = localStorage.getItem('accessToken');
 
     useEffect(() => {
         if (token && isTokenValid()) {
