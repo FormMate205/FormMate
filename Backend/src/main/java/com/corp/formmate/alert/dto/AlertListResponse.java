@@ -2,6 +2,7 @@ package com.corp.formmate.alert.dto;
 
 import java.time.LocalDateTime;
 
+import com.corp.formmate.alert.entity.AlertEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Schema(description = "알림 조회 응답")
 @Builder
-public class AlertUnreadResponse {
+public class AlertListResponse {
 
 	@Schema(
 		description = "알림 ID",
@@ -47,5 +48,15 @@ public class AlertUnreadResponse {
 	)
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime createdAt;
+
+	public static AlertListResponse fromEntity(AlertEntity entity) {
+		return AlertListResponse.builder()
+			.alertId(entity.getId())
+			.alertType(entity.getAlertType())
+			.content(entity.getContent())
+			.isRead(entity.getIsRead())
+			.createdAt(entity.getCreatedAt())
+			.build();
+	}
 
 }

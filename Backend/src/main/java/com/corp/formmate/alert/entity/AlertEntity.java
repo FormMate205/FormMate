@@ -15,12 +15,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @Table(name = "alerts")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -52,4 +52,8 @@ public class AlertEntity implements Serializable {
 	@Column(name = "created_at", nullable = false)
 	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
+
+	public void delete() {
+		this.isDeleted = true;
+	}
 }

@@ -34,8 +34,8 @@ public interface AlertRepository extends JpaRepository<AlertEntity, Integer> {
 
 	@Modifying
 	@Query("UPDATE AlertEntity a SET a.isRead = true " +
-		"WHERE a.user.id = :userId AND a.isRead = false AND a.isDeleted = false")
-	void markAllAsRead(@Param("userId") Integer userId);
+		"WHERE a.user = :user AND a.isRead = false AND a.isDeleted = false")
+	void markAllAsRead(@Param("user") UserEntity user);
 
 	long countByUserAndIsDeletedFalseAndIsReadFalse(UserEntity user);
 
