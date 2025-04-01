@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.corp.formmate.contract.dto.AmountResponse;
@@ -157,8 +158,8 @@ public class ContractController {
 			)
 		)
 	})
-	@GetMapping("/{status}")
-	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@PathVariable FormStatus formStatus, @CurrentUser AuthUser authUser) {
+	@GetMapping
+	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam FormStatus formStatus, @CurrentUser AuthUser authUser) {
 		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatus, authUser));
 	}
 
