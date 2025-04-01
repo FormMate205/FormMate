@@ -286,10 +286,12 @@ public class ContractService {
 		for (FormEntity f : allWithFilters) {
 			InterestResponse interestResponse = selectInterestResponse(f.getId());
 			if (f.getCreditorName().equals(username)) {
-				receivedAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+				receivedAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount()
+					+ interestResponse.getPaidOverdueInterestAmount());
 				expectedTotalReceived += interestResponse.getExpectedPaymentAmountAtMaturity();
 			} else if (f.getDebtorName().equals(username)) {
-				paidAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+				paidAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount()
+					+ interestResponse.getPaidOverdueInterestAmount());
 				expectedTotalRepayment += interestResponse.getExpectedPaymentAmountAtMaturity();
 			}
 		}
@@ -299,6 +301,7 @@ public class ContractService {
 		amountResponse.setReceivedAmount(receivedAmount);
 		amountResponse.setExpectedTotalReceived(expectedTotalReceived);
 		return amountResponse;
+	}
 
 	public ContractEntity selectTransferByForm(FormEntity form) {
 		ContractEntity contractEntity = contractRepository.findByForm(form).orElse(null);
