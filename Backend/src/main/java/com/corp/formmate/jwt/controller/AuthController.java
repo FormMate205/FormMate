@@ -8,6 +8,7 @@ import com.corp.formmate.jwt.service.JwtTokenService;
 import com.corp.formmate.user.dto.LoginRequest;
 import com.corp.formmate.user.dto.LoginResponse;
 import com.corp.formmate.user.entity.UserEntity;
+import com.corp.formmate.user.repository.UserRepository;
 import com.corp.formmate.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,6 +42,7 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtProperties jwtProperties;
+    private final UserRepository userRepository;
 
     /**
      * 로그인 API
@@ -126,6 +128,9 @@ public class AuthController {
                 user.getEmail(),
                 user.getUserName()
         );
+
+        user.login();
+        userRepository.save(user);
 
         // Header에 Access Token 포함
         return ResponseEntity.status(HttpStatus.OK)

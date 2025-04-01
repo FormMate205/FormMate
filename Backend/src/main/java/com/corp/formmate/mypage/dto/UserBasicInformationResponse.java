@@ -21,6 +21,9 @@ public class UserBasicInformationResponse {
     @Schema(description = "이메일", example = "user@example.com")
     private String email;
 
+    @Schema(description = "로그인 여부", example = "true")
+    private Boolean isLogged;
+
     @Schema(description = "계좌 등록 여부", example = "true")
     private Boolean hasAccount;
 }
