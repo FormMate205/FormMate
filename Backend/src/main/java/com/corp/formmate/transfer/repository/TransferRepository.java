@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.transfer.entity.TransferEntity;
+import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.user.entity.UserEntity;
 
 @Repository
@@ -35,4 +36,17 @@ public interface TransferRepository extends JpaRepository<TransferEntity, Intege
 		Pageable pageable);
 
 	Optional<List<TransferEntity>> findByForm(FormEntity form);
+
+	// 특정 폼과 상태에 따른 거래내역 조회 (currentRound가 0이 아닌 경우)
+	Page<TransferEntity> findByFormAndStatusAndCurrentRoundGreaterThan(
+		FormEntity form,
+		TransferStatus status,
+		Integer currentRound,
+		Pageable pageable);
+
+	// 특정 폼의 모든 거래내역 조회 (currentRound가 0이 아닌 경우)
+	Page<TransferEntity> findByFormAndCurrentRoundGreaterThan(
+		FormEntity form,
+		Integer currentRound,
+		Pageable pageable);
 }

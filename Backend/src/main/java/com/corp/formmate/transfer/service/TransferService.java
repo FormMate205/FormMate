@@ -11,14 +11,25 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.contract.entity.ContractEntity;
+import com.corp.formmate.contract.service.ContractService;
+import com.corp.formmate.form.entity.FormEntity;
+import com.corp.formmate.form.service.FormService;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.TransferException;
+import com.corp.formmate.transfer.dto.TransferCreateRequest;
+import com.corp.formmate.transfer.dto.TransferCreateResponse;
+import com.corp.formmate.transfer.dto.TransferFormListResponse;
 import com.corp.formmate.transfer.dto.TransferListResponse;
 import com.corp.formmate.transfer.entity.TransferEntity;
+import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.UserService;
+import com.corp.formmate.util.dto.BankTransferRequest;
+import com.corp.formmate.util.service.BankService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,17 +41,26 @@ public class TransferService {
 
 	private final TransferRepository transferRepository;
 
+	private final FormService formService;
+
 	private final UserService userService;
+
+	private final ContractService contractService;
+
+	private final BankService bankService;
 
 	@Transactional(readOnly = true)
 	public Page<TransferListResponse> selectTransfers(Integer userId, String period, String transferType,
-		Boolean latestFirst, Pageable pageable) {
+		String sortDirection, Pageable pageable) {
 
 		UserEntity user = userService.selectById(userId);
 
-		Sort sort = latestFirst
-			? Sort.by("transactionDate").descending()
-			: Sort.by("transactionDate").ascending();
+		Sort sort;
+		if (sortDirection.equals("과거순")) {
+			sort = Sort.by("transactionDate").ascending();
+		} else {
+			sort = Sort.by("transactionDate").descending();
+		}
 
 		Pageable pageableWithSort = PageRequest.of(
 			pageable.getPageNumber(),
@@ -51,10 +71,10 @@ public class TransferService {
 		LocalDateTime startDate = null;
 		LocalDateTime endDate = LocalDateTime.now();
 
-		if (period.equals("1m")) {
+		if (period.equals("1개월")) {
 			// 1개월
 			startDate = endDate.minusMonths(1);
-		} else if (period.equals("3m")) {
+		} else if (period.equals("3개월")) {
 			// 3개월
 			startDate = endDate.minusMonths(3);
 		} else if (period.contains("~")) {
@@ -79,11 +99,11 @@ public class TransferService {
 
 		Page<TransferEntity> transfers;
 
-		if ("ALL".equals(transferType)) {
+		if ("전체".equals(transferType)) {
 			// 모든 거래내역 (송금 + 수신)
 			transfers = transferRepository.findBySenderOrReceiverAndTransactionDateBetween(
 				user, user, startDate, endDate, pageableWithSort);
-		} else if ("SEND".equals(transferType)) {
+		} else if ("출금만".equals(transferType)) {
 			// 송금한 내역 (출금)
 			transfers = transferRepository.findBySenderAndTransactionDateBetween(
 				user, startDate, endDate, pageableWithSort);
@@ -93,6 +113,84 @@ public class TransferService {
 				user, startDate, endDate, pageableWithSort);
 		}
 		return transfers.map(transfer -> TransferListResponse.fromEntity(transfer, user));
+	}
+
+	@Transactional(readOnly = true)
+	public Page<TransferFormListResponse> selectFormTransfers(Integer formId, String transferStatus,
+		Pageable pageable) {
+
+		Page<TransferEntity> transfers;
+		FormEntity formEntity = formService.selectById(formId);
+
+		if ("전체".equals(transferStatus)) {
+			transfers = transferRepository.findByFormAndCurrentRoundGreaterThan(formEntity, 0, pageable);
+		} else {
+			TransferStatus status = TransferStatus.fromKorName(transferStatus);
+			transfers = transferRepository.findByFormAndStatusAndCurrentRoundGreaterThan(formEntity, status, 0,
+				pageable);
+		}
+
+		return transfers.map(TransferFormListResponse::fromEntity);
+	}
+
+	@Transactional
+	public TransferCreateResponse createTransfer(Integer userId, @Valid TransferCreateRequest transferCreateRequest) {
+
+		UserEntity sender = userService.selectById(userId);
+		UserEntity receiver = userService.selectById(transferCreateRequest.getPartnerId());
+		FormEntity formEntity = formService.selectById(transferCreateRequest.getFormId());
+		ContractEntity contractEntity = contractService.selectTransferByForm(formEntity);
+		Integer currentRound = contractEntity.getCurrentPaymentRound();
+
+		Long repaymentAmount = transferCreateRequest.getRepaymentAmount();
+		if (repaymentAmount == null) {
+			throw new TransferException(ErrorCode.INVALID_INPUT_VALUE);
+		}
+
+		Long amount = transferCreateRequest.getAmount();
+		if (amount == null) {
+			throw new TransferException(ErrorCode.INVALID_PAYMENT_AMOUNT);
+		}
+
+		Long paymentDifference = repaymentAmount - amount;
+
+		TransferEntity transferEntity;
+
+		if (paymentDifference > 0) { // 중도 상환
+			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
+				TransferStatus.EARLY_REPAYMENT);
+		} else if (paymentDifference == 0) { // 납부
+			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
+				TransferStatus.PAID);
+		} else { // 연체
+			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
+				TransferStatus.OVERDUE);
+		} // 해당 구문 빠져나오기 전 contract 관련한 처리 로직 필요
+
+		// Entity 저장 전 외부 은행 API 이체 로직 실행
+		bankService.createBankTransfer(BankTransferRequest.builder()
+			.depositAccountNo(receiver.getAccountNumber())
+			.withdrawalAccountNo(sender.getAccountNumber())
+			.transactionBalance(amount)
+			.build());
+
+		transferRepository.save(transferEntity);
+
+		return TransferCreateResponse.fromEntity(transferEntity);
+	}
+
+	private TransferEntity makeTransferEntity(FormEntity form, UserEntity sender, UserEntity receiver, Long amount,
+		Integer currentRound, Long paymentDifference, TransferStatus status) {
+		return TransferEntity.builder()
+			.form(form)
+			.sender(sender)
+			.receiver(receiver)
+			.amount(amount)
+			.currentRound(currentRound)
+			.paymentDifference(paymentDifference)
+			.status(status)
+			.transactionDate(LocalDateTime.now())
+			.build();
 	}
 }
 

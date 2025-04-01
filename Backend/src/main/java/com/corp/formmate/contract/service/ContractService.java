@@ -22,6 +22,7 @@ import com.corp.formmate.form.dto.PaymentScheduleResponse;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.repository.FormRepository;
+import com.corp.formmate.form.service.FormService;
 import com.corp.formmate.form.service.PaymentPreviewService;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.ContractException;
@@ -44,6 +45,7 @@ public class ContractService {
 	private final FormRepository formRepository;
 	private final TransferRepository transferRepository;
 	private final PaymentPreviewService paymentPreviewService;
+	private final FormService formService;
 
 	@Transactional
 	public ContractDetailResponse selectContractDetail(Integer formId) {
@@ -182,14 +184,15 @@ public class ContractService {
 				ExpectedPaymentAmountResponse expectedPaymentAmountResponse = selectExpectedPaymentAmount(f.getId());
 				ContractEntity contract = contractRepository.findByForm(f)
 					.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
-				String contractDuration = f.getContractDate().toLocalDate().toString() + " ~ " + f.getMaturityDate().toLocalDate().toString();
+				String contractDuration =
+					f.getContractDate().toLocalDate().toString() + " ~ " + f.getMaturityDate().toLocalDate().toString();
 
 				list.add(ContractWithPartnerResponse.builder()
-						.userIsCreditor(true)
-						.nextRepaymentAmount(expectedPaymentAmountResponse.getMonthlyRemainingPayment())
-						.nextRepaymentDate(contract.getNextRepaymentDate())
-						.contractDuration(contractDuration)
-						.build());
+					.userIsCreditor(true)
+					.nextRepaymentAmount(expectedPaymentAmountResponse.getMonthlyRemainingPayment())
+					.nextRepaymentDate(contract.getNextRepaymentDate())
+					.contractDuration(contractDuration)
+					.build());
 			}
 		}
 
@@ -198,7 +201,8 @@ public class ContractService {
 				ExpectedPaymentAmountResponse expectedPaymentAmountResponse = selectExpectedPaymentAmount(f.getId());
 				ContractEntity contract = contractRepository.findByForm(f)
 					.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
-				String contractDuration = f.getContractDate().toLocalDate().toString() + " ~ " + f.getMaturityDate().toLocalDate().toString();
+				String contractDuration =
+					f.getContractDate().toLocalDate().toString() + " ~ " + f.getMaturityDate().toLocalDate().toString();
 
 				list.add(ContractWithPartnerResponse.builder()
 					.userIsCreditor(false)
@@ -295,6 +299,13 @@ public class ContractService {
 		amountResponse.setReceivedAmount(receivedAmount);
 		amountResponse.setExpectedTotalReceived(expectedTotalReceived);
 		return amountResponse;
+
+	public ContractEntity selectTransferByForm(FormEntity form) {
+		ContractEntity contractEntity = contractRepository.findByForm(form).orElse(null);
+		if (contractEntity == null) {
+			throw new ContractException(ErrorCode.CONTRACT_NOT_FOUND);
+		}
+		return contractEntity;
 	}
 
 	// TODO: 송금 API에서 사용할 계약관리 테이블 업데이트 메소드(중도상환액, 연체액, 잔여원금, 중도상환수수료 등) 만들기 -> 동욱이형 API 짤 때 합의
