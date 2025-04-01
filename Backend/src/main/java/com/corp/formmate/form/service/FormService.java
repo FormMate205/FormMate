@@ -14,6 +14,16 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.contract.service.ContractService;
+import com.corp.formmate.form.dto.FormConfirmRequest;
+import com.corp.formmate.form.dto.FormConfirmVerifyRequest;
+import com.corp.formmate.form.dto.FormConfirmVerifyResponse;
+import com.corp.formmate.form.dto.FormCountResponse;
+import com.corp.formmate.form.dto.FormCreateRequest;
+import com.corp.formmate.form.dto.FormDetailResponse;
+import com.corp.formmate.form.dto.FormListResponse;
+import com.corp.formmate.form.dto.FormPartnerResponse;
+import com.corp.formmate.form.dto.FormUpdateRequest;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.repository.FormRepository;
@@ -46,9 +56,10 @@ public class FormService {
 	private final VerificationService verificationService;
 	private final TransferService transferService;
 	private final RedisTemplate<Object, Object> redisTemplate;
-
 	// 이벤트 발생을 위한
 	private final ApplicationEventPublisher eventPublisher;
+
+	private final ContractService contractService;
 
 	// 계약서 생성
 	@Transactional
@@ -303,6 +314,8 @@ public class FormService {
 		// 채팅 발송 위한 이벤트 발행
 		log.info("채권자 서명 & 계약 체결 이벤트 발행: 폼 ID={}", formEntity.getId());
 		eventPublisher.publishEvent(new CreditorSignatureCompletedEvent(formEntity));
+		
+		contractService.createContract(formEntity);
 
 		return FormConfirmVerifyResponse.fromEntity(formEntity);
 	}
