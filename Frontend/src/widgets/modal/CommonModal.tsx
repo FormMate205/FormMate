@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
+    DialogTitle,
     DialogFooter,
     DialogTrigger,
 } from '@/components/ui/dialog';
@@ -23,8 +24,8 @@ const CommonModal = ({
     return (
         <Dialog>
             <DialogTrigger>{triggerChildren}</DialogTrigger>
-
             <DialogContent className='flex flex-col items-center gap-4 bg-white'>
+                <DialogTitle></DialogTitle>
                 {children}
                 <DialogFooter>
                     <Button

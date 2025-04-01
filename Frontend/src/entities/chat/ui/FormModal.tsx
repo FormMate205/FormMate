@@ -1,6 +1,9 @@
-import { Contract } from '@/entities/contract/model/types';
+import { Suspense } from 'react';
+import { useGetContractDetail } from '@/entities/contract/api/ContractAPI';
 import ContractDocument from '@/entities/contract/ui/ContractDocument';
 import { Icons } from '@/shared';
+import { useContractPdfExport } from '@/shared/model/useContractPdfExport';
+import ListLoading from '@/shared/ui/ListLoading';
 import { CommonModal } from '@/widgets';
 
 interface FormModalProps {
@@ -8,12 +11,8 @@ interface FormModalProps {
 }
 
 const FormModal = ({ formId }: FormModalProps) => {
-    const contract = {} as Contract;
-
-    const handleDownload = () => {
-        console.log(formId);
-        return;
-    };
+    const { data } = useGetContractDetail(formId);
+    const { exportContract } = useContractPdfExport();
 
     return (
         <CommonModal
@@ -25,9 +24,13 @@ const FormModal = ({ formId }: FormModalProps) => {
                     <Icons name='docs' className='fill-line-700' width={20} />
                 </div>
             }
-            children={<ContractDocument contract={contract} />}
+            children={
+                <Suspense fallback={<ListLoading />}>
+                    <ContractDocument contract={data!} />
+                </Suspense>
+            }
             confirmText='pdf 다운로드'
-            onClick={handleDownload}
+            onClick={() => exportContract(data!)}
         />
     );
 };
