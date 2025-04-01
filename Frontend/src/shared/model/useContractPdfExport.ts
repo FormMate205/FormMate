@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Contract } from '@/entities/contract/model/types';
+import { ContractDocs } from '@/entities/contract/model/types';
 import { exportToPdf } from '../lib/exportToPdf';
 
 export const useContractPdfExport = () => {
     const [isPdfExporting, setIsPdfExporting] = useState(false);
 
-    const exportContract = async (contract: Contract) => {
+    const exportContract = async (contract: ContractDocs) => {
         setIsPdfExporting(true);
 
         await new Promise((r) => setTimeout(r, 100));

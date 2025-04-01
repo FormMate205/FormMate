@@ -1,13 +1,10 @@
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { logout } from '@/entities/user/api/logout';
+import { logout } from '@/entities/auth/api/logout';
 
 const Logout = () => {
-    const navigate = useNavigate();
-
     return (
         <>
-            <Button variant='logout' onClick={() => logout(navigate)}>
+            <Button variant='logout' onClick={() => logout()}>
                 로그아웃
             </Button>
         </>
