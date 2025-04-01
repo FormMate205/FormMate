@@ -126,10 +126,14 @@ public enum ErrorCode {
 	OVERDUE_INTEREST_CALCULATION_ERROR(500, "연체 이자 계산 중 오류가 발생했습니다"),
 
 	// 폼 종료 관련
-	FORM_TERMINATION_REQUEST_NOT_FOUND(404, "폼 파기 요청을 찾을 수 없습니다"),
-	FORM_TERMINATION_NOT_ALLOWED(400, "현재 폼 상태에서는 파기가 불가능합니다"),
 	FORM_TERMINATION_ALREADY_REQUESTED(400, "이미 파기 요청이 존재합니다"),
 	TERMINATION_APPROVAL_ERROR(500, "파기 승인 처리 중 오류가 발생했습니다"),
+	FORM_TERMINATION_NOT_ALLOWED(400, "현재 계약 상태에서는 파기가 불가능합니다"),
+	FORM_TERMINATION_SELF_SIGN_NOT_ALLOWED(400, "파기 요청자는 첫 번째 서명을 할 수 없습니다"),
+	FORM_TERMINATION_INVALID_SIGNER(400, "유효하지 않은 서명자입니다"),
+	FORM_TERMINATION_CONSENT_REQUIRED(400, "계약 파기에 대한 동의가 필요합니다"),
+	FORM_TERMINATION_REQUEST_NOT_FOUND(404, "파기 요청을 찾을 수 없습니다"),
+	INVALID_USER_INFO(400, "사용자 정보가 일치하지 않습니다"),
 
 	// 외부 API 관련
 	EXTERNAL_API_ERROR(500, "외부 API 호출 중 오류가 발생했습니다"),

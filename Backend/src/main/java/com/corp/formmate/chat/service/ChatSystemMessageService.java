@@ -82,11 +82,11 @@ public class ChatSystemMessageService {
         FormEntity form = event.getFormEntity();
         log.info("계약서 생성 이벤트 감지: form Id = {}", form.getId());
 
-        SystemMessageRequest request = SystemMessageRequest.create(
-                form.getId(),
-                "새로운 계약서 초안이 생성되었습니다.",
-                MessageType.CONTRACT_SHARED
-        );
+        SystemMessageRequest request = SystemMessageRequest.builder()
+                .formId(form.getId())
+                .content("새로운 계약서 초안이 생성되었습니다.")
+                .messageType(MessageType.CONTRACT_SHARED)
+                .build();
 
         createSystemMessage(request);
     }
@@ -100,49 +100,87 @@ public class ChatSystemMessageService {
         FormEntity form = event.getFormEntity();
         log.info("계약서 수정 이벤트 감지: form Id = {}", form.getId());
 
-        SystemMessageRequest request = SystemMessageRequest.create(
-                form.getId(),
-                "계약서 내용이 수정되었습니다.",
-                MessageType.CONTRACT_SHARED
-        );
+        SystemMessageRequest request = SystemMessageRequest.builder()
+                .formId(form.getId())
+                .content("계약서 내용이 수정되었습니다.")
+                .messageType(MessageType.CONTRACT_SHARED)
+                .build();
 
         createSystemMessage(request);
     }
 
     /**
-     * 서명 요청 이벤트 처리
+     * 채무자 서명 요청 이벤트 처리
      */
     @EventListener
     @Transactional
-    public void handleSignatureRequestEvent(SignatureRequestEvent event) {
+    public void handleDebtorSignatureRequestedEvent(DebtorSignatureRequestedEvent event) {
         FormEntity form = event.getFormEntity();
         Integer requestedByUserId = event.getRequestedByUserId();
-        log.info("서명 요청 이벤트 감지: form Id={}, 요청자 ID={}", form.getId(), requestedByUserId);
+        log.info("채무자 서명 요청 이벤트 감지: form Id={}, 요청자 ID={}", form.getId(), requestedByUserId);
 
-        SystemMessageRequest request = SystemMessageRequest.createWithRequester(
-                form.getId(),
-                "{userName}님이 서명을 요청했습니다.",
-                MessageType.SIGNATURE_REQUEST,
-                requestedByUserId
-        );
+        SystemMessageRequest request = SystemMessageRequest.builder()
+                .formId(form.getId())
+                .content("{userName}님이 채무자에게 서명을 요청했습니다.")
+                .messageType(MessageType.SIGNATURE_REQUEST)
+                .requestedByUserId(requestedByUserId)
+                .build();
 
         createSystemMessage(request);
     }
 
     /**
-     * 서명 완료 이벤트 처리
+     * 채무자 서명 완료 이벤트 처리
      */
     @EventListener
     @Transactional
-    public void handleSignatureCompletedEvent(SignatureCompletedEvent event) {
+    public void handleDebtorSignatureCompletedEvent(DebtorSignatureCompletedEvent event) {
         FormEntity form = event.getFormEntity();
-        log.info("서명 완료 이벤트 감지: form Id = {}", form.getId());
+        log.info("채무자 서명 완료 이벤트 감지: form Id = {}", form.getId());
 
-        SystemMessageRequest request = SystemMessageRequest.create(
-                form.getId(),
-                "모든 당사자의 서명이 완료되었습니다. 계약이 체결되었습니다.",
-                MessageType.SYSTEM_NOTIFICATION
-        );
+        SystemMessageRequest request = SystemMessageRequest.builder()
+                .formId(form.getId())
+                .content("채무자의 서명이 완료되었습니다. 채권자님의 서명을 기다립니다.")
+                .messageType(MessageType.SYSTEM_NOTIFICATION)
+                .build();
+
+        createSystemMessage(request);
+    }
+
+    /**
+     * 채권자 서명 요청 이벤트 처리
+     */
+    @EventListener
+    @Transactional
+    public void handleCreditorSignatureRequestedEvent(CreditorSignatureRequestedEvent event) {
+        FormEntity form = event.getFormEntity();
+        Integer requestedByUserId = event.getRequestedByUserId();
+        log.info("채권자 서명 요청 이벤트 감지: form Id={}, 요청자 ID={}", form.getId(), requestedByUserId);
+
+        SystemMessageRequest request = SystemMessageRequest.builder()
+                .formId(form.getId())
+                .content("{userName}님이 채권자에게 서명을 요청했습니다.")
+                .messageType(MessageType.SIGNATURE_REQUEST)
+                .requestedByUserId(requestedByUserId)
+                .build();
+
+        createSystemMessage(request);
+    }
+
+    /**
+     * 채권자 서명 완료 이벤트 처리 (계약 체결)
+     */
+    @EventListener
+    @Transactional
+    public void handleCreditorSignatureCompletedEvent(CreditorSignatureCompletedEvent event) {
+        FormEntity form = event.getFormEntity();
+        log.info("채권자 서명 완료 이벤트 감지: form Id = {}", form.getId());
+
+        SystemMessageRequest request = SystemMessageRequest.builder()
+                .formId(form.getId())
+                .content("채권자의 서명이 완료되었습니다. 계약이 체결되었습니다.")
+                .messageType(MessageType.SYSTEM_NOTIFICATION)
+                .build();
 
         createSystemMessage(request);
     }
@@ -157,12 +195,32 @@ public class ChatSystemMessageService {
         Integer requestedByUserId = event.getRequestedByUserId();
         log.info("계약 종료 요청 이벤트 감지: form Id={}, 요청자 ID={}", form.getId(), requestedByUserId);
 
-        SystemMessageRequest request = SystemMessageRequest.createWithRequester(
-                form.getId(),
-                "{userName}님이 계약 종료를 요청했습니다.",
-                MessageType.SYSTEM_NOTIFICATION,
-                requestedByUserId
-        );
+        SystemMessageRequest request = SystemMessageRequest.builder()
+                .formId(form.getId())
+                .content("{userName}님이 계약 종료를 요청했습니다.")
+                .messageType(MessageType.SYSTEM_NOTIFICATION)
+                .requestedByUserId(requestedByUserId)
+                .build();
+
+        createSystemMessage(request);
+    }
+
+    /**
+     * 첫 번째 당사자 종료 서명 완료 이벤트 처리
+     */
+    @EventListener
+    @Transactional
+    public void handleFirstPartyTerminationSignedEvent(FirstPartyTerminationSignedEvent event) {
+        FormEntity form = event.getForm();
+        Integer signedByUserId = event.getSignedByUserId();
+        log.info("첫 번째 당사자 종료 서명 완료 이벤트 감지: form Id={}, 서명자 ID={}", form.getId(), signedByUserId);
+
+        SystemMessageRequest request = SystemMessageRequest.builder()
+                .formId(form.getId())
+                .content("{userName}님이 계약 종료에 서명했습니다. 상대방의 서명을 기다립니다.")
+                .messageType(MessageType.SYSTEM_NOTIFICATION)
+                .requestedByUserId(signedByUserId)
+                .build();
 
         createSystemMessage(request);
     }
@@ -176,11 +234,11 @@ public class ChatSystemMessageService {
         FormEntity form = event.getFormEntity();
         log.info("계약 종료 완료 이벤트 감지: form Id={}", form.getId());
 
-        SystemMessageRequest request = SystemMessageRequest.create(
-                form.getId(),
-                "계약이 종료되었습니다.",
-                MessageType.SYSTEM_NOTIFICATION
-        );
+        SystemMessageRequest request = SystemMessageRequest.builder()
+                .formId(form.getId())
+                .content("모든 당사자의 서명이 완료되었습니다. 계약이 종료되었습니다.")
+                .messageType(MessageType.SYSTEM_NOTIFICATION)
+                .build();
 
         createSystemMessage(request);
     }
