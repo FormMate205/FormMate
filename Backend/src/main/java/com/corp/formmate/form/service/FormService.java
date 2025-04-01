@@ -3,6 +3,9 @@ package com.corp.formmate.form.service;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.corp.formmate.chat.event.FormCreatedEvent;
+import com.corp.formmate.chat.event.FormUpdatedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -57,6 +60,9 @@ public class FormService {
 
 	private final RedisTemplate<Object, Object> redisTemplate;
 
+	// 이벤트 발생을 위한
+	private final ApplicationEventPublisher eventPublisher;
+
 	// 계약서 생성
 	@Transactional
 	public FormDetailResponse createForm(Integer userId, FormCreateRequest request) {
@@ -72,6 +78,11 @@ public class FormService {
 		formRepository.save(formEntity);
 		List<SpecialTermResponse> specialTermResponses = specialTermService.createSpecialTerms(formEntity,
 			request.getSpecialTermIndexes());
+
+		// 채팅 발송 위한 이벤트 발행
+		log.info("계약서 생성 이벤트 발행: 폼 ID={}", formEntity.getId());
+		eventPublisher.publishEvent(new FormCreatedEvent(formEntity));
+
 		return FormDetailResponse.fromEntity(formEntity, specialTermResponses);
 	}
 
@@ -99,6 +110,11 @@ public class FormService {
 		formRepository.save(formEntity);
 		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(formEntity,
 			request.getSpecialTermIndexes());
+
+		// 채팅 발송 위한 이벤트 발행
+		log.info("계약서 수정 이벤트 발행: 폼 ID={}", formEntity.getId());
+		eventPublisher.publishEvent(new FormUpdatedEvent(formEntity));
+
 		return FormDetailResponse.fromEntity(formEntity, specialTermResponses);
 	}
 
