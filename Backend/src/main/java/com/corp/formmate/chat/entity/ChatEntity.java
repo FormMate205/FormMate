@@ -3,17 +3,12 @@ package com.corp.formmate.chat.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.corp.formmate.chat.dto.ChatResponse;
 import com.corp.formmate.form.entity.FormEntity;
+import com.corp.formmate.global.constants.SystemConstants;
 import com.corp.formmate.user.entity.UserEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,7 +33,7 @@ public class ChatEntity implements Serializable {
 
 	// writer_id -> User
 	@ManyToOne
-	@JoinColumn(name = "writer_id", nullable = false)
+	@JoinColumn(name = "writer_id", nullable = false) // 시스템일 경우 null 허용
 	private UserEntity writer;
 
 	@Column(columnDefinition = "TEXT", nullable = false)
@@ -55,4 +50,30 @@ public class ChatEntity implements Serializable {
 	@Column(name = "created_at", nullable = false)
 	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
+
+	@Enumerated(EnumType.STRING)  // VARCHAR로 저장하도록 지정
+	@Column(name = "message_type")
+	@Builder.Default
+	private MessageType messageType = MessageType.CHAT;  // 기본값 설정
+
+	// 시스템 메세지인지 확인
+	public boolean isSystemMessage() {
+		return writer != null && writer.getId().equals(SystemConstants.SYSTEM_USER_ID); // Id가 0인 사용자가 시스템
+	}
+
+	// 채권자가 보낸 메세지인지 확인
+	public boolean isCreditorMessage() {
+		if (isSystemMessage()) {
+			return false;
+		}
+		return writer.getId().equals(form.getCreditor().getId());
+	}
+
+	// 채무자가 보낸 메서드인지 확인
+	public boolean isDebtorMessage() {
+		if (isSystemMessage()) {
+			return false;
+		}
+		return writer.getId().equals(form.getDebtor().getId());
+	}
 }

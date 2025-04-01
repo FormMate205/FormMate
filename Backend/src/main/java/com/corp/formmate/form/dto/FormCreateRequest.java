@@ -58,7 +58,7 @@ public class FormCreateRequest {
 		required = true
 	)
 	@NotNull(message = "만기일은 필수입니다")
-	@JsonFormat(pattern = "yyyy-MM-dd")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime maturityDate;
 
 	@Schema(

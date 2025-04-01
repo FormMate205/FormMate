@@ -202,7 +202,7 @@ public class UserService {
     @Transactional
     public UserEntity getOrCreateOAuth2User(OAuth2UserInfo userInfo, Provider provider) {
         try {
-            Optional<UserEntity> existingUser = Optional.ofNullable(selectByEmail(userInfo.getEmail()));
+            Optional<UserEntity> existingUser = userRepository.findByEmail(userInfo.getEmail());
 
             if (existingUser.isPresent()) {
                 // 이미 가입된 경우, 필요에 따라 정보 업데이트 가능
@@ -220,7 +220,7 @@ public class UserService {
                 return userRepository.save(newUser);
             }
         } catch (Exception e) {
-            log.error("OAuth2 user createion failed: {}", e.getMessage());
+            log.error("OAuth2 user createion failed: {}", e.getMessage(), e);
             throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
