@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
 import {
     GetContractAmountChart,
-    GetContractDetail,
+    GetContractDetailResponse,
     GetContractStatusCountResponse,
 } from '../model/types';
 
@@ -37,8 +37,10 @@ export const useGetContractAmountChart = () => {
 // 차용증 상세 조회
 const getContractDetail = async (
     formId: string,
-): Promise<GetContractDetail> => {
-    const response = await api.get<GetContractDetail>(`/form/${formId}`);
+): Promise<GetContractDetailResponse> => {
+    const response = await api.get<GetContractDetailResponse>(
+        `/form/${formId}`,
+    );
     return response.data;
 };
 

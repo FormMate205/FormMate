@@ -5,7 +5,7 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 
-const InterestInfoTab = () => {
+const PaymentSummaryTab = () => {
     // dummy
     const data = {
         paidPrincipalAmount: 656124,
@@ -147,4 +147,4 @@ const InterestInfoTab = () => {
     );
 };
 
-export default InterestInfoTab;
+export default PaymentSummaryTab;
