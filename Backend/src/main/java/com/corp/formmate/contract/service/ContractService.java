@@ -25,6 +25,7 @@ import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.ContractException;
 import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.global.error.exception.TransferException;
+import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
@@ -241,6 +242,24 @@ public class ContractService {
 	// TODO: 공통) 잔여원금, 이자 금액, 연체 이자 금액 업데이트
 	// TODO: - 연체 금액 있을 경우: 잔여원금-연체금액(연체금액 있을 경우), 연체 금액도 업데이트
 	// TODO: 중도상환) 잔여원금(중도상환수수료 추가), 중도상환 횟수/금액, 만기일 예상 납부 금액/이자 업데이트
+	/**
+	 * Input
+	 * 1. 계약서 ID
+	 * 2. 상대방 유저 ID
+	 * 3. 상환 예정액
+	 * 4. 송금 금액
+	 * 설계
+	 * 연체가 있을 때를 가정할 필요 없음! -> TransferCreateRequest의 상환 예정액 필드에 연체액까지 포함되기 때문
+	 * 1. 중도상환 송금일 경우
+	 * 2. 납부 송금일 경우
+	 * 3. 연체 송금일 경우
+	 *
+	 */
+	@Transactional
+	public void updateContract(TransferCreateRequest request) {
+
+	}
+
 
 	// TODO: 납부일 다음 날 스케줄러 업데이트 메소드 제작
 	// TODO: 공통) 현재 회차, 다음 상환 날짜 업데이트
