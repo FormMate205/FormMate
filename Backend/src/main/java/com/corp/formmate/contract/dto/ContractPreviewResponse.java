@@ -18,6 +18,9 @@ import lombok.Data;
 @Data
 public class ContractPreviewResponse {
 
+	@Schema(description = "관련 계약서(폼) ID", example = "42")
+	private Integer formId;
+
 	@Schema(
 		description = "계약 상태",
 		example = "BEFORE_APPROVAL",
