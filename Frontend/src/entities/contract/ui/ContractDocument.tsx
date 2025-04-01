@@ -1,17 +1,14 @@
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom'; // 혹은 Next.js의 useRouter
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Contract } from '../model/types';
-
-interface ContractDocumentProps {
-    contract: Contract;
-    isPdfMode?: boolean;
-}
+import { formatCurrency } from '@/shared/model/formatCurrency';
+import { useGetContractDetail } from '../api/ContractAPI';
 
 const styles = {
     container: 'flex flex-col gap-4 pt-4 p-6 bg-white text-black ',
@@ -22,9 +19,23 @@ const styles = {
     contractValue: 'flex justify-between',
     section: 'flex justify-between',
     groupedValues: 'flex flex-col items-end text-right',
-}; // pdf 추출시 스타일 오류 방지 위함
+};
 
-const ContractDocument = ({ contract, isPdfMode }: ContractDocumentProps) => {
+const ContractDocument = ({ isPdfMode = false }: { isPdfMode?: boolean }) => {
+    const { formId } = useParams(); // or props로 받을 수도 있음
+    const { data, isLoading, isError } = useGetContractDetail(formId as string);
+
+    const [accordionValue, setAccordionValue] = useState<string | undefined>(
+        'item-1',
+    );
+
+    useEffect(() => {
+        if (isPdfMode) setAccordionValue('item-1');
+    }, [isPdfMode]);
+
+    if (isLoading) return <div>로딩 중...</div>;
+    if (isError || !data) return <div>데이터를 불러오지 못했습니다.</div>;
+
     const {
         creditorName,
         creditorPhone,
@@ -40,15 +51,7 @@ const ContractDocument = ({ contract, isPdfMode }: ContractDocumentProps) => {
         interestRate,
         earlyRepaymentFeeRate,
         specialTerms,
-    } = contract;
-
-    const [accordionValue, setAccordionValue] = useState<string | undefined>(
-        'item-1',
-    );
-
-    useEffect(() => {
-        if (isPdfMode) setAccordionValue('item-1');
-    }, [isPdfMode]);
+    } = data;
 
     return (
         <div id='contract-document' className={styles.container}>
@@ -98,8 +101,7 @@ const ContractDocument = ({ contract, isPdfMode }: ContractDocumentProps) => {
                     <div className={styles.groupedValues}>
                         <span>{repaymentMethod}</span>
                         <span>
-                            매달 {repaymentDay}일 /{' '}
-                            {Number(loanAmount).toLocaleString()}원
+                            매달 {repaymentDay}일 / {formatCurrency(loanAmount)}
                         </span>
                     </div>
                 </div>

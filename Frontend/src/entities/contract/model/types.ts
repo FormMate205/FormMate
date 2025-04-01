@@ -67,3 +67,6 @@ export type ContractAmountSummary = {
 };
 
 export type GetContractAmountChart = ContractAmountSummary;
+
+// 계약 상세
+export type GetContractDetail = Contract;
