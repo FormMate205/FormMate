@@ -1,6 +1,7 @@
 package com.corp.formmate.contract.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -419,8 +420,43 @@ public class ContractService {
 			remainingPrincipalMinusOverdue -= deductedAmount;
 			contract.setRemainingPrincipal(remainingPrincipal);
 			contract.setRemainingPrincipalMinusOverdue(remainingPrincipalMinusOverdue);
+			// 중도상환수수료만큼 만기일 예상 납부 금액 추가
+			contract.setExpectedMaturityPayment(contract.getExpectedMaturityPayment() + earlyRepaymentFee);
 			contractRepository.save(contract);
 		}
+	}
+
+	@Transactional
+	public void createContract(FormEntity form) {
+		ContractEntity contract = new ContractEntity();
+		contract.setForm(form);
+		contract.setOverdueCount(0);
+		contract.setOverdueAmount(0L);
+		LocalDate now = LocalDate.now();
+		contract.setNextRepaymentDate(LocalDate.of(now.getDayOfYear(), now.getDayOfMonth(), form.getRepaymentDay()));
+		contract.setEarlyRepaymentCount(0);
+		contract.setTotalEarlyRepaymentFee(0L);
+		Long loanAmount = form.getLoanAmount();
+		contract.setRemainingPrincipal(loanAmount);
+		contract.setRemainingPrincipalMinusOverdue(loanAmount);
+		contract.setInterestAmount(0L);
+		contract.setOverdueInterestAmount(0L);
+
+		PaymentPreviewRequest paymentPreview = new PaymentPreviewRequest(form);
+		PaymentPreviewResponse paymentPreviewResponse = paymentPreviewService.calculatePaymentPreview(paymentPreview,
+			PageRequest.of(0, 10000));
+		Page<PaymentScheduleResponse> schedulePage = paymentPreviewResponse.getSchedulePage();
+
+		Long expectedMaturityPayment = 0L;
+		Long expectedInterestAmountAtMaturity = 0L;
+		for (PaymentScheduleResponse p : schedulePage) {
+			expectedMaturityPayment += p.getPrincipal();
+			expectedInterestAmountAtMaturity += p.getInterest();
+		}
+		contract.setExpectedMaturityPayment(expectedMaturityPayment);
+		contract.setExpectedInterestAmountAtMaturity(expectedInterestAmountAtMaturity);
+
+		contractRepository.save(contract);
 	}
 
 
