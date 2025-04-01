@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.corp.formmate.jwt.provider.JwtTokenProvider;
+import io.jsonwebtoken.JwtException;
 import com.corp.formmate.user.service.CustomUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -109,7 +110,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				Integer userId = jwtTokenProvider.getUserIdFromTokenAsInteger(token);
 				UserDetails userDetails = customUserDetailsService.loadUserById(userId);
 				Authentication auth = new UsernamePasswordAuthenticationToken(
-					userDetails, "", userDetails.getAuthorities());
+						userDetails, "", userDetails.getAuthorities());
 				SecurityContextHolder.getContext().setAuthentication(auth);
 			}
 			// 개발 환경일 때 토큰이 없거나 유효하지 않은 경우
@@ -132,7 +133,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				try {
 					UserDetails userDetails = customUserDetailsService.loadUserById(userId);
 					Authentication auth = new UsernamePasswordAuthenticationToken(
-						userDetails, "", userDetails.getAuthorities());
+							userDetails, "", userDetails.getAuthorities());
 					SecurityContextHolder.getContext().setAuthentication(auth);
 					log.debug("Development mode: Set test user authentication for ID: {}", userId);
 				} catch (Exception e) {
@@ -141,10 +142,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 
 			filterChain.doFilter(request, response);
+		} catch (JwtException e) {  // JWT 관련 예외만 처리
+			log.error("JWT validation error: {}", e.getMessage());
+			sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "토큰 인증에 실패했습니다");
 		} catch (Exception e) {
-			// 기존 예외 처리
-			sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "인증에 실패했습니다: " + e.getMessage());
+			// 다른 예외는 Spring Security의 예외 처리 메커니즘으로 넘김
+			log.error("Authentication error: {}", e.getMessage());
+			throw e;  // 예외를 다시 던져서 AuthenticationEntryPoint에서 처리하게 함
 		}
+//		} catch (Exception e) {
+//			// 기존 예외 처리
+//			sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "인증에 실패했습니다: " + e.getMessage());
+//		}
 	}
 
 	// 개발 모드인지 확인하는 메서드
