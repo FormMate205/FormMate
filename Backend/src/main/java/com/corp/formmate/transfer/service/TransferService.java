@@ -156,6 +156,8 @@ public class TransferService {
 
 		TransferEntity transferEntity;
 
+		contractService.updateContract(transferCreateRequest); // contract(계약관리) 관련 처리 로직
+
 		if (paymentDifference > 0) { // 중도 상환
 			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
 				TransferStatus.EARLY_REPAYMENT);
