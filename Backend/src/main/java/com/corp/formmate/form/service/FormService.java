@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.dto.FormConfirmRequest;
 import com.corp.formmate.form.dto.FormConfirmVerifyRequest;
 import com.corp.formmate.form.dto.FormConfirmVerifyResponse;
@@ -56,6 +57,8 @@ public class FormService {
 	private final TransferService transferService;
 
 	private final RedisTemplate<Object, Object> redisTemplate;
+
+	private final ContractService contractService;
 
 	// 계약서 생성
 	@Transactional
@@ -288,6 +291,8 @@ public class FormService {
 
 		formEntity.setStatus(FormStatus.IN_PROGRESS);
 		formRepository.save(formEntity);
+
+		contractService.createContract(formEntity);
 
 		return FormConfirmVerifyResponse.fromEntity(formEntity);
 	}
