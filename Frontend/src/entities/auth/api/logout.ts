@@ -1,7 +1,6 @@
 import { queryClient } from '@/app/provider/queryClient';
 import api from '@/shared/api/instance';
-import { removeAccessToken } from '@/shared/api/token';
-import { useUserStore } from '../model/userStore';
+import { useUserStore } from '../../user/model/userStore';
 
 export const logout = async () => {
     try {
@@ -9,7 +8,7 @@ export const logout = async () => {
     } catch (e) {
         console.warn('로그아웃 실패', e);
     } finally {
-        removeAccessToken(); // 토큰 제거
+        localStorage.removeItem('accessToken');
         const store = useUserStore.getState();
         store.clearUser();
         store.setLoggedIn(false);

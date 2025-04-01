@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { logout } from '@/entities/user/api/logout';
+import { logout } from '@/entities/auth/api/logout';
 
 const Logout = () => {
     return (
