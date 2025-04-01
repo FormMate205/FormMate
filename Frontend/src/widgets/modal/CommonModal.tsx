@@ -6,6 +6,7 @@ import {
     DialogTitle,
     DialogFooter,
     DialogTrigger,
+    DialogClose,
 } from '@/components/ui/dialog';
 
 interface CommonModalProps {
@@ -25,6 +26,9 @@ const CommonModal = ({
         <Dialog>
             <DialogTrigger>{triggerChildren}</DialogTrigger>
             <DialogContent className='flex flex-col items-center gap-4 bg-white'>
+                <div className='flex w-full justify-end'>
+                    <DialogClose>닫기</DialogClose>
+                </div>
                 <DialogTitle></DialogTitle>
                 {children}
                 <DialogFooter>
