@@ -1,6 +1,6 @@
+import { setAccessToken } from '@/entities/auth/model/authService';
 import axios from '@/shared/api/instance';
-import { setAccessToken } from '@/shared/api/token';
-import { LoginFormSchema } from '../model/types';
+import { LoginFormSchema } from '../../../features/auth/login/model/types';
 
 export const login = async ({ email, password }: LoginFormSchema) => {
     const response = await axios.post('/auth/email/login', {
