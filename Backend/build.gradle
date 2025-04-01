@@ -66,7 +66,6 @@ dependencies {
     implementation 'org.webjars:sockjs-client:1.5.1'
 
     // Test
-// Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mockito:mockito-core:5.6.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.6.0'
@@ -102,6 +101,11 @@ dependencies {
 
     // CoolSMS SDK
     implementation 'net.nurigo:sdk:4.3.0'
+
+    // 알림 설정 FCM 이용
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.33.1'
+    implementation 'com.google.firebase:firebase-admin:9.4.3'
+    
 }
 
 tasks.named('test') {

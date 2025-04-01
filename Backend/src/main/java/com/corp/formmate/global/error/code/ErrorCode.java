@@ -154,7 +154,11 @@ public enum ErrorCode {
 	// 날짜 관련
 	INVALID_DATE_RANGE(400, "유효하지 않은 날짜 범위입니다"),
 	START_DATE_AFTER_END_DATE(400, "시작일이 종료일보다 늦을 수 없습니다"),
-	DATE_CONVERSION_ERROR(500, "날짜 변환 중 오류가 발생했습니다");
+	DATE_CONVERSION_ERROR(500, "날짜 변환 중 오류가 발생했습니다"),
+
+	// FcmToken 관련
+	INVALID_FCM_TOKEN(400, "유효하지 않은 FCM Token 입니다."),
+	FCM_TOKEN_NOT_FOUND(404, "유저의 FCM Token 을 찾을 수 없습니다.");
 
 	private final int status;
 	private final String message;

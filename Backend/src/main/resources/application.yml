@@ -12,7 +12,7 @@ spring:
       pool:
         size: 5
       thread-name-prefix: formmate-scheduler-
-#  autoconfigure:
+  #  autoconfigure:
   #    exclude:
   #      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
   servlet:
@@ -55,7 +55,7 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             redirect-uri: http://localhost:8088/api/login/oauth2/code/google
-#            redirect-uri: https://j12a205.p.ssafy.io/login/oauth2/code/google
+            #            redirect-uri: https://j12a205.p.ssafy.io/login/oauth2/code/google
             scope:
               - email
               - profile
@@ -158,13 +158,17 @@ coolsms:
 recaptcha:
   secret:
     key: ${RECAPTCHA_SECRET_KEY}
-    
+
 # 가상 은행 api 이용을 위한 설정
 bank:
   api:
     url: ${BANK_API_URL}
     key: ${BANK_API_KEY}
     id: ${BANK_USER_ID}
+
+firebase:
+  config-path: ${FIREBASE_PATH}
+  project-id: ${FIREBASE_ID}
 
 ---
 # test ???
