@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isTokenValid } from '@/entities/auth/model/authService';
+import { useUserStore } from '@/entities/user/model/userStore';
 import { Icons } from '@/shared';
 import api from '@/shared/api/instance';
 
@@ -23,12 +25,27 @@ const AccountInfo = () => {
             : null;
     const isValid = token ? isTokenValid() : false;
 
+    const user = useUserStore((state) => state.user);
+    const setUser = useUserStore((state) => state.setUser);
+
     const { data, isLoading, isError } = useQuery({
         queryKey: ['accountInfo'],
         queryFn: fetchAccountInfo,
         retry: false,
         enabled: isValid,
     });
+
+    useEffect(() => {
+        if (user && !isLoading) {
+            const hasAccount = !isError && !!data;
+            if (user.hasAccount !== hasAccount) {
+                setUser({
+                    ...user,
+                    hasAccount,
+                });
+            }
+        }
+    }, [data, isError, isLoading, user, setUser]);
 
     // 토큰이 유효하지 않으면 계좌 등록 UI 표시
     if (!isValid) {
