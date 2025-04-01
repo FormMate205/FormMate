@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
-import { useConnectWs } from '@/entities/chat/model/useConnectWs';
+import FormModal from '@/entities/chat/ui/FormModal';
 import showName from '@/features/chat/model/showName';
+import { useConnectWs } from '@/features/chat/model/useConnectWs';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
@@ -20,10 +21,14 @@ const Chat = () => {
     } = useConnectWs({ userId, userName, roomId });
 
     const displayProfile = showName(chatHistory);
-
     return (
         <div className='bg-line-50 flex h-screen w-full flex-col items-center justify-between px-4 py-2'>
-            <Header title='계약 생성' />
+            <Header title='채팅' />
+
+            {/* 계약서 팝업 */}
+            <div className='flex w-full justify-end'>
+                <FormModal formId={roomId!} />
+            </div>
 
             {/* 채팅 내용 */}
             <div

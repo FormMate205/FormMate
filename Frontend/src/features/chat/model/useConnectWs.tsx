@@ -1,7 +1,7 @@
 import { CompatClient, Stomp } from '@stomp/stompjs';
 import { useRef, useState, useEffect } from 'react';
-import { getMessages } from '../api/chatAPI';
-import { ChatMessage } from './types';
+import { getMessages } from '../../../entities/chat/api/chatAPI';
+import { ChatMessage } from '../../../entities/chat/model/types';
 
 interface useConnectWsProps {
     userId: string;
