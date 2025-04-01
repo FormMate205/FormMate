@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
-import { GetContractStatusCountResponse } from '../model/types';
+import {
+    GetContractAmountChart,
+    GetContractStatusCountResponse,
+} from '../model/types';
 
 // 계약 상태별 개수 조회 (대기, 진행, 완료)
 const getContractStatusCount =
@@ -13,6 +16,19 @@ const getContractStatusCount =
 export const useGetContractStatusCount = () => {
     return useQuery({
         queryKey: ['contractStatusCount'],
-        queryFn: () => getContractStatusCount(),
+        queryFn: getContractStatusCount,
+    });
+};
+
+// 보낼 금액, 받은 금액 차트
+const getContractAmountChart = async (): Promise<GetContractAmountChart> => {
+    const response = await api.get<GetContractAmountChart>('/contract/amount');
+    return response.data;
+};
+
+export const useGetContractAmountChart = () => {
+    return useQuery({
+        queryKey: ['contractAmountChart'],
+        queryFn: getContractAmountChart,
     });
 };

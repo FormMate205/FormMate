@@ -57,3 +57,13 @@ export type GetContractStatusCountResponse = {
     formActiveCount: number;
     formCompletedCount: number;
 };
+
+// 보낼, 받을 금액 (차트)
+export type ContractAmountSummary = {
+    paidAmount: number;
+    expectedTotalRepayment: number;
+    receivedAmount: number;
+    expectedTotalReceived: number;
+};
+
+export type GetContractAmountChart = ContractAmountSummary;

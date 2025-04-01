@@ -7,6 +7,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { ChartConfig, ChartContainer } from '@/components/ui/chart';
+import { useGetContractAmountChart } from '../../api/ContractAPI';
 
 const chartConfig = {
     edge: {
@@ -20,29 +21,35 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const ContractChart = () => {
-    // dummy
-    const data = {
-        totalSend: 1000000,
-        sent: 400000,
-        totalReceive: 1500000,
-        received: 900000,
-    };
-    const { totalSend, sent, totalReceive, received } = data;
+    const { data, isLoading, isError } = useGetContractAmountChart();
 
-    // 진행률 계산
+    if (isLoading) return <div>로딩 중...</div>;
+    if (isError || !data) return <div>데이터를 불러오는 데 실패했습니다.</div>;
+
+    const {
+        expectedTotalRepayment,
+        paidAmount,
+        expectedTotalReceived,
+        receivedAmount,
+    } = data;
+
     const sentPercent =
-        totalSend > 0 ? Math.round((sent / totalSend) * 100) : 0;
+        expectedTotalRepayment > 0
+            ? Math.round((paidAmount / expectedTotalRepayment) * 100)
+            : 0;
     const receivedPercent =
-        totalReceive > 0 ? Math.round((received / totalReceive) * 100) : 0;
+        expectedTotalReceived > 0
+            ? Math.round((receivedAmount / expectedTotalReceived) * 100)
+            : 0;
 
     const chartData = [
         {
-            name: '받은 금액',
+            name: chartConfig.edge.label,
             visitors: receivedPercent,
             fill: chartConfig.edge.color,
         },
         {
-            name: '보낸 금액',
+            name: chartConfig.other.label,
             visitors: sentPercent,
             fill: chartConfig.other.color,
         },
@@ -86,7 +93,7 @@ const ContractChart = () => {
                         <div>
                             보낸 금액{' '}
                             <span className='text-line-900'>
-                                {sent.toLocaleString()}원
+                                {paidAmount.toLocaleString()}원
                             </span>
                         </div>
                     </div>
@@ -98,7 +105,7 @@ const ContractChart = () => {
                         <div>
                             받은 금액{' '}
                             <span className='text-line-900'>
-                                {received.toLocaleString()}원
+                                {receivedAmount.toLocaleString()}원
                             </span>
                         </div>
                     </div>
