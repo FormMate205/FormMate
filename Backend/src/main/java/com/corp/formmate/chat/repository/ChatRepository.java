@@ -42,5 +42,6 @@ public interface ChatRepository extends JpaRepository<ChatEntity, Integer> {
     Integer countAllUnreadMessagesForUser(@Param("userId") Integer userId);
 
     // 사용자가 채권자 또는 채무자인 모든 폼 목록을 조회
-    List<FormEntity> findAllByCreditorIdOrDebtorId(Integer creditorId, Integer debtorId);
+    @Query("SELECT c.form FROM ChatEntity c WHERE c.form.creditor.id = :userId OR c.form.debtor.id = :userId GROUP BY c.form.id")
+    List<FormEntity> findFormsByUserParticipation(@Param("userId") Integer userId);
 }
