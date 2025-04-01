@@ -45,7 +45,7 @@ const RecipientTab = () => {
     };
 
     const handleSelectContract = (contract: ContractItem) => {
-        // 나중에 상태 저장 or navigate
+        // store에 값 저장
         navigate('amount');
     };
 
@@ -55,7 +55,7 @@ const RecipientTab = () => {
                 <TabList
                     title='최근 보낸 내역'
                     items={recentRecipients}
-                    onClickItem={() => navigate('amount')}
+                    onClickItem={handleClickContractPartner}
                 />
                 <TabList
                     title='나와 계약을 맺은 사람'

@@ -36,7 +36,7 @@ export interface SpecialTerm {
     specialTermDetail: string;
 }
 
-// 계약 관련 태그
+// 계약 상태 관련 태그
 export type ContractStatus = '대기' | '진행' | '연체' | '완료';
 
 export interface ContractCardProps {
@@ -50,3 +50,10 @@ export interface ContractCardProps {
     currentMonthAmount?: number;
     totalAmount?: number;
 }
+
+// 사용자의 계약 상태별 개수
+export type GetContractStatusCountResponse = {
+    formPendingCount: number;
+    formActiveCount: number;
+    formCompletedCount: number;
+};

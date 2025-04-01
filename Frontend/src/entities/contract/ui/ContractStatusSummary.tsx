@@ -1,12 +1,10 @@
 import { Fragment } from 'react';
+import { useGetContractStatusCount } from '../api/ContractAPI';
 
 const ContractStatusSummary = () => {
-    // dummy
-    const data = {
-        formPendingCount: 1,
-        formActiveCount: 3,
-        formCompletedCount: 2,
-    };
+    const { data, isLoading, isError } = useGetContractStatusCount();
+    if (isLoading) return <div>로딩 중...</div>;
+    if (isError || !data) return <div>에러 발생</div>;
 
     const summaryData = [
         {
