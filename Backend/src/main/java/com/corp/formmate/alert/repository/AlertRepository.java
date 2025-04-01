@@ -21,7 +21,7 @@ public interface AlertRepository extends JpaRepository<AlertEntity, Integer> {
 		UserEntity user);
 
 	// 특정 알림 ID보다 작은 ID를 가진 알림 조회 (페이징) isDeleted가 false인 알림만 조회
-	@Query("SELECT a FROM FcmTokenEntity a WHERE a.user = :user AND a.isDeleted = false " +
+	@Query("SELECT a FROM AlertEntity a WHERE a.user = :user AND a.isDeleted = false " +
 		"AND a.id < :alertId ORDER BY a.id DESC")
 	Page<AlertEntity> findOlderAlertsById(
 		@Param("user") UserEntity user,
@@ -33,7 +33,7 @@ public interface AlertRepository extends JpaRepository<AlertEntity, Integer> {
 		UserEntity user, Pageable pageable);
 
 	@Modifying
-	@Query("UPDATE FcmTokenEntity a SET a.isRead = true " +
+	@Query("UPDATE AlertEntity a SET a.isRead = true " +
 		"WHERE a.user = :user AND a.isRead = false AND a.isDeleted = false")
 	void markAllAsRead(@Param("user") UserEntity user);
 
