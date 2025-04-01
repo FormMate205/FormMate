@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom';
-import { useConnectWs } from '@/entities/chat/model/useConnectWs';
 import showName from '@/features/chat/model/showName';
+import { useConnectWs } from '@/features/chat/model/useConnectWs';
 import ChatBox from '@/features/chat/ui/ChatBox';
+import { Icons } from '@/shared';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 
@@ -21,9 +22,23 @@ const Chat = () => {
 
     const displayProfile = showName(chatHistory);
 
+    // 계약서 팝업
+    const onClick = () => {
+        return;
+    };
+
     return (
         <div className='bg-line-50 flex h-screen w-full flex-col items-center justify-between px-4 py-2'>
-            <Header title='계약 생성' />
+            <Header title='채팅' />
+
+            <div className='flex w-full justify-end'>
+                <button
+                    className='flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xs'
+                    onClick={onClick}
+                >
+                    <Icons name='docs' className='fill-line-700' width={20} />
+                </button>
+            </div>
 
             {/* 채팅 내용 */}
             <div

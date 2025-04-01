@@ -1,11 +1,19 @@
+import { ChatMessage } from '@/entities/chat/model/types';
+import { InfinitySlice } from '@/shared/model/types';
+
 export interface ChatRoom {
-    roomId: string;
+    roomId: string; // formId
     creditorId: string;
     creditorName: string;
     debtorId: string;
     debtorName: string;
     lastMessage: string;
-    lastTime: string;
+    lastMessageTime: string[];
     unreadCount: string;
-    status: '상대승인전' | '상대승인후' | '진행중' | '연체' | '종료';
 }
+
+// 개별 채팅 내역 response
+export type ChatHistoryResponse = { content: ChatMessage[] } & InfinitySlice;
+
+// 채팅 목록 response
+export type ChatRoomsResponse = { activeChatRooms: { content: ChatRoom[] } };
