@@ -35,6 +35,7 @@ public class UserBasicInformationService {
                     userId,
                     user.getUserName(),
                     user.getEmail(),
+                    user.isLogged(),
                     hasAccount
             );
         } catch (UserException e) {

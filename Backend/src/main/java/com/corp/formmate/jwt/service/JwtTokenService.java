@@ -7,6 +7,8 @@ import com.corp.formmate.jwt.dto.Token;
 import com.corp.formmate.jwt.entity.RefreshTokenEntity;
 import com.corp.formmate.jwt.provider.JwtTokenProvider;
 import com.corp.formmate.jwt.repository.RefreshTokenRepository;
+import com.corp.formmate.user.entity.UserEntity;
+import com.corp.formmate.user.repository.UserRepository;
 import com.corp.formmate.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +29,7 @@ public class JwtTokenService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     /**
      * 토큰 발급 (로그인, 회원가입 시 사용)
@@ -105,12 +108,16 @@ public class JwtTokenService {
                 throw new AuthException(ErrorCode.NOT_AUTHENTICATED);
             }
 
+            UserEntity user = null;
             if (token != null) {
                 String userIdStr = jwtTokenProvider.getUserIdFromToken(token);
                 int userId = Integer.parseInt(userIdStr);
 
                 // Refresh Token 삭제
                 refreshTokenRepository.deleteById(String.valueOf(userId));
+
+                // 사용자 조회 및 로그아웃 상태 업데이트
+                user = userService.selectById(userId);
             } else {
                 // 토큰이 없는 경우 - 사용자 정보에서 ID 추출
                 if (authentication.getPrincipal() instanceof UserDetails) {
@@ -121,6 +128,12 @@ public class JwtTokenService {
                 }
             }
 
+            // 사용자 로그아웃 상태 업데이트
+            if (user != null) {
+                user.logout();
+                userRepository.save(user);
+            }
+
             // 쿠키 삭제
             Cookie cookie = new Cookie("refresh_token", null);
             cookie.setHttpOnly(true);
@@ -128,6 +141,8 @@ public class JwtTokenService {
             cookie.setPath("/");
             cookie.setMaxAge(0);
             response.addCookie(cookie);
+
+
 
         } catch (AuthException e) {
             throw e;
