@@ -6,12 +6,8 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Contract } from '../model/types';
-
-interface ContractDocumentProps {
-    contract: Contract;
-    isPdfMode?: boolean;
-}
+import { formatCurrency } from '@/shared/model/formatCurrency';
+import { ContractDocs } from '../model/types';
 
 const styles = {
     container: 'flex flex-col gap-4 pt-4 p-6 bg-white text-black ',
@@ -22,9 +18,17 @@ const styles = {
     contractValue: 'flex justify-between',
     section: 'flex justify-between',
     groupedValues: 'flex flex-col items-end text-right',
-}; // pdf 추출시 스타일 오류 방지 위함
+};
 
-const ContractDocument = ({ contract, isPdfMode }: ContractDocumentProps) => {
+interface ContractDocumentProps {
+    contract: ContractDocs;
+    isPdfMode?: boolean;
+}
+
+const ContractDocument = ({
+    contract,
+    isPdfMode = false,
+}: ContractDocumentProps) => {
     const {
         creditorName,
         creditorPhone,
@@ -98,8 +102,7 @@ const ContractDocument = ({ contract, isPdfMode }: ContractDocumentProps) => {
                     <div className={styles.groupedValues}>
                         <span>{repaymentMethod}</span>
                         <span>
-                            매달 {repaymentDay}일 /{' '}
-                            {Number(loanAmount).toLocaleString()}원
+                            매달 {repaymentDay}일 / {formatCurrency(loanAmount)}
                         </span>
                     </div>
                 </div>

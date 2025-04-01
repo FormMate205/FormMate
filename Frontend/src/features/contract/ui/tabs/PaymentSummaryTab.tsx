@@ -1,22 +1,18 @@
+import { useParams } from 'react-router-dom';
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
+import { useGetPaymentSummary } from '../../api/ContractAPI';
 
-const InterestInfoTab = () => {
-    // dummy
-    const data = {
-        paidPrincipalAmount: 656124,
-        paidInterestAmount: 25269,
-        paidOverdueInterestAmount: 12345,
-        totalEarlyRepaymentFee: 3567,
-        unpaidAmount: 6124,
-        expectedPaymentAmountAtMaturity: 1656124,
-        expectedPrincipalAmountAtMaturity: 1000000,
-        expectedInterestAmountAtMaturity: 25269,
-    };
+const PaymentSummaryTab = () => {
+    const { formId } = useParams();
+    const { data, isLoading, isError } = useGetPaymentSummary(formId!);
+
+    if (isLoading) return <div>로딩 중...</div>;
+    if (isError || !data) return <div>납부 정보를 불러올 수 없습니다.</div>;
 
     const {
         paidPrincipalAmount,
@@ -29,26 +25,29 @@ const InterestInfoTab = () => {
         expectedInterestAmountAtMaturity,
     } = data;
 
+    // 현재까지 납부한 금액
+    const currentTotalPaid =
+        paidPrincipalAmount +
+        paidInterestAmount +
+        paidOverdueInterestAmount +
+        totalEarlyRepaymentFee;
+
+    const totalInterestPaid = paidInterestAmount + paidOverdueInterestAmount;
+
     return (
         <div className='flex flex-col gap-6 rounded-sm bg-white px-6 py-8 shadow-sm'>
             <div className='border-line-300 flex justify-between border-b py-2 text-lg font-semibold'>
                 <span>이번달 미납부 금액</span>
                 <span>{unpaidAmount.toLocaleString()}원</span>
             </div>
+
             <section className='flex flex-col gap-4 text-lg'>
                 <div className='border-line-300 flex flex-col gap-1 border-b'>
                     <div className='border-line-300 flex justify-between border-b py-2 text-lg font-semibold'>
                         <span>현재 납부 금액</span>
-                        <span>
-                            {(
-                                paidPrincipalAmount +
-                                paidInterestAmount +
-                                paidOverdueInterestAmount +
-                                totalEarlyRepaymentFee
-                            ).toLocaleString()}
-                            원
-                        </span>
+                        <span>{currentTotalPaid.toLocaleString()}원</span>
                     </div>
+
                     <div className='ml-14 flex flex-col text-base'>
                         <div className='border-line-200 flex justify-between border-b py-2 pl-2'>
                             <span>원금</span>
@@ -56,6 +55,7 @@ const InterestInfoTab = () => {
                                 {paidPrincipalAmount.toLocaleString()}원
                             </span>
                         </div>
+
                         <Accordion
                             type='single'
                             collapsible
@@ -66,10 +66,7 @@ const InterestInfoTab = () => {
                                     <div className='flex flex-1 justify-between pl-2'>
                                         <span>이자</span>
                                         <span>
-                                            {(
-                                                paidInterestAmount +
-                                                paidOverdueInterestAmount
-                                            ).toLocaleString()}
+                                            {totalInterestPaid.toLocaleString()}
                                             원
                                         </span>
                                     </div>
@@ -90,6 +87,7 @@ const InterestInfoTab = () => {
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
+
                         <div className='ml-2 flex justify-between py-2'>
                             <span>중도 상환 수수료</span>
                             <span>
@@ -147,4 +145,4 @@ const InterestInfoTab = () => {
     );
 };
 
-export default InterestInfoTab;
+export default PaymentSummaryTab;

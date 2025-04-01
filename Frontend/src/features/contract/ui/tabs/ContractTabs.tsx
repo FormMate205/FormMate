@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContractDetailTab from './ContractDetailTab';
-import InterestInfoTab from './InterestInfoTab';
 import PaymentHistoryTab from './PaymentHistoryTab';
+import PaymentSummaryTab from './PaymentSummaryTab';
 
 const ContractTabs = () => {
     return (
@@ -25,7 +25,7 @@ const ContractTabs = () => {
                 </TabsContent>
                 {/* 납부 요약 */}
                 <TabsContent value='interest' className='bg-line-50 h-full'>
-                    <InterestInfoTab />
+                    <PaymentSummaryTab />
                 </TabsContent>
             </Tabs>
         </section>
