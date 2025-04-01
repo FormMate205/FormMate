@@ -1,5 +1,6 @@
 package com.corp.formmate.contract.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.ContractException;
 import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.global.error.exception.TransferException;
+import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
@@ -80,6 +82,8 @@ public class ContractService {
 		 * 1. 계약서 기반으로 해당 회차에 납부할 금액 추출
 		 * 2. 중도상환 수수료율 더해서 추출
 		 */
+		// TODO: (중요) 송금내역에 현재 회차 송금 기록 있으면 paymentDifference 필드 기반으로 해당 회차 납부 금액 반환하기
+		// TODO: 현재 로직은 현재 회차 송금 기록 없을 때를 가정한 것임 (로직 추가 필수)
 		// 계약서와 계약관리 정보 생성
 		ExpectedPaymentAmountResponse expectedPaymentAmountResponse = null;
 		FormEntity form = formRepository.findById(formId)
@@ -315,7 +319,117 @@ public class ContractService {
 	// TODO: 송금 API에서 사용할 계약관리 테이블 업데이트 메소드(중도상환액, 연체액, 잔여원금, 중도상환수수료 등) 만들기 -> 동욱이형 API 짤 때 합의
 	// TODO: 공통) 잔여원금, 이자 금액, 연체 이자 금액 업데이트
 	// TODO: - 연체 금액 있을 경우: 잔여원금-연체금액(연체금액 있을 경우), 연체 금액도 업데이트
+	// TODO: - 중도상환액 있을 경우: 중도상환액 0원으로 업데이트
 	// TODO: 중도상환) 잔여원금(중도상환수수료 추가), 중도상환 횟수/금액, 만기일 예상 납부 금액/이자 업데이트
+	/**
+	 * Input
+	 * 1. 계약서 ID
+	 * 2. 상대방 유저 ID
+	 * 3. 상환 예정액
+	 * 4. 송금 금액
+	 * 설계
+	 * 연체 금액 있을 경우 -> 연체금액 관련 필드부터 처리(현재 연체 금액, 잔여원금(+연체 뺀 잔여원금), 누적 연체 이자)
+	 * 1. 중도상환 송금일 경우 -> 만기일 예상 납부 금액(+이자)는 이 때만 바뀜 (중도상환 수수료 때문에)
+	 * 2. 납부 송금일 경우
+	 * 3. 연체 송금일 경우
+	 *
+	 */
+	@Transactional
+	public void updateContract(TransferCreateRequest request) {
+		FormEntity form = formRepository.findById(request.getFormId())
+			.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
+		ContractEntity contract = contractRepository.findByForm(form)
+			.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
+
+		Long amount = request.getAmount();
+		Long repaymentAmount = request.getRepaymentAmount();
+		// 연체금액 처리 로직에서 amount 차감되니까 여기서 미리 계산함
+		long diff = amount - repaymentAmount;
+		Long overdueAmount = contract.getOverdueAmount();
+		Long remainingPrincipal = contract.getRemainingPrincipal();
+		Long remainingPrincipalMinusOverdue = contract.getRemainingPrincipalMinusOverdue();
+
+		// 연체금액 처리 로직(현재 연체금액부터 차감)
+		if (overdueAmount > 0) {
+			// 송금액 >= 연체액일 때
+			if (amount >= overdueAmount) {
+				// 현재 송금에서 낸 연체 이자
+				long overdueInterest = BigDecimal.valueOf(overdueAmount).multiply(form.getOverdueInterestRate()).longValue();
+
+				// 현재 연체 금액은 0원이 됨
+				contract.setOverdueAmount(0L);
+
+				// 이자 금액, 연체 이자 금액 필드 업데이트
+				contract.setOverdueInterestAmount(contract.getOverdueInterestAmount() + overdueInterest);
+				contract.setInterestAmount(contract.getInterestAmount() + overdueInterest);
+
+				// 송금 금액에서 연체액 차감
+				amount -= overdueAmount;
+
+				// 잔여 원금, 연체액 뺀 잔여원금 필드에 상환한 연체액 차감
+				remainingPrincipal -= overdueAmount;
+				remainingPrincipalMinusOverdue -= overdueAmount;
+			} else {
+				// 송금액 < 연체액일 때
+				// 현재 송금에서 낸 연체 이자
+				long overdueInterest = BigDecimal.valueOf(amount).multiply(form.getOverdueInterestRate()).longValue();
+
+				// 이자 금액, 연체 이자 금액 필드 업데이트
+				contract.setOverdueInterestAmount(contract.getOverdueInterestAmount() + overdueInterest);
+				contract.setInterestAmount(contract.getInterestAmount() + overdueInterest);
+
+				// 현재 연체 금액 업데이트 (위 분기와 달리 0원이 되지는 않음)
+				overdueAmount -= amount;
+				contract.setOverdueAmount(overdueAmount);
+
+				// 송금액 < 연체액이므로
+				// 잔여 원금, 연체액 뺀 잔여원금 필드 송금액만큼 차감하고 update 후 메소드 종료
+				remainingPrincipal -= amount;
+				remainingPrincipalMinusOverdue -= amount;
+				contract.setRemainingPrincipal(remainingPrincipal);
+				contract.setRemainingPrincipalMinusOverdue(remainingPrincipalMinusOverdue);
+				contractRepository.save(contract);
+				return;
+			}
+		}
+
+		// 연체 관련 필드 save 필요
+		if (diff >= 0) {
+			// 연체, 납부 송금
+			contract.setTotalEarlyRepaymentFee(0L); // 총 중도 상환 금액 필드 0이 됨(중도상환 송금이 아니니)
+
+			remainingPrincipal -= amount;
+			remainingPrincipalMinusOverdue -= overdueAmount;
+			// 이번 송금에서 낸 이자
+			long interest = BigDecimal.valueOf(amount).multiply(form.getInterestRate()).longValue();
+			contract.setInterestAmount(contract.getInterestAmount() + interest);
+			contract.setRemainingPrincipal(remainingPrincipal);
+			contract.setRemainingPrincipalMinusOverdue(remainingPrincipalMinusOverdue);
+			contractRepository.save(contract);
+		} else {
+			// 중도상환
+			contract.setTotalEarlyRepaymentFee(-diff); // 중도상환한 만큼으로 바뀜
+
+			// 잔여 원금 관련 필드에서 이번 달 상환액만큼만 차감
+			remainingPrincipal -= repaymentAmount;
+			remainingPrincipalMinusOverdue -= repaymentAmount;
+			long interest = BigDecimal.valueOf(repaymentAmount).multiply(form.getInterestRate()).longValue();
+			contract.setInterestAmount(contract.getInterestAmount() + interest);
+
+			// 이번 달 상환액을 제외한 나머지 금액은 이자 금액, 중도상환수수료를 차감하고 원금을 차감해야 함
+			amount -= repaymentAmount; // 이번 달 상환액을 제외한 나머지 금액
+			interest = BigDecimal.valueOf(amount).multiply(form.getInterestRate()).longValue();
+			long earlyRepaymentFee = BigDecimal.valueOf(amount).multiply(form.getEarlyRepaymentFeeRate()).longValue();
+			long deductedAmount = amount - interest - earlyRepaymentFee;
+			contract.setInterestAmount(contract.getInterestAmount() + interest);
+			remainingPrincipal -= deductedAmount;
+			remainingPrincipalMinusOverdue -= deductedAmount;
+			contract.setRemainingPrincipal(remainingPrincipal);
+			contract.setRemainingPrincipalMinusOverdue(remainingPrincipalMinusOverdue);
+			contractRepository.save(contract);
+		}
+	}
+
 
 	// TODO: 납부일 다음 날 스케줄러 업데이트 메소드 제작
 	// TODO: 공통) 현재 회차, 다음 상환 날짜 업데이트
