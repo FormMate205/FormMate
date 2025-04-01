@@ -122,54 +122,17 @@ public class FormService {
 		UserEntity userEntity = userService.selectById(currentUserId);
 
 		// 상태 필터 처리
-//		FormStatus formStatus = null;
-//		if (status != null && !status.equals("전체")) {
-//			formStatus = FormStatus.fromKorName(status);
-//		}
-		// 상태 필터 처리 - 여러 상태를 하나의 표시 카테고리로 매핑
-		List<FormStatus> formStatuses = null;
+		FormStatus formStatus = null;
 		if (status != null && !status.equals("전체")) {
-			switch (status) {
-				case "상대승인전":
-					formStatuses = Collections.singletonList(FormStatus.BEFORE_APPROVAL);
-					break;
-				case "상대승인후":
-					formStatuses = Collections.singletonList(FormStatus.AFTER_APPROVAL);
-					break;
-				case "진행중":
-					// "진행중" 카테고리에 종료 요청 관련 상태도 포함
-					formStatuses = Arrays.asList(
-							FormStatus.IN_PROGRESS,
-							FormStatus.TERMINATION_REQUESTED,
-							FormStatus.TERMINATION_FIRST_SIGNED
-					);
-					break;
-				case "연체":
-					formStatuses = Collections.singletonList(FormStatus.OVERDUE);
-					break;
-				case "종료":
-					formStatuses = Collections.singletonList(FormStatus.COMPLETED);
-					break;
-				default:
-					formStatuses = null;
-					break;
-			}
+			formStatus = FormStatus.fromKorName(status);
 		}
 
 		// 이름 필터 처리
 		String searchName = (name != null && !name.trim().isEmpty()) ? name : null;
 
 		// 조건에 맞는 폼 조회
-//		Page<FormEntity> formEntities = formRepository.findAllWithFilters(
-//			currentUserId, formStatus, searchName, pageable);
-		Page<FormEntity> formEntities;
-		if (formStatuses != null) {
-			formEntities = formRepository.findAllWithFiltersMultiStatus(
-					currentUserId, formStatuses, searchName, pageable);
-		} else {
-			formEntities = formRepository.findAllWithFilters(
-					currentUserId, null, searchName, pageable);
-		}
+		Page<FormEntity> formEntities = formRepository.findAllWithFilters(
+			currentUserId, formStatus, searchName, pageable);
 
 		if (formEntities.isEmpty()) {
 			throw new FormException(ErrorCode.FORM_NOT_FOUND);
