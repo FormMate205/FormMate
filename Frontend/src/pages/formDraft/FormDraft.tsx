@@ -3,7 +3,7 @@ import useFormPartnerStore from '@/entities/formPartner/model/formPartnerStore';
 import { useUserStore } from '@/entities/user/model/userStore';
 import useNavigationGuard from '@/shared/model/useNavigationGuard';
 import { ErrorNavigate } from '@/shared/ui/ErrorNavigate';
-import FormDraftContent from '@/widgets/formDraft/formDraftContent';
+import FormDraftContent from '@/widgets/formDraft/FormDraftContent';
 import NavigationGuardModal from '@/widgets/modal/NavigationGuardModal';
 
 const FormDraft = () => {

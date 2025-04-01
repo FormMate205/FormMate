@@ -9,7 +9,7 @@ import FormSelector from '@/features/formDraft/ui/FormSelector';
 import { maskUserName } from '@/shared/model/maskUserName';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
-import NotiContainer from '../../entities/formDraft/ui/NotiContainer';
+import NotiContainer from '../../features/formDraft/ui/NotiContainer';
 
 interface FormDraftContentProps {
     user: User;
