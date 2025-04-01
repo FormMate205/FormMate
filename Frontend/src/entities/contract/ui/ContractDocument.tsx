@@ -1,6 +1,5 @@
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'; // 혹은 Next.js의 useRouter
 import {
     Accordion,
     AccordionContent,
@@ -8,7 +7,7 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { formatCurrency } from '@/shared/model/formatCurrency';
-import { useGetContractDetail } from '../api/ContractAPI';
+import { ContractDocs } from '../model/types';
 
 const styles = {
     container: 'flex flex-col gap-4 pt-4 p-6 bg-white text-black ',
@@ -21,21 +20,15 @@ const styles = {
     groupedValues: 'flex flex-col items-end text-right',
 };
 
-const ContractDocument = ({ isPdfMode = false }: { isPdfMode?: boolean }) => {
-    const { formId } = useParams(); // or props로 받을 수도 있음
-    const { data, isLoading, isError } = useGetContractDetail(formId as string);
+interface ContractDocumentProps {
+    contract: ContractDocs;
+    isPdfMode?: boolean;
+}
 
-    const [accordionValue, setAccordionValue] = useState<string | undefined>(
-        'item-1',
-    );
-
-    useEffect(() => {
-        if (isPdfMode) setAccordionValue('item-1');
-    }, [isPdfMode]);
-
-    if (isLoading) return <div>로딩 중...</div>;
-    if (isError || !data) return <div>데이터를 불러오지 못했습니다.</div>;
-
+const ContractDocument = ({
+    contract,
+    isPdfMode = false,
+}: ContractDocumentProps) => {
     const {
         creditorName,
         creditorPhone,
@@ -51,7 +44,15 @@ const ContractDocument = ({ isPdfMode = false }: { isPdfMode?: boolean }) => {
         interestRate,
         earlyRepaymentFeeRate,
         specialTerms,
-    } = data;
+    } = contract;
+
+    const [accordionValue, setAccordionValue] = useState<string | undefined>(
+        'item-1',
+    );
+
+    useEffect(() => {
+        if (isPdfMode) setAccordionValue('item-1');
+    }, [isPdfMode]);
 
     return (
         <div id='contract-document' className={styles.container}>
