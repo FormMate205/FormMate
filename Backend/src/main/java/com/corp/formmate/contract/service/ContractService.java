@@ -272,7 +272,9 @@ public class ContractService {
 	public AmountResponse selectAmounts(AuthUser authUser) {
 		AmountResponse amountResponse = new AmountResponse();
 		Long paidAmount = 0L;
+		Long expectedTotalRepayment = 0L;
 		Long receivedAmount = 0L;
+		Long expectedTotalReceived = 0L;
 		Page<FormEntity> allWithFilters = formRepository.findAllWithFilters(authUser.getId(), null, null,
 			PageRequest.of(0, 10000));
 
@@ -281,13 +283,17 @@ public class ContractService {
 			InterestResponse interestResponse = selectInterestResponse(f.getId());
 			if (f.getCreditorName().equals(username)) {
 				receivedAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+				expectedTotalReceived += interestResponse.getExpectedPaymentAmountAtMaturity();
 			} else if (f.getDebtorName().equals(username)) {
 				paidAmount += (interestResponse.getPaidPrincipalAmount() + interestResponse.getPaidInterestAmount() + interestResponse.getPaidOverdueInterestAmount());
+				expectedTotalRepayment += interestResponse.getExpectedPaymentAmountAtMaturity();
 			}
 		}
 
 		amountResponse.setPaidAmount(paidAmount);
+		amountResponse.setExpectedTotalRepayment(expectedTotalRepayment);
 		amountResponse.setReceivedAmount(receivedAmount);
+		amountResponse.setExpectedTotalReceived(expectedTotalReceived);
 		return amountResponse;
 	}
 
