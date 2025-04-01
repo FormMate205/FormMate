@@ -1,14 +1,36 @@
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { checkAccount } from '@/entities/account/api/checkAccount';
 import { Header } from '@/widgets';
 
 const AccountRegist = () => {
     const [accountNum, setAccountNum] = useState('');
     const [bank, setBank] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const bankOptions = ['ㄷㄷ은행', 'ㄱㄱ은행', 'ㅇㅇ은행', 'ㅁㅁ은행'];
+    const bankOptions = ['기업은행', 'ㄱㄱ은행', 'ㅇㅇ은행', 'ㅁㅁ은행'];
+
+    const handleSubmit = async () => {
+        setError('');
+        try {
+            await checkAccount({ bankName: bank, accountNumber: accountNum });
+            navigate('/account/verify', {
+                state: {
+                    bankName: bank,
+                    accountNumber: accountNum,
+                },
+            });
+        } catch (err) {
+            const error = err as AxiosError<{ message: string }>;
+            setError(
+                error.response?.data?.message ||
+                    '계좌 확인 중 오류가 발생했습니다.',
+            );
+        }
+    };
 
     return (
         <div className='flex h-screen flex-col overflow-hidden'>
@@ -24,14 +46,19 @@ const AccountRegist = () => {
                         placeholder='계좌번호 입력'
                         value={accountNum}
                         onChange={(e) => setAccountNum(e.target.value)}
-                        className={`w-full border-b py-3 focus:ring-0 focus:outline-none ${accountNum ? 'border-primary-500' : 'border-line-300'}`}
+                        className={`w-full border-b py-3 focus:ring-0 focus:outline-none ${
+                            accountNum
+                                ? 'border-primary-500'
+                                : 'border-line-300'
+                        }`}
                     />
 
-                    {/* 은행 선택 */}
                     <select
                         value={bank}
                         onChange={(e) => setBank(e.target.value)}
-                        className={`mt-6 w-full border-b py-3 focus:ring-0 focus:outline-none ${bank ? 'border-primary-500' : 'border-line-300'}`}
+                        className={`mt-6 w-full border-b py-3 focus:ring-0 focus:outline-none ${
+                            bank ? 'border-primary-500' : 'border-line-300'
+                        }`}
                     >
                         <option value=''>은행 선택</option>
                         {bankOptions.map((option) => (
@@ -41,12 +68,16 @@ const AccountRegist = () => {
                         ))}
                     </select>
 
+                    {error && (
+                        <p className='text-destructive mt-4 text-sm'>{error}</p>
+                    )}
+
                     {accountNum && bank && (
                         <div className='absolute bottom-0 left-0 w-full p-6'>
                             <Button
                                 className='w-full'
                                 variant='primary'
-                                onClick={() => navigate('/account/verify')}
+                                onClick={handleSubmit}
                             >
                                 1원 보내기
                             </Button>
