@@ -30,8 +30,8 @@ public class FcmTokenService {
 	private final UserRepository userRepository;
 
 	@Transactional(readOnly = true)
-	public void sendMessageTo(Integer userId, String title, String body) {
-		FcmTokenEntity fcmTokenEntity = checkTokenByUser(userId);
+	public void sendMessageTo(UserEntity userEntity, String title, String body) {
+		FcmTokenEntity fcmTokenEntity = checkTokenByUser(userEntity);
 
 		if (fcmTokenEntity == null) {
 			return;
@@ -42,6 +42,27 @@ public class FcmTokenService {
 			.setNotification(Notification.builder()
 				.setTitle(title)
 				.setBody(body)
+				.setImage("https://github.com/user-attachments/assets/28da961d-3ab9-4650-b214-7a89125c4478")
+				.build())
+			.build();
+
+		try {
+			String response = FirebaseMessaging.getInstance().send(message);
+			System.out.println("✅ 푸시 전송 성공: " + response);
+		} catch (FirebaseMessagingException e) {
+			System.err.println("❌ 푸시 전송 실패: " + e.getMessage());
+		}
+	}
+
+	@Transactional(readOnly = true)
+	public void sendTestMessageTo(@Valid FcmTokenRequest tokenRequest, String title, String body) {
+
+		Message message = Message.builder()
+			.setToken(tokenRequest.getToken())
+			.setNotification(Notification.builder()
+				.setTitle(title)
+				.setBody(body)
+				.setImage("https://github.com/user-attachments/assets/28da961d-3ab9-4650-b214-7a89125c4478")
 				.build())
 			.build();
 
@@ -94,11 +115,7 @@ public class FcmTokenService {
 	@Transactional(readOnly = true)
 	public boolean isActiveToken(Integer userId) {
 		UserEntity userEntity = selectUserById(userId);
-		Boolean isActive = fcmTokenRepository.isActiveByUser(userEntity);
-		if (isActive == null) {
-			throw new FcmTokenException(ErrorCode.INVALID_FCM_TOKEN);
-		}
-		return isActive;
+		return fcmTokenRepository.existsByUserAndActiveTrue(userEntity);
 	}
 
 	// userId 로 FcmToken 검색
@@ -111,8 +128,7 @@ public class FcmTokenService {
 
 	// 알림 설정 여부, 로그인 여부 확인 하여 FcmToken 반환
 	@Transactional(readOnly = true)
-	protected FcmTokenEntity checkTokenByUser(Integer userId) {
-		UserEntity userEntity = selectUserById(userId);
+	protected FcmTokenEntity checkTokenByUser(UserEntity userEntity) {
 		if (!userEntity.isLogged()) {
 			return null;
 		}

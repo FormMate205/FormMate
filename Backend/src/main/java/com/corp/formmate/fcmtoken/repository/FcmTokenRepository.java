@@ -13,6 +13,6 @@ public interface FcmTokenRepository extends JpaRepository<FcmTokenEntity, Intege
 
 	Optional<FcmTokenEntity> findByUser(UserEntity user);
 
-	Boolean isActiveByUser(UserEntity user);
+	boolean existsByUserAndActiveTrue(UserEntity user);
 
 }

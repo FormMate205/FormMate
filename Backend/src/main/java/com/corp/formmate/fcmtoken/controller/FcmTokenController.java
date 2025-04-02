@@ -45,8 +45,8 @@ public class FcmTokenController {
 		@ApiResponse(responseCode = "400", description = "푸시 전송 실패")
 	})
 	@PostMapping("/test-send")
-	public ResponseEntity<String> sendTestPush(@CurrentUser AuthUser authUser) {
-		fcmTokenService.sendMessageTo(authUser.getId(), "테스트 알림", "푸시 알림이 잘 도착했습니다!");
+	public ResponseEntity<String> sendTestPush(@RequestBody @Valid FcmTokenRequest tokenRequest) {
+		fcmTokenService.sendTestMessageTo(tokenRequest, "테스트 알림", "푸시 알림이 잘 도착했습니다!");
 		return ResponseEntity.ok("전송 요청 완료!");
 	}
 
