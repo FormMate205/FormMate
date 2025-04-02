@@ -22,7 +22,7 @@ export async function registerServiceWorker() {
         'firebase-messaging-sw.js',
     );
 
-    // Service Worker에 Firebase 설정 전달
+    // Firebase 설정 전달
     registration.active?.postMessage({
         type: 'FIREBASE_CONFIG',
         config: firebaseConfig,
@@ -42,6 +42,8 @@ export async function requestPermission() {
             vapidKey: import.meta.env.VITE_VAPID,
             serviceWorkerRegistration: registration,
         });
+
+        // 토큰 등록
 
         console.log('FCM 토큰:', currentToken);
     }
