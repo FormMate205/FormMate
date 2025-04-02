@@ -54,7 +54,7 @@ const NewPartnerDrawer = () => {
                             계약할 상대의 전화번호를 입력하세요.
                         </DrawerDescription>
                     </DrawerHeader>
-                    <div className='px-4'>
+                    <div className='flex flex-col gap-3 px-4'>
                         <Input
                             variant='search'
                             placeholder="'-'를 제외하고 전화번호를 입력해주세요."

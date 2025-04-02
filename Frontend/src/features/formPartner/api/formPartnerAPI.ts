@@ -72,7 +72,8 @@ export const useGetRecentFormPartner = ({
 
 // 새로운 계약 상대 검색 API
 const getNewFormPartner = async (phoneNumber: string): Promise<FormPartner> => {
-    const response = await api.get('/users/', { params: phoneNumber });
+    const response = await api.get(`/users/${phoneNumber}`);
+    console.log(response.data);
     return response.data;
 };
 
@@ -80,6 +81,7 @@ export const useGetNewFormPartner = (phoneNumber: string) => {
     const { data } = useQuery({
         queryKey: ['newFormPartner', phoneNumber],
         queryFn: () => getNewFormPartner(phoneNumber),
+        enabled: !!phoneNumber && phoneNumber.trim() !== '',
     });
 
     return { data };

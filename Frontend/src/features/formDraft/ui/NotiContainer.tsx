@@ -1,3 +1,4 @@
+import { useUserStore } from '@/entities/user/model/userStore';
 import { Icons } from '@/shared';
 
 interface NotiContainerProps {
@@ -5,7 +6,7 @@ interface NotiContainerProps {
 }
 
 const NotiContainer = ({ name }: NotiContainerProps) => {
-    const userName = '강지은';
+    const { user } = useUserStore();
 
     return (
         <div className='bg-primary-500 mx-4 my-4 flex w-full items-center gap-4 rounded-lg px-5 py-3'>
@@ -13,7 +14,7 @@ const NotiContainer = ({ name }: NotiContainerProps) => {
             <div className='gap- 1 flex flex-col text-white'>
                 <p>
                     <span className='text-xl font-semibold'>
-                        {userName}, {name}
+                        {user?.userName}, {name}
                     </span>
                     <span> 을 위한</span>
                 </p>

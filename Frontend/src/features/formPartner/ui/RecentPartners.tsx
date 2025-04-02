@@ -29,7 +29,7 @@ const RecentPartners = ({ searchValue }: RecentPartnersProps) => {
         if (partners && partners.length > 0) {
             setRecentList(partners);
         }
-    }, [partners]);
+    }, []);
 
     const handleItemClick = (partner: FormPartner) => {
         setPartner(partner);
