@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { queryClient } from '@/app/provider/queryClient';
 import { Button } from '@/components/ui/button';
 import { registerAccount } from '@/entities/account/api/registerAccount';
+import { useAccountStore } from '@/entities/account/model/accountStore';
 import { useUserStore } from '@/entities/user/model/userStore';
 import NumberPad from '@/shared/ui/NumberPad';
 import PasswordDots from '@/shared/ui/PasswordDots';
@@ -12,6 +13,7 @@ const AccountPasswordForm = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const setHasAccount = useUserStore((state) => state.setHasAccount);
+    const setAccountInfo = useAccountStore((state) => state.setAccountInfo);
 
     const { verificationCode, bankName, accountNumber } = location.state || {};
 
@@ -48,6 +50,11 @@ const AccountPasswordForm = () => {
                     });
                     setHasAccount(true);
                     setShowSuccess(true);
+                    setAccountInfo({
+                        hasAccount: true,
+                        bankName,
+                        accountNumber,
+                    });
                     queryClient.invalidateQueries({ queryKey: ['user'] });
                     setTimeout(() => {
                         setShowSuccess(false);
