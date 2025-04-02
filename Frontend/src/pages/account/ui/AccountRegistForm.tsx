@@ -11,7 +11,16 @@ const AccountRegist = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const bankOptions = ['기업은행', 'ㄱㄱ은행', 'ㅇㅇ은행', 'ㅁㅁ은행'];
+    const bankOptions = [
+        '기업은행',
+        '국민은행',
+        '농협은행',
+        '우리은행',
+        '새마을금고',
+        'KEB하나은행',
+        '신한은행',
+        '카카오뱅크',
+    ];
 
     const handleSubmit = async () => {
         setError('');
