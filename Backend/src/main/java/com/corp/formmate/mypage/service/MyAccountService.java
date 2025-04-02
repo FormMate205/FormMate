@@ -75,7 +75,7 @@ public class MyAccountService {
 			// 해당 사용자에게 이미 계좌가 등록되어 있는지 확인
 			UserEntity user = userService.selectById(userId);
 			if (user.getAccountNumber() != null && !user.getAccountNumber().isEmpty()) {
-				throw new UserException(ErrorCode.ACCOUNT_ALREADY_REGISTERED);
+				throw new UserException(ErrorCode.ACCOUNT_ALREADY_EXIST);
 			}
 
 			// 해당 계좌 존재하는지 확인
@@ -87,7 +87,7 @@ public class MyAccountService {
 			// 입력한 은행과 실제 은행이 일치하는지 확인
 			String actualBankName = response.getRec().getBankName();
 			if (!actualBankName.equalsIgnoreCase(request.getBankName())) {
-				throw new UserException(ErrorCode.INVALID_BANK_CODE);
+				throw new UserException(ErrorCode.INVALID_BANK_NAME_AND_ACCOUNT);
 			}
 
 			// 1원 송금
