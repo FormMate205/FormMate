@@ -1,5 +1,5 @@
 import { ChangeEvent, useMemo, useState } from 'react';
-import { filterLabelToStatus } from '@/entities/contract/model/filterMapping';
+import { labelToStatus } from '@/entities/contract/model/filterMapping';
 import { ContractStatusLabel } from '@/entities/contract/model/types';
 import { useGetContractList } from '../api/ContractAPI';
 
@@ -11,7 +11,7 @@ export const useContractFilters = () => {
         setSearch(e.target.value);
     };
 
-    const selectedStatuses = filterLabelToStatus(filterLabel);
+    const selectedStatuses = labelToStatus(filterLabel);
     const {
         data: contracts = [],
         isLoading,

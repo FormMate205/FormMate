@@ -5,7 +5,7 @@ import {
     SelectContent,
     SelectItem,
 } from '@/components/ui/select';
-import { CONTRACT_FILTER_LABELS } from '@/entities/contract/model/filterMapping';
+import { CONTRACT_FILTER_LABELS } from '@/entities/contract/config/constants';
 import { ContractStatusLabel } from '@/entities/contract/model/types';
 
 interface ContractSelectProps {
