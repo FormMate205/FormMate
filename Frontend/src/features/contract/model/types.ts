@@ -1,11 +1,11 @@
 import { ContractCard, ContractStatus } from '@/entities/contract/model/types';
 
 // 차용증 리스트 조회
-export type GetContractsRequest = {
+export type GetContractListRequest = {
     status: ContractStatus[];
 };
 
-export type GetContractsResponse = ContractCard[];
+export type GetContractListResponse = ContractCard[];
 
 // 납부요약
 export interface PaymentSummary {
