@@ -51,3 +51,5 @@ export const useGetChatRooms = ({ page, size }: InfinitySliceRequest) => {
 
     return { rooms, fetchNextPage, lastItemRef };
 };
+
+//
