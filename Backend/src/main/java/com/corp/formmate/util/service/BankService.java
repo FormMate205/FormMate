@@ -55,8 +55,16 @@ public class BankService {
 		Map<String, Object> requestData = new HashMap<>();
 		requestData.put("accountNo", accountNumber);
 
-		// API 호출 및 응답 반환
-		return callBankApi(apiName, endpoint, requestData, BankAccountSearchResponse.class);
+		BankAccountSearchResponse response = callBankApi(apiName, endpoint, requestData,
+			BankAccountSearchResponse.class);
+
+		String code = response.getHeader().getResponseCode();
+
+		return switch (code) {
+			case "H0000" -> response;
+			case "A1003" -> throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
+			default -> throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
+		};
 	}
 
 	/**

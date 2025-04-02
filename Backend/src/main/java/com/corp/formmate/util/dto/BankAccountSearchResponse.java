@@ -15,8 +15,19 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BankAccountSearchResponse {
 
+	@JsonProperty("Header")
+	private Header header;
+
 	@JsonProperty("REC")
 	private REC rec;
+
+	@Getter
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Builder
+	public static class Header {
+		private String responseCode;
+	}
 
 	@Getter
 	@NoArgsConstructor
