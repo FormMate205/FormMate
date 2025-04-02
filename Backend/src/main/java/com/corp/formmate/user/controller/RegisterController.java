@@ -147,13 +147,7 @@ public class RegisterController {
         // 회원가입
         UserEntity savedUser = userService.register(request, normalizedPhone);
 
-        // 토큰 생성
-        Token token = jwtTokenService.createTokens(savedUser.getId());
-        jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
-
         // 응답 반환 (Access Token 포함)
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .header("Authorization", "Bearer " + token.getAccessToken())
-                .body("회원가입이 완료되었습니다.");
+        return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다.");
     }
 }
