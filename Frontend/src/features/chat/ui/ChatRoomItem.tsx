@@ -20,7 +20,7 @@ const ChatRoomItem = ({
 }: ChatRoomItemProps) => {
     return (
         <button
-            className='border-b-line-100 flex w-full justify-between border-b py-3'
+            className={`border-b-line-100 flex w-full justify-between border-b py-4 ${isFin ? 'bg-line-50' : 'bg-white'}`}
             onClick={onClick}
         >
             <div className='flex gap-5 pl-3'>
