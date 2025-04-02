@@ -23,11 +23,11 @@ export interface InfinitySlice {
     pageSize: string;
     first: boolean;
     last: boolean;
-    numberOfElement: string;
+    numberOfElements: string;
     empty: boolean;
 }
 
 // 무한스크롤 (slice) request
-export type InfinitySliceRequest = { formId: string } & { page: string } & {
+export type InfinitySliceRequest = { page: string } & {
     size: string;
 };
