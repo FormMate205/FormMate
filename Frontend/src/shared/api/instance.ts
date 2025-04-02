@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { queryClient } from '@/app/provider/queryClient';
 import { refreshToken } from '@/entities/auth/api/refreshToken';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { setAccessToken } from '../../entities/auth/model/authService';
@@ -74,6 +75,7 @@ api.interceptors.response.use(
                 try {
                     const newAccessToken = await refreshToken();
                     setAccessToken(newAccessToken);
+                    queryClient.invalidateQueries({ queryKey: ['user'] });
 
                     // 대기 중인 요청들에 새 토큰 제공
                     refreshSubscribers.forEach((callback) =>

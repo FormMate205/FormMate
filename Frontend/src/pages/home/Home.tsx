@@ -1,3 +1,4 @@
+import { useUserStore } from '@/entities/user/model/userStore';
 import { Footer, Header } from '@/widgets';
 import AccountInfo from './ui/AccountInfo';
 import Schedule from './ui/Schedule';
@@ -8,7 +9,7 @@ interface HomeProps {
 }
 
 const Home = ({ userName }: HomeProps) => {
-    userName = '오은지';
+    userName = useUserStore((state) => state.user?.userName ?? '사용자');
 
     return (
         <div className='flex h-screen flex-col overflow-hidden'>

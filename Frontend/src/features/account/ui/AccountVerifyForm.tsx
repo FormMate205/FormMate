@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header, NoticeModal } from '@/widgets';
 
@@ -7,18 +7,27 @@ const AccountVerifyForm = () => {
     const [codeArr, setCodeArr] = useState(['', '', '', '']);
     const [failModal, setFailModal] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleInputChange = (value: string, index: number) => {
         const updated = [...codeArr];
-        updated[index] = value;
+        updated[index] = value.replace(/[^0-9]/g, ''); // 숫자만 입력 허용
         setCodeArr(updated);
     };
 
-    // 임시 인증번호 1234
     const handleVerify = () => {
         const code = codeArr.join('');
-        if (code === '1234') navigate('/account/password');
-        else setFailModal(true);
+        if (code.length === 4) {
+            navigate('/account/password', {
+                state: {
+                    verificationCode: code,
+                    bankName: location.state?.bankName,
+                    accountNumber: location.state?.accountNumber,
+                },
+            });
+        } else {
+            setFailModal(true);
+        }
     };
 
     return (
@@ -50,12 +59,15 @@ const AccountVerifyForm = () => {
                                         key={idx}
                                         className='h-9 w-9 rounded-md bg-white text-center'
                                         maxLength={1}
+                                        inputMode='numeric'
+                                        pattern='[0-9]*'
                                         onChange={(e) =>
                                             handleInputChange(
                                                 e.target.value,
                                                 idx,
                                             )
                                         }
+                                        value={codeArr[idx]}
                                     />
                                 ))}
                             </div>

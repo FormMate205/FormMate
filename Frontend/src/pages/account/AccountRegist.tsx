@@ -1,4 +1,4 @@
-import AccountRegistForm from './ui/AccountRegistForm';
+import AccountRegistForm from '../../features/account/ui/AccountRegistForm';
 
 const AccountRegist = () => {
     return (
