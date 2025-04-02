@@ -165,7 +165,7 @@ public class ChatService {
             }
 
             // 페이지 요청 객체 생성 (시간 역순으로 정렬하여 최신 메세지부터 가져옴)
-            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
 
             // 채팅 내역 조회
             Slice<ChatEntity> chatSlice = chatRepository.findByFormAndIsDeletedFalse(form, pageable);
@@ -217,9 +217,9 @@ public class ChatService {
      */
     private  void sortChatRoomsByLastMessageTime(List<ChatRoomResponse> chatRooms) {
         chatRooms.sort((a, b) -> {
-            if (a.getLastMessageTime() == null) return -1;
-            if (b.getLastMessageTime() == null) return 1;
-            return b.getLastMessageTime().compareTo(a.getLastMessageTime()); // 오름차순 정렬
+            if (a.getLastMessageTime() == null) return 1;
+            if (b.getLastMessageTime() == null) return -1;
+            return b.getLastMessageTime().compareTo(a.getLastMessageTime()); // 내림차순 정렬
         });
     }
 
