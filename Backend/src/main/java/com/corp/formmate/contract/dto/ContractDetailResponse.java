@@ -20,6 +20,13 @@ import lombok.NoArgsConstructor;
 public class ContractDetailResponse {
 
 	@Schema(
+		description = "계약 상대방 이름",
+		example = "강지은",
+		required = true
+	)
+	private String contracteeName;
+
+	@Schema(
 		description = "연체 횟수",
 		example = "1",
 		required = true
