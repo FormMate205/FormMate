@@ -1,5 +1,7 @@
 export interface AccountInfo {
     bankName: string;
     accountNumber: string;
-    balance: string;
+    accountBalance: string;
 }
+
+export type GetAccountInfoResponse = AccountInfo;
