@@ -54,8 +54,8 @@ public class FcmTokenEntity implements Serializable {
 			.build();
 	}
 
-	// 상태 업데이트 메서드
-	public void activate() {
+	public void activate(String newToken) {
+		this.token = newToken;
 		this.active = true;
 	}
 

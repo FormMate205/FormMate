@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.alert.service.AlertService;
 import com.corp.formmate.contract.entity.ContractEntity;
 import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.entity.FormEntity;
@@ -48,6 +49,8 @@ public class TransferService {
 	private final ContractService contractService;
 
 	private final BankService bankService;
+
+	private final AlertService alertService;
 
 	@Transactional(readOnly = true)
 	public Page<TransferListResponse> selectTransfers(Integer userId, String period, String transferType,
@@ -178,6 +181,15 @@ public class TransferService {
 
 		transferRepository.save(transferEntity);
 
+		// 입금, 송금 알림
+		String receiverContent =
+			transferEntity.getSender().getUserName() + " 님께서 " + amount + "원 을 입금하셨습니다.";
+		alertService.createAlert(transferEntity.getReceiver(), "입금 알림", receiverContent);
+
+		String senderContent =
+			transferEntity.getReceiver().getUserName() + " 님께 " + amount + "원 을 송금하였습니다.";
+		alertService.createAlert(transferEntity.getSender(), "송금 알림", senderContent);
+
 		return TransferCreateResponse.fromEntity(transferEntity);
 	}
 
@@ -208,6 +220,15 @@ public class TransferService {
 			.build();
 
 		transferRepository.save(transferEntity);
+
+		// 입금, 송금 알림
+		String receiverContent =
+			transferEntity.getSender().getUserName() + " 님께서 " + transactionBalance + "원 을 입금하셨습니다.";
+		alertService.createAlert(transferEntity.getReceiver(), "입금 알림", receiverContent);
+
+		String senderContent =
+			transferEntity.getReceiver().getUserName() + " 님께 " + transactionBalance + " 원 을 송금하였습니다.";
+		alertService.createAlert(transferEntity.getSender(), "송금 알림", senderContent);
 
 	}
 
