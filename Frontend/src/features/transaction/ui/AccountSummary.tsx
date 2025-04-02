@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { AccountInfo } from '@/features/account/model/types';
 import { Icons } from '@/shared';
+import { formatCurrency } from '@/shared/model/formatCurrency';
 
 interface AccountSummaryProps {
     accountInfo: AccountInfo;
@@ -8,7 +9,7 @@ interface AccountSummaryProps {
 }
 
 const AccountSummary = ({ accountInfo, onTransfer }: AccountSummaryProps) => {
-    const { bankName, accountNumber, balance } = accountInfo;
+    const { bankName, accountNumber, accountBalance } = accountInfo;
     return (
         <div className='flex flex-col gap-7 px-2'>
             <div className='flex flex-col gap-2'>
@@ -25,7 +26,9 @@ const AccountSummary = ({ accountInfo, onTransfer }: AccountSummaryProps) => {
                         }}
                     />
                 </div>
-                <div className='text-4xl font-semibold'>{balance} 원</div>
+                <div className='text-4xl font-semibold'>
+                    {formatCurrency(accountBalance)}
+                </div>
             </div>
             <Button variant='primary' onClick={onTransfer}>
                 송금하기

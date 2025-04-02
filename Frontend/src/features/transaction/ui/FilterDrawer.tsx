@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Drawer,
@@ -8,55 +8,66 @@ import {
     DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Icons } from '@/shared';
+import { TransactionFilters } from '../model/types';
 import FilterTab from './FilterTab';
 import RangeDatePicker from './RangeDatePicker';
 
-interface FilterValues {
-    period: string;
-    type: string;
-    order: string;
-}
+const periods = ['1개월', '3개월', '직접 설정'] as const;
+const transferTypes = ['전체', '입금만', '출금만'] as const;
+const sortDirections = ['최신순', '과거순'] as const;
+
+type PeriodOption = (typeof periods)[number];
+
+// 날짜를 yyyyMMdd 형식으로 포맷
+const formatDateToYMD = (date: Date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}${mm}${dd}`;
+};
 
 interface FilterDrawerProps {
-    defaultValues: FilterValues; // 부모 상태 (현재 필터 값)
-    onConfirm: (filters: FilterValues) => void; // 확인 버튼 누를 때 호출
+    defaultValues: TransactionFilters;
+    onConfirm: (filters: TransactionFilters) => void;
 }
 
 const FilterDrawer = ({ defaultValues, onConfirm }: FilterDrawerProps) => {
     const [open, setOpen] = useState(false);
-    // 필터 상태
-    const [period, setPeriod] = useState(defaultValues.period);
-    const [type, setType] = useState(defaultValues.type);
-    const [order, setOrder] = useState(defaultValues.order);
-
-    // Drawer가 열릴 때 defaultValues로 초기화
-    useEffect(() => {
-        if (open) {
-            setPeriod(defaultValues.period);
-            setType(defaultValues.type);
-            setOrder(defaultValues.order);
-        }
-    }, [open, defaultValues]);
+    const [period, setPeriod] = useState<PeriodOption>(
+        defaultValues.period === '1개월' || defaultValues.period === '3개월'
+            ? defaultValues.period
+            : '직접 설정',
+    );
+    const [startDate, setStartDate] = useState<Date | undefined>();
+    const [endDate, setEndDate] = useState<Date | undefined>();
+    const [transferType, setTransferType] = useState(
+        defaultValues.transferType,
+    );
+    const [sortDirection, setSortDirection] = useState(
+        defaultValues.sortDirection,
+    );
 
     const handleConfirm = () => {
-        onConfirm({ period, type, order });
+        const appliedPeriod =
+            period === '직접 설정' && startDate && endDate
+                ? `${formatDateToYMD(startDate)}~${formatDateToYMD(endDate)}`
+                : period;
+
+        onConfirm({
+            period: appliedPeriod,
+            transferType,
+            sortDirection,
+        });
         setOpen(false);
     };
-
-    const periods = ['1개월', '3개월', '직접 설정'];
-    const types = ['전체', '입금만', '출금만'];
-    const orders = ['최신순', '과거순'];
-    const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-    const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger className='flex w-full items-center justify-end gap-1'>
                 <span className='text-line-950'>
-                    {defaultValues.period}•{defaultValues.type}•
-                    {defaultValues.order}
+                    {defaultValues.period}•{defaultValues.transferType}•
+                    {defaultValues.sortDirection}
                 </span>
-
                 <Icons name='chev-down' size={14} className='fill-line-950' />
             </DrawerTrigger>
 
@@ -82,17 +93,18 @@ const FilterDrawer = ({ defaultValues, onConfirm }: FilterDrawerProps) => {
 
                     <FilterTab
                         label='거래 유형'
-                        options={types}
-                        selected={type}
-                        onChange={setType}
+                        options={transferTypes}
+                        selected={transferType}
+                        onChange={setTransferType}
                     />
                     <FilterTab
                         label='정렬방식'
-                        options={orders}
-                        selected={order}
-                        onChange={setOrder}
+                        options={sortDirections}
+                        selected={sortDirection}
+                        onChange={setSortDirection}
                     />
                 </div>
+
                 <DrawerFooter className='mt-10 p-0'>
                     <Button variant='primary' onClick={handleConfirm}>
                         확인
