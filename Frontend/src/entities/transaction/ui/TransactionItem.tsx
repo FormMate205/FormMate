@@ -1,23 +1,24 @@
-interface TransactionItemProps {
-    name: string;
-    transactionType: string; // '출금 | 입금'
-    amount: string;
-}
+import { Transaction } from '@/features/transaction/model/types';
+import { formatCurrency } from '@/shared/model/formatCurrency';
+
+type TransactionItemProps = Omit<Transaction, 'transactionDate'>;
 
 const TransactionItem = ({
-    name,
-    transactionType,
+    partnerName,
+    type,
     amount,
 }: TransactionItemProps) => {
+    const sign = type === '출금' ? '-' : '+';
     return (
         <div className='border-line-100 flex justify-between border-b pb-2'>
-            <div className='flex items-center text-lg font-medium'>{name}</div>
+            <div className='flex items-center text-lg font-medium'>
+                {partnerName}
+            </div>
             <div className='flex flex-col items-end'>
-                <span className='text-line-700 font-medium'>
-                    {transactionType}
-                </span>
+                <span className='text-line-700 font-medium'>{type}</span>
                 <span className='text-primary-500 font-semibold'>
-                    {amount}원
+                    {sign}
+                    {formatCurrency(amount)}
                 </span>
             </div>
         </div>
