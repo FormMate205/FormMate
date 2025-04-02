@@ -1,4 +1,4 @@
-import AccountVerifyForm from './ui/AccountVerifyForm';
+import AccountVerifyForm from '../../features/account/ui/AccountVerifyForm';
 
 const AccountVerify = () => {
     return (

@@ -1,15 +1,11 @@
 import { create } from 'zustand';
 
 interface AccountState {
-    bankName: string;
-    accountNumber: string;
-    setBankInfo: (bankName: string, accountNumber: string) => void;
-    clearBankInfo: () => void;
+    hasAccount: boolean;
+    setHasAccount: (value: boolean) => void;
 }
 
 export const useAccountStore = create<AccountState>((set) => ({
-    bankName: '',
-    accountNumber: '',
-    setBankInfo: (bankName, accountNumber) => set({ bankName, accountNumber }),
-    clearBankInfo: () => set({ bankName: '', accountNumber: '' }),
+    hasAccount: false,
+    setHasAccount: (value) => set({ hasAccount: value }),
 }));

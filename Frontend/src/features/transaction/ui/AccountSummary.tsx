@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { AccountInfo } from '@/entities/account/model/types';
+import { AccountInfo } from '@/features/account/model/types';
 import { Icons } from '@/shared';
 
 interface AccountSummaryProps {

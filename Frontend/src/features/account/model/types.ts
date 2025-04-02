@@ -1,11 +1,5 @@
-// export interface AccountFormValues {
-//     bankName: string;
-//     accountNumber: string;
-// }
-
-// export interface AccountVerifyValues {
-//     verificationCode: string;
-//     bankName: string;
-//     accountNumber: string;
-//     accountPassword: string;
-// }
+export interface AccountInfo {
+    bankName: string;
+    accountNumber: string;
+    balance: string;
+}
