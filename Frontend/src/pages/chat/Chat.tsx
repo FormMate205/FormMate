@@ -12,7 +12,7 @@ const Chat = () => {
     const { roomId } = useParams();
 
     const {
-        chatHistory,
+        messages,
         message,
         setMessage,
         sendMessage,
@@ -20,7 +20,7 @@ const Chat = () => {
         scrollRef,
     } = useConnectWs({ userId, userName, roomId });
 
-    const displayProfile = showName(chatHistory);
+    const displayProfile = showName(messages);
     return (
         <div className='bg-line-50 flex h-screen w-full flex-col items-center justify-between px-4 py-2'>
             <Header title='채팅' />
@@ -35,22 +35,21 @@ const Chat = () => {
                 ref={scrollRef}
                 className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
             >
-                {chatHistory.length > 0 &&
-                    chatHistory.map((chat, index) => {
-                        return (
-                            <ChatBox
-                                key={chat.id}
-                                writerId={chat.writerId}
-                                content={chat.content}
-                                name={
-                                    chat.writerId !== userId &&
-                                    displayProfile(index)
-                                        ? chat.writerName
-                                        : undefined
-                                }
-                            />
-                        );
-                    })}
+                {messages.map((chat, index) => {
+                    return (
+                        <ChatBox
+                            key={chat.id}
+                            writerId={chat.writerId}
+                            content={chat.content}
+                            name={
+                                chat.writerId !== userId &&
+                                displayProfile(index)
+                                    ? chat.writerName
+                                    : undefined
+                            }
+                        />
+                    );
+                })}
             </div>
 
             {/* 연결 상태 표시 */}
@@ -62,7 +61,7 @@ const Chat = () => {
 
             {/* 채팅 입력창 */}
             <ChatInput
-                isActive={message.trim().length > 0}
+                isActive={isConnected}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onClick={sendMessage}
