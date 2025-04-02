@@ -30,25 +30,33 @@ export interface Contract {
     specialTerms: SpecialTerm[];
 }
 
+// 차용증 목록 조회 카드
+export type ContractCard = {
+    formId: string;
+    status: ContractStatus;
+    userIsCreditor: boolean;
+    contracteeName: string;
+    maturityDate: string;
+    nextRepaymentAmount: number;
+    totalRepaymentAmount: number;
+    totalAmountDue: number;
+};
+
+// 계약 상태 관련 태그
+export type ContractStatus =
+    | 'ALL'
+    | 'BEFORE_APPROVAL'
+    | 'AFTER_APPROVAL'
+    | 'IN_PROGRESS'
+    | 'OVERDUE'
+    | 'COMPLETED';
+
+export type ContractStatusLabel = '전체' | '대기' | '진행' | '연체' | '완료';
+
 // 특약 사항
 export interface SpecialTerm {
     specialTermIndex: string;
     specialTermDetail: string;
-}
-
-// 계약 상태 관련 태그
-export type ContractStatus = '대기' | '진행' | '연체' | '완료';
-
-export interface ContractCardProps {
-    id: string;
-    name: string;
-    status: ContractStatus;
-    contractType?: 'send' | 'receive';
-    endDate?: string;
-    progress?: number;
-    currentAmount?: number;
-    currentMonthAmount?: number;
-    totalAmount?: number;
 }
 
 // 사용자의 계약 상태별 개수

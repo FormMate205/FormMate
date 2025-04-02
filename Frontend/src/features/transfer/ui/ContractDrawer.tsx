@@ -1,6 +1,6 @@
 import { Drawer, DrawerContent, DrawerHeader } from '@/components/ui/drawer';
+import { ContractItem } from '@/entities/transfer/model/types';
 import ContractDrawerItem from '@/entities/transfer/ui/ContractDrawerItem';
-import { ContractItem } from '../model/types';
 
 interface ContractDrawerProps {
     open: boolean;
