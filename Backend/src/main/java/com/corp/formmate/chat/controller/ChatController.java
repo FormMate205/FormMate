@@ -5,6 +5,8 @@ import com.corp.formmate.chat.service.ChatService;
 import com.corp.formmate.global.annotation.CurrentUser;
 import com.corp.formmate.global.error.dto.ErrorResponse;
 import com.corp.formmate.user.dto.AuthUser;
+import com.corp.formmate.user.entity.UserEntity;
+import com.corp.formmate.user.service.CustomUserDetailsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -21,9 +23,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Parameter;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -40,17 +46,39 @@ public class ChatController {
      * 웹소켓을 통한 메세지 전송 처리
      * /app/chat.sendMessage로 메세지를 받아 처리
      */
+//    @MessageMapping("/chat.sendMessage")
+//    public void sendMessage(@Payload @Valid ChatRequest chatRequest, @CurrentUser AuthUser authUser) {
+//        log.info("메세지 수신: [} - 사용자: {}", chatRequest, authUser.getUsername());
+//
+//        // 메세지 저장 및 응답 생성
+//        ChatResponse chatResponse = chatService.createChat(chatRequest, authUser.getId());
+//
+//        // 특정 계약의 채팅방으로 메세지 브로드캐스트
+//        messagingTemplate.convertAndSend("/topic/chat" + chatRequest.getFormId(), chatResponse);
+//
+//        log.info("메세지 전송 완료: {}", chatResponse.getId());
+//    }
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload @Valid ChatRequest chatRequest, @CurrentUser AuthUser authUser) {
-        log.info("메세지 수신: [} - 사용자: {}", chatRequest, authUser.getUsername());
+    public void sendMessage(@Payload @Valid ChatRequest chatRequest, Principal principal) {
+        // Principal에서 사용자 정보 추출
+        if (principal instanceof Authentication) {
+            Authentication authentication = (Authentication) principal;
+            Object details = authentication.getPrincipal();
 
-        // 메세지 저장 및 응답 생성
-        ChatResponse chatResponse = chatService.createChat(chatRequest, authUser.getId());
+            if (details instanceof UserEntity) {
+                UserEntity user = (UserEntity) details;
+                Integer userId = user.getId();
 
-        // 특정 계약의 채팅방으로 메세지 브로드캐스트
-        messagingTemplate.convertAndSend("/topic/chat" + chatRequest.getFormId(), chatResponse);
+                log.info("메세지 수신: {} - 사용자: {}", chatRequest, user.getEmail());
 
-        log.info("메세지 전송 완료: {}", chatResponse.getId());
+                ChatResponse chatResponse = chatService.createChat(chatRequest, userId);
+                messagingTemplate.convertAndSend("/topic/chat" + chatRequest.getFormId(), chatResponse);
+            } else {
+                log.error("인증되지 않은 사용자의 메세지 요청");
+            }
+        } else {
+            log.error("유효하지 않은 인증 정보");
+        }
     }
 
     /**
