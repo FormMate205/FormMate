@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { QueryErrorResetBoundary } from '@tanstack/react-query';
+import { Suspense, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 import { useGetTransactionList } from '@/features/transaction/api/TransactionAPI';
 import { TransactionFilters } from '@/features/transaction/model/types';
 import AccountSummary from '@/features/transaction/ui/AccountSummary';
+import { ErrorFallBack } from '@/shared/ui/ErrorFallBack';
+import ListLoading from '@/shared/ui/ListLoading';
 import { Header } from '@/widgets';
 import FilterDrawer from '../../features/transaction/ui/FilterDrawer';
 import TransactionList from '../../features/transaction/ui/TransactionList';
@@ -46,10 +50,21 @@ const Transaction = () => {
                     onConfirm={(nextFilters) => setFilters(nextFilters)}
                 />
                 <div className='flex flex-col gap-6'>
-                    <TransactionList
-                        transactions={transactions}
-                        lastItemRef={lastItemRef}
-                    />
+                    <QueryErrorResetBoundary>
+                        {({ reset }) => (
+                            <ErrorBoundary
+                                onReset={reset}
+                                FallbackComponent={ErrorFallBack}
+                            >
+                                <Suspense fallback={<ListLoading />}>
+                                    <TransactionList
+                                        transactions={transactions}
+                                        lastItemRef={lastItemRef}
+                                    />
+                                </Suspense>
+                            </ErrorBoundary>
+                        )}
+                    </QueryErrorResetBoundary>
                 </div>
             </section>
         </>
