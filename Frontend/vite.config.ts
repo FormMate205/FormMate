@@ -13,4 +13,13 @@ export default defineConfig({
     define: {
         global: 'window',
     },
+    server: {
+        proxy: {
+            '/ws': {
+                target: 'https://j12a205.p.ssafy.io',
+                ws: true,
+                changeOrigin: true,
+            },
+        },
+    },
 });

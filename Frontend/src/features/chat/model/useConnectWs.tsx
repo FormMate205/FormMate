@@ -1,7 +1,7 @@
-import { CompatClient, Stomp } from '@stomp/stompjs';
+import { CompatClient } from '@stomp/stompjs';
 import { useRef, useState, useEffect } from 'react';
-import { getMessages } from '../../../entities/chat/api/chatAPI';
-import { ChatMessage } from '../../../entities/chat/model/types';
+import { createStompClient } from '@/features/chat/model/wsService';
+import { useGetMessages } from '../api/chatAPI';
 
 interface useConnectWsProps {
     userId: string;
@@ -9,17 +9,19 @@ interface useConnectWsProps {
     roomId: string | undefined;
 }
 
-export const useConnectWs = ({
-    userId,
-    userName,
-    roomId,
-}: useConnectWsProps) => {
-    const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]); // 채팅 내역
+export const useConnectWs = ({ roomId }: useConnectWsProps) => {
     const [message, setMessage] = useState(''); // 채팅 입력
     const [isConnected, setIsConnected] = useState(false); // 연결 상태
 
     const stompClient = useRef<CompatClient | null>(null); // 웹소켓 연결 유지
     const scrollRef = useRef<HTMLDivElement | null>(null); // 새 메시지 추가 시 스크롤 이동
+
+    // 채팅 내역 가져오기
+    const { messages, fetchNextPage, lastItemRef } = useGetMessages({
+        formId: roomId!,
+        page: '0',
+        size: '15',
+    });
 
     // 웹소켓 연결
     const connect = () => {
@@ -29,36 +31,18 @@ export const useConnectWs = ({
         }
 
         try {
-            const socket = new WebSocket(import.meta.env.VITE_WS_URI);
-            stompClient.current = Stomp.over(socket);
+            stompClient.current = createStompClient();
 
             stompClient.current.connect({}, () => {
                 setIsConnected(true);
-                // 채팅방 구독
-                stompClient.current!.subscribe(
-                    `/sub/chat/${roomId}`,
-                    (message) => {
-                        try {
-                            // 새 메시지 전송
-                            const newMessage = JSON.parse(message.body);
-                            setChatHistory((prevMessages) => [
-                                ...prevMessages,
-                                newMessage,
-                            ]);
 
-                            // 메시지가 추가되면 스크롤을 아래로 이동
-                            if (scrollRef.current) {
-                                scrollRef.current.scrollTop =
-                                    scrollRef.current.scrollHeight;
-                            }
-                        } catch (error) {
-                            console.error('메시지 전송을 실패했습니다.', error);
-                        }
-                    },
-                );
-
-                // 채팅 내역 가져오기
-                fetchChatHistory();
+                stompClient.current?.subscribe(`/topic/chat${roomId}`, () => {
+                    // 메시지가 추가되면 스크롤을 아래로 이동
+                    if (scrollRef.current) {
+                        scrollRef.current.scrollTop =
+                            scrollRef.current.scrollHeight;
+                    }
+                });
             });
         } catch (error) {
             console.error('웹소켓 연결을 실패했습니다.', error);
@@ -66,52 +50,38 @@ export const useConnectWs = ({
     };
 
     // 웹소켓 연결 해제
-    const disconnect = () => {
-        if (stompClient.current) {
-            try {
-                stompClient.current.disconnect();
-                setIsConnected(false);
-            } catch (error) {
-                console.error('웹소켓 연결 해제를 실패했습니다.', error);
-            }
-        }
-    };
-
-    // 채팅 내역 가져오기
-    const fetchChatHistory = async () => {
-        try {
-            const data = await getMessages(roomId!);
-            setChatHistory(data);
-
-            // 스크롤 아래로 이동
-            setTimeout(() => {
-                if (scrollRef.current) {
-                    scrollRef.current.scrollTop =
-                        scrollRef.current.scrollHeight;
-                }
-            }, 100);
-        } catch (error) {
-            console.error('채팅 내역을 가져오지 못했습니다.', error);
-        }
-    };
+    // const disconnect = () => {
+    //     if (stompClient.current) {
+    //         try {
+    //             stompClient.current.disconnect();
+    //             setIsConnected(false);
+    //         } catch (error) {
+    //             console.error('웹소켓 연결 해제를 실패했습니다.', error);
+    //         }
+    //     }
+    // };
 
     // 메시지 전송
     const sendMessage = () => {
         if (!stompClient.current || !message.trim()) {
+            console.log('메시지 전송 실패');
             return;
         }
 
         try {
             const newMessage = {
-                roomId: roomId,
-                writerId: userId,
-                writerName: userName,
-                message: message.trim(),
+                formId: roomId,
+                content: message.trim(),
+                messageType: 'CHAT',
             };
 
+            console.log('채팅 보내기: ', newMessage);
+
             stompClient.current.send(
-                `/pub/message`,
-                {},
+                '/app/chat.sendMessage',
+                {
+                    Authorization: localStorage.getItem('accessToken'), // 헤더에 토큰 포함
+                },
                 JSON.stringify(newMessage),
             );
             setMessage('');
@@ -125,14 +95,12 @@ export const useConnectWs = ({
         if (roomId) {
             connect();
         }
-
-        return () => {
-            disconnect();
-        };
     }, [roomId]);
 
     return {
-        chatHistory,
+        messages,
+        fetchNextPage,
+        lastItemRef,
         message,
         setMessage,
         sendMessage,
