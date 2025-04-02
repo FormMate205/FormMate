@@ -7,8 +7,6 @@ import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.dto.ErrorResponse;
 import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.user.dto.AuthUser;
-import com.corp.formmate.user.entity.UserEntity;
-import com.corp.formmate.user.service.CustomUserDetailsService;
 import com.corp.formmate.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,9 +25,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -66,15 +62,15 @@ public class ChatController {
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload @Valid ChatRequest chatRequest, SimpMessageHeaderAccessor headerAccessor) {
         // Principal에서 사용자 정보 추출
-        Principal principal = headerAccessor.getUser();
-        if (principal != null) {
+        Authentication authentication = (Authentication) headerAccessor.getUser();
+        if (authentication != null || "anonymous".equals(authentication.getName())) {
             throw new UserException(ErrorCode.UNAUTHORIZED);
         }
 
-        String username = principal.getName();
-        Integer userId = userService.selectByEmail(username).getId();
+        AuthUser authUser = (AuthUser) authentication.getPrincipal();
+        Integer userId = authUser.getId();
 
-        log.info("메세지 수신: {} - 사용자: {}", chatRequest, username);
+        log.info("메세지 수신: {} - 사용자: {}", chatRequest, userId);
 
         ChatResponse chatResponse = chatService.createChat(chatRequest, userId);
 
