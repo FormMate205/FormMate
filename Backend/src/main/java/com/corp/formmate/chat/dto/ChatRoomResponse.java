@@ -14,8 +14,14 @@ public class ChatRoomResponse {
     @Schema(description = "계약서(폼) ID", example = "42")
     private Integer formId;
 
+    @Schema(description = "채권자 ID", example = "15")
+    private Integer creditorId;
+
     @Schema(description = "채권자 이름", example = "홍길동")
     private String creditorName;
+
+    @Schema(description = "채무자 ID", example = "16")
+    private Integer debtorId;
 
     @Schema(description = "채무자 이름", example = "김철수")
     private String debtorName;
@@ -28,4 +34,7 @@ public class ChatRoomResponse {
 
     @Schema(description = "안읽은 메시지 수", example = "3")
     private Integer unreadCount;
+
+    @Schema(description = "계약 완료 여부", example = "false")
+    private Boolean isCompleted;
 }
