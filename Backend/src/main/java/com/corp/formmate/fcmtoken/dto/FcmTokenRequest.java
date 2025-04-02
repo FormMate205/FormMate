@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@Schema(description = "Fcm 토큰 등록 요청")
-public class FcmTokenCreateRequest {
+@Schema(description = "Fcm 토큰 요청")
+public class FcmTokenRequest {
 
 	@Schema(
 		description = "fcm 토큰",
