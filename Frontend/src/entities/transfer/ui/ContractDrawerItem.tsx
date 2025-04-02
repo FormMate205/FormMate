@@ -1,6 +1,6 @@
-import { ContractItem } from '@/features/transfer/model/types';
 import { cn } from '@/lib/utils';
 import { getDday } from '@/shared/lib/date';
+import { ContractItem } from '../model/types';
 
 interface Props {
     contract: ContractItem;

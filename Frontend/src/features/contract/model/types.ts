@@ -1,19 +1,4 @@
-export type ContractStatus =
-    | 'BEFORE_APPROVAL'
-    | 'AFTER_APPROVAL'
-    | 'IN_PROGRESS'
-    | 'OVERDUE'
-    | 'COMPLETED';
-
-export type ContractCard = {
-    status: ContractStatus;
-    userIsCreditor: boolean;
-    contracteeName: string;
-    maturityDate: string;
-    nextRepaymentAmount: number;
-    totalRepaymentAmount: number;
-    totalAmountDue: number;
-};
+import { ContractCard, ContractStatus } from '@/entities/contract/model/types';
 
 // 차용증 리스트 조회
 export type GetContractsRequest = {
