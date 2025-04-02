@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useGetAccountInfo } from '@/entities/account/api/AccountAPI';
+import { useGetUserDetail } from '@/entities/auth/api/getUserDetail';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { Footer, Header } from '@/widgets';
 import AddressInfo from './ui/AddressInfo';
@@ -8,20 +9,9 @@ import MyAccount from './ui/MyAccount';
 import UserInfo from './ui/UserInfo';
 
 const MyInfo = () => {
-    // 임시 데이터 (API 연결 후 대체)
-    const userData = {
-        userName: '강지은',
-        phoneNumber: '010-1234-1234',
-        email: 'ggsilver@naver.com',
-        isOAuth: false,
-        hasAccount: true,
-        accountNumber: '싸피뱅크 111-11111-11111',
-        zipCode: '12321',
-        address: '서울 강남구 테헤란로 212',
-        detailAddress: '멀티캠퍼스 802호',
-    };
-
     const { data: accountInfo, isLoading, isError } = useGetAccountInfo();
+    const { data: userDetail } = useGetUserDetail();
+
     const { user, setUser } = useUserStore();
 
     useEffect(() => {
@@ -45,17 +35,17 @@ const MyInfo = () => {
                     <MyAccount />
 
                     <div className='mt-4'>
-                        <UserInfo
-                            isOAuth={userData.isOAuth}
-                            userName={userData.userName}
-                            phoneNumber={userData.phoneNumber}
-                            email={userData.email}
-                        />
-                        <AddressInfo
-                            zipCode={userData.zipCode}
-                            address={userData.address}
-                            detailAddress={userData.detailAddress}
-                        />
+                        {userDetail && (
+                            <>
+                                <UserInfo
+                                    isOAuth={false} // 소셜 로그인 여부 판단 로직 나중에 추가
+                                    userName={userDetail.userName}
+                                    phoneNumber={userDetail.phoneNumber}
+                                    email={userDetail.email}
+                                />
+                                <AddressInfo address={userDetail.address} />
+                            </>
+                        )}
                     </div>
 
                     <div className='mx-auto'>
