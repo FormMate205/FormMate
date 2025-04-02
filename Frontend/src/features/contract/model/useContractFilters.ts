@@ -1,67 +1,39 @@
-import { ChangeEvent, useState } from 'react';
-
-import {
-    ContractStatus,
-    ContractCardProps,
-} from '@/entities/contract/model/types';
-
-const dummyContracts: ContractCardProps[] = [
-    {
-        id: '1',
-        name: '강지은',
-        status: '진행',
-        contractType: 'send',
-        currentMonthAmount: 150000,
-        currentAmount: 450000,
-        totalAmount: 1500000,
-        endDate: '2025.04.23',
-    },
-    {
-        id: '2',
-        name: '이동욱',
-        status: '대기',
-    },
-    {
-        id: '3',
-        name: '박상학',
-        status: '연체',
-        contractType: 'receive',
-        currentMonthAmount: 100000,
-        currentAmount: 100000,
-        totalAmount: 500000,
-        endDate: '2025.02.15',
-    },
-    {
-        id: '4',
-        name: '차윤영',
-        status: '완료',
-        contractType: 'receive',
-        currentMonthAmount: 0,
-        currentAmount: 1000000,
-        totalAmount: 1000000,
-        endDate: '2025.01.01',
-    },
-];
+import { ChangeEvent, useMemo, useState } from 'react';
+import { labelToStatus } from '@/entities/contract/model/filterMapping';
+import { ContractStatusLabel } from '@/entities/contract/model/types';
+import { useGetContractList } from '../api/ContractAPI';
 
 export const useContractFilters = () => {
-    const [filter, setFilter] = useState<ContractStatus | '전체'>('전체');
+    const [filterLabel, setFilterLabel] = useState<ContractStatusLabel>('전체');
     const [search, setSearch] = useState('');
+
     const onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
-        setSearch(e.target.value.trim());
+        setSearch(e.target.value);
     };
 
-    const filteredContracts = dummyContracts
-        .filter((contract) =>
-            filter === '전체' ? true : contract.status === filter,
-        )
-        .filter((contract) => contract.name.includes(search));
+    const selectedStatuses = labelToStatus(filterLabel);
+    const {
+        data: contracts = [],
+        isLoading,
+        isError,
+    } = useGetContractList(selectedStatuses);
+
+    const filteredContracts = useMemo(() => {
+        return contracts.filter((contract) =>
+            contract.contracteeName
+                ?.toLowerCase()
+                .includes(search.toLowerCase()),
+        );
+    }, [contracts, search]);
 
     return {
-        filter,
-        setFilter,
-        filteredContracts,
+        filterLabel, // '전체', '진행' 등의 레이블
+        setFilterLabel,
         search,
         setSearch,
         onChangeSearch,
+        filteredContracts,
+        isLoading,
+        isError,
     };
 };

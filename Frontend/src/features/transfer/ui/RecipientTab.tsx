@@ -1,9 +1,8 @@
 // src/pages/RecipientTab.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TabListItem } from '@/entities/transfer/model/types';
+import { ContractItem, TabListItem } from '@/entities/transfer/model/types';
 import TabList from '@/entities/transfer/ui/TabList';
-import { ContractItem } from '../model/types';
 import ContractDrawer from './ContractDrawer';
 
 const recentRecipients: TabListItem[] = [

@@ -1,18 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
+import { ContractStatus } from '@/entities/contract/model/types';
 import api from '@/shared/api/instance';
 import {
-    ContractStatus,
     GetContractsResponse,
     GetPaymentSummaryResponse,
 } from '../model/types';
 
-// 계약 리스트 조회
+// 계약 리스트 조회 및 상태별 필터링
 const getContracts = async (
     status: ContractStatus[],
 ): Promise<GetContractsResponse> => {
-    const response = await api.get<GetContractsResponse>('/api/contract', {
-        params: { status },
-    });
+    const searchParams = new URLSearchParams();
+    status.forEach((s) => searchParams.append('status', s));
+    const response = await api.get<GetContractsResponse>(
+        `/contract?${searchParams.toString()}`,
+    );
     return response.data;
 };
 
