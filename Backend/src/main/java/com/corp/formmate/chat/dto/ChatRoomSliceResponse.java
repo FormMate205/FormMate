@@ -39,7 +39,7 @@ public class ChatRoomSliceResponse {
     /**
      * Spring Data의 Slice 객체로부터 간소화된 응답 객체를 생성합니다.
      */
-    public static <T> ChatRoomSliceResponse fromSlice(Slice<ChatRoomResponse> slice) {
+    public static ChatRoomSliceResponse fromSlice(Slice<ChatRoomResponse> slice) {
         return ChatRoomSliceResponse.builder()
                 .content(slice.getContent())
                 .pageNumber(slice.getNumber())

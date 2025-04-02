@@ -66,53 +66,27 @@ public class ChatController {
      * 사용자의 모든 채팅방 목록 조회
      */
     @GetMapping("/rooms")
-    public ResponseEntity<List<ChatRoomResponse>> getChatRooms(@CurrentUser AuthUser authUser) {
-        log.info("채팅방 목록 조회 요청: 사용자 ID = {}", authUser.getId());
-        List<ChatRoomResponse> chatRooms = chatService.selectChatRoomsByUserId(authUser.getId());
-        return ResponseEntity.status(HttpStatus.OK).body(chatRooms);
-    }
-
-    /**
-     * 사용자의 채팅방 목록을 계약 상태(진행중/종료)에 따라 그룹화하여 조회
-     */
-    @GetMapping("/rooms/grouped")
-    public ResponseEntity<GroupedChatRoomsResponse> getGroupedChatRooms(
-            @Parameter(description = "진행 중인 채팅방 페이지 번호(0부터 시작)", required = true)
-            @RequestParam(defaultValue = "0") Integer activePage,
-            @Parameter(description = "종료된 채팅방 페이지 번호(0부터 시작)", required = true)
-            @RequestParam(defaultValue = "0") Integer completedPage,
+    public ResponseEntity<ChatRoomSliceResponse> selectChatRooms(
+            @Parameter(description = "페이지 번호(0부터 시작)", required = true)
+            @RequestParam(defaultValue = "0") Integer page,
             @Parameter(description = "페이지 크기", required = true)
             @RequestParam(defaultValue = "10") Integer size,
-            @CurrentUser AuthUser authUser) {
+            @CurrentUser AuthUser authUser
+    ) {
+        log.info("채팅방 목록 조회 요청: 사용자 ID={}, 페이지={}, 크기={}", authUser.getId(), page, size);
 
-        log.info("그룹화된 채팅방 목록 조회 요청: 사용자 ID={}, 활성 페이지={}, 종료 페이지={}, 크기={}", authUser.getId(), activePage, completedPage, size);
+        Slice<ChatRoomResponse> chatRooms = chatService.selectChatRoomsSlice(authUser.getId(), page, size);
 
-        GroupedChatRoomsResponse response = chatService.selectGroupedChatRooms(authUser.getId(), activePage, completedPage, size);
+        // Slice 객체를 응답 형식에 맞게 변환
+        ChatRoomSliceResponse response = ChatRoomSliceResponse.fromSlice(chatRooms);
 
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 특정 계약의 채팅 내역 조회
-     */
-    @GetMapping("/rooms/{formId}")
-    public ResponseEntity<List<ChatResponse>> selectChatHistory(
-            @Parameter(description = "계약서(폼) ID", required = true)
-            @PathVariable("formId") Integer formId,
-            @CurrentUser AuthUser authUser) {
-        log.info("채팅 내역 조회 요청: 계약 ID = {}, 사용자 ID = {}", formId, authUser.getId());
-        List<ChatResponse> chatHistory = chatService.selectChatsByUserId(formId, authUser.getId());
-
-        // 메세지 읽음 처리
-        chatService.markAsRead(formId, authUser.getId());
-
-        return ResponseEntity.status(HttpStatus.OK).body(chatHistory);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
      * 특정 계약의 채팅 내역 SLice 조회
      */
-    @GetMapping("/rooms/{formId}/slice")
+    @GetMapping("/rooms/{formId}")
     public ResponseEntity<ChatSliceResponse> selectChatHistorySlice(
             @Parameter(description = "계약서(폼) ID", required = true)
             @PathVariable Integer formId,
