@@ -59,7 +59,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 					// 모든 API 경로에 접근 허용 (개발 편의를 위해)
-					.requestMatchers("/api/**", "/oauth2/**", "/login/oauth2/code/**", "/auth/**").permitAll()
+					.requestMatchers("/api/**", "/oauth2/**", "/login/oauth2/code/**", "/auth/**", "/ws/**").permitAll()
 					.anyRequest()
 					.authenticated()
 				//				// 공개 API 경로 설정
