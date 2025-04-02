@@ -56,8 +56,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 웹소켓 연결 엔드포인트 등록. SockJS를 사용하여 WebSocket을 지원하지 않는 브라우저에 대한 폴백도 제공
         registry.addEndpoint(endpoint)
-                .setAllowedOriginPatterns(allowedOrigins.split(","))
-                .withSockJS();
+                .setAllowedOriginPatterns(allowedOrigins.split(","));
 
         log.info("Websocket endpoint registered: {}: " + endpoint);
         log.info("Websocket allowed origins: {}", allowedOrigins);
