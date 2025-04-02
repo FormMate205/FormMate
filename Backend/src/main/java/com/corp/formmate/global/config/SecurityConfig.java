@@ -2,6 +2,7 @@ package com.corp.formmate.global.config;
 
 import java.util.Arrays;
 
+import com.corp.formmate.global.security.CustomAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,15 +36,18 @@ public class SecurityConfig {
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final CustomUserDetailsService customUserDetailsService;
 	private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
 	@Autowired
 	public SecurityConfig(
 			@Lazy CustomUserDetailsService customUserDetailsService,
 			@Lazy JwtAuthenticationFilter jwtAuthenticationFilter,
-			@Lazy OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
+			@Lazy OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+			CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
 		this.customUserDetailsService = customUserDetailsService;
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
 		this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
+		this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
 	}
 
 	// 프로덕션 환경용 설정
@@ -55,7 +59,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 					// 모든 API 경로에 접근 허용 (개발 편의를 위해)
-					.requestMatchers("/api/**", "/oauth2/**", "/login/oauth2/code/**", "/auth/**").permitAll()
+					.requestMatchers("/api/**", "/oauth2/**", "/login/oauth2/code/**", "/auth/**", "/ws/**").permitAll()
 					.anyRequest()
 					.authenticated()
 				//				// 공개 API 경로 설정
@@ -74,9 +78,13 @@ public class SecurityConfig {
 				.defaultSuccessUrl("/")
 				.successHandler(oAuth2LoginSuccessHandler)
 			)
-			// 인증 실패 시 401 응답 반환하도록 설정 (리다이렉트 방지)
+//			// 인증 실패 시 401 응답 반환하도록 설정 (리다이렉트 방지)
+//			.exceptionHandling(exceptions -> exceptions
+//				.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+//			);
+			// 인증 실패 시 커스텀 응답 반환
 			.exceptionHandling(exceptions -> exceptions
-				.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+					.authenticationEntryPoint(customAuthenticationEntryPoint)
 			);
 
 		// Jwt 필터 추가
@@ -111,7 +119,8 @@ public class SecurityConfig {
 //		configuration.setAllowedOriginPatterns(List.of("*"));
 		configuration.setAllowedOriginPatterns(Arrays.asList(
 				"https://j12a205.p.ssafy.io",
-				"http://localhost:5173"
+				"http://localhost:5173",
+				"http://127.0.0.1:5500"
 		));
 
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

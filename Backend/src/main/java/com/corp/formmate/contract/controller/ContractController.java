@@ -1,11 +1,15 @@
 package com.corp.formmate.contract.controller;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.corp.formmate.contract.dto.AmountResponse;
@@ -14,6 +18,7 @@ import com.corp.formmate.contract.dto.ContractPreviewResponse;
 import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
+import com.corp.formmate.contract.dto.MonthlyContractResponse;
 import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.global.annotation.CurrentUser;
@@ -58,8 +63,8 @@ public class ContractController {
 		)
 	})
 	@GetMapping("/{formId}")
-	public ResponseEntity<ContractDetailResponse> selectContractDetail(@PathVariable Integer formId) {
-		return ResponseEntity.ok(contractService.selectContractDetail(formId));
+	public ResponseEntity<ContractDetailResponse> selectContractDetail(@CurrentUser AuthUser user, @PathVariable Integer formId) {
+		return ResponseEntity.ok(contractService.selectContractDetail(user, formId));
 	}
 
 	@Operation(summary = "납부 예정 금액 조회(송금 화면)", description = "이번 달 남은 상환 금액(연체액 포함 금액) / 중도상환수수료")
@@ -157,8 +162,18 @@ public class ContractController {
 			)
 		)
 	})
-	@GetMapping("/{status}")
-	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@PathVariable FormStatus formStatus, @CurrentUser AuthUser authUser) {
+	@GetMapping
+	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam String status, @CurrentUser AuthUser authUser) {
+		FormStatus formStatus = null;
+		if (!status.equals("ALL")) {
+			for (FormStatus s : FormStatus.values()) {
+				if (s.name().equals(status)) {
+					formStatus = s;
+					break;
+				}
+			}
+		}
+
 		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatus, authUser));
 	}
 
@@ -184,5 +199,33 @@ public class ContractController {
 	@GetMapping("/amount")
 	public ResponseEntity<AmountResponse> selectAmounts(@CurrentUser AuthUser authUser) {
 		return ResponseEntity.ok(contractService.selectAmounts(authUser));
+	}
+
+	@Operation(summary = "메인화면 납부 계획(내역)", description = "메인화면 달력(additionalProp1 = day라고 생각하면 됨)")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "납부 계획(내역) 조회 성공",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(
+					type = "object",
+					additionalPropertiesSchema = MonthlyContractResponse.class
+				)
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 입력값",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@GetMapping("/schedule")
+	public ResponseEntity<Map<Integer, MonthlyContractResponse>> selectMonthlyContracts(@CurrentUser AuthUser authUser, @RequestParam
+		LocalDate now, @RequestParam LocalDate viewDate) {
+		return ResponseEntity.ok(contractService.selectMonthlyContracts(authUser, now, viewDate));
 	}
 }

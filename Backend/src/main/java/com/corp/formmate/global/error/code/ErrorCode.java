@@ -48,18 +48,20 @@ public enum ErrorCode {
 	IDENTITY_NOT_VERIFIED(401, "본인인증이 필요합니다"),
 
 	// 계좌 관련
-	ACCOUNT_NOT_FOUND(404, "계좌 정보를 찾을 수 없습니다"),
-	INVALID_ACCOUNT_NUMBER(400, "유효하지 않은 계좌번호입니다"),
-	ACCOUNT_PASSWORD_MISMATCH(400, "계좌 비밀번호가 일치하지 않습니다"),
-	INSUFFICIENT_BALANCE(400, "잔액이 부족합니다"),
-	BANK_CONNECTION_ERROR(500, "은행 시스템 연결 중 오류가 발생했습니다"),
-	ACCOUNT_ALREADY_REGISTERED(400, "이미 등록된 계좌입니다"),
-	INVALID_BANK_CODE(400, "유효하지 않은 은행 코드입니다"),
+	ACCOUNT_NOT_FOUND(404, "계좌 정보를 찾을 수 없습니다."),
+	INVALID_ACCOUNT_NUMBER(400, "유효하지 않은 계좌번호입니다."),
+	ACCOUNT_PASSWORD_MISMATCH(400, "계좌 비밀번호가 일치하지 않습니다."),
+	INSUFFICIENT_BALANCE(400, "잔액이 부족합니다."),
+	BANK_CONNECTION_ERROR(500, "은행 시스템 연결 중 오류가 발생했습니다."),
+	ACCOUNT_ALREADY_REGISTERED(400, "이미 등록된 계좌입니다."),
+	ACCOUNT_ALREADY_EXIST(400, "이미 등록된 계좌가 존재합니다."),
+	INVALID_BANK_CODE(400, "유효하지 않은 은행 코드입니다."),
+	INVALID_BANK_NAME_AND_ACCOUNT(400, "유효하지 않은 계좌입니다."),
 	VERIFY_NOT_FOUND(404, "인증코드 발급 내역이 없습니다."),
 	EXPIRED_VERIFY_TIME(400, "인증 시간이 만료되었습니다."),
 	VERIFY_NOT_MATCHED(400, "인증코드가 일치하지 않습니다."),
-	ACCOUNT_VERIFICATION_FAILED(400, "계좌 인증에 실패했습니다"),
-	VERIFICATION_ATTEMPT_EXCEEDED(429, "인증 시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요"),
+	ACCOUNT_VERIFICATION_FAILED(400, "계좌 인증에 실패했습니다."),
+	VERIFICATION_ATTEMPT_EXCEEDED(429, "인증 시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요."),
 
 	// 폼 관련 (이전 계약 관련)
 	FORM_NOT_FOUND(404, "폼을 찾을 수 없습니다"),
@@ -126,10 +128,14 @@ public enum ErrorCode {
 	OVERDUE_INTEREST_CALCULATION_ERROR(500, "연체 이자 계산 중 오류가 발생했습니다"),
 
 	// 폼 종료 관련
-	FORM_TERMINATION_REQUEST_NOT_FOUND(404, "폼 파기 요청을 찾을 수 없습니다"),
-	FORM_TERMINATION_NOT_ALLOWED(400, "현재 폼 상태에서는 파기가 불가능합니다"),
 	FORM_TERMINATION_ALREADY_REQUESTED(400, "이미 파기 요청이 존재합니다"),
 	TERMINATION_APPROVAL_ERROR(500, "파기 승인 처리 중 오류가 발생했습니다"),
+	FORM_TERMINATION_NOT_ALLOWED(400, "현재 계약 상태에서는 파기가 불가능합니다"),
+	FORM_TERMINATION_SELF_SIGN_NOT_ALLOWED(400, "파기 요청자는 첫 번째 서명을 할 수 없습니다"),
+	FORM_TERMINATION_INVALID_SIGNER(400, "유효하지 않은 서명자입니다"),
+	FORM_TERMINATION_CONSENT_REQUIRED(400, "계약 파기에 대한 동의가 필요합니다"),
+	FORM_TERMINATION_REQUEST_NOT_FOUND(404, "파기 요청을 찾을 수 없습니다"),
+	INVALID_USER_INFO(400, "사용자 정보가 일치하지 않습니다"),
 
 	// 외부 API 관련
 	EXTERNAL_API_ERROR(500, "외부 API 호출 중 오류가 발생했습니다"),
