@@ -84,7 +84,7 @@ public class CoolSMSSender implements MessageSender {
             Message message = new Message();
             message.setFrom(senderPhone);
             message.setTo(phoneNumber);
-            message.setText(String.format("\n%s %s %s\n%s\n입금 1원\n인증번호 전송 %s",
+            message.setText(String.format("%s %s %s\n%s\n입금 1원\n인증번호 전송 %s",
                     bankName,                      // 은행 이름 (예: "OO")
                     currentDate,                  // 현재 날짜 (예: "06/14")
                     currentTime,                  // 현재 시간 (예: "12:16")
