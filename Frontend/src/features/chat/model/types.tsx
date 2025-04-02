@@ -13,10 +13,15 @@ export interface ChatRoom {
     isCompleted: boolean;
 }
 
-// 개별 채팅 내역 response
-export type ChatHistoryResponse = { content: ChatMessage[] } & InfinitySlice;
-
-// 채팅 목록 response
+// 채팅방 목록 response
 export type ChatRoomsResponse = {
     content: ChatRoom[];
 } & InfinitySlice;
+
+// 개별 채팅 내역 request
+export type ChatHistoryRequest = {
+    formId: string;
+} & { page: string } & { size: string };
+
+// 개별 채팅 내역 response
+export type ChatHistoryResponse = { content: ChatMessage[] } & InfinitySlice;

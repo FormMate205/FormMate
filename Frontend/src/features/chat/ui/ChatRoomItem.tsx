@@ -23,23 +23,27 @@ const ChatRoomItem = ({
             className={`border-b-line-100 flex w-full justify-between border-b py-4 ${isFin ? 'bg-line-50' : 'bg-white'}`}
             onClick={onClick}
         >
-            <div className='flex gap-5 pl-3'>
+            <div className='flex min-w-0 flex-1 gap-5 overflow-hidden pl-3'>
                 <Icons
                     name='chat'
-                    className={`${isFin ? 'fill-line-300' : 'fill-primary-500'} mt-[2px]`}
+                    className={`${isFin ? 'fill-line-300' : 'fill-primary-500'} mt-[2px] flex-shrink-0`}
                 />
-                <div className='flex flex-col items-start justify-between gap-1'>
+                <div className='flex min-w-0 flex-col gap-1 overflow-hidden text-left'>
                     <p
-                        className={`${isFin ? 'text-line-700' : 'text-black'} font-medium`}
+                        className={`${isFin ? 'text-line-700' : 'text-black'} w-full font-medium`}
                     >
                         {partnerName}
                     </p>
-                    <p className='text-line-700'>{lastMessage}</p>
+                    <p className='text-line-700 w-full overflow-hidden text-ellipsis whitespace-nowrap'>
+                        {lastMessage}
+                    </p>
                 </div>
             </div>
 
-            <div className='flex flex-col items-end justify-between pr-3'>
-                <p className='text-line-700 text-sm'>{lastMessageTime}</p>
+            <div className='ml-4 flex flex-shrink-0 flex-col items-end gap-2 pr-4'>
+                <p className='text-line-700 text-sm whitespace-nowrap'>
+                    {lastMessageTime}
+                </p>
                 <div className='bg-primary-100 text-primary-500 flex items-center justify-center rounded-lg px-2 py-[2px] text-sm font-medium'>
                     {unreadCount}
                 </div>
