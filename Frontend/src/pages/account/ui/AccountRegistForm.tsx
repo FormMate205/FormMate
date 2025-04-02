@@ -2,6 +2,12 @@ import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { checkAccount } from '@/entities/account/api/checkAccount';
 import { Header } from '@/widgets';
 
@@ -62,7 +68,7 @@ const AccountRegist = () => {
                         }`}
                     />
 
-                    <select
+                    {/* <select
                         value={bank}
                         onChange={(e) => setBank(e.target.value)}
                         className={`mt-6 w-full border-b py-3 focus:ring-0 focus:outline-none ${
@@ -75,7 +81,37 @@ const AccountRegist = () => {
                                 {option}
                             </option>
                         ))}
-                    </select>
+                    </select> */}
+
+                    <div className='relative mt-6'>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button
+                                    className={`w-full border-b py-3 text-left focus:outline-none ${
+                                        bank
+                                            ? 'border-primary-500 text-black'
+                                            : 'border-line-300 text-gray-400'
+                                    }`}
+                                >
+                                    {bank || '은행 선택'}
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                className='w-[var(--radix-dropdown-menu-trigger-width)] bg-white'
+                                align='start'
+                            >
+                                {bankOptions.map((option) => (
+                                    <DropdownMenuItem
+                                        key={option}
+                                        onSelect={() => setBank(option)}
+                                        className='w-full px-4 py-2 text-sm hover:bg-gray-100'
+                                    >
+                                        {option}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
 
                     {error && (
                         <p className='text-destructive mt-4 text-sm'>{error}</p>

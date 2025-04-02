@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { queryClient } from '@/app/provider/queryClient';
 import { Button } from '@/components/ui/button';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { registerAccount } from '@/features/account/api/registerAccount';
@@ -47,6 +48,7 @@ const AccountPasswordForm = () => {
                     });
                     setHasAccount(true);
                     setShowSuccess(true);
+                    queryClient.invalidateQueries({ queryKey: ['user'] });
                     setTimeout(() => {
                         setShowSuccess(false);
                         navigate('/');
