@@ -91,25 +91,50 @@ public class MyAccountController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(type = "string"),
-                            examples = @ExampleObject(value = "\"존재하는 계좌입니다.\"")
+                            examples = @ExampleObject(value = "\"1원이 송금되었습니다. 인증번호를 확인해주세요.\"")
                     )
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "유효하지 않은 계좌번호입니다",
+                    description = "유효하지 않은 계좌번호 또는 중복 등록",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(
-                                    value = """
-                        {
-                            "timestamp": "2024-01-23T10:00:00",
-                            "status": 400,
-                            "message": "유효하지 않은 계좌번호입니다",
-                            "errors": []
-                        }
-                        """
-                            )
+                            examples = {
+                                    @ExampleObject(
+                                            name = "유효하지 않은 계좌번호",
+                                            value = """
+                                {
+                                    "timestamp": "2024-01-23T10:00:00",
+                                    "status": 400,
+                                    "message": "유효하지 않은 계좌번호입니다",
+                                    "errors": []
+                                }
+                                """
+                                    ),
+                                    @ExampleObject(
+                                            name = "유효하지 않은 은행 코드",
+                                            value = """
+                                {
+                                    "timestamp": "2024-01-23T10:00:00",
+                                    "status": 400,
+                                    "message": "유효하지 않은 은행 코드입니다",
+                                    "errors": []
+                                }
+                                """
+                                    ),
+                                    @ExampleObject(
+                                            name = "이미 등록된 계좌",
+                                            value = """
+                                {
+                                    "timestamp": "2024-01-23T10:00:00",
+                                    "status": 400,
+                                    "message": "이미 등록된 계좌입니다",
+                                    "errors": []
+                                }
+                                """
+                                    )
+                            }
                     )
             ),
             @ApiResponse(
@@ -132,7 +157,7 @@ public class MyAccountController {
             @Valid @RequestBody AccountSearchRequest request) {
         log.info("계좌 정보 확인 및 1원 송금 인증: userId={}, bankName={}", authUser.getId(), request.getBankName());
         myAccountService.searchAndVerifyMyAccount(authUser.getId(), request);
-        return ResponseEntity.status(HttpStatus.OK).body("존재하는 계좌입니다.");
+        return ResponseEntity.status(HttpStatus.OK).body("1원이 송금되었습니다. 인증번호를 확인해주세요.");
     }
 
     @Operation(summary = "계좌 등록", description = "인증코드를 확인하고 계좌를 등록합니다.")
