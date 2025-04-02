@@ -224,8 +224,8 @@ public class ContractController {
 		)
 	})
 	@GetMapping("/schedule")
-	public ResponseEntity<Map<Integer, MonthlyContractResponse>> selectMonthlyContracts(@CurrentUser AuthUser authUser, @RequestBody
-		LocalDate now, @RequestBody LocalDate viewDate) {
+	public ResponseEntity<Map<Integer, MonthlyContractResponse>> selectMonthlyContracts(@CurrentUser AuthUser authUser, @RequestParam
+		LocalDate now, @RequestParam LocalDate viewDate) {
 		return ResponseEntity.ok(contractService.selectMonthlyContracts(authUser, now, viewDate));
 	}
 }
