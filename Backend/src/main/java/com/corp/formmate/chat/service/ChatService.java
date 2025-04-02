@@ -217,9 +217,9 @@ public class ChatService {
      */
     private  void sortChatRoomsByLastMessageTime(List<ChatRoomResponse> chatRooms) {
         chatRooms.sort((a, b) -> {
-            if (a.getLastMessageTime() == null) return 1;
-            if (b.getLastMessageTime() == null) return -1;
-            return b.getLastMessageTime().compareTo(a.getLastMessageTime()); // 내림차순 정렬
+            if (a.getLastMessageTime() == null) return -1;
+            if (b.getLastMessageTime() == null) return 1;
+            return b.getLastMessageTime().compareTo(a.getLastMessageTime()); // 오름차순 정렬
         });
     }
 
