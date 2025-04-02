@@ -32,6 +32,12 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 5   # 커넥션 풀 최대 크기 제한
+      minimum-idle: 2        # 최소 유지 커넥션 수
+      idle-timeout: 30000    # 30초 후 idle 커넥션 종료
+      max-lifetime: 60000    # 1분 후 커넥션 재생성
+      connection-timeout: 30000
   data:
     redis:
       host: ${REDIS_HOST}
