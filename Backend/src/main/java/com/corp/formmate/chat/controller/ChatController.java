@@ -3,10 +3,13 @@ package com.corp.formmate.chat.controller;
 import com.corp.formmate.chat.dto.*;
 import com.corp.formmate.chat.service.ChatService;
 import com.corp.formmate.global.annotation.CurrentUser;
+import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.dto.ErrorResponse;
+import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.user.dto.AuthUser;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.CustomUserDetailsService;
+import com.corp.formmate.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -22,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,6 +45,7 @@ public class ChatController {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final UserService userService;
 
     /**
      * 웹소켓을 통한 메세지 전송 처리
@@ -59,26 +64,23 @@ public class ChatController {
 //        log.info("메세지 전송 완료: {}", chatResponse.getId());
 //    }
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload @Valid ChatRequest chatRequest, Principal principal) {
+    public void sendMessage(@Payload @Valid ChatRequest chatRequest, SimpMessageHeaderAccessor headerAccessor) {
         // Principal에서 사용자 정보 추출
-        if (principal instanceof Authentication) {
-            Authentication authentication = (Authentication) principal;
-            Object details = authentication.getPrincipal();
-
-            if (details instanceof UserEntity) {
-                UserEntity user = (UserEntity) details;
-                Integer userId = user.getId();
-
-                log.info("메세지 수신: {} - 사용자: {}", chatRequest, user.getEmail());
-
-                ChatResponse chatResponse = chatService.createChat(chatRequest, userId);
-                messagingTemplate.convertAndSend("/topic/chat" + chatRequest.getFormId(), chatResponse);
-            } else {
-                log.error("인증되지 않은 사용자의 메세지 요청");
-            }
-        } else {
-            log.error("유효하지 않은 인증 정보");
+        Principal principal = headerAccessor.getUser();
+        if (principal != null) {
+            throw new UserException(ErrorCode.UNAUTHORIZED);
         }
+
+        String username = principal.getName();
+        Integer userId = userService.selectByEmail(username).getId();
+
+        log.info("메세지 수신: {} - 사용자: {}", chatRequest, username);
+
+        ChatResponse chatResponse = chatService.createChat(chatRequest, userId);
+
+        messagingTemplate.convertAndSend("/topic/chat" + chatRequest.getFormId(), chatResponse);
+
+        log.info("메세지 전송 완료: {}", chatResponse.getId());
     }
 
     /**
