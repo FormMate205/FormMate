@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetAccountInfo } from '@/entities/account/api/AccountAPI';
 import { isTokenValid } from '@/entities/auth/model/authService';
+import { useUserStore } from '@/entities/user/model/userStore';
 import { Icons } from '@/shared';
 import { formatCurrency } from '@/shared/model/formatCurrency';
 
@@ -13,6 +15,19 @@ const AccountInfo = () => {
     const isValid = token ? isTokenValid() : false;
 
     const { data: accountInfo, isLoading, isError } = useGetAccountInfo();
+    const { user, setUser } = useUserStore();
+
+    useEffect(() => {
+        if (user && !isLoading) {
+            const hasAccount = !isError && !!accountInfo;
+            if (user.hasAccount !== hasAccount) {
+                setUser({
+                    ...user,
+                    hasAccount,
+                });
+            }
+        }
+    }, [accountInfo, isError, isLoading, user, setUser]);
 
     // 토큰이 유효하지 않으면 계좌 등록 UI 표시
     if (!isValid) {

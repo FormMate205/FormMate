@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import AccountInfo from '@/pages/home/ui/AccountInfo';
 import { Icons } from '@/shared';
 import { ToastModal } from '@/widgets';
@@ -51,10 +50,6 @@ const MyAccount = ({ hasAccount, accountNumber, userName }: MyAccountProps) => {
             </div>
 
             <ToastModal isOpen={showToast} title='복사되었습니다' />
-
-            <Button variant='light' className='mt-4 w-full'>
-                결제 비밀번호 수정
-            </Button>
 
             {openAlert && (
                 <div className='fixed inset-0 z-50'>
