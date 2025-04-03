@@ -100,9 +100,6 @@ public class ContractService {
 		contractDetail.setRepaymentAmount(repaymentAmount);
 		contractDetail.setTotalEarlyRepaymentCharge(totalEarlyRepaymentCharge);
 		contractDetail.setOverdueLimit(form.getOverdueLimit());
-		String contracteeName =
-			form.getCreditorName().equals(user.getUsername()) ? form.getDebtorName() : form.getCreditorName();
-		contractDetail.setContracteeName(contracteeName);
 
 		return contractDetail;
 	}
