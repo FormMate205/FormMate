@@ -34,11 +34,14 @@ import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.ContractException;
 import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.global.error.exception.TransferException;
+import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
 import com.corp.formmate.user.dto.AuthUser;
+import com.corp.formmate.user.entity.UserEntity;
+import com.corp.formmate.user.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +57,7 @@ public class ContractService {
 	private final FormRepository formRepository;
 	private final TransferRepository transferRepository;
 	private final PaymentPreviewService paymentPreviewService;
+	private final UserRepository userRepository;
 
 	@Transactional
 	public ContractDetailResponse selectContractDetail(AuthUser user, Integer formId) {
@@ -262,8 +266,9 @@ public class ContractService {
 		Page<FormEntity> allWithFilters = formRepository.findAllWithFilters(authUser.getId(), formStatus, null,
 			PageRequest.of(0, 10000));
 
-		String username = authUser.getUsername();
-		log.info("userName = {}", username);
+		UserEntity user = userRepository.findById(authUser.getId())
+			.orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+		String username = user.getUserName();
 
 		for (FormEntity f : allWithFilters) {
 			ContractPreviewResponse contractPreviewResponse = new ContractPreviewResponse();
