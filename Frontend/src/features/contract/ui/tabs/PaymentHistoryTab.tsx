@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { QueryErrorResetBoundary } from '@tanstack/react-query';
+import { useState, Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import {
     Select,
     SelectContent,
@@ -6,70 +8,31 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import PaymentItem from '../../../../entities/contract/ui/PaymentItem';
+import { PaymentStatus } from '@/entities/contract/model/types';
+import PaymentHistoryList from '@/entities/contract/ui/PaymentList';
+import { ErrorFallBack } from '@/shared/ui/ErrorFallBack';
+import ListLoading from '@/shared/ui/ListLoading';
+import { useGetPaymentHistoryList } from '../../api/ContractAPI';
 
-const paymentList = [
-    {
-        date: '25.07.15',
-        round: '6회차',
-        amount: '-15,000원',
-        tagText: '중도',
-        description: '3,000원 초과',
-    },
-    {
-        date: '25.06.15',
-        round: '5회차',
-        amount: '-12,000원',
-        tagText: '정상',
-        description: '정상납부',
-    },
-    {
-        date: '25.05.15',
-        round: '4회차',
-        amount: '-12,000원',
-        tagText: '정상',
-        description: '정상납부',
-    },
-    {
-        date: '25.05.15',
-        round: '3회차',
-        amount: '-1,000원',
-        tagText: '연체',
-        description: '23,000원 미납',
-    },
-    {
-        date: '25.05.15',
-        round: '2회차',
-        amount: '0원',
-        tagText: '연체',
-        description: '12,000원 미납',
-    },
-    {
-        date: '25.05.15',
-        round: '1회차',
-        amount: '12,000원',
-        tagText: '정상',
-        description: '정상 납부',
-    },
-];
+const statusList: PaymentStatus[] = ['전체', '납부', '연체', '중도상환'];
 
-const PaymentHistoryTab = () => {
-    const [selectedTag, setSelectedTag] = useState('전체');
+const PaymentHistoryTab = ({ formId }: { formId: string }) => {
+    const [selected, setSelected] = useState<PaymentStatus>('전체');
 
-    const filteredList =
-        selectedTag === '전체'
-            ? paymentList
-            : paymentList.filter((item) => item.tagText === selectedTag);
+    const { paymentHistoryList, lastItemRef } = useGetPaymentHistoryList({
+        formId,
+        transferStatus: selected,
+        pageable: {
+            page: '0',
+            size: '10',
+        },
+    });
 
     return (
         <div className='flex flex-col gap-2'>
             <Select
-                onValueChange={(value) => {
-                    if (value === 'default') setSelectedTag('전체');
-                    else if (value === 'progress') setSelectedTag('정상');
-                    else if (value === 'delayed') setSelectedTag('연체');
-                    else if (value === 'end') setSelectedTag('중도');
-                }}
+                value={selected}
+                onValueChange={(value: PaymentStatus) => setSelected(value)}
             >
                 <div className='flex justify-end'>
                     <SelectTrigger className='w-20'>
@@ -78,17 +41,31 @@ const PaymentHistoryTab = () => {
                 </div>
 
                 <SelectContent>
-                    <SelectItem value='default'>전체</SelectItem>
-                    <SelectItem value='progress'>정상</SelectItem>
-                    <SelectItem value='delayed'>연체</SelectItem>
-                    <SelectItem value='end'>중도</SelectItem>
+                    {statusList.map((status) => (
+                        <SelectItem key={status} value={status}>
+                            {status}
+                        </SelectItem>
+                    ))}
                 </SelectContent>
             </Select>
+
             <hr className='border-line-200' />
-            {/* Payment List */}
-            {filteredList.map((item, idx) => (
-                <PaymentItem key={idx} {...item} />
-            ))}
+
+            <QueryErrorResetBoundary>
+                {({ reset }) => (
+                    <ErrorBoundary
+                        onReset={reset}
+                        FallbackComponent={ErrorFallBack}
+                    >
+                        <Suspense fallback={<ListLoading />}>
+                            <PaymentHistoryList
+                                data={paymentHistoryList}
+                                lastItemRef={lastItemRef}
+                            />
+                        </Suspense>
+                    </ErrorBoundary>
+                )}
+            </QueryErrorResetBoundary>
         </div>
     );
 };

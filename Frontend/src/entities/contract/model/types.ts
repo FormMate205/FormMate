@@ -42,6 +42,17 @@ export type ContractCard = {
     totalAmountDue: number;
 };
 
+// 거래 내역
+export type PaymentStatus = '납부' | '연체' | '전체' | '중도상환';
+
+export interface PaymentHistoryItem {
+    status: PaymentStatus;
+    currentRound: string;
+    amount: number;
+    paymentDifference: number;
+    transactionDate: string;
+}
+
 // 계약 상태 관련 태그
 export type ContractStatus =
     | 'ALL'
