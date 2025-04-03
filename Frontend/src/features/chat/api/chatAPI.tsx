@@ -69,21 +69,22 @@ const getMessages = async ({
 };
 
 export const useGetMessages = ({ formId, page, size }: ChatHistoryRequest) => {
-    const { data, fetchNextPage, hasNextPage } = useSuspenseInfiniteQuery({
-        queryKey: ['chat', formId],
-        queryFn: ({ pageParam }) =>
-            getMessages({ formId, page: pageParam.page, size }),
-        initialPageParam: { page },
-        getNextPageParam: (lastPage) => {
-            // 마지막 페이지면 undefined 반환
-            if (lastPage.last) return undefined;
+    const { data, fetchNextPage, hasNextPage, refetch } =
+        useSuspenseInfiniteQuery({
+            queryKey: ['chat', formId],
+            queryFn: ({ pageParam }) =>
+                getMessages({ formId, page: pageParam.page, size }),
+            initialPageParam: { page },
+            getNextPageParam: (lastPage) => {
+                // 마지막 페이지면 undefined 반환
+                if (lastPage.last) return undefined;
 
-            // 다음 페이지 번호 계산
-            return {
-                page: (parseInt(lastPage.pageNumber) + 1).toString(),
-            };
-        },
-    });
+                // 다음 페이지 번호 계산
+                return {
+                    page: (parseInt(lastPage.pageNumber) + 1).toString(),
+                };
+            },
+        });
 
     // 모든 페이지의 데이터를 하나로 합침
     const messages = data ? data.pages.flatMap((page) => page.content) : [];
@@ -98,5 +99,5 @@ export const useGetMessages = ({ formId, page, size }: ChatHistoryRequest) => {
         },
     );
 
-    return { messages, fetchNextPage, lastItemRef };
+    return { messages, fetchNextPage, lastItemRef, refetch };
 };
