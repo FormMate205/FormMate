@@ -1,9 +1,5 @@
 import api from '@/shared/api/instance';
-
-export interface CheckAccountPayload {
-    bankName: string;
-    accountNumber: string;
-}
+import { CheckAccountPayload } from '../model/types';
 
 export const checkAccount = async (payload: CheckAccountPayload) => {
     const res = await api.post('/users/account', payload);
