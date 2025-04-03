@@ -15,6 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "비밀번호 인증번호 검증 요청")
 public class PasswordVerifyRequest {
     @NotBlank(message = "전화번호는 필수 입력 항목입니다.")
     @Pattern(regexp = "^01(?:0|1|[6-9])[0-9]{7,8}$", message = "올바른 휴대폰 번호 형식이 아닙니다.")
