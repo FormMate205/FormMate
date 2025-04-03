@@ -1,6 +1,6 @@
-import { lastDayOfMonth, format } from 'date-fns';
+import { format, endOfMonth } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { useScheduleMap } from '@/entities/home/model/useScheduleMap';
@@ -10,12 +10,13 @@ const Schedule = () => {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(
         new Date(),
     );
+    const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
     const [viewDate, setViewDate] = useState<string>(
-        format(lastDayOfMonth(new Date()), 'yyyy-MM-dd'),
-        // 1일 말고 매달 말일로 설정 필요!
+        format(endOfMonth(new Date()), 'yyyy-MM-dd'),
     );
 
     const { data, isLoading } = useScheduleMap(viewDate);
+
     const selectedDayKey = String((selectedDate ?? new Date()).getDate());
     const scheduleForSelectedDate = (
         data?.[selectedDayKey]?.contracts ?? []
@@ -24,17 +25,34 @@ const Schedule = () => {
             contract.repaymentAmount !== null && contract.repaymentAmount !== 0,
     );
 
+    const modifiers = useMemo(() => {
+        return {
+            hasSettlement: (date: Date) => {
+                const dayKey = String(date.getDate());
+                const contracts = data?.[dayKey]?.contracts ?? [];
+                return contracts.some(
+                    (c) =>
+                        c.repaymentAmount !== null && c.repaymentAmount !== 0,
+                );
+            },
+        };
+    }, [data]);
+
+    const modifiersClassNames = {
+        hasSettlement: 'dot-indicator',
+    };
+
     useEffect(() => {
         if (!selectedDate) return;
 
         const selectedMonth = format(selectedDate, 'yyyy-MM');
-        const currentViewMonth = format(new Date(viewDate), 'yyyy-MM');
+        const currentViewMonth = format(new Date(currentMonth), 'yyyy-MM');
 
         if (selectedMonth !== currentViewMonth) {
-            // 새 월의 1일로 viewDate 갱신 --> 새 월의 말일로 갱신 필요!
-            setViewDate(format(lastDayOfMonth(selectedDate), 'yyyy-MM-dd'));
+            setViewDate(format(endOfMonth(selectedDate), 'yyyy-MM-dd'));
+            setCurrentMonth(selectedDate);
         }
-    }, [selectedDate, viewDate]);
+    }, [selectedDate]);
 
     return (
         <section className='mb-12'>
@@ -47,6 +65,15 @@ const Schedule = () => {
                         locale={ko}
                         className='w-full'
                         classNames={calendarCustom}
+                        month={currentMonth}
+                        onMonthChange={(newMonth: Date) => {
+                            setCurrentMonth(newMonth);
+                            setViewDate(
+                                format(endOfMonth(newMonth), 'yyyy-MM-dd'),
+                            );
+                        }}
+                        modifiers={modifiers}
+                        modifiersClassNames={modifiersClassNames}
                     />
                 </div>
 
