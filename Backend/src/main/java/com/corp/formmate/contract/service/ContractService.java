@@ -91,7 +91,9 @@ public class ContractService {
 				repaymentAmount += t.getAmount();
 			}
 			if (t.getStatus() == TransferStatus.EARLY_REPAYMENT) {
-				totalEarlyRepaymentCharge -= BigDecimal.valueOf(t.getPaymentDifference()).multiply(form.getEarlyRepaymentFeeRate()).longValue();
+				totalEarlyRepaymentCharge -= BigDecimal.valueOf(t.getPaymentDifference())
+					.multiply(form.getEarlyRepaymentFeeRate())
+					.longValue();
 			}
 		}
 		contractDetail.setRemainingPrincipal(contract.getRemainingPrincipal());
@@ -125,7 +127,7 @@ public class ContractService {
 			// 중도상환액이 있을 경우 해당 회차 상환액은 다 내고 추가로 낸 것이므로 0원
 			expectedPaymentAmountResponse.setMonthlyRemainingPayment(0L);
 		} else {
-			List<TransferEntity> transfers = transferRepository.findByFormOrderByCreatedAtDesc(form);
+			List<TransferEntity> transfers = transferRepository.findByFormOrderByTransactionDateDesc(form);
 			Integer currentPaymentRound1 = contract.getCurrentPaymentRound();
 
 			// 현재 회차 송금 중 가장 마지막 송금(desc로 뽑았으니까)의 PaymentDifference와 0 중 가장 큰 것으로 설정
@@ -373,7 +375,8 @@ public class ContractService {
 	 * 3.1. now.month < viewDate.month && now.day < viewDate.day일 때 -> month 차이+1
 	 */
 	@Transactional
-	public Map<Integer, MonthlyContractResponse> selectMonthlyContracts(AuthUser user, LocalDate now, LocalDate viewDate) {
+	public Map<Integer, MonthlyContractResponse> selectMonthlyContracts(AuthUser user, LocalDate now,
+		LocalDate viewDate) {
 		log.info("now = {}, viewDate = {}", now, viewDate);
 		Map<Integer, MonthlyContractResponse> map = new HashMap<>();
 		Page<FormEntity> allWithFilters = formRepository.findAllWithFilters(user.getId(), null, null,
@@ -430,7 +433,8 @@ public class ContractService {
 
 							for (PaymentScheduleResponse p : schedulePage) {
 								if (p.getInstallmentNumber().equals(currentPaymentRound)) {
-									monthlyContractDetail.setRepaymentAmount(p.getPaymentAmount() + contract.getOverdueAmount());
+									monthlyContractDetail.setRepaymentAmount(
+										p.getPaymentAmount() + contract.getOverdueAmount());
 									break;
 								}
 							}
@@ -452,7 +456,8 @@ public class ContractService {
 							Long sumTransferAmount = 0L;
 							for (TransferEntity t : transfers) {
 								LocalDate transferDate = t.getTransactionDate().toLocalDate();
-								if (transferDate.getYear() == viewDate.getYear() && transferDate.getMonth() == viewDate.getMonth()) {
+								if (transferDate.getYear() == viewDate.getYear()
+									&& transferDate.getMonth() == viewDate.getMonth()) {
 									sumTransferAmount += t.getAmount();
 								}
 							}
@@ -495,7 +500,8 @@ public class ContractService {
 				Long sumTransferAmount = 0L;
 				for (TransferEntity t : transfers) {
 					LocalDate transferDate = t.getTransactionDate().toLocalDate();
-					if (transferDate.getYear() == viewDate.getYear() && transferDate.getMonth() == viewDate.getMonth()) {
+					if (transferDate.getYear() == viewDate.getYear()
+						&& transferDate.getMonth() == viewDate.getMonth()) {
 						sumTransferAmount += t.getAmount();
 					}
 				}
@@ -541,7 +547,9 @@ public class ContractService {
 			// 송금액 >= 연체액일 때
 			if (amount >= overdueAmount) {
 				// 현재 송금에서 낸 연체 이자
-				long overdueInterest = BigDecimal.valueOf(overdueAmount).multiply(form.getOverdueInterestRate()).longValue();
+				long overdueInterest = BigDecimal.valueOf(overdueAmount)
+					.multiply(form.getOverdueInterestRate())
+					.longValue();
 
 				// 현재 연체 금액은 0원이 됨
 				contract.setOverdueAmount(0L);
@@ -605,7 +613,9 @@ public class ContractService {
 			// 이번 달 상환액을 제외한 나머지 금액은 이자 금액, 중도상환수수료를 차감하고 원금을 차감해야 함
 			amount -= repaymentAmount; // 이번 달 상환액을 제외한 나머지 금액
 			interest = BigDecimal.valueOf(amount).multiply(form.getInterestRate()).longValue();
-			long earlyRepaymentFee = BigDecimal.valueOf(amount).multiply(form.getEarlyRepaymentFeeRate()).longValue(); // 나머지 금액만큼에서 중도상환수수료 계산
+			long earlyRepaymentFee = BigDecimal.valueOf(amount)
+				.multiply(form.getEarlyRepaymentFeeRate())
+				.longValue(); // 나머지 금액만큼에서 중도상환수수료 계산
 			long deductedAmount = amount - interest - earlyRepaymentFee; // 원금에서 차감할 금액(나머지 금액 - 이자 금액 - 중도상환수수료)
 			contract.setInterestAmount(contract.getInterestAmount() + interest);
 			remainingPrincipal -= deductedAmount;
@@ -650,7 +660,6 @@ public class ContractService {
 
 		contractRepository.save(contract);
 	}
-
 
 	// TODO: 납부일 다음 날 스케줄러 업데이트 메소드 제작
 	// TODO: 공통) 현재 회차, 다음 상환 날짜 업데이트

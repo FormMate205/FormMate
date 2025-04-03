@@ -213,24 +213,24 @@ public class FormTerminationController {
                                     @ExampleObject(
                                             name = "동의 필요",
                                             value = """
-                            {
-                                "timestamp": "2024-01-23T10:00:00",
-                                "status": 400,
-                                "message": "계약 파기에 동의가 필요합니다",
-                                "errors": []
-                            }
-                            """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 400,
+                            "message": "계약 파기에 동의가 필요합니다",
+                            "errors": []
+                        }
+                        """
                                     ),
                                     @ExampleObject(
                                             name = "인증번호 불일치",
                                             value = """
-                            {
-                                "timestamp": "2024-01-23T10:00:00",
-                                "status": 400,
-                                "message": "휴대전화 인증에 실패했습니다",
-                                "errors": []
-                            }
-                            """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 400,
+                            "message": "휴대전화 인증에 실패했습니다",
+                            "errors": []
+                        }
+                        """
                                     )
                             }
                     )
@@ -251,7 +251,23 @@ public class FormTerminationController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "인증 확인 및 서명 정보",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = FormTerminationConfirmRequest.class))
+                    content = @Content(
+                            schema = @Schema(implementation = FormTerminationConfirmRequest.class),
+                            examples = @ExampleObject(
+                                    value = """
+                    {
+                        "verifyRequest": {
+                            "phoneNumber": "01012345678",
+                            "verificationCode": "123456",
+                            "recaptchaToken": "03AGdBq24PBgaJFuQxxxx..."
+                        },
+                        "signRequest": {
+                            "consent": true
+                        }
+                    }
+                    """
+                            )
+                    )
             )
             @Valid @RequestBody FormTerminationConfirmRequest request,
             @CurrentUser AuthUser authUser
@@ -330,7 +346,31 @@ public class FormTerminationController {
                     description = "잘못된 요청 또는 인증 실패",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "동의 필요",
+                                            value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 400,
+                            "message": "계약 파기에 동의가 필요합니다",
+                            "errors": []
+                        }
+                        """
+                                    ),
+                                    @ExampleObject(
+                                            name = "인증번호 불일치",
+                                            value = """
+                        {
+                            "timestamp": "2024-01-23T10:00:00",
+                            "status": 400,
+                            "message": "휴대전화 인증에 실패했습니다",
+                            "errors": []
+                        }
+                        """
+                                    )
+                            }
                     )
             ),
             @ApiResponse(
@@ -349,7 +389,23 @@ public class FormTerminationController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "인증 확인 및 서명 정보",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = FormTerminationConfirmRequest.class))
+                    content = @Content(
+                            schema = @Schema(implementation = FormTerminationConfirmRequest.class),
+                            examples = @ExampleObject(
+                                    value = """
+                    {
+                        "verifyRequest": {
+                            "phoneNumber": "01012345678",
+                            "verificationCode": "123456",
+                            "recaptchaToken": "03AGdBq24PBgaJFuQxxxx..."
+                        },
+                        "signRequest": {
+                            "consent": true
+                        }
+                    }
+                    """
+                            )
+                    )
             )
             @Valid @RequestBody FormTerminationConfirmRequest request,
             @CurrentUser AuthUser authUser

@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.corp.formmate.chat.event.*;
 import com.corp.formmate.form.dto.*;
+import com.corp.formmate.form.entity.TerminationProcess;
+import com.corp.formmate.user.service.IdentityVerificationService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,6 +58,7 @@ public class FormService {
 	private final VerificationService verificationService;
 	private final TransferService transferService;
 	private final RedisTemplate<Object, Object> redisTemplate;
+	private final IdentityVerificationService identityVerificationService;
 	// 이벤트 발생을 위한
 	private final ApplicationEventPublisher eventPublisher;
 
@@ -166,9 +169,7 @@ public class FormService {
 //		Integer formActiveCount = formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS);
 		// 진행중 상태 (종료 요청과 첫번째 서명 완료 상태 포함)
 		Integer formActiveCount =
-				formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS) +
-						formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.TERMINATION_REQUESTED) +
-						formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.TERMINATION_FIRST_SIGNED);
+				formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS);
 
 		// 완료 상태
 		Integer formCompletedCount = formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.COMPLETED);
@@ -214,11 +215,15 @@ public class FormService {
 			throw new FormException(ErrorCode.INVALID_DEBTOR);
 		}
 
-		confirmRequest(userEntity, formEntity, FormStatus.BEFORE_APPROVAL);
+		if (formEntity.getStatus() != FormStatus.BEFORE_APPROVAL) {
+			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
+		}
+
+		verificationService.requestVerificationCode(phoneNumber);
 
 		// 채팅 발송 위한 이벤트 발행
-		log.info("채무자 서명 이벤트 발행: 폼 ID={}", formEntity.getId());
-		eventPublisher.publishEvent(new CreditorSignatureCompletedEvent(formEntity));
+		log.info("채무자 서명 요청 이벤트 발행: 폼 ID={}", formEntity.getId());
+		eventPublisher.publishEvent(new DebtorSignatureRequestedEvent(formEntity, formEntity.getId()));
 
 		return true;
 	}
@@ -247,11 +252,16 @@ public class FormService {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
-		verifyConfirmRequest(phoneNumber, verificationCode);
+		identityVerificationService.verifyIdentity(userEntity.getUserName(), phoneNumber, verificationCode, request.getRecaptchaToken());
+
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
 
 		formEntity.setStatus(FormStatus.AFTER_APPROVAL);
 		formRepository.save(formEntity);
+
+		// 채팅 발송 위한 이벤트 발행
+		log.info("채무자 서명 이벤트 발행: 폼 ID={}", formEntity.getId());
+		eventPublisher.publishEvent(new DebtorSignatureCompletedEvent(formEntity));
 
 		return FormConfirmVerifyResponse.fromEntity(formEntity);
 	}
@@ -275,7 +285,15 @@ public class FormService {
 			throw new FormException(ErrorCode.INVALID_CREDITOR);
 		}
 
-		confirmRequest(userEntity, formEntity, FormStatus.AFTER_APPROVAL);
+		if (formEntity.getStatus() != FormStatus.AFTER_APPROVAL) {
+			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
+		}
+
+		verificationService.requestVerificationCode(phoneNumber);
+
+		// 채팅 발송 위한 이벤트 발행
+		log.info("채권자 서명 요청 이벤트 발행: 폼 ID={}", formEntity.getId());
+		eventPublisher.publishEvent(new CreditorSignatureRequestedEvent(formEntity, formEntity.getId()));
 
 		return true;
 	}
@@ -304,18 +322,19 @@ public class FormService {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
-		verifyConfirmRequest(phoneNumber, verificationCode);
+		identityVerificationService.verifyIdentity(userEntity.getUserName(), phoneNumber, verificationCode, request.getRecaptchaToken());
+
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
 		transferService.createInitialTransfer(formEntity);
 
 		formEntity.setStatus(FormStatus.IN_PROGRESS);
 		formRepository.save(formEntity);
+		
+		contractService.createContract(formEntity);
 
 		// 채팅 발송 위한 이벤트 발행
 		log.info("채권자 서명 & 계약 체결 이벤트 발행: 폼 ID={}", formEntity.getId());
 		eventPublisher.publishEvent(new CreditorSignatureCompletedEvent(formEntity));
-		
-		contractService.createContract(formEntity);
 
 		return FormConfirmVerifyResponse.fromEntity(formEntity);
 	}
@@ -325,73 +344,6 @@ public class FormService {
 		userService.selectById(userId); // 사용자 존재 여부 확인
 
 		return formRepository.findAllByCreditorIdOrDebtorId(userId, userId);
-	}
-
-	// 인증번호 요청
-	private void confirmRequest(UserEntity userEntity, FormEntity formEntity, FormStatus formStatus) {
-		try {
-
-			if (formEntity.getStatus() != formStatus) {
-				throw new FormException(ErrorCode.INVALID_FORM_STATUS);
-			}
-
-			// 전화번호 정규화
-			String normalizedPhone = messageService.normalizePhoneNumber(userEntity.getPhoneNumber());
-
-			// 인증 코드 생성 및 Redis에 저장
-			String code = verificationService.createAndStoreCode(normalizedPhone);
-
-			// 인증 코드 전송
-			boolean sent = messageService.sendVerificationCode(normalizedPhone, code);
-
-			if (!sent) {
-				log.error("Failed to send verification code to: {}", normalizedPhone);
-				throw new PasswordException(ErrorCode.FAIL_MESSAGE_SEND);
-			}
-			log.info("Password reset verification code sent to: {}", normalizedPhone);
-		} catch (PasswordException e) {
-			log.error("Password error in verification: {}", e.getMessage());
-			throw e;
-		} catch (UserException e) {
-			log.error("Error in password reset verification: {}", e.getMessage());
-			throw e;
-		} catch (Exception e) {
-			log.error("Unexpected error in password reset verification: {}", e.getMessage());
-			throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	// 인증번호 검증
-	private void verifyConfirmRequest(String phoneNumber, String verificationCode) {
-		try {
-			// 전화번호 정규화
-			String normalizedPhone = messageService.normalizePhoneNumber(phoneNumber);
-
-			// 인증 코드 확인
-			verificationService.verifyCode(normalizedPhone, verificationCode);
-
-			try {
-				// 인증 성공 시 Redis에 인증 상태 저장 (예: 10분간 유효)
-				String verifiedKey = "verified:" + normalizedPhone;
-				redisTemplate.opsForValue()
-					.set(verificationService.getVerificationKeyPrefix() + verifiedKey, "true", 10, TimeUnit.MINUTES);
-				log.debug("인증 상태 저장 - 키: {}", verifiedKey);
-			} catch (UserException e) {
-				if (e.getErrorCode() == ErrorCode.USER_NOT_FOUND) {
-					throw new PasswordException(ErrorCode.USER_NOT_FOUND);
-				}
-				throw e;
-			}
-		} catch (PasswordException e) {
-			log.error("Password verification error: {}", e.getMessage());
-			throw e; // 예외를 그대로 던져서 컨트롤러에서 처리하도록
-		} catch (UserException e) {
-			log.error("User error in password verification: {}", e.getMessage());
-			throw e;
-		} catch (Exception e) {
-			log.error("Unexpected error in password verification: {}", e.getMessage());
-			throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
-		}
 	}
 
 	private void checkAccount(String creditorAccount, String debtorAccount) {
@@ -422,8 +374,14 @@ public class FormService {
 			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
 		}
 
-		// 계약 상태 변경
-		form.setStatus(FormStatus.TERMINATION_REQUESTED);
+		// 이미 파기 프로세스 중인지 확인
+		if (form.getIsTerminationProcess() == TerminationProcess.REQUESTED
+		|| form.getIsTerminationProcess() == TerminationProcess.SIGNED) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_ALREADY_REQUESTED);
+		}
+
+		// 파기 프로세스 시작 설정
+		form.startTerminationProcess();
 		formRepository.save(form);
 
 		// 계약 파기 요청 이벤트 발생
@@ -436,6 +394,42 @@ public class FormService {
 				.statusKorName(form.getStatus().getKorName())
 				.requestedByName(user.getUserName())
 				.build();
+	}
+
+	/**
+	 * 계약 파기 취소
+	 */
+	@Transactional
+	public FormTerminationResponse cancelTermination(Integer formId, Integer userId) {
+		// 사용자와 계약 조회
+		UserEntity user = userService.selectById(userId);
+		FormEntity form = selectById(formId);
+
+		// 채권자나 채무자만 파기 요청 가능
+		if (!isParticipant(form, userId)) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
+		}
+
+		// 계약 파기 프로세스 중인지 확인
+		if (form.getIsTerminationProcess() == TerminationProcess.NONE) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_REQUEST_NOT_FOUND);
+		}
+
+		// 원래 상태인지 확인
+		form.cancelTerminationProcess();
+		formRepository.save(form);
+
+		// 계약 파기 취소 이벤트 발생
+		log.info("계약 파기 취소 이벤트 발행: form Id={}, 취소자 ID={}", formId, userId);
+		eventPublisher.publishEvent(new FormTerminationCancelledEvent(form, userId));
+
+		return FormTerminationResponse.builder()
+				.formId(form.getId())
+				.status(form.getStatus().name())
+				.statusKorName(form.getStatus().getKorName())
+				.requestedByName(user.getUserName())
+				.build();
+
 	}
 
 	/**
@@ -454,7 +448,7 @@ public class FormService {
 		FormEntity form = selectById(formId);
 
 		// 상태 확인
-		if (form.getStatus() != FormStatus.TERMINATION_REQUESTED) {
+		if (form.getIsTerminationProcess() != TerminationProcess.REQUESTED) {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
@@ -468,7 +462,7 @@ public class FormService {
 		Integer requesterId = getOtherPartyId(form, userId);
 
 		// 인증번호 발송
-		sendVerificationCode(user);
+		verificationService.requestVerificationCode(user.getPhoneNumber());
 
 		return true;
 	}
@@ -478,11 +472,6 @@ public class FormService {
 	 */
 	@Transactional
 	public FormTerminationResponse confirmFirstSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request, FormTerminationSignRequest signRequest) {
-		// 동의 확인
-		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
-			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
-		}
-
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -493,15 +482,25 @@ public class FormService {
 		FormEntity form = selectById(formId);
 
 		// 상태 확인
-		if (form.getStatus() != FormStatus.TERMINATION_REQUESTED) {
+		if (form.getIsTerminationProcess() != TerminationProcess.REQUESTED) {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
+		// 채권자나 채무자만 서명 가능
+		if (!isParticipant(form, userId)) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
+		}
+
+		// 동의 확인
+		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
+		}
+
 		// 인증번호 확인
-		verifyVerificationCode(request.getPhoneNumber(), request.getVerificationCode());
+		identityVerificationService.verifyIdentity(user.getUserName(), request.getPhoneNumber(), request.getVerificationCode(), request.getRecaptchaToken());
 
 		// 계약 상태 변경
-		form.setStatus(FormStatus.TERMINATION_FIRST_SIGNED);
+		form.signTerminationProcess();
 		formRepository.save(form);
 
 		// 첫 번째 서명 완료 이벤트 발생
@@ -532,7 +531,7 @@ public class FormService {
 		FormEntity form = selectById(formId);
 
 		// 상태 확인
-		if (form.getStatus() != FormStatus.TERMINATION_FIRST_SIGNED) {
+		if (form.getIsTerminationProcess() != TerminationProcess.SIGNED) {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
@@ -543,7 +542,7 @@ public class FormService {
 		}
 
 		// 인증번호 발송
-		sendVerificationCode(user);
+		verificationService.requestVerificationCode(user.getPhoneNumber());
 
 		return true;
 	}
@@ -553,11 +552,6 @@ public class FormService {
 	 */
 	@Transactional
 	public FormTerminationResponse confirmSecondSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request, FormTerminationSignRequest signRequest) {
-		// 동의 확인
-		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
-			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
-		}
-
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -568,12 +562,21 @@ public class FormService {
 		FormEntity form = selectById(formId);
 
 		// 상태 확인
-		if (form.getStatus() != FormStatus.TERMINATION_FIRST_SIGNED) {
+		if (form.getIsTerminationProcess() != TerminationProcess.SIGNED) {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
+		if (!isParticipant(form, userId)) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
+		}
+
+		// 동의 확인
+		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
+		}
+
 		// 인증번호 확인
-		verifyVerificationCode(request.getPhoneNumber(), request.getVerificationCode());
+		identityVerificationService.verifyIdentity(user.getUserName(), request.getPhoneNumber(), request.getVerificationCode(), request.getRecaptchaToken());
 
 		// 계약 상태를 종료로 변경
 		form.setStatus(FormStatus.COMPLETED);
@@ -620,58 +623,4 @@ public class FormService {
 		}
 	}
 
-	/**
-	 * 인증번호 발송
-	 */
-	private void sendVerificationCode(UserEntity user) {
-		try {
-			// 전화번호 정규화
-			String normalizedPhone = messageService.normalizePhoneNumber(user.getPhoneNumber());
-
-			// 인증 코드 생성 및 Redis에 저장
-			String code = verificationService.createAndStoreCode(normalizedPhone);
-
-			// 인증 코드 전송
-			boolean sent = messageService.sendVerificationCode(normalizedPhone, code);
-
-			if (!sent) {
-				log.error("Failed to send verification code to: {}", normalizedPhone);
-				throw new PasswordException(ErrorCode.FAIL_MESSAGE_SEND);
-			}
-			log.info("계약 파기 인증 코드 발송: {}", normalizedPhone);
-		} catch (PasswordException e) {
-			log.error("Password error in verification: {}", e.getMessage());
-			throw e;
-		} catch (UserException e) {
-			log.error("Error in verification: {}", e.getMessage());
-			throw e;
-		} catch (Exception e) {
-			log.error("Unexpected error in verification: {}", e.getMessage());
-			throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	/**
-	 * 인증번호 확인
-	 */
-	private void verifyVerificationCode(String phoneNumber, String verificationCode) {
-		try {
-			// 전화번호 정규화
-			String normalizedPhone = messageService.normalizePhoneNumber(phoneNumber);
-
-			// 인증 코드 확인
-			verificationService.verifyCode(normalizedPhone, verificationCode);
-
-			log.info("계약 파기 인증 완료: {}", normalizedPhone);
-		} catch (PasswordException e) {
-			log.error("Password verification error: {}", e.getMessage());
-			throw e;
-		} catch (UserException e) {
-			log.error("User error in verification: {}", e.getMessage());
-			throw e;
-		} catch (Exception e) {
-			log.error("Unexpected error in verification: {}", e.getMessage());
-			throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
-		}
-	}
 }
