@@ -1,4 +1,5 @@
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+import ChatSystem from '@/entities/chat/ui/ChatSystem';
 import FormModal from '@/entities/chat/ui/FormModal';
 import { useUserStore } from '@/entities/user/model/userStore';
 import showName from '@/features/chat/model/showName';
@@ -8,6 +9,9 @@ import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 
 const Chat = () => {
+    const location = useLocation();
+    const { isFin } = location.state;
+
     const { user } = useUserStore();
     const { roomId } = useParams();
 
@@ -36,7 +40,15 @@ const Chat = () => {
                 className='scrollbar-none my-1 flex w-full flex-1 flex-col-reverse gap-2 overflow-y-auto'
             >
                 {messages.map((chat, index) => {
-                    return (
+                    return chat.messageType == 'CONTRACT_SHARED' ||
+                        chat.messageType == 'SIGNATURE_REQUEST' ? (
+                        <ChatSystem
+                            key={chat.id}
+                            formId={chat.formId}
+                            children={chat.content}
+                            type={chat.messageType}
+                        />
+                    ) : (
                         <ChatBox
                             key={chat.id}
                             writerId={chat.writerId}
@@ -61,7 +73,7 @@ const Chat = () => {
 
             {/* 채팅 입력창 */}
             <ChatInput
-                isActive={isConnected}
+                isActive={isConnected && !isFin}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onClick={sendMessage}
