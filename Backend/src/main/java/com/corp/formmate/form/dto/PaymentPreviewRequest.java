@@ -107,7 +107,7 @@ public class PaymentPreviewRequest {
 		this.interestRate = String.valueOf(form.getInterestRate());
 		this.loanAmount = form.getLoanAmount();
 		this.maturityDate = form.getMaturityDate();
-		this.repaymentMethod = String.valueOf(form.getRepaymentMethod());
+		this.repaymentMethod = form.getRepaymentMethod().getKorName();
 		this.repaymentDay = form.getRepaymentDay();
 	}
 
