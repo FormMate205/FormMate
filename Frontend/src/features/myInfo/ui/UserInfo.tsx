@@ -1,11 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-
-interface UserInfoProps {
-    isOAuth: boolean;
-    userName: string;
-    phoneNumber: string;
-    email: string;
-}
+import { UserInfoProps } from '../model/types';
 
 const UserInfo = ({ isOAuth, userName, phoneNumber, email }: UserInfoProps) => {
     const navigate = useNavigate();
