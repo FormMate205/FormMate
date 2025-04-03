@@ -9,8 +9,10 @@ import lombok.Getter;
 @Getter
 public class FormCreatedEvent {
     private final FormEntity formEntity;
+    private final Integer requestedByUserId;
 
-    public FormCreatedEvent(FormEntity formEntity) {
+    public FormCreatedEvent(FormEntity formEntity, Integer requestedByUserId) {
         this.formEntity = formEntity;
+        this.requestedByUserId = requestedByUserId;
     }
 }
