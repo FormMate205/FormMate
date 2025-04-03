@@ -263,6 +263,7 @@ public class ContractService {
 			PageRequest.of(0, 10000));
 
 		String username = authUser.getUsername();
+		log.info("userName = {}", username);
 
 		for (FormEntity f : allWithFilters) {
 			ContractPreviewResponse contractPreviewResponse = new ContractPreviewResponse();
