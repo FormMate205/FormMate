@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { AccountInfo } from '@/entities/account/model/types';
+import { AccountInfo } from '@/features/account/model/types';
 import { Icons } from '@/shared';
 import { formatCurrency } from '@/shared/model/formatCurrency';
 
@@ -27,7 +27,7 @@ const AccountSummary = ({ accountInfo, onTransfer }: AccountSummaryProps) => {
                     />
                 </div>
                 <div className='text-4xl font-semibold'>
-                    {formatCurrency(accountBalance)}
+                    {formatCurrency(accountBalance ?? 0)}
                 </div>
             </div>
             <Button variant='primary' onClick={onTransfer}>

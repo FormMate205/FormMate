@@ -6,7 +6,8 @@ interface UserState {
     isLoggedIn: boolean;
     setUser: (user: User) => void;
     clearUser: () => void;
-    setLoggedIn: (state: boolean) => void;
+    setLoggedIn: (value: boolean) => void;
+    setHasAccount: (value: boolean) => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -14,5 +15,12 @@ export const useUserStore = create<UserState>((set) => ({
     isLoggedIn: false,
     setUser: (user) => set({ user, isLoggedIn: true }),
     clearUser: () => set({ user: null, isLoggedIn: false }),
-    setLoggedIn: (state) => set({ isLoggedIn: state }),
+    setLoggedIn: (value) =>
+        set((state) => ({
+            user: state.user ? { ...state.user, isLogged: value } : null,
+        })),
+    setHasAccount: (value) =>
+        set((state) => ({
+            user: state.user ? { ...state.user, hasAccount: value } : null,
+        })),
 }));

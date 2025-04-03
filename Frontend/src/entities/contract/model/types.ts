@@ -36,7 +36,7 @@ export type ContractCard = {
     status: ContractStatus;
     userIsCreditor: boolean;
     contracteeName: string;
-    maturityDate: string;
+    maturityDate: number[];
     nextRepaymentAmount: number;
     totalRepaymentAmount: number;
     totalAmountDue: number;

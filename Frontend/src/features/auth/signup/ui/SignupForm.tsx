@@ -15,29 +15,6 @@ import {
     SignupFormState,
 } from '../model/types';
 
-declare global {
-    interface Window {
-        daum: {
-            Postcode: new (options: PostcodeOptions) => { open(): void };
-        };
-    }
-
-    interface PostcodeData {
-        roadAddress: string;
-        jibunAddress: string;
-        zonecode: string;
-        addressType: string;
-        buildingName: string;
-        apartment: string;
-        bname: string;
-    }
-
-    interface PostcodeOptions {
-        oncomplete: (data: PostcodeData) => void;
-        onclose?: () => void;
-    }
-}
-
 const SignupForm = () => {
     const navigate = useNavigate();
 
