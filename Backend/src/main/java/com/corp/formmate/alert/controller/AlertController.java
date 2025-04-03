@@ -16,13 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.corp.formmate.alert.dto.AlertCountResponse;
 import com.corp.formmate.alert.dto.AlertListResponse;
 import com.corp.formmate.alert.service.AlertService;
+import com.corp.formmate.contract.dto.ContractPreviewResponse;
 import com.corp.formmate.global.annotation.CurrentUser;
 import com.corp.formmate.user.dto.AuthUser;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,21 +45,8 @@ public class AlertController {
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "읽지 않은 알림 목록 조회 성공", content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(
-				value = """
-					[
-					  {
-					    \"alertId\": 1,
-					    \"alertType\": \"연체\",
-					    \"title\": \"연체가 발생했습니다!\",
-					    \"content\": \"계약이 제대로 이행되지 않았습니다.\",
-					    \"isRead\": false,
-					    \"createdAt\": \"2025-03-21T00:00:00\"
-					  }
-					]
-					"""
-			)
-		))
+			array = @ArraySchema(schema = @Schema(implementation = ContractPreviewResponse.class)
+			)))
 	})
 	@GetMapping("/unread")
 	public ResponseEntity<List<AlertListResponse>> selectUnreadAlerts(
@@ -75,24 +65,24 @@ public class AlertController {
 			examples = @ExampleObject(
 				value = """
 					{
-					  \"content\": [
+					  "content": [
 					    {
-					      \"alertId\": 1,
-					      \"alertType\": \"연체\",
-					      \"title\": \"연체가 발생했습니다!\",
-					      \"content\": \"계약이 제대로 이행되지 않았습니다.\",
-					      \"isRead\": false,
-					      \"createdAt\": \"2025-03-21T00:00:00\"
+					      "alertId": 1,
+					      "alertType": "연체",
+					      "title": "연체가 발생했습니다!",
+					      "content": "계약이 제대로 이행되지 않았습니다.",
+					      "isRead": false,
+					      "createdAt": "2025-03-21T00:00:00"
 					    }
 					  ],
-					  \"totalElements\": 10,
-					  \"totalPages\": 1,
-					  \"pageable\": {
-					    \"page\": 0,
-					    \"size\": 10,
-					    \"sort\": {
-					      \"sorted\": true,
-					      \"direction\": \"DESC\"
+					  "totalElements": 10,
+					  "totalPages": 1,
+					  "pageable": {
+					    "page": 0,
+					    "size": 10,
+					    "sort": {
+					      "sorted": true,
+					      "direction": "DESC"
 					    }
 					  }
 					}
@@ -155,13 +145,7 @@ public class AlertController {
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "읽지 않은 알림 개수 조회 성공", content = @Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(
-				value = """
-					{
-					  \"unreadAlertCount\": 3
-					}
-					"""
-			)
+			schema = @Schema(implementation = AlertCountResponse.class)
 		))
 	})
 	@GetMapping("/count-unread")
