@@ -20,6 +20,13 @@ import lombok.NoArgsConstructor;
 public class ContractDetailResponse {
 
 	@Schema(
+		description = "사용자가 채권자인지 여부",
+		example = "true",
+		required = true
+	)
+	private boolean userIsCreditor;
+
+	@Schema(
 		description = "계약 상대방 이름",
 		example = "강지은",
 		required = true
@@ -67,6 +74,13 @@ public class ContractDetailResponse {
 		required = true
 	)
 	private Long totalEarlyRepaymentCharge;
+
+	@Schema(
+		description = "현재까지 납부한 금액",
+		example = "48000",
+		required = true
+	)
+	private Long repaymentAmount;
 
 	@Schema(
 		description = "남은 금액",
