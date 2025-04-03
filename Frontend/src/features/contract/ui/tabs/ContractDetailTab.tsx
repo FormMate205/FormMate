@@ -1,11 +1,9 @@
-import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useGetContractDetail } from '@/entities/contract/api/ContractAPI';
 import ContractDocument from '@/entities/contract/ui/ContractDocument';
 import { useContractPdfExport } from '@/shared/model/useContractPdfExport';
 
-const ContractDetailTab = () => {
-    const { formId } = useParams();
+const ContractDetailTab = ({ formId }: { formId: string }) => {
     const { data, isLoading, isError } = useGetContractDetail(formId!);
     const { isPdfExporting, exportContract } = useContractPdfExport();
 

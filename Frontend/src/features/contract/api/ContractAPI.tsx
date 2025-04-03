@@ -1,8 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { ContractStatus } from '@/entities/contract/model/types';
 import api from '@/shared/api/instance';
+import { useIntersection } from '@/shared/model/useIntersection';
 import {
     GetContractListResponse,
+    GetPaymentHistoryListRequest,
+    GetPaymentHistoryListResponse,
     GetPaymentSummaryResponse,
 } from '../model/types';
 
@@ -40,4 +43,73 @@ export const useGetPaymentSummary = (formId: string) => {
         queryKey: ['paymentSummary', formId],
         queryFn: () => getPaymentSummary(formId),
     });
+};
+
+// 납부 내역 조회
+const getPaymentHistoryList = async ({
+    formId,
+    transferStatus,
+    pageable,
+}: GetPaymentHistoryListRequest): Promise<GetPaymentHistoryListResponse> => {
+    const response = await api.get<GetPaymentHistoryListResponse>(
+        `/transfer/${formId}`,
+        {
+            params: {
+                page: pageable.page,
+                size: pageable.size,
+                transferStatus,
+            },
+        },
+    );
+    return response.data;
+};
+
+export const useGetPaymentHistoryList = ({
+    formId,
+    transferStatus,
+    pageable,
+}: GetPaymentHistoryListRequest) => {
+    const { data, fetchNextPage, hasNextPage, refetch, isFetchingNextPage } =
+        useSuspenseInfiniteQuery({
+            queryKey: ['paymentHistoryList', formId, transferStatus],
+            queryFn: async ({ pageParam }) => {
+                return getPaymentHistoryList({
+                    formId,
+                    transferStatus,
+                    pageable: {
+                        ...pageable,
+                        page: pageParam.toString(),
+                    },
+                });
+            },
+            getNextPageParam: (lastPage) => {
+                const currentPage = parseInt(lastPage.pageable.page);
+                const totalPages = parseInt(lastPage.totalPages);
+                return currentPage < totalPages - 1
+                    ? currentPage + 1
+                    : undefined;
+            },
+            initialPageParam: 0,
+        });
+
+    const paymentHistoryList = data
+        ? data.pages.flatMap((page) => page.content)
+        : [];
+
+    const lastItemRef = useIntersection(
+        { threshold: 0.1, rootMargin: '0px' },
+        () => {
+            if (hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+            }
+        },
+    );
+
+    return {
+        paymentHistoryList,
+        hasNextPage,
+        fetchNextPage,
+        refetch,
+        lastItemRef,
+    };
 };
