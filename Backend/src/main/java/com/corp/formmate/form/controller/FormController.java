@@ -1,5 +1,6 @@
 package com.corp.formmate.form.controller;
 
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -428,39 +429,61 @@ public class FormController {
 
 	@Operation(summary = "채무자 인증번호 확인", description = "채무자가 받은 인증번호를 확인하고 계약 상태를 '상대승인후'로 변경합니다.")
 	@ApiResponses({
-		@ApiResponse(
-			responseCode = "200",
-			description = "인증번호 확인 성공 및 계약 상태 변경 완료",
-			content = @Content(
-				mediaType = "application/json",
-				schema = @Schema(implementation = FormConfirmVerifyResponse.class)
+			@ApiResponse(
+					responseCode = "200",
+					description = "인증번호 확인 성공 및 계약 상태 변경 완료",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = FormConfirmVerifyResponse.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "잘못된 입력값 또는 인증번호 불일치",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponse.class),
+							examples = @ExampleObject(
+									value = """
+                    {
+                        "timestamp": "2024-03-01T10:00:00",
+                        "status": 400,
+                        "message": "휴대전화 인증에 실패했습니다",
+                        "errors": []
+                    }
+                """
+							)
+					)
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "계약서 또는 사용자를 찾을 수 없음",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponse.class)
+					)
 			)
-		),
-		@ApiResponse(
-			responseCode = "400",
-			description = "잘못된 입력값 또는 인증번호 불일치",
-			content = @Content(
-				mediaType = "application/json",
-				schema = @Schema(implementation = ErrorResponse.class)
-			)
-		),
-		@ApiResponse(
-			responseCode = "404",
-			description = "계약서 또는 사용자를 찾을 수 없음",
-			content = @Content(
-				mediaType = "application/json",
-				schema = @Schema(implementation = ErrorResponse.class)
-			)
-		)
 	})
 	@PatchMapping("/confirm/debtor")
 	public ResponseEntity<FormConfirmVerifyResponse> confirmVerifyDebtorFormStatus(
 		@CurrentUser AuthUser authUser,
 
 		@io.swagger.v3.oas.annotations.parameters.RequestBody(
-			description = "채무자 인증번호 확인 요청 정보",
-			required = true,
-			content = @Content(schema = @Schema(implementation = FormConfirmVerifyRequest.class))
+				description = "채무자 인증번호 확인 요청 정보",
+				required = true,
+				content = @Content(
+						schema = @Schema(implementation = FormConfirmVerifyRequest.class),
+						examples = @ExampleObject(
+								value = """
+                    {
+                        "formId": 1,
+                        "phoneNumber": "01012345678",
+                        "verificationCode": "123456",
+                        "recaptchaToken": "03AGdBq24PBgaJFuQxxxx..."
+                    }
+                """
+						)
+				)
 		)
 		@Valid @RequestBody FormConfirmVerifyRequest request) {
 
@@ -501,7 +524,7 @@ public class FormController {
 		@CurrentUser AuthUser authUser,
 
 		@io.swagger.v3.oas.annotations.parameters.RequestBody(
-			description = "채무자 인증번호 확인 요청 정보",
+			description = "채권자 인증번호 확인 요청 정보",
 			required = true,
 			content = @Content(schema = @Schema(implementation = FormConfirmRequest.class))
 		)
@@ -514,39 +537,61 @@ public class FormController {
 
 	@Operation(summary = "채권자 인증번호 확인", description = "채권자가 받은 인증번호를 확인하고 계약 상태를 '진행중'으로 변경합니다.")
 	@ApiResponses({
-		@ApiResponse(
-			responseCode = "200",
-			description = "인증번호 확인 성공 및 계약 상태 변경 완료",
-			content = @Content(
-				mediaType = "application/json",
-				schema = @Schema(implementation = FormConfirmVerifyResponse.class)
+			@ApiResponse(
+					responseCode = "200",
+					description = "인증번호 확인 성공 및 계약 상태 변경 완료",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = FormConfirmVerifyResponse.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "잘못된 입력값 또는 인증번호 불일치",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponse.class),
+							examples = @ExampleObject(
+									value = """
+                    {
+                        "timestamp": "2024-03-01T10:00:00",
+                        "status": 400,
+                        "message": "휴대전화 인증에 실패했습니다",
+                        "errors": []
+                    }
+                """
+							)
+					)
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "계약서 또는 사용자를 찾을 수 없음",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponse.class)
+					)
 			)
-		),
-		@ApiResponse(
-			responseCode = "400",
-			description = "잘못된 입력값 또는 인증번호 불일치",
-			content = @Content(
-				mediaType = "application/json",
-				schema = @Schema(implementation = ErrorResponse.class)
-			)
-		),
-		@ApiResponse(
-			responseCode = "404",
-			description = "계약서 또는 사용자를 찾을 수 없음",
-			content = @Content(
-				mediaType = "application/json",
-				schema = @Schema(implementation = ErrorResponse.class)
-			)
-		)
 	})
 	@PatchMapping("/confirm/creditor")
 	public ResponseEntity<FormConfirmVerifyResponse> confirmVerifyCreditorFormStatus(
 		@CurrentUser AuthUser authUser,
 
 		@io.swagger.v3.oas.annotations.parameters.RequestBody(
-			description = "채무자 인증번호 확인 요청 정보",
-			required = true,
-			content = @Content(schema = @Schema(implementation = FormConfirmVerifyRequest.class))
+				description = "채권자 인증번호 확인 요청 정보", // 수정: "채무자"에서 "채권자"로 변경
+				required = true,
+				content = @Content(
+						schema = @Schema(implementation = FormConfirmVerifyRequest.class),
+						examples = @ExampleObject(
+								value = """
+                    {
+                        "formId": 1,
+                        "phoneNumber": "01012345678",
+                        "verificationCode": "123456",
+                        "recaptchaToken": "03AGdBq24PBgaJFuQxxxx..."
+                    }
+                """
+						)
+				)
 		)
 		@Valid @RequestBody FormConfirmVerifyRequest request) {
 

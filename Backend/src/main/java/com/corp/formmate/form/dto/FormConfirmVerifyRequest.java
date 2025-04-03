@@ -44,4 +44,8 @@ public class FormConfirmVerifyRequest {
 		required = true
 	)
 	private String verificationCode;
+
+	@NotBlank(message = "reCAPTCHA 토큰은 필수 입력 항목입니다.")
+	@Schema(description = "reCAPTCHA 토큰", example = "03AGdBq24PBgaJFuQxxxx...", required = true)
+	private String recaptchaToken;
 }
