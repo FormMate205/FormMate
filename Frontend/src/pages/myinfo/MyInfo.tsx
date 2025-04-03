@@ -3,10 +3,10 @@ import { useGetAccountInfo } from '@/entities/account/api/AccountAPI';
 import { useGetUserDetail } from '@/entities/auth/api/getUserDetail';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { Footer, Header } from '@/widgets';
-import AddressInfo from './ui/AddressInfo';
-import Logout from './ui/Logout';
-import MyAccount from './ui/MyAccount';
-import UserInfo from './ui/UserInfo';
+import AddressInfo from '../../features/myInfo/ui/AddressInfo';
+import Logout from '../../features/myInfo/ui/Logout';
+import MyAccount from '../../features/myInfo/ui/MyAccount';
+import UserInfo from '../../features/myInfo/ui/UserInfo';
 
 const MyInfo = () => {
     const { data: accountInfo, isLoading, isError } = useGetAccountInfo();

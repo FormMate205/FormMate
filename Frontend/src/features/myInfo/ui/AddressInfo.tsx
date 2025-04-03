@@ -1,33 +1,7 @@
 import { useState, useEffect } from 'react';
 import { updateAddress as updateAddressAPI } from '@/entities/user/api/updateAddress';
 import { ToastModal } from '@/widgets';
-
-declare global {
-    interface Window {
-        daum: {
-            Postcode: new (options: PostcodeOptions) => { open(): void };
-        };
-    }
-
-    interface PostcodeData {
-        roadAddress: string;
-        jibunAddress: string;
-        zonecode: string;
-        addressType: string;
-        buildingName: string;
-        apartment: string;
-        bname: string;
-    }
-
-    interface PostcodeOptions {
-        oncomplete: (data: PostcodeData) => void;
-        onclose?: () => void;
-    }
-}
-
-interface AddressInfoProps {
-    address?: string;
-}
+import { AddressInfoProps } from '../model/types';
 
 const AddressInfo = ({ address }: AddressInfoProps) => {
     const [currentAddress, setCurrentAddress] = useState('');
