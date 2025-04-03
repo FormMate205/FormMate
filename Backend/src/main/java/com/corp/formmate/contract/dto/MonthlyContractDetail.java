@@ -1,9 +1,15 @@
 package com.corp.formmate.contract.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Data
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MonthlyContractDetail {
 	@Schema(
 		description = "유저가 채권자인지 여부",

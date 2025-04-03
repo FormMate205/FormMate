@@ -5,13 +5,13 @@ import java.time.LocalDate;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
  * 다음 상환 금액, 다음 상환일, 계약 기간 등 (사용자가 채권자, 채무자인 것 모두 반환)
  */
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

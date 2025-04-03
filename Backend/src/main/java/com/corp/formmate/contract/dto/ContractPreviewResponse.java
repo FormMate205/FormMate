@@ -5,7 +5,10 @@ import java.time.LocalDate;
 import com.corp.formmate.form.entity.FormStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * 계약 상태(대기, 진행, 연체, 종료)
@@ -15,7 +18,10 @@ import lombok.Data;
  * 지금까지 상환한(받은) 총액
  * 상환 총액(지금까지 상환 금액 + 만기일 예상 납부 금액)
  */
-@Data
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ContractPreviewResponse {
 
 	@Schema(description = "관련 계약서(폼) ID", example = "42")

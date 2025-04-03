@@ -2,10 +2,10 @@ package com.corp.formmate.contract.dto;
 
 import java.time.LocalDate;
 
-import com.corp.formmate.contract.entity.ContractEntity;
-
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -15,8 +15,10 @@ import lombok.NoArgsConstructor;
  * 중도 상환 횟수 + 수수료
  * 남은 금액
  */
-@Data
+@Getter
+@AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ContractDetailResponse {
 
 	@Schema(
@@ -89,11 +91,4 @@ public class ContractDetailResponse {
 	)
 	private Long remainingPrincipal;
 
-	public ContractDetailResponse(ContractEntity contract) {
-		this.overdueCount = contract.getOverdueCount();
-		this.overdueAmount = contract.getOverdueAmount();
-		this.nextRepaymentDate = contract.getNextRepaymentDate();
-		this.earlyRepaymentCount = contract.getEarlyRepaymentCount();
-		this.remainingPrincipal = contract.getRemainingPrincipal();
-	}
 }
