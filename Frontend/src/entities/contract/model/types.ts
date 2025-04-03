@@ -31,7 +31,8 @@ export interface Contract {
 }
 
 // 차용증 목록 조회 카드
-export type ContractCard = Pick<Contract, 'formId' | 'status'> & {
+export type ContractCard = Pick<Contract, 'formId'> & {
+    status: ContractStatus;
     userIsCreditor: boolean;
     contracteeName: string;
     maturityDate: number[];
