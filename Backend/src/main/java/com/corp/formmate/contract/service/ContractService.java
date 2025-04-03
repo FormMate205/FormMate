@@ -38,6 +38,7 @@ import com.corp.formmate.global.error.exception.ContractException;
 import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.global.error.exception.TransferException;
 import com.corp.formmate.global.error.exception.UserException;
+import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
@@ -428,4 +429,135 @@ public class ContractService {
 		return transferRepository.findByForm(form)
 			.orElseThrow(() -> new TransferException(ErrorCode.TRANSFER_NOT_FOUND));
 	}
+
+	@Transactional
+	public void createContract(FormEntity form) {
+		ContractEntity contract = ContractEntity.builder()
+			.form(form)
+			.overdueCount(0)
+			.overdueAmount(0L)
+			.earlyRepaymentCount(0)
+			.totalEarlyRepaymentFee(0L)
+			.remainingPrincipal(form.getLoanAmount())
+			.remainingPrincipalMinusOverdue(form.getLoanAmount())
+			.interestAmount(0L)
+			.overdueInterestAmount(0L)
+			.nextRepaymentDate(LocalDate.of(
+				LocalDate.now().getYear(),
+				LocalDate.now().getMonth(),
+				form.getRepaymentDay()
+			))
+			.build();
+
+		PaymentPreviewRequest request = new PaymentPreviewRequest(form);
+		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(request,
+			PageRequest.of(0, 1000));
+
+		long maturityPayment = preview.getSchedulePage()
+			.stream()
+			.mapToLong(PaymentScheduleResponse::getPrincipal)
+			.sum();
+		long maturityInterest = preview.getSchedulePage()
+			.stream()
+			.mapToLong(PaymentScheduleResponse::getInterest)
+			.sum();
+
+		contract.setExpectedMaturityPayment(maturityPayment);
+		contract.setExpectedInterestAmountAtMaturity(maturityInterest);
+
+		contractRepository.save(contract);
+	}
+
+	public ContractEntity selectTransferByForm(FormEntity form) {
+		return contractRepository.findByForm(form)
+			.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
+	}
+
+	/**
+	 * 송금 생성 시 계약 상태 업데이트 처리 (정상 납부 / 중도상환 / 연체 모두 처리)
+	 */
+	@Transactional
+	public void updateContract(TransferCreateRequest request) {
+		FormEntity form = formRepository.findById(request.getFormId())
+			.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
+		ContractEntity contract = contractRepository.findByForm(form)
+			.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
+
+		long amount = request.getAmount(); // 실제 송금된 금액
+		long repaymentAmount = request.getRepaymentAmount(); // 이번 회차 예상 납부 금액
+		long diff = amount - repaymentAmount;
+
+		long overdueAmount = contract.getOverdueAmount();
+		long remainingPrincipal = contract.getRemainingPrincipal();
+		long remainingPrincipalMinusOverdue = contract.getRemainingPrincipalMinusOverdue();
+
+		// 1. 연체금 먼저 처리
+		if (overdueAmount > 0) {
+			if (amount >= overdueAmount) {
+				long overdueInterest = BigDecimal.valueOf(overdueAmount)
+					.multiply(form.getOverdueInterestRate()).longValue();
+
+				amount -= overdueAmount;
+				overdueAmount = 0;
+				remainingPrincipal -= overdueAmount;
+				remainingPrincipalMinusOverdue -= overdueAmount;
+
+				contract.setOverdueAmount(overdueAmount);
+				contract.setOverdueInterestAmount(contract.getOverdueInterestAmount() + overdueInterest);
+				contract.setInterestAmount(contract.getInterestAmount() + overdueInterest);
+			} else {
+				long overdueInterest = BigDecimal.valueOf(amount)
+					.multiply(form.getOverdueInterestRate()).longValue();
+
+				overdueAmount -= amount;
+				remainingPrincipal -= amount;
+				remainingPrincipalMinusOverdue -= amount;
+
+				contract.setOverdueAmount(overdueAmount);
+				contract.setOverdueInterestAmount(contract.getOverdueInterestAmount() + overdueInterest);
+				contract.setInterestAmount(contract.getInterestAmount() + overdueInterest);
+				contract.setRemainingPrincipal(remainingPrincipal);
+				contract.setRemainingPrincipalMinusOverdue(remainingPrincipalMinusOverdue);
+				contractRepository.save(contract);
+				return;
+			}
+		}
+
+		// 2. 정상 납부 or 중도상환 구분
+		if (diff >= 0) {
+			// 정상 납부 or 연체 상환
+			long interest = BigDecimal.valueOf(amount).multiply(form.getInterestRate()).longValue();
+			contract.setTotalEarlyRepaymentFee(0L);
+			contract.setInterestAmount(contract.getInterestAmount() + interest);
+
+			remainingPrincipal -= amount;
+			remainingPrincipalMinusOverdue -= overdueAmount;
+		} else {
+			// 중도상환 처리
+			long earlyRepaymentFee = calculateEarlyRepaymentFee(-diff, form);
+			long interest = BigDecimal.valueOf(repaymentAmount).multiply(form.getInterestRate()).longValue();
+
+			contract.setTotalEarlyRepaymentFee(-diff);
+			contract.setExpectedMaturityPayment(contract.getExpectedMaturityPayment() + earlyRepaymentFee);
+			contract.setInterestAmount(contract.getInterestAmount() + interest);
+
+			remainingPrincipal -= repaymentAmount;
+			remainingPrincipalMinusOverdue -= repaymentAmount;
+
+			// 남은 송금 금액에서 이자, 수수료 뺀 만큼 원금 차감
+			long surplus = amount - repaymentAmount;
+			long surplusInterest = BigDecimal.valueOf(surplus).multiply(form.getInterestRate()).longValue();
+			long surplusFee = calculateEarlyRepaymentFee(surplus, form);
+			long principalReduce = surplus - surplusInterest - surplusFee;
+
+			contract.setInterestAmount(contract.getInterestAmount() + surplusInterest);
+			remainingPrincipal -= principalReduce;
+			remainingPrincipalMinusOverdue -= principalReduce;
+		}
+
+		contract.setRemainingPrincipal(remainingPrincipal);
+		contract.setRemainingPrincipalMinusOverdue(remainingPrincipalMinusOverdue);
+		contractRepository.save(contract);
+	}
+
 }
