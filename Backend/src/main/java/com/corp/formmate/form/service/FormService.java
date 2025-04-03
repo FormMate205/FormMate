@@ -54,10 +54,8 @@ public class FormService {
 	private final FormRepository formRepository;
 	private final UserService userService;
 	private final SpecialTermService specialTermService;
-	private final MessageService messageService;
 	private final VerificationService verificationService;
 	private final TransferService transferService;
-	private final RedisTemplate<Object, Object> redisTemplate;
 	private final IdentityVerificationService identityVerificationService;
 	// 이벤트 발생을 위한
 	private final ApplicationEventPublisher eventPublisher;
@@ -82,7 +80,7 @@ public class FormService {
 
 		// 채팅 발송 위한 이벤트 발행
 		log.info("계약서 생성 이벤트 발행: 폼 ID={}", formEntity.getId());
-		eventPublisher.publishEvent(new FormCreatedEvent(formEntity));
+		eventPublisher.publishEvent(new FormCreatedEvent(formEntity, userId));
 
 		return FormDetailResponse.fromEntity(formEntity, specialTermResponses);
 	}
@@ -114,7 +112,7 @@ public class FormService {
 
 		// 채팅 발송 위한 이벤트 발행
 		log.info("계약서 수정 이벤트 발행: 폼 ID={}", formEntity.getId());
-		eventPublisher.publishEvent(new FormUpdatedEvent(formEntity));
+		eventPublisher.publishEvent(new FormUpdatedEvent(formEntity, userId));
 
 		return FormDetailResponse.fromEntity(formEntity, specialTermResponses);
 	}
@@ -221,10 +219,6 @@ public class FormService {
 
 		verificationService.requestVerificationCode(phoneNumber);
 
-		// 채팅 발송 위한 이벤트 발행
-		log.info("채무자 서명 요청 이벤트 발행: 폼 ID={}", formEntity.getId());
-		eventPublisher.publishEvent(new DebtorSignatureRequestedEvent(formEntity, formEntity.getId()));
-
 		return true;
 	}
 
@@ -290,10 +284,6 @@ public class FormService {
 		}
 
 		verificationService.requestVerificationCode(phoneNumber);
-
-		// 채팅 발송 위한 이벤트 발행
-		log.info("채권자 서명 요청 이벤트 발행: 폼 ID={}", formEntity.getId());
-		eventPublisher.publishEvent(new CreditorSignatureRequestedEvent(formEntity, formEntity.getId()));
 
 		return true;
 	}

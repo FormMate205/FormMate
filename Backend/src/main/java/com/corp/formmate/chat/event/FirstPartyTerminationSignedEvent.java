@@ -5,11 +5,11 @@ import lombok.Getter;
 
 @Getter
 public class FirstPartyTerminationSignedEvent {
-    private final FormEntity form;
-    private final Integer signedByUserId;
+    private final FormEntity formEntity;
+    private final Integer requestedByUserId;
 
-    public FirstPartyTerminationSignedEvent(FormEntity form, Integer signedByUserId) {
-        this.form = form;
-        this.signedByUserId = signedByUserId;
+    public FirstPartyTerminationSignedEvent(FormEntity formEntity, Integer requestedByUserId) {
+        this.formEntity = formEntity;
+        this.requestedByUserId = requestedByUserId;
     }
 }
