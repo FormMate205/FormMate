@@ -1,8 +1,8 @@
 import { useUserStore } from '@/entities/user/model/userStore';
 import { Footer, Header } from '@/widgets';
-import AccountInfo from './ui/AccountInfo';
-import Schedule from './ui/Schedule';
-import TodaySettlement from './ui/TodaySettlement';
+import AccountInfo from '../../features/home/ui/AccountInfo';
+import Schedule from '../../features/home/ui/Schedule';
+import TodaySettlement from '../../features/home/ui/TodaySettlement';
 
 interface HomeProps {
     userName: string;
@@ -18,9 +18,9 @@ const Home = ({ userName }: HomeProps) => {
                 <div className='flex flex-col gap-7'>
                     <div className='relative mt-2'>
                         <p className='text-2xl font-semibold'>
-                            {userName}님
+                            {userName}님의
                             <br />
-                            부~자 되세요
+                            금전 거래
                         </p>
                         <img
                             src='/assets/images/cones.png'
@@ -30,13 +30,7 @@ const Home = ({ userName }: HomeProps) => {
                     </div>
 
                     <AccountInfo />
-                    <TodaySettlement
-                        hasTodayTransaction={true}
-                        isSend={true}
-                        targetName='강지은'
-                        amount={33500}
-                        principal={600000}
-                    />
+                    <TodaySettlement />
                     <Schedule />
                 </div>
             </div>
