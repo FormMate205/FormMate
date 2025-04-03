@@ -1,90 +1,117 @@
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import Calendar from './Calendar';
+import { Calendar } from '@/components/ui/calendar';
+
+interface ScheduleItem {
+    name: string;
+    amount: number;
+    type: 'send' | 'receive';
+    date: string; // 'yyyy-MM-dd'
+}
+
+const dummySchedules: ScheduleItem[] = [
+    { name: '이동욱', amount: 80000, type: 'receive', date: '2025-04-03' },
+    { name: '강지은', amount: 100000, type: 'send', date: '2025-04-03' },
+    { name: '차윤영', amount: 20000, type: 'send', date: '2025-04-04' },
+    { name: '윤이영', amount: 20000, type: 'send', date: '2025-05-08' },
+    { name: '박상학', amount: 20000, type: 'send', date: '2025-05-08' },
+];
 
 const Schedule = () => {
-    const hasSchedule = true;
-    const [activeTab, setActiveTab] = useState<'send' | 'receive'>('send');
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+        new Date(),
+    );
+
+    const formatDateKey = (date: Date) => format(date, 'yyyy-MM-dd');
+
+    const scheduleForSelectedDate = dummySchedules.filter(
+        (s) => selectedDate && s.date === formatDateKey(selectedDate),
+    );
 
     return (
-        <div className='mb-20'>
-            <p className='mb-4 text-lg font-semibold'>주간 일정</p>
-            <div className='rounded-lg bg-white p-4 pt-8 shadow-sm'>
-                <Calendar />
-
-                {/* 보낼/받을 금액 토글 */}
-                <div className='bg-line-100 mb-4 flex overflow-hidden rounded-xl p-1 text-sm'>
-                    <div
-                        className={`flex-1 cursor-pointer rounded-lg py-2 text-center ${activeTab === 'send' ? 'bg-white font-semibold' : 'text-line-500'}`}
-                        onClick={() => setActiveTab('send')}
-                    >
-                        보낼 금액
-                    </div>
-                    <div
-                        className={`flex-1 cursor-pointer rounded-lg py-2 text-center ${activeTab === 'receive' ? 'bg-white font-semibold' : 'text-line-500'}`}
-                        onClick={() => setActiveTab('receive')}
-                    >
-                        받을 금액
-                    </div>
+        <section className='mb-12'>
+            <div className='rounded-xl bg-white p-4 shadow-sm'>
+                {/* 캘린더 컨테이너에 추가 스타일링 */}
+                <div className='w-full'>
+                    <Calendar
+                        mode='single'
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        locale={ko}
+                        className='w-full'
+                        classNames={{
+                            months: 'w-full flex flex-col space-y-4',
+                            month: 'w-full space-y-8 ',
+                            caption:
+                                'flex justify-between pt-2 relative items-center w-full',
+                            caption_label:
+                                'text-sm font-bold absolute left-1/2 transform -translate-x-1/2',
+                            nav: 'w-full flex items-center justify-between',
+                            nav_button:
+                                'bg-transparent p-0 opacity-50 hover:opacity-100',
+                            table: 'w-full border-collapse space-y-1',
+                            head_row: 'flex w-full',
+                            head_cell:
+                                'text-muted-foreground rounded-md w-full font-light text-xs text-[0.8rem]',
+                            row: 'flex w-full mt-2',
+                            cell: 'h-9 w-full text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20',
+                            day: 'h-9 w-full p-0 font-normal aria-selected:opacity-100',
+                            day_selected:
+                                'bg-blue-500 text-white rounded-full hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white',
+                            day_today:
+                                'border rounded-full border-blue-300 text-blue-600',
+                            day_outside: 'text-muted-foreground opacity-50',
+                            day_disabled: 'text-muted-foreground opacity-50',
+                            day_range_middle:
+                                'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                            day_hidden: 'invisible',
+                        }}
+                    />
                 </div>
 
-                {/* 일정 or 일정 없음 */}
-                {hasSchedule ? (
-                    <>
-                        {/* 예정 */}
-                        <div className='mb-3'>
-                            <p className='p-1 font-semibold'>예정</p>
-                            <div className='flex items-center gap-1 p-2'>
-                                <span className='text-primary-500 min-w-[50px] text-sm'>
-                                    D-3
-                                </span>
-
-                                <div className='flex flex-1 items-center justify-between'>
-                                    <div>
-                                        <p className='pb-0.5 text-sm font-semibold'>
-                                            이동욱
+                {/* 정산 내역 */}
+                <div className='border-line-200 mt-4 border-t-1 pt-4'>
+                    {scheduleForSelectedDate.length > 0 ? (
+                        scheduleForSelectedDate.map((item, idx) => (
+                            <div
+                                key={idx}
+                                className='mb-3 flex items-center justify-between'
+                            >
+                                <div className='flex gap-5 p-2'>
+                                    <div
+                                        className={`y-10 ${
+                                            item.type === 'send'
+                                                ? 'bg-subPink-200'
+                                                : 'bg-primary-200'
+                                        } w-1`}
+                                    ></div>
+                                    <div className='flex-col items-center'>
+                                        <p className='pb-1 font-semibold'>
+                                            {item.name}
                                         </p>
-                                        <p className='text-line-500 text-xs'>
-                                            80,000원
-                                        </p>
-                                    </div>
-                                    <Button variant={'choiceFill'}>
-                                        송금하기
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <p className='p-1 font-semibold'>연체</p>
-                            <div className='flex items-center gap-1 p-2'>
-                                <span className='text-subPink-700 min-w-[50px] text-sm'>
-                                    D+2
-                                </span>
-
-                                <div className='flex flex-1 items-center justify-between'>
-                                    <div>
-                                        <p className='pb-0.5 text-sm font-semibold'>
-                                            이동욱
-                                        </p>
-                                        <p className='text-line-500 text-xs'>
-                                            100,000원
+                                        <p className={`text-line-400 text-sm`}>
+                                            {item.type === 'send' ? '-' : '+'}{' '}
+                                            {item.amount.toLocaleString()}원
                                         </p>
                                     </div>
-                                    <Button variant={'choiceFill'}>
-                                        송금하기
-                                    </Button>
                                 </div>
+                                {item.type === 'send' && (
+                                    <Button variant='choiceFill'>
+                                        이체하기
+                                    </Button>
+                                )}
                             </div>
-                        </div>
-                    </>
-                ) : (
-                    <p className='text-line-400 my-6 text-center text-sm'>
-                        예정된 상환 일정이 없습니다.
-                    </p>
-                )}
+                        ))
+                    ) : (
+                        <p className='text-line-400 my-4 text-center text-sm'>
+                            예정된 정산 내역이 없습니다.
+                        </p>
+                    )}
+                </div>
             </div>
-        </div>
+        </section>
     );
 };
 
