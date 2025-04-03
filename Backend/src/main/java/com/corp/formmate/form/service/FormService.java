@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.corp.formmate.chat.event.*;
 import com.corp.formmate.form.dto.*;
+import com.corp.formmate.form.entity.TerminationProcess;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -166,9 +167,7 @@ public class FormService {
 //		Integer formActiveCount = formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS);
 		// 진행중 상태 (종료 요청과 첫번째 서명 완료 상태 포함)
 		Integer formActiveCount =
-				formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS) +
-						formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.TERMINATION_REQUESTED) +
-						formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.TERMINATION_FIRST_SIGNED);
+				formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS);
 
 		// 완료 상태
 		Integer formCompletedCount = formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.COMPLETED);
@@ -422,8 +421,14 @@ public class FormService {
 			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
 		}
 
-		// 계약 상태 변경
-		form.setStatus(FormStatus.TERMINATION_REQUESTED);
+		// 이미 파기 프로세스 중인지 확인
+		if (form.getIsTerminationProcess() == TerminationProcess.REQUESTED
+		|| form.getIsTerminationProcess() == TerminationProcess.SIGNED) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_ALREADY_REQUESTED);
+		}
+
+		// 파기 프로세스 시작 설정
+		form.startTerminationProcess();
 		formRepository.save(form);
 
 		// 계약 파기 요청 이벤트 발생
@@ -436,6 +441,42 @@ public class FormService {
 				.statusKorName(form.getStatus().getKorName())
 				.requestedByName(user.getUserName())
 				.build();
+	}
+
+	/**
+	 * 계약 파기 취소
+	 */
+	@Transactional
+	public FormTerminationResponse cancelTermination(Integer formId, Integer userId) {
+		// 사용자와 계약 조회
+		UserEntity user = userService.selectById(userId);
+		FormEntity form = selectById(formId);
+
+		// 채권자나 채무자만 파기 요청 가능
+		if (!isParticipant(form, userId)) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
+		}
+
+		// 계약 파기 프로세스 중인지 확인
+		if (form.getIsTerminationProcess() == TerminationProcess.NONE) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_REQUEST_NOT_FOUND);
+		}
+
+		// 원래 상태인지 확인
+		form.cancelTerminationProcess();
+		formRepository.save(form);
+
+		// 계약 파기 취소 이벤트 발생
+		log.info("계약 파기 취소 이벤트 발행: form Id={}, 취소자 ID={}", formId, userId);
+		eventPublisher.publishEvent(new FormTerminationCancelledEvent(form, userId));
+
+		return FormTerminationResponse.builder()
+				.formId(form.getId())
+				.status(form.getStatus().name())
+				.statusKorName(form.getStatus().getKorName())
+				.requestedByName(user.getUserName())
+				.build();
+
 	}
 
 	/**
@@ -454,7 +495,7 @@ public class FormService {
 		FormEntity form = selectById(formId);
 
 		// 상태 확인
-		if (form.getStatus() != FormStatus.TERMINATION_REQUESTED) {
+		if (form.getIsTerminationProcess() != TerminationProcess.REQUESTED) {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
@@ -478,11 +519,6 @@ public class FormService {
 	 */
 	@Transactional
 	public FormTerminationResponse confirmFirstSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request, FormTerminationSignRequest signRequest) {
-		// 동의 확인
-		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
-			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
-		}
-
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -493,15 +529,25 @@ public class FormService {
 		FormEntity form = selectById(formId);
 
 		// 상태 확인
-		if (form.getStatus() != FormStatus.TERMINATION_REQUESTED) {
+		if (form.getIsTerminationProcess() != TerminationProcess.REQUESTED) {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
+		}
+
+		// 채권자나 채무자만 서명 가능
+		if (!isParticipant(form, userId)) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
+		}
+
+		// 동의 확인
+		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
 		}
 
 		// 인증번호 확인
 		verifyVerificationCode(request.getPhoneNumber(), request.getVerificationCode());
 
 		// 계약 상태 변경
-		form.setStatus(FormStatus.TERMINATION_FIRST_SIGNED);
+		form.signTerminationProcess();
 		formRepository.save(form);
 
 		// 첫 번째 서명 완료 이벤트 발생
@@ -532,7 +578,7 @@ public class FormService {
 		FormEntity form = selectById(formId);
 
 		// 상태 확인
-		if (form.getStatus() != FormStatus.TERMINATION_FIRST_SIGNED) {
+		if (form.getIsTerminationProcess() != TerminationProcess.SIGNED) {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
@@ -553,11 +599,6 @@ public class FormService {
 	 */
 	@Transactional
 	public FormTerminationResponse confirmSecondSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request, FormTerminationSignRequest signRequest) {
-		// 동의 확인
-		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
-			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
-		}
-
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -568,8 +609,17 @@ public class FormService {
 		FormEntity form = selectById(formId);
 
 		// 상태 확인
-		if (form.getStatus() != FormStatus.TERMINATION_FIRST_SIGNED) {
+		if (form.getIsTerminationProcess() != TerminationProcess.SIGNED) {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
+		}
+
+		if (!isParticipant(form, userId)) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
+		}
+
+		// 동의 확인
+		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
+			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
 		}
 
 		// 인증번호 확인
