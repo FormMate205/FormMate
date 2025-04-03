@@ -1,38 +1,36 @@
 import ProgressBar from '@/entities/contract/ui/charts/ProgressBar';
 import DetailOverviewItem from '@/entities/contract/ui/DetailOverviewItem';
-import { getDday } from '@/shared/lib/date';
+import { useGetContractDetailOverview } from '../api/ContractAPI';
 
-// dummy
-const data = {
-    overdueCount: 1,
-    overdueLimit: 3,
-    overdueAmount: 110000,
-    nextRepaymentDate: '2025-03-27',
-    earlyRepaymentCount: 2,
-    totalEarlyRepaymentCharge: 3567,
-    remainingPrincipal: 5200000,
-};
-
-const {
-    overdueCount,
-    overdueLimit,
-    overdueAmount,
-    nextRepaymentDate,
-    earlyRepaymentCount,
-    totalEarlyRepaymentCharge,
-    remainingPrincipal,
-} = data;
-
-// API 수정 필요) 특정 계약 상대와의 계약 조회 -> 이름, 채무/채권, 원금 데이터 필요
+// API 수정 필요) 특정 계약 상대와의 계약 조회 -> 계약의 종류/ 원금 데이터 / 현재까지 상환 데이터 필요
 const contractData = {
-    contractor: '강지은',
     userIsCreditor: true,
-    loanAmount: 10000000,
+    loanAmount: 100000000,
 };
 
-const { contractor, userIsCreditor, loanAmount } = contractData;
+const { userIsCreditor, loanAmount } = contractData;
 
-const ContractDetailOverview = () => {
+const formatDate = (dateArr: number[]): string => {
+    const [year, month, day] = dateArr;
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+};
+
+const ContractDetailOverview = ({ formId }: { formId: string }) => {
+    const { data } = useGetContractDetailOverview(formId);
+    if (!data) return null;
+    const {
+        contracteeName,
+        overdueCount,
+        overdueLimit,
+        overdueAmount,
+        nextRepaymentDate,
+        earlyRepaymentCount,
+        totalEarlyRepaymentCharge,
+        remainingPrincipal,
+    } = data;
+
+    const nextDateString = formatDate(nextRepaymentDate);
+
     const summaryData = [
         {
             tag: '연체',
@@ -42,7 +40,7 @@ const ContractDetailOverview = () => {
         },
         {
             tag: '진행',
-            mainText: `${getDday(nextRepaymentDate)}`,
+            mainText: `${nextDateString}`,
             subText: `다음 상환 일정 ${nextRepaymentDate}`,
         },
         {
@@ -57,7 +55,7 @@ const ContractDetailOverview = () => {
             <div className='border-line-200 flex items-center justify-between border-b pb-3'>
                 <div className='text-lg font-medium'>
                     <span className='text-primary-500 text-xl'>
-                        {contractor}
+                        {contracteeName}
                     </span>
                     <span>님과의 차용증 계약</span>
                 </div>
