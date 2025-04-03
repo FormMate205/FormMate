@@ -1,4 +1,3 @@
-import { useParams } from 'react-router-dom';
 import {
     Accordion,
     AccordionContent,
@@ -7,8 +6,7 @@ import {
 } from '@/components/ui/accordion';
 import { useGetPaymentSummary } from '../../api/ContractAPI';
 
-const PaymentSummaryTab = () => {
-    const { formId } = useParams();
+const PaymentSummaryTab = ({ formId }: { formId: string }) => {
     const { data, isLoading, isError } = useGetPaymentSummary(formId!);
 
     if (isLoading) return <div>로딩 중...</div>;
