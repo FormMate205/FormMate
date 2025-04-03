@@ -31,6 +31,12 @@ public class AlertListResponse {
 	private String alertType;
 
 	@Schema(
+		description = "알림 제목",
+		example = "연체가 발생했습니다!"
+	)
+	private String title;
+
+	@Schema(
 		description = "알림 내용",
 		example = "장원영님과의 계약이 제대로 이행되지 않았습니다."
 	)
@@ -53,6 +59,7 @@ public class AlertListResponse {
 		return AlertListResponse.builder()
 			.alertId(entity.getId())
 			.alertType(entity.getAlertType())
+			.title(entity.getTitle())
 			.content(entity.getContent())
 			.isRead(entity.getIsRead())
 			.createdAt(entity.getCreatedAt())
