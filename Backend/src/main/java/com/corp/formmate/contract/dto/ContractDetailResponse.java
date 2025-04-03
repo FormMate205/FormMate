@@ -20,6 +20,13 @@ import lombok.NoArgsConstructor;
 public class ContractDetailResponse {
 
 	@Schema(
+		description = "사용자가 채권자인지 여부",
+		example = "true",
+		required = true
+	)
+	private boolean userIsCreditor;
+
+	@Schema(
 		description = "계약 상대방 이름",
 		example = "강지은",
 		required = true

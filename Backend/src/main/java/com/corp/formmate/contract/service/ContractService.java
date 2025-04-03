@@ -75,6 +75,14 @@ public class ContractService {
 		List<TransferEntity> transfers = transferRepository.findByForm(form)
 			.orElseThrow(() -> new TransferException(ErrorCode.TRANSFER_NOT_FOUND));
 
+		UserEntity userEntity = userRepository.findById(user.getId())
+			.orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+		String username = userEntity.getUserName();
+		boolean userIsCreditor = form.getCreditorName().equals(username);
+		String contracteeName = userIsCreditor ? form.getDebtorName() : form.getCreditorName();
+		contractDetail.setUserIsCreditor(userIsCreditor);
+		contractDetail.setContracteeName(contracteeName);
+
 		// 찾은 거래내역들 기반으로 중도상환 수수료 총액 계산후 필드에 주입
 		Long totalEarlyRepaymentCharge = 0L;
 		Long repaymentAmount = 0L;
@@ -90,8 +98,6 @@ public class ContractService {
 		contractDetail.setRepaymentAmount(repaymentAmount);
 		contractDetail.setTotalEarlyRepaymentCharge(totalEarlyRepaymentCharge);
 		contractDetail.setOverdueLimit(form.getOverdueLimit());
-		String contracteeName = form.getCreditorName().equals(user.getUsername()) ? form.getDebtorName() : form.getCreditorName();
-		contractDetail.setContracteeName(contracteeName);
 
 		return contractDetail;
 	}
