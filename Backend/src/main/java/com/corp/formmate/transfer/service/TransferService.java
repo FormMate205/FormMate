@@ -181,14 +181,20 @@ public class TransferService {
 
 		transferRepository.save(transferEntity);
 
-		// 입금, 송금 알림
-		String receiverContent =
-			transferEntity.getSender().getUserName() + " 님께서 " + amount + "원 을 입금하셨습니다.";
-		alertService.createAlert(transferEntity.getReceiver(), "입금 알림", receiverContent);
+		String senderName = transferEntity.getSender().getUserName();
+		String senderAccountLast4 = getLast4Digits(transferEntity.getSender().getAccountNumber());
+		String receiverName = transferEntity.getReceiver().getUserName();
+		String receiverAccountLast4 = getLast4Digits(transferEntity.getReceiver().getAccountNumber());
 
-		String senderContent =
-			transferEntity.getReceiver().getUserName() + " 님께 " + amount + "원 을 송금하였습니다.";
-		alertService.createAlert(transferEntity.getSender(), "송금 알림", senderContent);
+		// 입금자 알림
+		String depositTitle = receiverName + "(" + receiverAccountLast4 + ") 입금 알림";
+		String depositContent = "입금 " + amount + "원 | " + senderName;
+		alertService.createAlert(transferEntity.getReceiver(), "입금", depositTitle, depositContent);
+
+		// 출금자 알림
+		String withdrawTitle = senderName + "(" + senderAccountLast4 + ") 출금 알림";
+		String withdrawContent = "출금 " + amount + "원 | " + receiverName;
+		alertService.createAlert(transferEntity.getSender(), "출금", withdrawTitle, withdrawContent);
 
 		return TransferCreateResponse.fromEntity(transferEntity);
 	}
@@ -221,15 +227,20 @@ public class TransferService {
 
 		transferRepository.save(transferEntity);
 
-		// 입금, 송금 알림
-		String receiverContent =
-			transferEntity.getSender().getUserName() + " 님께서 " + transactionBalance + "원 을 입금하셨습니다.";
-		alertService.createAlert(transferEntity.getReceiver(), "입금 알림", receiverContent);
+		String senderName = transferEntity.getSender().getUserName();
+		String senderAccountLast4 = getLast4Digits(transferEntity.getSender().getAccountNumber());
+		String receiverName = transferEntity.getReceiver().getUserName();
+		String receiverAccountLast4 = getLast4Digits(transferEntity.getReceiver().getAccountNumber());
 
-		String senderContent =
-			transferEntity.getReceiver().getUserName() + " 님께 " + transactionBalance + " 원 을 송금하였습니다.";
-		alertService.createAlert(transferEntity.getSender(), "송금 알림", senderContent);
+		// 입금자 알림
+		String depositTitle = receiverName + "(" + receiverAccountLast4 + ") 입금 알림";
+		String depositContent = "입금 " + transactionBalance + "원 | " + senderName;
+		alertService.createAlert(transferEntity.getReceiver(), "입금", depositTitle, depositContent);
 
+		// 출금자 알림
+		String withdrawTitle = senderName + "(" + senderAccountLast4 + ") 출금 알림";
+		String withdrawContent = "출금 " + transactionBalance + "원 | " + receiverName;
+		alertService.createAlert(transferEntity.getSender(), "출금", withdrawTitle, withdrawContent);
 	}
 
 	@Transactional(readOnly = true)
@@ -253,6 +264,12 @@ public class TransferService {
 			.status(status)
 			.transactionDate(LocalDateTime.now())
 			.build();
+	}
+
+	private String getLast4Digits(String accountNumber) {
+		if (accountNumber == null || accountNumber.length() < 4)
+			return "****";
+		return accountNumber.substring(accountNumber.length() - 4);
 	}
 }
 

@@ -38,6 +38,9 @@ public class AlertEntity implements Serializable {
 	@Column(name = "alert_type", nullable = false, length = 50)
 	private String alertType;
 
+	@Column(nullable = false)
+	private String title;
+
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String content;
 
