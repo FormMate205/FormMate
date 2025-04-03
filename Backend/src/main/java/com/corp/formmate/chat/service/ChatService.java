@@ -133,7 +133,7 @@ public class ChatService {
             // 채팅 내역 조회 (시간 순으로 정렬)
             List<ChatEntity> chattings = chatRepository.findByFormAndIsDeletedFalse(
                     form,
-                    Sort.by(Sort.Direction.ASC, "createdAt")
+                    Sort.by(Sort.Direction.DESC, "createdAt")
             );
 
             // 엔티티를 DTO로 반환
