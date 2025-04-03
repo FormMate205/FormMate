@@ -44,7 +44,7 @@ const Chat = () => {
                         chat.messageType == 'SIGNATURE_REQUEST' ? (
                         <ChatSystem
                             key={chat.id}
-                            formId={chat.formId}
+                            formId={chat.formId!}
                             children={chat.content}
                             type={chat.messageType}
                         />
