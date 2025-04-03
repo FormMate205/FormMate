@@ -1,40 +1,41 @@
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { useScheduleMap } from '@/entities/home/model/useScheduleMap';
 import { calendarCustom } from '@/features/home/model/calendarCustom';
-
-interface ScheduleItem {
-    name: string;
-    amount: number;
-    type: 'send' | 'receive';
-    date: string; // 'yyyy-MM-dd'
-}
-
-const dummySchedules: ScheduleItem[] = [
-    { name: '이동욱', amount: 80000, type: 'receive', date: '2025-04-03' },
-    { name: '강지은', amount: 100000, type: 'send', date: '2025-04-03' },
-    { name: '차윤영', amount: 20000, type: 'send', date: '2025-04-04' },
-    { name: '윤이영', amount: 20000, type: 'send', date: '2025-05-08' },
-    { name: '박상학', amount: 20000, type: 'send', date: '2025-05-08' },
-];
 
 const Schedule = () => {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(
         new Date(),
     );
-
-    const formatDateKey = (date: Date) => format(date, 'yyyy-MM-dd');
-
-    const scheduleForSelectedDate = dummySchedules.filter(
-        (s) => selectedDate && s.date === formatDateKey(selectedDate),
+    const [viewDate, setViewDate] = useState<string>(
+        format(new Date(), 'yyyy-MM-01'),
+        // 1일 말고 매달 말일로 설정 필요!
     );
+
+    const { data, isLoading } = useScheduleMap(viewDate);
+    const selectedDayKey = String((selectedDate ?? new Date()).getDate());
+    const scheduleForSelectedDate = (
+        data?.[selectedDayKey]?.contracts ?? []
+    ).filter((contract) => contract.repaymentAmount !== null);
+
+    useEffect(() => {
+        if (!selectedDate) return;
+
+        const selectedMonth = format(selectedDate, 'yyyy-MM');
+        const currentViewMonth = format(new Date(viewDate), 'yyyy-MM');
+
+        if (selectedMonth !== currentViewMonth) {
+            // 새 월의 1일로 viewDate 갱신 --> 새 월의 말일로 갱신 필요!
+            setViewDate(format(selectedDate, 'yyyy-MM-01'));
+        }
+    }, [selectedDate, viewDate]);
 
     return (
         <section className='mb-12'>
             <div className='rounded-xl bg-white p-4 shadow-sm'>
-                {/* 캘린더 컨테이너에 추가 스타일링 */}
                 <div className='w-full'>
                     <Calendar
                         mode='single'
@@ -48,7 +49,11 @@ const Schedule = () => {
 
                 {/* 정산 내역 */}
                 <div className='border-line-200 mt-4 border-t-1 pt-4'>
-                    {scheduleForSelectedDate.length > 0 ? (
+                    {isLoading ? (
+                        <p className='text-center text-sm text-gray-400'>
+                            불러오는 중...
+                        </p>
+                    ) : scheduleForSelectedDate.length > 0 ? (
                         scheduleForSelectedDate.map((item, idx) => (
                             <div
                                 key={idx}
@@ -57,22 +62,23 @@ const Schedule = () => {
                                 <div className='flex gap-5 p-2'>
                                     <div
                                         className={`y-10 ${
-                                            item.type === 'send'
-                                                ? 'bg-subPink-200'
-                                                : 'bg-primary-200'
+                                            item.userIsCreditor
+                                                ? 'bg-primary-200'
+                                                : 'bg-subPink-200'
                                         } w-1`}
                                     ></div>
                                     <div className='flex-col items-center'>
                                         <p className='pb-1 font-semibold'>
-                                            {item.name}
+                                            {item.contracteeName}
                                         </p>
-                                        <p className={`text-line-400 text-sm`}>
-                                            {item.type === 'send' ? '-' : '+'}{' '}
-                                            {item.amount.toLocaleString()}원
+                                        <p className='text-line-400 text-sm'>
+                                            {item.userIsCreditor ? '+' : '-'}{' '}
+                                            {item.repaymentAmount.toLocaleString()}
+                                            원
                                         </p>
                                     </div>
                                 </div>
-                                {item.type === 'send' && (
+                                {!item.userIsCreditor && (
                                     <Button variant='choiceFill'>
                                         이체하기
                                     </Button>
