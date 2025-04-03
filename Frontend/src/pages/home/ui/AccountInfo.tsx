@@ -85,7 +85,7 @@ const AccountInfo = () => {
                         {accountInfo.bankName} {accountInfo.accountNumber}
                     </p>
                     <p className='text-3xl font-semibold text-white'>
-                        {formatCurrency(accountInfo.accountBalance)}
+                        {formatCurrency(accountInfo.accountBalance ?? 0)}
                     </p>
                 </div>
                 <div>
