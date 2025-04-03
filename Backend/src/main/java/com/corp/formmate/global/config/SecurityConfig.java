@@ -119,7 +119,8 @@ public class SecurityConfig {
 //		configuration.setAllowedOriginPatterns(List.of("*"));
 		configuration.setAllowedOriginPatterns(Arrays.asList(
 				"https://j12a205.p.ssafy.io",
-				"http://localhost:5173"
+				"http://localhost:5173",
+				"https://cdiptangshu.github.io" // 나중에 제거
 		));
 
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

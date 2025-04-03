@@ -63,7 +63,7 @@ public class ChatController {
     public void sendMessage(@Payload @Valid ChatRequest chatRequest, SimpMessageHeaderAccessor headerAccessor) {
         // Principal에서 사용자 정보 추출
         Authentication authentication = (Authentication) headerAccessor.getUser();
-        if (authentication != null || "anonymous".equals(authentication.getName())) {
+        if (authentication == null || "anonymous".equals(authentication.getName())) {
             throw new UserException(ErrorCode.UNAUTHORIZED);
         }
 
