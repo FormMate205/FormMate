@@ -1,16 +1,24 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { queryClient } from '@/app/provider/queryClient';
 import { Button } from '@/components/ui/button';
+import { registerAccount } from '@/entities/account/api/registerAccount';
+import { useAccountStore } from '@/entities/account/model/accountStore';
+import { useUserStore } from '@/entities/user/model/userStore';
 import NumberPad from '@/shared/ui/NumberPad';
 import PasswordDots from '@/shared/ui/PasswordDots';
 import { Header, NoticeModal, ToastModal } from '@/widgets';
 
 const AccountPasswordForm = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const setHasAccount = useUserStore((state) => state.setHasAccount);
+    const setAccountInfo = useAccountStore((state) => state.setAccountInfo);
+
+    const { verificationCode, bankName, accountNumber } = location.state || {};
 
     const [step, setStep] = useState<'input' | 'confirm'>('input');
     const [password, setPassword] = useState('');
-    // const [confirmPassword, setConfirmPassword] = useState('');
     const [inputValue, setInputValue] = useState('');
     const [showFailModal, setShowFailModal] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -24,7 +32,7 @@ const AccountPasswordForm = () => {
         setInputValue((prev) => prev.slice(0, -1));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (step === 'input') {
             if (inputValue.length === 6) {
                 setPassword(inputValue);
@@ -33,14 +41,31 @@ const AccountPasswordForm = () => {
             }
         } else if (step === 'confirm') {
             if (inputValue === password) {
-                // 성공
-                setShowSuccess(true);
-                setTimeout(() => {
-                    setShowSuccess(false);
-                    navigate('/');
-                }, 1500);
+                try {
+                    await registerAccount({
+                        verificationCode,
+                        bankName,
+                        accountNumber,
+                        accountPassword: inputValue,
+                    });
+                    setHasAccount(true);
+                    setShowSuccess(true);
+                    setAccountInfo({
+                        hasAccount: true,
+                        bankName,
+                        accountNumber,
+                    });
+                    queryClient.invalidateQueries({ queryKey: ['user'] });
+                    setTimeout(() => {
+                        setShowSuccess(false);
+                        navigate('/');
+                    }, 1500);
+                } catch (err) {
+                    console.error('계좌 등록 실패:', err);
+                    setShowFailModal(true);
+                    setInputValue('');
+                }
             } else {
-                // 실패
                 setShowFailModal(true);
                 setInputValue('');
             }
@@ -63,15 +88,13 @@ const AccountPasswordForm = () => {
                     </p>
                     <PasswordDots inputValue={inputValue} />
 
-                    {/* 실패 모달 */}
                     <NoticeModal
                         isOpen={showFailModal}
-                        title='비밀번호 불일치'
-                        description='비밀번호가 일치하지 않습니다.'
+                        title='실패'
+                        description='비밀번호가 일치하지 않거나 계좌 등록에 실패했습니다.'
                         onClose={() => setShowFailModal(false)}
                     />
 
-                    {/* 성공 모달 */}
                     <ToastModal
                         isOpen={showSuccess}
                         title='계좌 등록이 완료되었습니다'
@@ -79,16 +102,12 @@ const AccountPasswordForm = () => {
                 </div>
             </div>
 
-            {/* 숫자패드 + 버튼 - 고정 위치로 변경 */}
             <div className='bottom-0 left-0 w-full bg-white p-6'>
                 <div className='mx-auto flex w-full flex-col gap-6'>
-                    {/* 숫자 키패드 */}
                     <NumberPad
                         onDelete={handleDelete}
                         onNumberClick={handleNumberClick}
                     />
-
-                    {/* 하단 버튼 */}
                     <Button
                         variant='primary'
                         onClick={handleSubmit}
