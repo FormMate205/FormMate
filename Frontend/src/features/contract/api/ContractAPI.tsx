@@ -20,7 +20,7 @@ const getContractList = async (
 
 export const useGetContractList = (status: ContractStatus[]) => {
     return useQuery({
-        queryKey: ['contractList', ...status],
+        queryKey: ['contractList', status],
         queryFn: () => getContractList(status),
     });
 };
