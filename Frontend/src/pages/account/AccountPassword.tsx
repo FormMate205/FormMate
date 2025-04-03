@@ -1,4 +1,4 @@
-import AccountPasswordForm from './ui/AccountPasswordForm';
+import AccountPasswordForm from '../../features/account/ui/AccountPasswordForm';
 
 const AccountPassword = () => {
     return <AccountPasswordForm />;

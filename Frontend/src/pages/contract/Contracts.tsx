@@ -1,52 +1,51 @@
 import { Input } from '@/components/ui/input';
-import { ContractStatus } from '@/entities/contract/model/types';
+import ContractChart from '@/entities/contract/ui/charts/ContractChart';
+import ContractStatusSummary from '@/entities/contract/ui/ContractStatusSummary';
 import { useContractFilters } from '@/features/contract/model/useContractFilters';
-import ContractChart from '@/features/contract/ui/charts/ContractChart';
 import ContractList from '@/features/contract/ui/ContractList';
 import ContractSelect from '@/features/contract/ui/ContractSelect';
 import { Footer, Header } from '@/widgets';
-import ContractStatusSummary from '../../entities/contract/ui/ContractStatusSummary';
-
-export interface ContractCardProps {
-    name: string;
-    status: ContractStatus;
-    contractType?: 'send' | 'receive';
-    endDate?: string;
-    progress?: number;
-    currentAmount?: number;
-    currentMonthAmount?: number;
-    totalAmount?: number;
-}
 
 const Contracts = () => {
     const {
-        filter,
-        setFilter,
-        filteredContracts, // 상태 + 필터된 결과
+        search,
+        onChangeSearch,
+        filterLabel,
+        setFilterLabel,
+        filteredContracts,
+        isLoading,
+        isError,
     } = useContractFilters();
+
     return (
         <div className='bg-line-50 flex h-screen flex-col overflow-hidden'>
             <div className='scrollbar-none flex h-full flex-col gap-2 overflow-y-auto px-4 py-2'>
                 <Header title='계약 관리' />
-                <div className='flex flex-col gap-4'>
-                    {/* 계약 현황 */}
+                <div className='flex flex-col gap-8'>
                     <ContractStatusSummary />
-                    {/* 체결된 계약 */}
                     <ContractChart />
-                    {/* 계약 내역 */}
+
                     <div className='flex flex-col gap-2'>
                         <div className='text-lg font-medium'>계약 내역</div>
                         <section className='flex flex-col gap-4 rounded-lg bg-white px-4 py-3'>
                             <div className='border-line-200 flex items-center justify-between border-b p-2'>
-                                <div className='text-lg font-medium'>2건</div>
+                                <div className='text-lg font-medium'>
+                                    {isLoading
+                                        ? '로딩 중...'
+                                        : isError
+                                          ? '불러오기 실패'
+                                          : `${filteredContracts.length}건`}
+                                </div>
                                 <ContractSelect
-                                    value={filter}
-                                    onChange={setFilter}
+                                    value={filterLabel}
+                                    onChange={setFilterLabel}
                                 />
                             </div>
                             <Input
                                 variant={'search'}
                                 placeholder='이름을 입력하세요'
+                                value={search}
+                                onChange={onChangeSearch}
                             />
                             <ContractList contracts={filteredContracts} />
                         </section>

@@ -1,10 +1,8 @@
-import { Header } from '@/widgets';
-import AccountRegistForm from './ui/AccountRegistForm';
+import AccountRegistForm from '../../features/account/ui/AccountRegistForm';
 
 const AccountRegist = () => {
     return (
-        <div className='bg-line-50 flex min-h-screen flex-col'>
-            <Header title='계좌 등록' />
+        <div>
             <AccountRegistForm />
         </div>
     );
