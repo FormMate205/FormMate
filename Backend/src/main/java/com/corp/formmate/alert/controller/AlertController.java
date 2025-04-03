@@ -48,6 +48,7 @@ public class AlertController {
 					  {
 					    \"alertId\": 1,
 					    \"alertType\": \"연체\",
+					    \"title\": \"연체가 발생했습니다!\",
 					    \"content\": \"계약이 제대로 이행되지 않았습니다.\",
 					    \"isRead\": false,
 					    \"createdAt\": \"2025-03-21T00:00:00\"
@@ -78,6 +79,7 @@ public class AlertController {
 					    {
 					      \"alertId\": 1,
 					      \"alertType\": \"연체\",
+					      \"title\": \"연체가 발생했습니다!\",
 					      \"content\": \"계약이 제대로 이행되지 않았습니다.\",
 					      \"isRead\": false,
 					      \"createdAt\": \"2025-03-21T00:00:00\"

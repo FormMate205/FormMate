@@ -12,6 +12,7 @@ import com.corp.formmate.alert.dto.AlertCountResponse;
 import com.corp.formmate.alert.dto.AlertListResponse;
 import com.corp.formmate.alert.entity.AlertEntity;
 import com.corp.formmate.alert.repository.AlertRepository;
+import com.corp.formmate.fcmtoken.service.FcmTokenService;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.AlertException;
 import com.corp.formmate.user.entity.UserEntity;
@@ -27,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AlertService {
 
 	private final AlertRepository alertRepository;
+
+	private final FcmTokenService fcmTokenService;
 
 	private final UserService userService;
 
@@ -90,5 +93,18 @@ public class AlertService {
 		return AlertCountResponse.builder()
 			.unreadAlertCount(count)
 			.build();
+	}
+
+	@Transactional
+	public void createAlert(UserEntity userEntity, String alertType, String title, String content) {
+		AlertEntity alertEntity = AlertEntity.builder()
+			.user(userEntity)
+			.alertType(alertType)
+			.title(title)
+			.content(content)
+			.build();
+
+		alertRepository.save(alertEntity);
+		fcmTokenService.sendMessageTo(userEntity, title, content);
 	}
 }

@@ -85,17 +85,13 @@ public class MyProfileController {
                             schema = @Schema(implementation = DetailProfileResponse.class),
                             examples = @ExampleObject(
                                     value = """
-                        {
-                            "userId": 1,
-                            "userName": "홍길동",
-                            "email": "user@example.com",
-                            "phoneNumber": "01012345678",
-                            "address": "서울특별시 강남구 테헤란로 123",
-                            "addressDetail": "456동 789호",
-                            "bankName": "한국은행",
-                            "accountNumber": "1112222233333"
-                        }
-                        """
+                    {
+                        "userName": "홍길동",
+                        "phoneNumber": "01012345678",
+                        "email": "user@example.com",
+                        "provider": "LOCAL"
+                    }
+                    """
                             )
                     )
             ),
