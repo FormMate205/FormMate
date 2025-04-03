@@ -28,7 +28,7 @@ const FormCheck = () => {
 
                 <div className='flex flex-col items-center gap-6'>
                     <img
-                        src='/public/assets/images/avatar.png'
+                        src='/assets/images/avatar.png'
                         alt='사람 모양의 대표 이미지'
                         width={50}
                     />
