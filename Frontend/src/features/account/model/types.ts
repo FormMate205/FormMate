@@ -1,3 +1,10 @@
+export interface AccountInfo {
+    hasAccount: boolean;
+    bankName: string;
+    accountNumber: string;
+    accountBalance?: number;
+}
+
 export interface AccountFormState {
     bankName: string;
     accountNumber: string;
