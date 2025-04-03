@@ -69,6 +69,13 @@ public class ContractDetailResponse {
 	private Long totalEarlyRepaymentCharge;
 
 	@Schema(
+		description = "현재까지 납부한 금액",
+		example = "48000",
+		required = true
+	)
+	private Long repaymentAmount;
+
+	@Schema(
 		description = "남은 금액",
 		example = "52000",
 		required = true
