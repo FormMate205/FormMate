@@ -35,7 +35,7 @@ const Home = ({ userName }: HomeProps) => {
 
                     <AccountInfo />
                     <Suspense fallback={<ListLoading />}>
-                        {data && <TodaySettlement data={data} />}
+                        {<TodaySettlement data={data} />}
                     </Suspense>
                     <Schedule />
                 </div>
