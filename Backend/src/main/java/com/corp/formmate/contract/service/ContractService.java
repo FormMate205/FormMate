@@ -3,8 +3,6 @@ package com.corp.formmate.contract.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.chrono.ChronoLocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,30 +91,35 @@ public class ContractService {
 		/**
 		 * 1. 계약서 기반으로 해당 회차에 납부할 금액 추출 (예상 납부 스케줄 메소드로)
 		 * 2. 중도상환 수수료율 더해서 추출
+		 * -> 송금내역에 현재 회차 송금 기록 있으면 paymentDifference 필드 기반으로 해당 회차 납부 금액 반환함
 		 */
-		// TODO: (중요) 송금내역에 현재 회차 송금 기록 있으면 paymentDifference 필드 기반으로 해당 회차 납부 금액 반환하기
-		// TODO: 현재 로직은 현재 회차 송금 기록 없을 때를 가정한 것임 (로직 추가 필수)
-		// TODO: 추가로 중도 상환 횟수 1회 이상이면
 		// 계약서와 계약관리 정보 생성
-		ExpectedPaymentAmountResponse expectedPaymentAmountResponse = null;
+		ExpectedPaymentAmountResponse expectedPaymentAmountResponse = new ExpectedPaymentAmountResponse();
 		FormEntity form = formRepository.findById(formId)
 			.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
 		ContractEntity contract = contractRepository.findByForm(form)
 			.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
 
+		expectedPaymentAmountResponse.setEarlyRepaymentFeeRate(form.getEarlyRepaymentFeeRate());
+
 		Page<PaymentScheduleResponse> paymentSchedulePage = getPaymentScheduleResponses(
 			contract, form);
 
-		// 중도상환액이 있을 경우 예상 납부 금액을 다시 산정하기 때문에 첫째 달로 선정
-		Integer currentPaymentRound = contract.getTotalEarlyRepaymentFee() > 0 ? 1 : contract.getCurrentPaymentRound();
-		Long overdueAmount = contract.getOverdueAmount();
+		if (contract.getTotalEarlyRepaymentFee() > 0) {
+			// 중도상환액이 있을 경우 해당 회차 상환액은 다 내고 추가로 낸 것이므로 0원
+			expectedPaymentAmountResponse.setMonthlyRemainingPayment(0L);
+		} else {
+			List<TransferEntity> transfers = transferRepository.findByFormOrderByCreatedAtDesc(form);
+			Integer currentPaymentRound1 = contract.getCurrentPaymentRound();
 
-		for (PaymentScheduleResponse p : paymentSchedulePage) {
-			if (p.getInstallmentNumber().equals(currentPaymentRound)) {
-				expectedPaymentAmountResponse = ExpectedPaymentAmountResponse.builder()
-					.monthlyRemainingPayment(overdueAmount + p.getPaymentAmount())
-					.earlyRepaymentFeeRate(form.getEarlyRepaymentFeeRate())
-					.build();
+			// 현재 회차 송금 중 가장 마지막 송금(desc로 뽑았으니까)의 PaymentDifference와 0 중 가장 큰 것으로 설정
+			if (transfers != null && !transfers.isEmpty()) {
+				for (TransferEntity t : transfers) {
+					if (t.getCurrentRound().equals(currentPaymentRound1)) {
+						expectedPaymentAmountResponse.setMonthlyRemainingPayment(Math.max(0, t.getPaymentDifference()));
+						break;
+					}
+				}
 			}
 		}
 		return expectedPaymentAmountResponse;
@@ -266,6 +269,7 @@ public class ContractService {
 			contractPreviewResponse.setFormId(f.getId());
 			contractPreviewResponse.setStatus(f.getStatus());
 
+			// TODO: userIsCreditor가 무조건 false, contracteeName(계약 상대 이름)이 무조건 null로 나오는 문제 수정
 			if (f.getCreditorName().equals(username)) {
 				contractPreviewResponse.setUserIsCreditor(true);
 				contractPreviewResponse.setContracteeName(f.getDebtorName());
