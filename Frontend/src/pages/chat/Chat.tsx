@@ -42,7 +42,7 @@ const Chat = () => {
                             writerId={chat.writerId}
                             content={chat.content}
                             name={
-                                chat.writerId !== user?.userId &&
+                                chat.writerId !== user?.id &&
                                 displayProfile(index)
                                     ? chat.writerName
                                     : undefined
