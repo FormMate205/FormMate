@@ -53,7 +53,7 @@ const ContractCardItem = ({ contract }: ContractCardItemProps) => {
         status === 'BEFORE_APPROVAL' || status === 'AFTER_APPROVAL';
 
     const progressPercent = totalAmountDue
-        ? Math.floor((totalRepaymentAmount / totalAmountDue) * 100)
+        ? Math.floor((totalAmountDue / totalRepaymentAmount) * 100)
         : 0;
 
     return (
@@ -103,7 +103,7 @@ const ContractCardItem = ({ contract }: ContractCardItemProps) => {
                             </div>
                             <div className='flex justify-between'>
                                 <span>계약 만기</span>
-                                <span>{maturityDate}</span>
+                                <span>{`${maturityDate[0]}.${maturityDate[1]}.${maturityDate[2]}`}</span>
                             </div>
                         </div>
 
@@ -113,10 +113,10 @@ const ContractCardItem = ({ contract }: ContractCardItemProps) => {
                                 color={!isSender ? 'blue' : undefined}
                             />
                             <div className='flex justify-between'>
+                                <span>{totalAmountDue.toLocaleString()}원</span>
                                 <span>
                                     {totalRepaymentAmount.toLocaleString()}원
                                 </span>
-                                <span>{totalAmountDue.toLocaleString()}원</span>
                             </div>
                         </div>
                     </>
