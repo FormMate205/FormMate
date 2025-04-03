@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/auth/paswword")
+@RequestMapping("/api/auth/password")
 @RequiredArgsConstructor
 @Tag(name = "비밀번호 관리 API", description = "비밀번호 찾기 및 재설정 관련 API")
 public class PasswordController {
