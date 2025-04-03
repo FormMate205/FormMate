@@ -50,5 +50,6 @@ public interface TransferRepository extends JpaRepository<TransferEntity, Intege
 		Integer currentRound,
 		Pageable pageable);
 
-	List<TransferEntity> findByFormOrderByCreatedAtDesc(FormEntity form);
+	List<TransferEntity> findByFormOrderByTransactionDateDesc(FormEntity form);
+
 }
