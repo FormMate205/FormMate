@@ -19,7 +19,10 @@ const Schedule = () => {
     const selectedDayKey = String((selectedDate ?? new Date()).getDate());
     const scheduleForSelectedDate = (
         data?.[selectedDayKey]?.contracts ?? []
-    ).filter((contract) => contract.repaymentAmount !== null);
+    ).filter(
+        (contract) =>
+            contract.repaymentAmount !== null && contract.repaymentAmount !== 0,
+    );
 
     useEffect(() => {
         if (!selectedDate) return;
