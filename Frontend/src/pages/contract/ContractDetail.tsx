@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import ContractDetailOverview from '@/features/contract/ui/ContractDetailOverview';
+import ContractDetailOverview from '@/entities/contract/ui/ContractDetailOverview';
 import EarlyTerminateAlert from '@/features/contract/ui/EarlyTerminateAlert';
 import ContractTabs from '@/features/contract/ui/tabs/ContractTabs';
 import { Header } from '@/widgets';
@@ -13,7 +13,7 @@ const ContractDetail = () => {
             <div className='bg-line-50 flex flex-col px-4 py-2'>
                 <Header title='계약 상세' />
                 <div className='flex h-full flex-col gap-2'>
-                    <ContractDetailOverview />
+                    <ContractDetailOverview formId={formId!} />
                     {/* ContractActionButtons */}
                     <div className='flex flex-col items-center gap-3 py-2'>
                         <div className='flex w-full justify-center gap-4'>

@@ -27,6 +27,7 @@ import {
     ChatRooms,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
+import { ErrorFallBack } from '@/shared/ui/ErrorFallBack';
 import FormDraftLanding from '@/widgets/landing/FormDraftLanding';
 import LayoutProvider from './provider/LayoutProvider';
 
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
     {
         path: '/',
         element: <LayoutProvider />,
+        errorElement: <ErrorFallBack />,
         children: [
             // 홈, 회원가입, 로그인
             { path: '/', element: <Home userName='' /> },
