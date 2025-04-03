@@ -97,7 +97,9 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
 
                     stompClient.current?.subscribe(
                         `/topic/chat${roomId}`,
-                        () => {},
+                        () => {
+                            refetch();
+                        },
                     );
                 },
             );
