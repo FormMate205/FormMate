@@ -1,7 +1,7 @@
 // 채팅 메시지
 export interface ChatMessage {
     id: string;
-    roomId?: string; // formId
+    formId: string;
     writerId: string;
     writerName: string;
     content: string;

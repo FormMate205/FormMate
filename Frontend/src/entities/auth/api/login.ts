@@ -20,7 +20,7 @@ export const login = async ({ email, password }: LoginFormSchema) => {
     setAccessToken(token);
 
     const user: Partial<User> = {
-        userId: String(data.userId),
+        id: String(data.id),
         userName: data.userName,
         email: data.email,
         isLogged: true,

@@ -42,10 +42,10 @@ const ChatInput = ({
                 className='flex-shrink-0'
             >
                 {isActive ? (
-                    <img src='/public/assets/images/send.png' alt='전송하기' />
+                    <img src='/assets/images/send.png' alt='전송하기' />
                 ) : (
                     <img
-                        src='/public/assets/images/send-disabled.png'
+                        src='/assets/images/send-disabled.png'
                         alt='전송불가'
                     />
                 )}

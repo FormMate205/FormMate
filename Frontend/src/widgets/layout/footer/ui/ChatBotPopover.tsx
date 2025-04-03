@@ -35,7 +35,7 @@ const ChatBotPopover = ({
                 <div className='top-auto bottom-32 flex translate-y-0 flex-col items-center gap-4 shadow-xs'>
                     <div className='flex flex-col items-center gap-2'>
                         <img
-                            src='/public/assets/images/chatbot.png'
+                            src='/assets/images/chatbot.png'
                             alt='챗봇 이미지'
                             width={100}
                         />
