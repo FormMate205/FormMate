@@ -96,14 +96,15 @@ public class AlertService {
 	}
 
 	@Transactional
-	public void createAlert(UserEntity userEntity, String alertType, String content) {
+	public void createAlert(UserEntity userEntity, String alertType, String title, String content) {
 		AlertEntity alertEntity = AlertEntity.builder()
 			.user(userEntity)
 			.alertType(alertType)
+			.title(title)
 			.content(content)
 			.build();
 
 		alertRepository.save(alertEntity);
-		fcmTokenService.sendMessageTo(userEntity, alertType, content);
+		fcmTokenService.sendMessageTo(userEntity, title, content);
 	}
 }
