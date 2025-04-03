@@ -480,7 +480,7 @@ public class ContractService {
 				Page<PaymentScheduleResponse> schedulePage = paymentPreviewResponse.getSchedulePage();
 
 				for (PaymentScheduleResponse p : schedulePage) {
-					if (p.getInstallmentNumber().equals(betweenMonths)) {
+					if (p.getInstallmentNumber().intValue() == betweenMonths) {
 						monthlyContractDetail.setRepaymentAmount(p.getPaymentAmount() + contract.getOverdueAmount());
 						break;
 					}
