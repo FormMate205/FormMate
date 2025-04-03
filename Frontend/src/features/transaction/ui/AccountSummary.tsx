@@ -27,7 +27,7 @@ const AccountSummary = ({ accountInfo, onTransfer }: AccountSummaryProps) => {
                     />
                 </div>
                 <div className='text-4xl font-semibold'>
-                    {formatCurrency(accountBalance)}
+                    {formatCurrency(accountBalance ?? 0)}
                 </div>
             </div>
             <Button variant='primary' onClick={onTransfer}>
