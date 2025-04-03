@@ -5,7 +5,7 @@ export interface ChatMessage {
     writerId: string;
     writerName: string;
     content: string;
-    isRead?: string;
+    isRead?: boolean;
     createdAt?: string[];
     messageType?:
         | 'CHAT'

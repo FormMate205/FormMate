@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import FormModal from '@/entities/chat/ui/FormModal';
+import { useUserStore } from '@/entities/user/model/userStore';
 import showName from '@/features/chat/model/showName';
 import { useConnectWs } from '@/features/chat/model/useConnectWs';
 import ChatBox from '@/features/chat/ui/ChatBox';
@@ -7,8 +8,7 @@ import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 
 const Chat = () => {
-    const userId = '1';
-    const userName = '강지은';
+    const { user } = useUserStore();
     const { roomId } = useParams();
 
     const {
@@ -18,7 +18,7 @@ const Chat = () => {
         sendMessage,
         isConnected,
         scrollRef,
-    } = useConnectWs({ userId, userName, roomId });
+    } = useConnectWs({ user, roomId });
 
     const displayProfile = showName(messages);
     return (
@@ -33,7 +33,7 @@ const Chat = () => {
             {/* 채팅 내용 */}
             <div
                 ref={scrollRef}
-                className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
+                className='scrollbar-none my-1 flex w-full flex-1 flex-col-reverse gap-2 overflow-y-auto'
             >
                 {messages.map((chat, index) => {
                     return (
@@ -42,7 +42,7 @@ const Chat = () => {
                             writerId={chat.writerId}
                             content={chat.content}
                             name={
-                                chat.writerId !== userId &&
+                                chat.writerId !== user?.userId &&
                                 displayProfile(index)
                                     ? chat.writerName
                                     : undefined
