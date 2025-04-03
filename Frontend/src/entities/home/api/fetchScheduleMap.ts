@@ -7,7 +7,7 @@ export const fetchScheduleMap = async (
     const response = await api.get('/contract/schedule', {
         params: {
             now: new Date().toISOString().split('T')[0], // 오늘 날짜
-            viewDate, // ex: '2025-04-01'
+            viewDate, // ex: '2025-04-30' 보고 싶은 달의 말일
         },
     });
 

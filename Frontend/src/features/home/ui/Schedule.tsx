@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { lastDayOfMonth, format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ const Schedule = () => {
         new Date(),
     );
     const [viewDate, setViewDate] = useState<string>(
-        format(new Date(), 'yyyy-MM-01'),
+        format(lastDayOfMonth(new Date()), 'yyyy-MM-dd'),
         // 1일 말고 매달 말일로 설정 필요!
     );
 
@@ -29,7 +29,7 @@ const Schedule = () => {
 
         if (selectedMonth !== currentViewMonth) {
             // 새 월의 1일로 viewDate 갱신 --> 새 월의 말일로 갱신 필요!
-            setViewDate(format(selectedDate, 'yyyy-MM-01'));
+            setViewDate(format(lastDayOfMonth(selectedDate), 'yyyy-MM-dd'));
         }
     }, [selectedDate, viewDate]);
 
