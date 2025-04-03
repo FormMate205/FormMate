@@ -31,8 +31,7 @@ export interface Contract {
 }
 
 // 차용증 목록 조회 카드
-export type ContractCard = {
-    formId: string;
+export type ContractCard = Pick<Contract, 'formId'> & {
     status: ContractStatus;
     userIsCreditor: boolean;
     contracteeName: string;
@@ -41,6 +40,17 @@ export type ContractCard = {
     totalRepaymentAmount: number;
     totalAmountDue: number;
 };
+
+// 거래 내역
+export type PaymentStatus = '납부' | '연체' | '전체' | '중도상환';
+
+export interface PaymentHistoryItem {
+    status: PaymentStatus;
+    currentRound: string;
+    amount: number;
+    paymentDifference: number;
+    transactionDate: string;
+}
 
 // 계약 상태 관련 태그
 export type ContractStatus =
@@ -75,6 +85,19 @@ export type ContractAmountSummary = {
 };
 
 export type GetContractAmountChart = ContractAmountSummary;
+
+// 계약 상세 조회 상단 내용
+export type ContractDetailOverview = {
+    contracteeName: string;
+    overdueCount: number;
+    overdueLimit: number;
+    overdueAmount: number;
+    nextRepaymentDate: number[];
+    earlyRepaymentCount: number;
+    totalEarlyRepaymentCharge: number;
+    remainingPrincipal: number;
+};
+export type GetContractDetailOverviewResponse = ContractDetailOverview;
 
 // 계약서 상세
 export type ContractDocs = Pick<

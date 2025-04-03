@@ -1,4 +1,10 @@
-import { ContractCard, ContractStatus } from '@/entities/contract/model/types';
+import {
+    ContractCard,
+    ContractStatus,
+    PaymentHistoryItem,
+    PaymentStatus,
+} from '@/entities/contract/model/types';
+import { Pagenation, PagenationRequest } from '@/shared/model/types';
 
 // 차용증 리스트 조회
 export type GetContractListRequest = {
@@ -6,6 +12,16 @@ export type GetContractListRequest = {
 };
 
 export type GetContractListResponse = ContractCard[];
+
+// 납부내역
+export type GetPaymentHistoryListResponse = {
+    content: PaymentHistoryItem[];
+} & Pagenation;
+
+export type GetPaymentHistoryListRequest = {
+    formId: string;
+    transferStatus: PaymentStatus;
+} & PagenationRequest;
 
 // 납부요약
 export interface PaymentSummary {
