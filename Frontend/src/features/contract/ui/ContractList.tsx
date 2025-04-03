@@ -1,11 +1,11 @@
-import { ContractCardProps } from '@/entities/contract/model/types';
-import ContractCard from '../../../entities/contract/ui/ContractCard';
+import { ContractCard } from '@/entities/contract/model/types';
+import ContractCardItem from '@/entities/contract/ui/ContractCardItem';
 
-const ContractList = ({ contracts }: { contracts: ContractCardProps[] }) => {
+const ContractList = ({ contracts }: { contracts: ContractCard[] }) => {
     return (
         <div className='flex flex-col gap-4'>
             {contracts.map((contract) => (
-                <ContractCard key={contract.id} {...contract} />
+                <ContractCardItem key={contract.formId} contract={contract} />
             ))}
         </div>
     );

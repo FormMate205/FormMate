@@ -2,17 +2,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import useFormPartnerStore from '@/entities/formPartner/model/formPartnerStore';
 import { maskUserName } from '@/shared/model/maskUserName';
-import useNavigationGuard from '@/shared/model/useNavigationGuard';
 import Header from '@/widgets/layout/header/Header';
-import NavigationGuardModal from '@/widgets/modal/NavigationGuardModal';
 
 const FormCheck = () => {
     const navigate = useNavigate();
     const { partner } = useFormPartnerStore();
-
-    // 경로 이탈 감지 모달
-    const { showModal, confirmNavigation, cancelNavigation } =
-        useNavigationGuard();
 
     // 계약 상대 미지정 시 돌아가기
     if (!partner) {
@@ -53,14 +47,6 @@ const FormCheck = () => {
             </div>
 
             <Button variant='primary' children='확인' onClick={onClick} />
-
-            <NavigationGuardModal
-                title='계약 생성을 그만두시겠습니까?'
-                description='페이지를 벗어나면 지금까지 입력한 모든 내용이 사라집니다.'
-                isOpen={showModal}
-                onConfirm={confirmNavigation}
-                onCancel={cancelNavigation}
-            />
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FormPartner } from '@/entities/formDraft/model/types';
 import useFormPartnerStore from '@/entities/formPartner/model/formPartnerStore';
@@ -15,8 +15,6 @@ const RecentPartners = ({ searchValue }: RecentPartnersProps) => {
     const { setPartner } = useFormPartnerStore();
 
     // 최근 계약 상대 리스트
-    const [recentList, setRecentList] = useState<FormPartner[] | null>();
-
     const { partners, refetch, lastItemRef } = useGetRecentFormPartner({
         pageable: {
             page: '0',
@@ -24,12 +22,6 @@ const RecentPartners = ({ searchValue }: RecentPartnersProps) => {
         },
         input: searchValue,
     });
-
-    useEffect(() => {
-        if (partners && partners.length > 0) {
-            setRecentList(partners);
-        }
-    }, [partners]);
 
     const handleItemClick = (partner: FormPartner) => {
         setPartner(partner);
@@ -51,21 +43,21 @@ const RecentPartners = ({ searchValue }: RecentPartnersProps) => {
     return (
         <div>
             {/* 데이터 목록 표시 */}
-            {recentList && recentList.length > 0 ? (
+            {partners.length > 0 ? (
                 <div className='flex flex-col'>
-                    {recentList.map((item, index) => (
+                    {partners.map((partner, index) => (
                         <div
-                            key={item.userId}
+                            key={partner.userId}
                             ref={
-                                index === recentList.length - 1
+                                index === partners.length - 1
                                     ? lastItemRef
                                     : null
                             }
                         >
                             <ArrowListItem
-                                title={maskUserName(item.userName)}
-                                subString={item.phoneNumber}
-                                onClick={() => handleItemClick(item)}
+                                title={maskUserName(partner.userName)}
+                                subString={partner.phoneNumber}
+                                onClick={() => handleItemClick(partner)}
                             />
                         </div>
                     ))}

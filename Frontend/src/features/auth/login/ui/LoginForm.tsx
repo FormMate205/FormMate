@@ -1,7 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { login } from '../api/login';
+import { login } from '../../../../entities/auth/api/login';
 import { LoginFormSchema } from '../model/types';
 import { useLoginForm } from '../model/useLoginForm';
 
@@ -16,15 +17,26 @@ const LoginForm = () => {
 
     const onSubmit = async (data: LoginFormSchema) => {
         try {
-            const res = await login(data);
-            // 1. 토큰 저장
-            localStorage.setItem('accessToken', res.token);
-            // 2. 유저 정보 갱신
+            await login(data);
+
+            // 유저 정보 쿼리 갱신
             await queryClient.invalidateQueries({ queryKey: ['user'] });
-            // 3. 이동
+
+            // 홈으로 이동
             navigate('/');
         } catch (err) {
-            alert(err instanceof Error ? err.message : '로그인 실패');
+            if (err instanceof AxiosError) {
+                // 서버에서 전달한 에러 메시지가 있는 경우
+                if (err.response?.data?.message) {
+                    alert(err.response.data.message);
+                } else {
+                    // 기본 에러 메시지
+                    alert('로그인 중 오류가 발생했습니다.');
+                }
+            } else {
+                // 기타 예상치 못한 에러
+                alert('로그인 중 알 수 없는 오류가 발생했습니다.');
+            }
         }
     };
 

@@ -1,99 +1,70 @@
-import { ChangeEvent, useState } from 'react';
-import getName from '@/features/chat/model/getName';
+import { useParams } from 'react-router-dom';
+import FormModal from '@/entities/chat/ui/FormModal';
+import { useUserStore } from '@/entities/user/model/userStore';
 import showName from '@/features/chat/model/showName';
+import { useConnectWs } from '@/features/chat/model/useConnectWs';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 
 const Chat = () => {
-    const userId = '1';
-    const dummy = {
-        formId: '1',
-        writer: [
-            {
-                writerId: '1',
-                name: '강지은',
-            },
-            {
-                writerId: '2',
-                name: '윤이영',
-            },
-        ],
-        history: [
-            {
-                id: '1',
-                writerId: '1',
-                content: '안녕하세요',
-            },
-            {
-                id: '2',
-                writerId: '2',
-                content: '하이루',
-            },
-            {
-                id: '3',
-                writerId: '2',
-                content: 'ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ',
-            },
-        ],
-    };
+    const { user } = useUserStore();
+    const { roomId } = useParams();
 
-    const [value, setValue] = useState('');
-    const [chatting, setChatting] = useState(dummy);
-    const writers = chatting.writer;
-    const displayProfile = showName(chatting.history);
+    const {
+        messages,
+        message,
+        setMessage,
+        sendMessage,
+        isConnected,
+        scrollRef,
+    } = useConnectWs({ user, roomId });
 
-    const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        setValue(e.target.value);
-    };
-
-    const onClick = () => {
-        console.log('채팅 보내기: ', value);
-        if (value.trim()) {
-            const newChat = {
-                id: String(chatting.history.length + 1),
-                writerId: userId,
-                content: value,
-            };
-
-            setChatting((prev) => ({
-                ...prev,
-                history: [...prev.history, newChat],
-            }));
-        }
-        setValue('');
-    };
-
+    const displayProfile = showName(messages);
     return (
         <div className='bg-line-50 flex h-screen w-full flex-col items-center justify-between px-4 py-2'>
-            <Header title='계약 생성' />
+            <Header title='채팅' />
+
+            {/* 계약서 팝업 */}
+            <div className='flex w-full justify-end'>
+                <FormModal formId={roomId!} />
+            </div>
 
             {/* 채팅 내용 */}
-            <div className='my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'>
-                {chatting.history.length > 0 &&
-                    chatting.history.map((chat, index) => {
-                        return (
-                            <ChatBox
-                                key={chat.id}
-                                writerId={chat.writerId}
-                                content={chat.content}
-                                name={
-                                    chat.writerId !== userId &&
-                                    displayProfile(index)
-                                        ? getName(writers, chat.writerId)
-                                        : undefined
-                                }
-                            />
-                        );
-                    })}
+            <div
+                ref={scrollRef}
+                className='scrollbar-none my-1 flex w-full flex-1 flex-col-reverse gap-2 overflow-y-auto'
+            >
+                {messages.map((chat, index) => {
+                    return (
+                        <ChatBox
+                            key={chat.id}
+                            writerId={chat.writerId}
+                            content={chat.content}
+                            name={
+                                chat.writerId !== user?.userId &&
+                                displayProfile(index)
+                                    ? chat.writerName
+                                    : undefined
+                            }
+                        />
+                    );
+                })}
             </div>
+
+            {/* 연결 상태 표시 */}
+            {!isConnected && (
+                <div className='w-full bg-red-100 p-2 text-center text-red-600'>
+                    연결이 끊어졌습니다. 새로고침을 시도해주세요.
+                </div>
+            )}
 
             {/* 채팅 입력창 */}
             <ChatInput
-                isActive={value.trim().length > 0}
-                value={value}
-                onChange={onChange}
-                onClick={onClick}
+                isActive={isConnected}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onClick={sendMessage}
             />
         </div>
     );

@@ -1,6 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import useNavigationGuard from '@/shared/model/useNavigationGuard';
-import NavigationGuardModal from '../modal/NavigationGuardModal';
 
 const FormDraftLanding = () => {
     const navigate = useNavigate();
@@ -9,10 +7,6 @@ const FormDraftLanding = () => {
     setTimeout(() => {
         navigate('/draft');
     }, 3000);
-
-    // 경로 이탈 감지 모달
-    const { showModal, confirmNavigation, cancelNavigation } =
-        useNavigationGuard();
 
     return (
         <div className='bg-primary-500 relative flex h-full w-full flex-col justify-between px-4 py-28'>
@@ -47,14 +41,6 @@ const FormDraftLanding = () => {
                     className='animate-float'
                 />
             </div>
-
-            <NavigationGuardModal
-                title='계약 생성을 그만두시겠습니까?'
-                description='페이지를 벗어나면 지금까지 입력한 모든 내용이 사라집니다.'
-                isOpen={showModal}
-                onConfirm={confirmNavigation}
-                onCancel={cancelNavigation}
-            />
         </div>
     );
 };

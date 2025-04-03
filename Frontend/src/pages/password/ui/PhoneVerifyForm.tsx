@@ -17,7 +17,7 @@ const PhoneVerifyForm = () => {
 
     return (
         <div className='flex h-screen flex-col overflow-hidden'>
-            <div className='bg-line-50 scrollbar-none w-full flex-1 overflow-y-auto px-4 py-2'>
+            <div className='bg-line-50 scrollbar-none relative w-full flex-1 overflow-y-auto px-4 py-2'>
                 <Header title='비밀번호 찾기' />
 
                 <h2 className='my-6 gap-6 text-xl font-semibold'>

@@ -24,6 +24,7 @@ import {
     EnterAmount,
     EnterPassword,
     OauthAddInfoPage,
+    ChatRooms,
 } from '@/pages';
 import Transaction from '@/pages/transaction/Transaction';
 import FormDraftLanding from '@/widgets/landing/FormDraftLanding';
@@ -57,12 +58,13 @@ export const router = createBrowserRouter([
             },
             { path: '/draft', element: <FormDraft /> },
             // 채팅
-            { path: '/chat', element: <Chat /> },
+            { path: '/chat', element: <ChatRooms /> },
+            { path: '/chat/:roomId', element: <Chat /> },
             // 계약 관리
             { path: '/transaction', element: <Transaction /> },
             { path: '/contracts', element: <Contracts /> },
             {
-                path: '/contracts/:contractId',
+                path: '/contracts/:formId',
                 element: <ContractDetail />,
             },
             { path: '/notifications', element: <Notifications /> },
