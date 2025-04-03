@@ -117,40 +117,6 @@ public class ChatService {
     }
 
     /**
-     * 특정 계약의 채팅 내역 조회
-     */
-    @Transactional(readOnly = true)
-    public List<ChatResponse> selectChatsByUserId(Integer formId, Integer userId) {
-        try {
-            // 계약 조회
-            FormEntity form = formService.selectById(formId);
-
-            // 사용자가 해당 계약의 채권자인지 채무자인지 확인
-            if (!isParticipantInForm(form, userId)) {
-                throw new ChatException(ErrorCode.CHAT_ROOM_ACCESS_DENIED);
-            }
-
-            // 채팅 내역 조회 (시간 순으로 정렬)
-            List<ChatEntity> chattings = chatRepository.findByFormAndIsDeletedFalse(
-                    form,
-                    Sort.by(Sort.Direction.DESC, "createdAt")
-            );
-
-            // 엔티티를 DTO로 반환
-            return chattings.stream()
-                    .map(this::createChatResponseFromEntity)
-                    .collect(Collectors.toList());
-
-        } catch (ChatException e) {
-            log.error("채팅 내역 조회 중 에러 발생: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("채팅 내역 조회 중 예상치 못한 에러 발생", e);
-            throw new ChatException(ErrorCode.CHAT_NOT_FOUND);
-        }
-    }
-
-    /**
      * 특정 계약의 채팅 내역을 Slice로 조회
      */
     @Transactional(readOnly = true)
@@ -165,7 +131,7 @@ public class ChatService {
             }
 
             // 페이지 요청 객체 생성 (시간 역순으로 정렬하여 최신 메세지부터 가져옴)
-            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
             // 채팅 내역 조회
             Slice<ChatEntity> chatSlice = chatRepository.findByFormAndIsDeletedFalse(form, pageable);
