@@ -19,11 +19,12 @@ export const useContractFilters = () => {
     } = useGetContractList(selectedStatuses);
 
     const filteredContracts = useMemo(() => {
-        return contracts.filter((contract) =>
-            contract.contracteeName
-                ?.toLowerCase()
-                .includes(search.toLowerCase()),
-        );
+        return contracts.filter((contract) => {
+            if (!contract.contracteeName) return true; // 이름 없으면 필터링 안 함
+            return contract.contracteeName
+                .toLowerCase()
+                .includes(search.toLowerCase());
+        });
     }, [contracts, search]);
 
     return {
