@@ -118,6 +118,11 @@ public class FormEntity implements Serializable {
 	@Column(name = "overdue_limit")
 	private Integer overdueLimit;
 
+	// 계약 파기 프로세스 여부를 관리하는 새로운 필드
+	@Enumerated(EnumType.STRING)
+	@Column(name = "is_termination_process", nullable = false)
+	private TerminationProcess isTerminationProcess = TerminationProcess.NONE;
+
 	public void update(FormUpdateRequest request) {
 
 		Integer repaymentDay = request.getRepaymentDay();
@@ -150,6 +155,21 @@ public class FormEntity implements Serializable {
 		this.earlyRepaymentFeeRate = request.getEarlyRepaymentFeeRateAsBigDecimal();
 		this.overdueInterestRate = request.getOverdueInterestRateAsBigDecimal();
 		this.overdueLimit = overdueLimit;
+	}
+
+	// 파기 프로세스 시작
+	public void startTerminationProcess() {
+		this.isTerminationProcess = TerminationProcess.REQUESTED;
+	}
+
+	// 파기 프로세스 상대 서명 완료
+	public void signTerminationProcess() {
+		this.isTerminationProcess = TerminationProcess.SIGNED;
+	}
+
+	// 파기 프로세스 취소
+	public void cancelTerminationProcess() {
+		this.isTerminationProcess = TerminationProcess.NONE;
 	}
 
 	public void updateStatus(FormStatus status) {
