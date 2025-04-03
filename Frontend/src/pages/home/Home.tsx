@@ -1,8 +1,8 @@
 import { useUserStore } from '@/entities/user/model/userStore';
 import { Footer, Header } from '@/widgets';
-import AccountInfo from './ui/AccountInfo';
-import Schedule from './ui/Schedule';
-import TodaySettlement from './ui/TodaySettlement';
+import AccountInfo from '../../features/home/ui/AccountInfo';
+import Schedule from '../../features/home/ui/Schedule';
+import TodaySettlement from '../../features/home/ui/TodaySettlement';
 
 interface HomeProps {
     userName: string;
