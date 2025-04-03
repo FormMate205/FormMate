@@ -3,7 +3,7 @@ package com.corp.formmate.contract.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
  * - 그 중 원금
  * - 그 중 이자
  */
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,7 +26,7 @@ public class InterestResponse {
 		required = true
 	)
 	private Long paidPrincipalAmount;
-	
+
 	@Schema(
 		description = "납부한 총 이자",
 		example = "25269",

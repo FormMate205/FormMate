@@ -155,7 +155,7 @@ public class TransferService {
 			throw new TransferException(ErrorCode.INVALID_PAYMENT_AMOUNT);
 		}
 
-		Long paymentDifference = repaymentAmount - amount;
+		Long paymentDifference = amount - repaymentAmount;
 
 		TransferEntity transferEntity;
 
