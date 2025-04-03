@@ -8,28 +8,41 @@ import { CommonModal } from '@/widgets';
 
 interface FormModalProps {
     formId: string;
+    isDraft?: boolean;
 }
 
-const FormModal = ({ formId }: FormModalProps) => {
+const FormModal = ({ formId, isDraft = false }: FormModalProps) => {
     const { data } = useGetContractDetail(formId);
     const { exportContract } = useContractPdfExport();
 
     return (
         <CommonModal
             triggerChildren={
-                <div
-                    className='flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xs'
-                    aria-label='계약서 보기'
-                >
-                    <Icons name='docs' className='fill-line-700' width={20} />
-                </div>
+                isDraft ? (
+                    <Icons
+                        name='zoom-in'
+                        className='fill-primary-500'
+                        width={18}
+                    />
+                ) : (
+                    <div
+                        className='flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xs'
+                        aria-label='계약서 보기'
+                    >
+                        <Icons
+                            name='docs'
+                            className='fill-line-700'
+                            width={20}
+                        />
+                    </div>
+                )
             }
             children={
                 <Suspense fallback={<ListLoading />}>
                     <ContractDocument contract={data!} />
                 </Suspense>
             }
-            confirmText='pdf 다운로드'
+            confirmText={`${isDraft ? '수정하기' : 'pdf 다운로드'}`}
             onClick={() => exportContract(data!)}
         />
     );

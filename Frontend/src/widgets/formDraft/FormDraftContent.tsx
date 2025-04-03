@@ -17,7 +17,7 @@ interface FormDraftContentProps {
 }
 
 const FormDraftContent = ({ user, partner }: FormDraftContentProps) => {
-    const userId = user.userId;
+    const userId = user.id;
     const userName = user.userName;
     const receiverId = partner.userId;
     const receiverName = partner.userName;

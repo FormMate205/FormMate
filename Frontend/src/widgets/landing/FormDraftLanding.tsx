@@ -20,7 +20,7 @@ const FormDraftLanding = () => {
 
             <div className='z-10 flex w-full flex-col justify-start gap-2'>
                 <img
-                    src='/public/assets/images/chatbot-profile.png'
+                    src='/assets/images/chatbot-profile.png'
                     alt='챗봇 아이콘'
                     width={40}
                 />
@@ -35,7 +35,7 @@ const FormDraftLanding = () => {
 
             <div className='z-20 flex w-full justify-end'>
                 <img
-                    src='/public/assets/images/chatbot.png'
+                    src='/assets/images/chatbot.png'
                     alt='챗봇 캐릭터 이미지'
                     width={260}
                     className='animate-float'

@@ -10,7 +10,7 @@ interface ChatBoxProps {
 
 const ChatBox = ({ writerId, name, content }: ChatBoxProps) => {
     const { user } = useUserStore();
-    const userId = user?.userId;
+    const userId = user?.id;
 
     return (
         <div
