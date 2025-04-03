@@ -1,4 +1,4 @@
-import { RadialBar, RadialBarChart, ResponsiveContainer } from 'recharts';
+import { RadialBar, RadialBarChart } from 'recharts';
 import {
     Card,
     CardContent,
@@ -67,21 +67,19 @@ const ContractChart = () => {
                         config={chartConfig}
                         className='mx-auto aspect-square max-h-[250px]'
                     >
-                        <ResponsiveContainer width='100%' height='100%'>
-                            <RadialBarChart
-                                data={chartData}
-                                startAngle={-90}
-                                endAngle={360}
-                                innerRadius={60}
-                                outerRadius={100}
-                            >
-                                <RadialBar
-                                    dataKey='visitors'
-                                    background
-                                    cornerRadius={10}
-                                />
-                            </RadialBarChart>
-                        </ResponsiveContainer>
+                        <RadialBarChart
+                            data={chartData}
+                            startAngle={-90}
+                            endAngle={360}
+                            innerRadius={60}
+                            outerRadius={100}
+                        >
+                            <RadialBar
+                                dataKey='visitors'
+                                background
+                                cornerRadius={10}
+                            />
+                        </RadialBarChart>
                     </ChartContainer>
                 </CardContent>
                 <CardFooter className='text-line-700 mt-4 flex-col items-start gap-2 text-sm font-medium'>

@@ -1,21 +1,12 @@
+import { Notification } from '@/entities/notification/model/types';
 import { Pagenation, PagenationRequest } from '@/shared/model/types';
 
-export interface Notification {
-    alertId: string;
-    alertType: '연체' | '입금' | '출금' | '상환일';
-    content: string;
-    isRead: boolean;
-    createdAt: boolean;
-}
-
 // 읽지 않은 알림 조회
-export type GetUnreadNotificationListResponse = {
-    content: Notification[];
-};
+export type GetUnreadNotificationListResponse = Notification[];
 
-// 읽은 알림 추가 조회
+// 읽은 알림 조회
 export type GetNotificationListRequest = {
-    alertId: string;
+    alertId: string | null;
 } & PagenationRequest;
 
 export type GetNotificationListResposne = {

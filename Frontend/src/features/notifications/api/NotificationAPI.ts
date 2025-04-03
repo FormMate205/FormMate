@@ -8,6 +8,7 @@ import { useIntersection } from '@/shared/model/useIntersection';
 import {
     GetNotificationListRequest,
     GetNotificationListResposne,
+    GetUnreadNotificationCountResponse,
     GetUnreadNotificationListResponse,
 } from '../model/types';
 
@@ -90,8 +91,8 @@ export const useGetNotificationList = ({
 
 // 읽지 않은 알림 개수 조회
 const getUnreadNotificationCount =
-    async (): Promise<GetUnreadNotificationListResponse> => {
-        const response = await api.get<GetUnreadNotificationListResponse>(
+    async (): Promise<GetUnreadNotificationCountResponse> => {
+        const response = await api.get<GetUnreadNotificationCountResponse>(
             '/alert/count-unread',
         );
         return response.data;
