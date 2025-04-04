@@ -2,6 +2,7 @@ import {
     useMutation,
     useQuery,
     useSuspenseInfiniteQuery,
+    useSuspenseQuery,
 } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
 import { useIntersection } from '@/shared/model/useIntersection';
@@ -21,7 +22,7 @@ const getUnreadNotificationList =
     };
 
 export const useGetUnreadNotificationList = () => {
-    return useQuery({
+    return useSuspenseQuery({
         queryKey: ['unreadNotificationList'],
         queryFn: () => getUnreadNotificationList(),
     });

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { mapNotificationListToItems } from '@/entities/notification/model/mapNotificationItem';
 import NotificationGroup from '@/entities/notification/ui/NotificationGroup';
 import {
@@ -7,6 +7,7 @@ import {
     useUpdateNotificationList,
 } from '@/features/notifications/api/NotificationAPI';
 import { getMinAlertId } from '@/features/notifications/model/getMinAlertId';
+import ListLoading from '@/shared/ui/ListLoading';
 import { Footer, Header } from '@/widgets';
 
 const Notifications = () => {
@@ -42,18 +43,22 @@ const Notifications = () => {
                 </div>
 
                 <div className='flex flex-col gap-6 py-4'>
-                    <NotificationGroup
-                        label='읽지 않은 알림'
-                        notifications={unreadNotifications}
-                        bgColor='bg-primary-50'
-                    />
-                    <NotificationGroup
-                        label='이전 알림'
-                        notifications={readNotifications}
-                        getItemRef={(idx) =>
-                            idx === lastIndex ? lastItemRef : null
-                        }
-                    />
+                    <Suspense fallback={<ListLoading />}>
+                        <NotificationGroup
+                            label='읽지 않은 알림'
+                            notifications={unreadNotifications}
+                            bgColor='bg-primary-50'
+                        />
+                    </Suspense>
+                    <Suspense fallback={<ListLoading />}>
+                        <NotificationGroup
+                            label='이전 알림'
+                            notifications={readNotifications}
+                            getItemRef={(idx) =>
+                                idx === lastIndex ? lastItemRef : null
+                            }
+                        />
+                    </Suspense>
                 </div>
             </section>
 
