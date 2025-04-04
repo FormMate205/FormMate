@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
 import {
     ContractAmountChart,
-    GetContractDetailOverviewResponse,
+    ContractDetailOverview,
     GetContractDetailResponse,
     GetContractStatusCountResponse,
 } from '../model/types';
@@ -61,8 +61,8 @@ export const useGetContractDetail = (formId: string) => {
 // 계약 상세 조회 (Detail 상단 내용)
 const getContractDetailOverview = async (
     formId: string,
-): Promise<GetContractDetailOverviewResponse> => {
-    const response = await api.get<GetContractDetailOverviewResponse>(
+): Promise<ContractDetailOverview> => {
+    const response = await api.get<ContractDetailOverview>(
         `contract/${formId}`,
     );
     return response.data;
