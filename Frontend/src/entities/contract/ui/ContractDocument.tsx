@@ -7,6 +7,7 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { formatCurrency } from '@/shared/model/formatCurrency';
+import { getSignatureStatus } from '../model/getSignatureStatus';
 import { ContractDocs } from '../model/types';
 
 const styles = {
@@ -50,14 +51,6 @@ const ContractDocument = ({
     const [accordionValue, setAccordionValue] = useState<string | undefined>(
         'item-1',
     );
-
-    const getSignatureStatus = (role: 'creditor' | 'debtor') => {
-        if (status === '상대 승인전') return '(전자서명 미완료)';
-        if (status === '상대승인후') {
-            return role === 'debtor' ? '(전자서명 완료)' : '(전자서명 미완료)';
-        }
-        return '(전자서명 완료)';
-    };
 
     useEffect(() => {
         if (isPdfMode) setAccordionValue('item-1');
@@ -162,13 +155,13 @@ const ContractDocument = ({
                     <div>
                         <span>{creditorName}</span>
                         <span className={styles.subtext}>
-                            {getSignatureStatus('creditor')}
+                            {getSignatureStatus(status, 'creditor')}
                         </span>
                     </div>
                     <div>
                         <span>{debtorName}</span>
                         <span className={styles.subtext}>
-                            {getSignatureStatus('debtor')}
+                            {getSignatureStatus(status, 'debtor')}
                         </span>
                     </div>
                 </div>

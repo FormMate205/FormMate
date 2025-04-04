@@ -1,20 +1,6 @@
 import { cn } from '@/lib/utils';
 import { TagItem } from '@/shared';
-import { TagColor } from '@/shared/model/types';
-
-const tagColorMap: Record<string, TagColor> = {
-    중도: 'subPurple',
-    진행: 'primary',
-    연체: 'subPink',
-    이자: 'line',
-};
-
-const textColorMap: Record<TagColor, string> = {
-    primary: 'text-primary-700',
-    subPurple: 'text-subPurple-700',
-    subPink: 'text-subPink-700',
-    line: 'text-line-700',
-};
+import { tagColorMap, textColorMap } from '../config/constants';
 
 interface DetailOverviewItemProps {
     tagText: string;
