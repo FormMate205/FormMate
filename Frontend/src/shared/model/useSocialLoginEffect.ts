@@ -17,8 +17,14 @@ export const useSocialLoginEffect = () => {
         // 인증 코드 처리
         (async () => {
             try {
-                const user = await exchangeCodeForToken(code);
-                setUser(user);
+                const response = await exchangeCodeForToken(code);
+                setUser({
+                    id: response.userId.toString(),
+                    userName: response.userName,
+                    email: response.email,
+                    isLogged: true,
+                    hasAccount: false, // 필요 시 교체
+                });
                 navigate(window.location.pathname, { replace: true });
             } catch (err) {
                 console.error('소셜 로그인 토큰 처리 실패:', err);
