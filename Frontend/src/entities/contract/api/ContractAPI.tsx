@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
 import {
-    GetContractAmountChart,
-    GetContractDetailOverviewResponse,
+    ContractAmountChart,
+    ContractDetailOverview,
     GetContractDetailResponse,
     GetContractStatusCountResponse,
 } from '../model/types';
@@ -23,15 +23,21 @@ export const useGetContractStatusCount = () => {
 };
 
 // 보낼 금액, 받은 금액 차트
-const getContractAmountChart = async (): Promise<GetContractAmountChart> => {
-    const response = await api.get<GetContractAmountChart>('/contract/amount');
+const getContractAmountChart = async (): Promise<ContractAmountChart> => {
+    const response = await api.get<ContractAmountChart>('/contract/amount');
     return response.data;
 };
 
 export const useGetContractAmountChart = () => {
+    const accessToken =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('accessToken')
+            : null;
+
     return useQuery({
         queryKey: ['contractAmountChart'],
         queryFn: getContractAmountChart,
+        enabled: !!accessToken,
     });
 };
 
@@ -55,8 +61,8 @@ export const useGetContractDetail = (formId: string) => {
 // 계약 상세 조회 (Detail 상단 내용)
 const getContractDetailOverview = async (
     formId: string,
-): Promise<GetContractDetailOverviewResponse> => {
-    const response = await api.get<GetContractDetailOverviewResponse>(
+): Promise<ContractDetailOverview> => {
+    const response = await api.get<ContractDetailOverview>(
         `contract/${formId}`,
     );
     return response.data;

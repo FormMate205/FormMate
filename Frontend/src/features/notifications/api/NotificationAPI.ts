@@ -2,12 +2,14 @@ import {
     useMutation,
     useQuery,
     useSuspenseInfiniteQuery,
+    useSuspenseQuery,
 } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
 import { useIntersection } from '@/shared/model/useIntersection';
 import {
     GetNotificationListRequest,
     GetNotificationListResposne,
+    GetUnreadNotificationCountResponse,
     GetUnreadNotificationListResponse,
 } from '../model/types';
 
@@ -20,7 +22,7 @@ const getUnreadNotificationList =
     };
 
 export const useGetUnreadNotificationList = () => {
-    return useQuery({
+    return useSuspenseQuery({
         queryKey: ['unreadNotificationList'],
         queryFn: () => getUnreadNotificationList(),
     });
@@ -32,9 +34,12 @@ const getNotificationList = async ({
     pageable,
 }: GetNotificationListRequest): Promise<GetNotificationListResposne> => {
     const response = await api.get<GetNotificationListResposne>(
-        `/alert/history/${alertId}`,
+        '/alert/history',
         {
-            params: pageable,
+            params: {
+                ...(alertId && { alertId }),
+                ...pageable,
+            },
         },
     );
     return response.data;
@@ -90,8 +95,8 @@ export const useGetNotificationList = ({
 
 // 읽지 않은 알림 개수 조회
 const getUnreadNotificationCount =
-    async (): Promise<GetUnreadNotificationListResponse> => {
-        const response = await api.get<GetUnreadNotificationListResponse>(
+    async (): Promise<GetUnreadNotificationCountResponse> => {
+        const response = await api.get<GetUnreadNotificationCountResponse>(
             '/alert/count-unread',
         );
         return response.data;

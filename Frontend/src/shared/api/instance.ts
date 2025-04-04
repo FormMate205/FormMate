@@ -13,7 +13,12 @@ const api = axios.create({
 });
 
 // 공개 API 경로 목록 (인증이 필요하지 않은 API)
-const publicApiPaths = ['/auth/email/login', '/auth/refresh', '/auth/register'];
+const publicApiPaths = [
+    '/auth/email/login',
+    '/auth/refresh',
+    '/auth/register',
+    '/auth/exchange-code',
+];
 
 // 요청 시 accessToken 붙이기
 api.interceptors.request.use((config) => {
