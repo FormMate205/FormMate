@@ -5,5 +5,10 @@ export const exchangeCodeForToken = async (code: string) => {
         code,
     });
 
+    const accessToken = response.headers['authorization'];
+    if (accessToken) {
+        localStorage.setItem('accessToken', accessToken);
+    }
+
     return response.data;
 };
