@@ -36,10 +36,6 @@ public class ChatResponse {
     @Schema(description = "메시지 유형", example = "CHAT")
     private MessageType messageType;
 
-    @Schema(description = "채권자가 보낸 메시지 여부", example = "true")
-    private Boolean isCreditorMessage;
-
-    @Schema(description = "채무자가 보낸 메시지 여부", example = "false")
-    private Boolean isDebtorMessage;
-
+    @Schema(description = "서명 요청을 받을 사람", example = "1")
+    private Integer targetUserId;
 }
