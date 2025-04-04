@@ -139,6 +139,7 @@ public class ChatSystemMessageService {
                     .content(finalContent)
                     .messageType(request.getMessageType())
                     .isRead(false)
+                    .targetUserId(targetUserId)
                     .build();
 
             ChatEntity savedChat = chatRepository.save(chat);
@@ -180,6 +181,8 @@ public class ChatSystemMessageService {
 
         createSystemMessage(request);
 
+        sleepSafely(1000); // 0.1초 대기
+
         String content = createForm(form);
 
         SystemMessageRequest secondRequest = SystemMessageRequest.builder()
@@ -188,7 +191,9 @@ public class ChatSystemMessageService {
                 .messageType(MessageType.CONTRACT_SHARED)
                 .build();
 
-        createSystemMessage(request);
+        createSystemMessage(secondRequest);
+
+        sleepSafely(1000); // 0.1초 대기
 
         SystemMessageRequest thirdRequest = SystemMessageRequest.builder()
                 .formId(form.getId())
@@ -265,6 +270,8 @@ public class ChatSystemMessageService {
 
         createSystemMessage(request);
 
+        sleepSafely(1000); // 0.1초 대기
+
         String content = createForm(form);
 
         SystemMessageRequest secondRequest = SystemMessageRequest.builder()
@@ -274,6 +281,8 @@ public class ChatSystemMessageService {
                 .build();
 
         createSystemMessage(secondRequest);
+
+        sleepSafely(1000); // 0.1초 대기
 
         SystemMessageRequest thirdRequest = SystemMessageRequest.builder()
                 .formId(form.getId())
@@ -306,6 +315,8 @@ public class ChatSystemMessageService {
                 .build();
 
         createSystemMessage(request);
+
+        sleepSafely(1000); // 0.1초 대기
 
         SystemMessageRequest secondRequest = SystemMessageRequest.builder()
                 .formId(form.getId())
@@ -478,5 +489,14 @@ public class ChatSystemMessageService {
     @Transactional
     public ChatResponse sendSystemMessage(SystemMessageRequest request) {
         return createSystemMessage(request);
+    }
+
+    private void sleepSafely(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("스레드 대기 중 인터럽트 발생", e);
+        }
     }
 }

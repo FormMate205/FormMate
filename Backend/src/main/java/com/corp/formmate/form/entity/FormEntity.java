@@ -121,6 +121,7 @@ public class FormEntity implements Serializable {
 	// 계약 파기 프로세스 여부를 관리하는 새로운 필드
 	@Enumerated(EnumType.STRING)
 	@Column(name = "is_termination_process", nullable = false)
+	@Builder.Default
 	private TerminationProcess isTerminationProcess = TerminationProcess.NONE;
 
 	public void update(FormUpdateRequest request) {
