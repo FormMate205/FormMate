@@ -4,10 +4,20 @@ import { registerServiceWorker, requestPermission } from '@/lib/firebase';
 import { router } from './router';
 
 const App = () => {
+    // useEffect(() => {
+    //     registerServiceWorker();
+    //     requestPermission();
+    // }, []);
     useEffect(() => {
-        registerServiceWorker();
-        requestPermission();
+        const isSafePath = !window.location.pathname.startsWith(
+            '/oauth2/authorization',
+        );
+        if (isSafePath) {
+            registerServiceWorker();
+            requestPermission();
+        }
     }, []);
+
     return <RouterProvider router={router} />;
 };
 

@@ -19,7 +19,7 @@ const messaging = getMessaging(app);
 
 export async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register(
-        'firebase-messaging-sw.js',
+        '/firebase-messaging-sw.js',
     );
 
     // Firebase 설정 전달
