@@ -86,6 +86,7 @@ export type ContractAmountChart = {
 
 // 계약 상세 조회 상단 내용
 export type ContractDetailOverview = {
+    userIsCreditor: boolean;
     contracteeName: string;
     overdueCount: number;
     overdueLimit: number;
@@ -93,13 +94,14 @@ export type ContractDetailOverview = {
     nextRepaymentDate: number[];
     earlyRepaymentCount: number;
     totalEarlyRepaymentCharge: number;
+    repaymentAmount: number;
     remainingPrincipal: number;
 };
-export type GetContractDetailOverviewResponse = ContractDetailOverview;
 
 // 계약서 상세
 export type ContractDocs = Pick<
     Contract,
+    | 'status'
     | 'creditorName'
     | 'creditorPhone'
     | 'debtorName'
