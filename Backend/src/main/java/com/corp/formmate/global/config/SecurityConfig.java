@@ -76,7 +76,7 @@ public class SecurityConfig {
 				.redirectionEndpoint(endpoint -> endpoint
 					.baseUri("/api/login/oauth2/code/*") // 중요: 리디렉션 엔드포인트 설정
 				)
-//				.defaultSuccessUrl("/")
+				.defaultSuccessUrl("/")
 //				.successHandler(oAuth2LoginSuccessHandler)
 			)
 //			// 인증 실패 시 401 응답 반환하도록 설정 (리다이렉트 방지)
