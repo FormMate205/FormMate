@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useGetAccountInfo } from '@/entities/account/api/AccountAPI';
 import { useGetUserDetail } from '@/entities/auth/api/getUserDetail';
 import { useUserStore } from '@/entities/user/model/userStore';
+import SubscriptionToggle from '@/features/myInfo/ui/SubscriptionToggle';
 import { Footer, Header } from '@/widgets';
 import AddressInfo from '../../features/myInfo/ui/AddressInfo';
 import Logout from '../../features/myInfo/ui/Logout';
@@ -33,7 +34,7 @@ const MyInfo = () => {
                 <Header title='내 정보' />
                 <div className='scrollbar-none flex h-full flex-col gap-6 overflow-y-auto'>
                     <MyAccount />
-
+                    <SubscriptionToggle />
                     <div className='mt-4'>
                         {userDetail && (
                             <>

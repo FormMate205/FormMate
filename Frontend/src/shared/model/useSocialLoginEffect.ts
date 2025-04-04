@@ -5,11 +5,10 @@ import { useUserStore } from '@/entities/user/model/userStore';
 
 export const useSocialLoginEffect = () => {
     const [searchParams] = useSearchParams();
+    const code = searchParams.get('code');
     const navigate = useNavigate();
     const setUser = useUserStore((s) => s.setUser);
     const [hasExchanged, setHasExchanged] = useState(false);
-
-    const code = searchParams.get('code');
 
     useEffect(() => {
         if (!code || hasExchanged) return;
@@ -24,9 +23,24 @@ export const useSocialLoginEffect = () => {
                 if (accessToken)
                     localStorage.setItem('accessToken', accessToken);
 
-                setUser(response.data); // { userId, userName, email }
+                const { userId, userName, email, needsAdditionalInfo } =
+                    response.data;
+
+                setUser({
+                    id: userId,
+                    userName,
+                    email,
+                    isLogged: true,
+                    hasAccount: false,
+                });
                 setHasExchanged(true);
-                navigate(window.location.pathname, { replace: true }); // code 제거
+
+                // 리디렉트 분기: 최초 소셜 로그인 여부
+                if (needsAdditionalInfo) {
+                    navigate('/login/oauthInfo', { replace: true });
+                } else {
+                    navigate('/', { replace: true });
+                }
             } catch (error) {
                 console.error('OAuth exchange 실패:', error);
                 navigate('/login');
