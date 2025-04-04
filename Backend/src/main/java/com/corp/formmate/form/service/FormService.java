@@ -382,7 +382,7 @@ public class FormService {
 				.formId(form.getId())
 				.status(form.getStatus().name())
 				.statusKorName(form.getStatus().getKorName())
-				.requestedByName(user.getUserName())
+				.requestedById(userId)
 				.build();
 	}
 
@@ -461,7 +461,7 @@ public class FormService {
 	 * 계약 파기 첫 번째 당사자 인증 확인 및 서명
 	 */
 	@Transactional
-	public FormTerminationResponse confirmFirstSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
+	public void confirmFirstSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -491,13 +491,6 @@ public class FormService {
 		// 첫 번째 서명 완료 이벤트 발생
 		log.info("계약 파기 첫 번째 서명 완료 이벤트 발행: 폼 ID={}, 서명자 ID={}", formId, userId);
 		eventPublisher.publishEvent(new FirstPartyTerminationSignedEvent(form, userId));
-
-		return FormTerminationResponse.builder()
-				.formId(form.getId())
-				.status(form.getStatus().name())
-				.statusKorName(form.getStatus().getKorName())
-				.requestedByName(getOtherPartyName(form, userId))
-				.build();
 	}
 
 	/**
@@ -536,7 +529,7 @@ public class FormService {
 	 * 계약 파기 두 번째 당사자 인증 확인 및 서명 (계약 종료)
 	 */
 	@Transactional
-	public FormTerminationResponse confirmSecondSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
+	public void confirmSecondSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -566,12 +559,6 @@ public class FormService {
 		log.info("계약 파기 완료 이벤트 발행: 폼 ID={}", formId);
 		eventPublisher.publishEvent(new FormTerminationCompletedEvent(form));
 
-		return FormTerminationResponse.builder()
-				.formId(form.getId())
-				.status(form.getStatus().name())
-				.statusKorName(form.getStatus().getKorName())
-				.requestedByName(user.getUserName())
-				.build();
 	}
 
 	/**

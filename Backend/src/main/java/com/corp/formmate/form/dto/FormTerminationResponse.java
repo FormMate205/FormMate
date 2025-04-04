@@ -24,6 +24,6 @@ public class FormTerminationResponse {
     @Schema(description = "계약 상태 한글명", example = "종료요청")
     private String statusKorName;
 
-    @Schema(description = "요청자 이름", example = "홍길동")
-    private String requestedByName;
+    @Schema(description = "요청자 Id", example = "1")
+    private Integer requestedById;
 }

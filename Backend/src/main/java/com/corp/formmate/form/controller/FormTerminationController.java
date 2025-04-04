@@ -200,7 +200,7 @@ public class FormTerminationController {
                     description = "서명 인증 확인 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = FormTerminationResponse.class)
+                            schema = @Schema(implementation = String.class)
                     )
             ),
             @ApiResponse(
@@ -245,7 +245,7 @@ public class FormTerminationController {
             )
     })
     @PostMapping("/firstSign/confirm")
-    public ResponseEntity<FormTerminationResponse> confirmFirstSignVerification(
+    public ResponseEntity<String> confirmFirstSignVerification(
             @Parameter(description = "계약 ID", required = true, example = "42")
             @PathVariable Integer formId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -268,8 +268,8 @@ public class FormTerminationController {
             @CurrentUser AuthUser authUser
             ) {
         log.info("계약 파기 첫 번째 서명 인증 확인 - 계약 ID: {}, 요청자: {}", formId, authUser.getId());
-        FormTerminationResponse response = formService.confirmFirstSignVerification(formId, authUser.getId(), request);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        formService.confirmFirstSignVerification(formId, authUser.getId(), request);
+        return ResponseEntity.status(HttpStatus.OK).body("첫 번째 서명이 완료되었습니다.");
     }
 
     // 계약 파기 두 번째 서명 인증 요청
@@ -333,7 +333,7 @@ public class FormTerminationController {
                     description = "서명 인증 확인 성공 (계약 종료)",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = FormTerminationResponse.class)
+                            schema = @Schema(implementation = String.class)
                     )
             ),
             @ApiResponse(
@@ -378,7 +378,7 @@ public class FormTerminationController {
             )
     })
     @PostMapping("/secondSign/confirm")
-    public ResponseEntity<FormTerminationResponse> confirmSecondSignVerification(
+    public ResponseEntity<String> confirmSecondSignVerification(
             @Parameter(description = "계약 ID", required = true, example = "42")
             @PathVariable Integer formId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -401,7 +401,7 @@ public class FormTerminationController {
             @CurrentUser AuthUser authUser
     ) {
         log.info("계약 파기 두 번째 서명 인증 확인 - 계약 ID: {}, 요청자: {}", formId, authUser.getId());
-        FormTerminationResponse response = formService.confirmSecondSignVerification(formId, authUser.getId(), request);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        formService.confirmSecondSignVerification(formId, authUser.getId(), request);
+        return ResponseEntity.status(HttpStatus.OK).body("두 번째 서명이 완료되었습니다. 계약이 종료되었습니다.");
     }
 }
