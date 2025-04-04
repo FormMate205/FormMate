@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useGetAccountInfo } from '@/entities/account/api/AccountAPI';
 import { useGetUserDetail } from '@/entities/auth/api/getUserDetail';
 import { useUserStore } from '@/entities/user/model/userStore';
+import SubscriptionToggle from '@/features/myInfo/ui/SubscriptionToggle';
 import { Footer, Header } from '@/widgets';
 import AddressInfo from '../../features/myInfo/ui/AddressInfo';
 import Logout from '../../features/myInfo/ui/Logout';
@@ -37,6 +38,7 @@ const MyInfo = () => {
                     <div className='mt-4'>
                         {userDetail && (
                             <>
+                                <SubscriptionToggle />
                                 <UserInfo
                                     isOAuth={false} // 소셜 로그인 여부 판단 로직 나중에 추가
                                     userName={userDetail.userName}
