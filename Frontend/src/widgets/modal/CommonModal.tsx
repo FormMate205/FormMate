@@ -8,6 +8,7 @@ import {
     DialogTrigger,
     DialogClose,
 } from '@/components/ui/dialog';
+import { Icons } from '@/shared';
 
 interface CommonModalProps {
     triggerChildren: ReactNode;
@@ -27,15 +28,17 @@ const CommonModal = ({
             <DialogTrigger>{triggerChildren}</DialogTrigger>
             <DialogContent className='flex flex-col items-center gap-4 bg-white'>
                 <div className='flex w-full justify-end'>
-                    <DialogClose>닫기</DialogClose>
+                    <DialogClose>
+                        <Icons name='close' />
+                    </DialogClose>
                 </div>
                 <DialogTitle></DialogTitle>
                 {children}
-                <DialogFooter>
+                <DialogFooter className='w-full'>
                     <Button
                         variant={'primary'}
                         children={confirmText}
-                        className='w-[250px] rounded-lg'
+                        className='rounded-lg'
                         onClick={onClick}
                     />
                 </DialogFooter>

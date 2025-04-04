@@ -1,10 +1,10 @@
 import { useLocation, useParams } from 'react-router-dom';
-import ChatSystem from '@/entities/chat/ui/ChatSystem';
 import FormModal from '@/entities/chat/ui/FormModal';
 import { useUserStore } from '@/entities/user/model/userStore';
 import showName from '@/features/chat/model/showName';
 import { useConnectWs } from '@/features/chat/model/useConnectWs';
 import ChatBox from '@/features/chat/ui/ChatBox';
+import ChatSystem from '@/features/chat/ui/ChatSystem';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 
@@ -41,12 +41,14 @@ const Chat = () => {
             >
                 {messages.map((chat, index) => {
                     return chat.messageType == 'CONTRACT_SHARED' ||
-                        chat.messageType == 'SIGNATURE_REQUEST' ? (
+                        chat.messageType == 'SIGNATURE_REQUEST_CONTRACT' ||
+                        chat.messageType == 'SIGNATURE_REQUEST_TERMINATION' ? (
                         <ChatSystem
                             key={chat.id}
                             formId={chat.formId!}
                             children={chat.content}
                             type={chat.messageType}
+                            signId={chat.targetUserId}
                         />
                     ) : (
                         <ChatBox
