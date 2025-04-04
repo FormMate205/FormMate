@@ -296,4 +296,17 @@ public class EnhancedPaymentPreviewService {
 		int day = Math.min(repaymentDay, date.toLocalDate().lengthOfMonth());
 		return date.withDayOfMonth(day).withHour(0).withMinute(0).withSecond(0).withNano(0);
 	}
+
+	public Long getCurrentRoundAmount(FormEntity form, ContractEntity contract) {
+		int currentRound = contract.getCurrentPaymentRound();
+
+		EnhancedPaymentPreviewResponse preview = calculateEnhancedPaymentPreview(form, contract);
+
+		return preview.getScheduleList().stream()
+			.filter(schedule -> schedule.getInstallmentNumber() == currentRound)
+			.findFirst()
+			.map(EnhancedPaymentScheduleResponse::getPaymentAmount)
+			.orElse(0L);
+	}
+
 }
