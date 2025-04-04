@@ -1,56 +1,40 @@
-import { NotificationItemProps } from '@/entities/notification/model/types';
+import { Suspense, useEffect } from 'react';
+import { mapNotificationListToItems } from '@/entities/notification/model/mapNotificationItem';
 import NotificationGroup from '@/entities/notification/ui/NotificationGroup';
+import {
+    useGetNotificationList,
+    useGetUnreadNotificationList,
+    useUpdateNotificationList,
+} from '@/features/notifications/api/NotificationAPI';
+import { getMinAlertId } from '@/features/notifications/model/getMinAlertId';
+import ListLoading from '@/shared/ui/ListLoading';
 import { Footer, Header } from '@/widgets';
 
-const todayNotifications: NotificationItemProps[] = [
-    {
-        icon: 'exclamation',
-        title: '연체가 발생했습니다!',
-        content: '윤이영님과의 계약이 제대로 이행되지 않았습니다.',
-        iconColorClass: 'fill-line-900',
-    },
-    {
-        icon: 'message',
-        title: '오늘은 상환일입니다!',
-        content: '윤이영님께 1,000원을 이체하세요!',
-        iconColorClass: 'fill-line-900',
-    },
-];
-
-const pastNotifications: NotificationItemProps[] = [
-    {
-        icon: 'message',
-        title: '오늘은 상환일입니다!',
-        content: '윤이영님께 1,000원을 이체하세요!',
-        iconColorClass: 'fill-line-700',
-    },
-    {
-        icon: 'contract',
-        title: '강지은(7895)의 통장',
-        content: '출금 12,000원 | 윤이영',
-        iconColorClass: 'fill-line-700',
-    },
-    {
-        icon: 'contract',
-        title: '강지은(7895)의 통장',
-        content: '출금 12,000원 | 윤이영',
-        iconColorClass: 'fill-line-700',
-    },
-    {
-        icon: 'contract',
-        title: '강지은(7895)의 통장',
-        content: '출금 12,000원 | 윤이영',
-        iconColorClass: 'fill-line-700',
-    },
-    {
-        icon: 'contract',
-        title: '강지은(7895)의 통장',
-        content: '출금 12,000원 | 윤이영',
-        iconColorClass: 'fill-line-700',
-    },
-];
-
 const Notifications = () => {
+    // 읽지 않은 알림 호출
+    const { data: unread } = useGetUnreadNotificationList();
+    const unreadNotifications = mapNotificationListToItems(unread ?? []);
+    const minAlertId = getMinAlertId(unread);
+
+    // 읽지 않은 알림 서버에 읽음 처리
+    const { mutate: markAllAsRead } = useUpdateNotificationList();
+    useEffect(() => {
+        if (unread && unread.length > 0) {
+            markAllAsRead();
+        }
+    }, [unread, markAllAsRead]);
+
+    // 읽은 알림 호출
+    const { notifications: read, lastItemRef } = useGetNotificationList({
+        alertId: minAlertId,
+        pageable: {
+            page: '0',
+            size: '10',
+        },
+    });
+    const readNotifications = mapNotificationListToItems(read);
+    const lastIndex = readNotifications.length - 1;
+
     return (
         <div className='flex h-screen flex-col justify-between py-2'>
             <section>
@@ -59,15 +43,22 @@ const Notifications = () => {
                 </div>
 
                 <div className='flex flex-col gap-6 py-4'>
-                    <NotificationGroup
-                        label='오늘'
-                        notifications={todayNotifications}
-                        bgColor='bg-primary-50'
-                    />
-                    <NotificationGroup
-                        label='이전 알림'
-                        notifications={pastNotifications}
-                    />
+                    <Suspense fallback={<ListLoading />}>
+                        <NotificationGroup
+                            label='읽지 않은 알림'
+                            notifications={unreadNotifications}
+                            bgColor='bg-primary-50'
+                        />
+                    </Suspense>
+                    <Suspense fallback={<ListLoading />}>
+                        <NotificationGroup
+                            label='이전 알림'
+                            notifications={readNotifications}
+                            getItemRef={(idx) =>
+                                idx === lastIndex ? lastItemRef : null
+                            }
+                        />
+                    </Suspense>
                 </div>
             </section>
 
