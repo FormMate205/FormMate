@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
     requestVerificationCode,
@@ -21,7 +21,7 @@ interface PostcodeData {
 
 const AddInfo = () => {
     const navigate = useNavigate();
-    const token = new URLSearchParams(window.location.search).get('token');
+    const token = localStorage.getItem('accessToken');
 
     const [form, setForm] = useState({
         userName: '',
@@ -41,11 +41,17 @@ const AddInfo = () => {
         code: false,
     });
 
+    const [searchParams] = useSearchParams();
+    const code = searchParams.get('code');
+
     useEffect(() => {
-        if (!token) {
+        // const code = new URLSearchParams(window.location.search).get('code');
+
+        console.log('code: ', code);
+        if (!code) {
             navigate('/');
         }
-    }, [token, navigate]);
+    }, [code, navigate]);
 
     const handleChange = (key: string, value: string) => {
         setForm((prev) => ({ ...prev, [key]: value }));
