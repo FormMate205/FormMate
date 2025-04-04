@@ -417,7 +417,7 @@ public class FormService {
 				.formId(form.getId())
 				.status(form.getStatus().name())
 				.statusKorName(form.getStatus().getKorName())
-				.requestedByName(user.getUserName())
+				.requestedById(userId)
 				.build();
 
 	}
