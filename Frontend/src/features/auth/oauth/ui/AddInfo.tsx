@@ -45,11 +45,9 @@ const AddInfo = () => {
     const code = searchParams.get('code');
 
     useEffect(() => {
-        // const code = new URLSearchParams(window.location.search).get('code');
-
-        console.log('code: ', code);
         if (!code) {
             navigate('/');
+            return;
         }
     }, [code, navigate]);
 
