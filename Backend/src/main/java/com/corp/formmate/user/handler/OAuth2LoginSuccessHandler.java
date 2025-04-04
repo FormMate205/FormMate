@@ -43,6 +43,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String registrationId = oauthToken.getAuthorizedClientRegistrationId();
         String userNameAttributeName = oauthToken.getAuthorizedClientRegistrationId();
 
+        log.info("OAuth2 로그인 성공: registrationId={}, username={}", registrationId, oAuth2User.getName());
+
         // OAuth2 사용자 정보 추출
         OAuth2UserInfo userInfo = OAuth2UserInfo.of(
                 registrationId,
@@ -55,9 +57,10 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             UserEntity user;
             try {
                 user = userService.selectByEmail(userInfo.getEmail());
+                log.info("기존 사용자 조회 성공: email={}, id={}", userInfo.getEmail(), user.getId());
             } catch (UsernameNotFoundException e) {
                 // 사용자가 없으면 생성
-                log.info("Creating new OAuth2 user with email: " + userInfo.getEmail());
+                log.info("신규 사용자 생성: email={}", userInfo.getEmail());
                 user = userService.getOrCreateOAuth2User(userInfo, Provider.valueOf(registrationId.toUpperCase()));
             }
 
@@ -67,16 +70,20 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     user.getAddress().isEmpty() ||
                     user.getPhoneNumber().isEmpty();
 
+            log.info("추가 정보 필요 여부: {}", needsAdditionalInfo);
+
             // 일회용 인증 코드 생성
             String authCode = oauth2AuthorizationService.generateAuthorizationCode(user.getId());
 
-            // 리다이렉트 URL 결정 (c추가 정보 필요 여부에 따라)
+            // 리다이렉트 URL 결정 (추가 정보 필요 여부에 따라)
             String targetUrl = determineTargetUrl(authCode, needsAdditionalInfo);
+            log.info("리다이렉트 URL: {}", targetUrl);
 
             // 리다이렉트
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
+            log.info("리다이렉트 완료: {}", targetUrl);
         } catch (Exception e) {
-            log.error("OAuth2 login failed", e);
+            log.error("OAuth2 로그인 실패", e);
             getRedirectStrategy().sendRedirect(request, response, "/login?error=oauth_failed");
         }
 
@@ -86,17 +93,21 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
      * 로그인 후 리다이렉트 할 URL 결정
      */
     private String determineTargetUrl(String authCode, boolean needsAdditionalInfo) {
+        String targetUrl;
         if (needsAdditionalInfo) {
             // 추가 정보가 필요한 경우 프로필 완성 페이지로 이동
-            return UriComponentsBuilder.fromUriString("/login/oauthInfo")
+            targetUrl = UriComponentsBuilder.fromUriString("/login/oauthInfo")
                     .queryParam("code", authCode)
                     .build().toUriString();
+            log.info("추가 정보가 필요한 사용자의 리다이렉트 URL: {}", targetUrl);
         } else {
             // 추가 정보가 필요 없는 경우 메인 페이지로 이동
-            return UriComponentsBuilder.fromUriString("/")
+            targetUrl = UriComponentsBuilder.fromUriString("/")
                     .queryParam("code", authCode)
                     .build().toUriString();
+            log.info("추가 정보가 필요 없는 사용자의 리다이렉트 URL: {}", targetUrl);
         }
+        return targetUrl;
     }
 
 //    private String determineTargetUrl(String authCode, boolean needsAdditionalInfo) {
