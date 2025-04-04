@@ -1,34 +1,38 @@
-import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { exchangeCodeForToken } from '@/entities/auth/api/exchangeCode';
 import { useUserStore } from '@/entities/user/model/userStore';
 
 export const useSocialLoginEffect = () => {
-    const { search } = useLocation();
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const setUser = useUserStore((state) => state.setUser);
+    const setUser = useUserStore((s) => s.setUser);
+    const [hasExchanged, setHasExchanged] = useState(false);
+
+    const code = searchParams.get('code');
 
     useEffect(() => {
-        const params = new URLSearchParams(search);
-        const code = params.get('code');
+        if (!code || hasExchanged) return;
 
-        if (!code) return;
-
-        // 인증 코드 처리
-        (async () => {
+        const fetch = async () => {
             try {
                 const response = await exchangeCodeForToken(code);
-                setUser({
-                    id: response.userId.toString(),
-                    userName: response.userName,
-                    email: response.email,
-                    isLogged: true,
-                    hasAccount: false, // 필요 시 교체
-                });
-                navigate(window.location.pathname, { replace: true });
-            } catch (err) {
-                console.error('소셜 로그인 토큰 처리 실패:', err);
+                const accessToken = response.headers['authorization']?.replace(
+                    'Bearer ',
+                    '',
+                );
+                if (accessToken)
+                    localStorage.setItem('accessToken', accessToken);
+
+                setUser(response.data); // { userId, userName, email }
+                setHasExchanged(true);
+                navigate(window.location.pathname, { replace: true }); // code 제거
+            } catch (error) {
+                console.error('OAuth exchange 실패:', error);
+                navigate('/login');
             }
-        })();
-    }, []);
+        };
+
+        fetch();
+    }, [code, hasExchanged, navigate, setUser]);
 };
