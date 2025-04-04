@@ -9,6 +9,7 @@ export interface Notification {
 
 export type NotificationIconType = 'exclamation' | 'message' | 'contract';
 export interface NotificationItemProps {
+    alertId: string;
     icon: NotificationIconType;
     title: string;
     content: string;

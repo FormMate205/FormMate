@@ -30,6 +30,7 @@ export const mapNotificationToItem = (
     ).padStart(2, '0')}`;
 
     return {
+        alertId: notification.alertId,
         icon,
         title: notification.title,
         content: notification.content,

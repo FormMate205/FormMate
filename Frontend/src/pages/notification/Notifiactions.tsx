@@ -1,59 +1,31 @@
-import { useMemo } from 'react';
 import { mapNotificationListToItems } from '@/entities/notification/model/mapNotificationItem';
-import { NotificationItemProps } from '@/entities/notification/model/types';
 import NotificationGroup from '@/entities/notification/ui/NotificationGroup';
-import { useGetUnreadNotificationList } from '@/features/notifications/api/NotificationAPI';
+import {
+    useGetNotificationList,
+    useGetUnreadNotificationList,
+} from '@/features/notifications/api/NotificationAPI';
 import { getMinAlertId } from '@/features/notifications/model/getMinAlertId';
 import { Footer, Header } from '@/widgets';
 
-const pastNotifications: NotificationItemProps[] = [
-    {
-        icon: 'message',
-        title: '오늘은 상환일입니다!',
-        content: '윤이영님께 1,000원을 이체하세요!',
-        createdAt: '2025-01-01',
-    },
-    {
-        icon: 'contract',
-        title: '강지은(7895)의 통장',
-        content: '출금 12,000원 | 윤이영',
-        createdAt: '2025-01-01',
-    },
-    {
-        icon: 'contract',
-        title: '강지은(7895)의 통장',
-        content: '출금 12,000원 | 윤이영',
-        createdAt: '2025-01-01',
-    },
-    {
-        icon: 'contract',
-        title: '강지은(7895)의 통장',
-        content: '출금 12,000원 | 윤이영',
-        createdAt: '2025-01-01',
-    },
-    {
-        icon: 'contract',
-        title: '강지은(7895)의 통장',
-        content: '출금 12,000원 | 윤이영',
-        createdAt: '2025-01-01',
-    },
-];
-
 const Notifications = () => {
+    // 읽지 않은 알림 호출
     const { data: unread } = useGetUnreadNotificationList();
     const unreadNotifications = mapNotificationListToItems(unread ?? []);
-    const minAlertId = useMemo(() => getMinAlertId(unread), [unread]);
+    const minAlertId = getMinAlertId(unread);
 
-    console.log('minAlertId', minAlertId);
-    // const { notifications: read, lastItemRef } = useGetNotificationList({
-    //     alertId: minAlertId ?? null,
-    //     pageable: {
-    //         page: '0',
-    //         size: '10',
-    //     },
-    // });
+    // 읽은 알림 호출
+    const { notifications: read, lastItemRef } = useGetNotificationList({
+        alertId: minAlertId,
+        pageable: {
+            page: '0',
+            size: '10',
+        },
+    });
 
-    //const readNotifications = mapNotificationListToItems(read);
+    const readNotifications = mapNotificationListToItems(read);
+    const lastIndex = readNotifications.length - 1;
+
+    console.log('readNotifications', readNotifications);
 
     return (
         <div className='flex h-screen flex-col justify-between py-2'>
@@ -70,7 +42,10 @@ const Notifications = () => {
                     />
                     <NotificationGroup
                         label='이전 알림'
-                        notifications={pastNotifications}
+                        notifications={readNotifications}
+                        getItemRef={(idx) =>
+                            idx === lastIndex ? lastItemRef : null
+                        }
                     />
                 </div>
             </section>

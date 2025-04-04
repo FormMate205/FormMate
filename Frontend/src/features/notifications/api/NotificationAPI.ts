@@ -33,9 +33,12 @@ const getNotificationList = async ({
     pageable,
 }: GetNotificationListRequest): Promise<GetNotificationListResposne> => {
     const response = await api.get<GetNotificationListResposne>(
-        `/alert/history/${alertId}`,
+        '/alert/history',
         {
-            params: pageable,
+            params: {
+                ...(alertId && { alertId }),
+                ...pageable,
+            },
         },
     );
     return response.data;
