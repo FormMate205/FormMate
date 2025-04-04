@@ -79,9 +79,21 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             String targetUrl = determineTargetUrl(authCode, needsAdditionalInfo);
             log.info("리다이렉트 URL: {}", targetUrl);
 
-            // 리다이렉트
-            getRedirectStrategy().sendRedirect(request, response, targetUrl);
-            log.info("리다이렉트 완료: {}", targetUrl);
+//            // 응답 상태 코드 로깅 추가
+//            log.info("리다이렉트 전 응답 상태 코드: {}", response.getStatus());
+//
+//            // 리다이렉트
+//            getRedirectStrategy().sendRedirect(request, response, targetUrl);
+//            log.info("리다이렉트 완료: {}", targetUrl);
+
+            // 명시적으로 상태 코드 설정
+            response.setStatus(HttpServletResponse.SC_FOUND); // 302 Found
+            response.setHeader("Location", targetUrl);
+
+            log.info("리다이렉트 설정 완료: {}, 상태 코드: {}", targetUrl, response.getStatus());
+
+            // 응답 커밋
+            response.flushBuffer();
         } catch (Exception e) {
             log.error("OAuth2 로그인 실패", e);
             getRedirectStrategy().sendRedirect(request, response, "/login?error=oauth_failed");
