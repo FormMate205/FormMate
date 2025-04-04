@@ -7,14 +7,16 @@ export interface ChatMessage {
     content: string;
     isRead?: boolean;
     createdAt?: string[];
-    messageType?:
-        | 'CHAT'
-        | 'CONTRACT_SHARED'
-        | 'SIGNATURE_REQUEST'
-        | 'SYSTEM_NOTIFICATION'; // 일반채팅, 계약서 공유, 서명 요청, 시스템 알림
-    isCreditorMessage?: boolean;
-    isDebtorMessage?: boolean;
+    messageType?: MessageType; // 일반채팅, 계약서 공유, 서명 요청, 시스템 알림
+    targetUserId?: string; // 서명 요청 시 서명 ID
 }
+
+export type MessageType =
+    | 'CHAT'
+    | 'CONTRACT_SHARED'
+    | 'SIGNATURE_REQUEST_CONTRACT'
+    | 'SIGNATURE_REQUEST_TERMINATION'
+    | 'SYSTEM_NOTIFICATION';
 
 export interface Writer {
     writerId: string;
