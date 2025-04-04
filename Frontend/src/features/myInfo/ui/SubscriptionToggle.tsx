@@ -2,8 +2,8 @@ import { Switch } from '@/components/ui/switch';
 
 const SubscriptionToggle = () => {
     return (
-        <div className='flex items-center justify-between rounded-lg bg-white p-4'>
-            알림 수신
+        <div className='text-line-950 flex items-center justify-between rounded-lg bg-white p-4 text-sm'>
+            알림 받기
             <Switch />
         </div>
     );

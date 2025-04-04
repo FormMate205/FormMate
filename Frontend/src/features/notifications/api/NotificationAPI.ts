@@ -118,6 +118,7 @@ const updateNotificationList = async () => {
 
 export const useUpdateNotificationList = () => {
     return useMutation({
+        mutationKey: ['updateNotificationList'],
         mutationFn: updateNotificationList,
     });
 };

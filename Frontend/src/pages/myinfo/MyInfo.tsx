@@ -34,11 +34,10 @@ const MyInfo = () => {
                 <Header title='내 정보' />
                 <div className='scrollbar-none flex h-full flex-col gap-6 overflow-y-auto'>
                     <MyAccount />
-
+                    <SubscriptionToggle />
                     <div className='mt-4'>
                         {userDetail && (
                             <>
-                                <SubscriptionToggle />
                                 <UserInfo
                                     isOAuth={false} // 소셜 로그인 여부 판단 로직 나중에 추가
                                     userName={userDetail.userName}
