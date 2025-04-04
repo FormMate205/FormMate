@@ -1,6 +1,7 @@
 package com.corp.formmate.jwt.controller;
 
 import com.corp.formmate.global.error.dto.ErrorResponse;
+import com.corp.formmate.global.error.exception.AuthException;
 import com.corp.formmate.jwt.dto.Token;
 import com.corp.formmate.jwt.properties.JwtProperties;
 import com.corp.formmate.jwt.provider.JwtTokenProvider;
@@ -9,6 +10,7 @@ import com.corp.formmate.user.dto.LoginRequest;
 import com.corp.formmate.user.dto.LoginResponse;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
+import com.corp.formmate.user.service.OAuth2AuthorizationService;
 import com.corp.formmate.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,6 +32,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
@@ -43,6 +47,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtProperties jwtProperties;
     private final UserRepository userRepository;
+    private final OAuth2AuthorizationService oAuth2AuthorizationService;
 
     /**
      * 로그인 API
@@ -277,5 +282,50 @@ public class AuthController {
         jwtTokenService.logout(token, authentication, response);
 
         return ResponseEntity.status(HttpStatus.OK).body("Logged out successfully");
+    }
+
+    // 일회용 코드 토큰으로 변경
+    @PostMapping("/exchange-code")
+    public ResponseEntity<?> exchangeCodeFormToken(@RequestBody Map<String, String> request, HttpServletResponse response) {
+
+        String authCode = request.get("code");
+        if (authCode == null || authCode.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증코드가 필요합니다.");
+        }
+
+        try {
+            // 인증 코드로 토큰 교환
+            Token token = oAuth2AuthorizationService.exchangeCodeForToken(authCode);
+
+            // 토큰에서 사용자 ID 추출
+            String userIdStr = jwtTokenProvider.getUserIdFromToken(token.getAccessToken());
+            Integer userId = Integer.parseInt(userIdStr);
+
+            // 사용자 정보 조회
+            UserEntity user = userService.selectById(userId);
+
+            // 리프레시 토큰을 쿠키에 저장
+            jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
+
+            // 응답 객체 생성
+            LoginResponse loginResponse = new LoginResponse(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getUserName()
+            );
+
+            user.login();
+            userRepository.save(user);
+
+            // 엑세스 토큰은 응답 바디에 포함
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Authorization", "Bearer " + token.getAccessToken())
+                    .body(loginResponse);
+        } catch (AuthException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Token exchange failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("토큰 교환 중 오류가 발생했습니다.");
+        }
     }
 }
