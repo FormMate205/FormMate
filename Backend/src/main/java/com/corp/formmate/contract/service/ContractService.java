@@ -3,12 +3,11 @@ package com.corp.formmate.contract.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -23,20 +22,17 @@ import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
 import com.corp.formmate.contract.dto.MonthlyContractDetail;
-import com.corp.formmate.contract.dto.MonthlyContractResponse;
 import com.corp.formmate.contract.entity.ContractEntity;
 import com.corp.formmate.contract.repository.ContractRepository;
-import com.corp.formmate.form.dto.PaymentPreviewRequest;
-import com.corp.formmate.form.dto.PaymentPreviewResponse;
-import com.corp.formmate.form.dto.PaymentScheduleResponse;
+import com.corp.formmate.form.dto.EnhancedPaymentPreviewResponse;
+import com.corp.formmate.form.dto.EnhancedPaymentScheduleResponse;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.repository.FormRepository;
-import com.corp.formmate.form.service.PaymentPreviewService;
+import com.corp.formmate.form.service.EnhancedPaymentPreviewService;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.ContractException;
 import com.corp.formmate.global.error.exception.FormException;
-import com.corp.formmate.global.error.exception.TransferException;
 import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
@@ -58,7 +54,7 @@ public class ContractService {
 	private final ContractRepository contractRepository;
 	private final FormRepository formRepository;
 	private final TransferRepository transferRepository;
-	private final PaymentPreviewService paymentPreviewService;
+	private final EnhancedPaymentPreviewService enhancedPaymentPreviewService;
 	private final UserRepository userRepository;
 
 	/**
@@ -68,27 +64,25 @@ public class ContractService {
 	 */
 	@Transactional
 	public ContractDetailResponse selectContractDetail(AuthUser user, Integer formId) {
-		FormEntity form = getForm(formId); // 계약서 정보 조회
-		ContractEntity contract = getContract(form); // 계약 상태 정보 조회
-		UserEntity userEntity = getUser(user.getId()); // 로그인한 사용자 정보 조회
-		List<TransferEntity> transfers = getTransfers(form); // 해당 계약의 송금 내역 조회
+		FormEntity form = getForm(formId);
+		ContractEntity contract = getContract(form);
+		UserEntity userEntity = getUser(user.getId());
+		List<TransferEntity> transfers = getTransfers(form);
 
-		// 로그인한 사용자가 채권자인지 확인
 		boolean userIsCreditor = form.getCreditorName().equals(userEntity.getUserName());
 		String contracteeName = userIsCreditor ? form.getDebtorName() : form.getCreditorName();
 
-		// 현재까지 납부한 총액 계산 (모든 회차의 송금 금액 합)
+		// 현재까지 납부한 총액 (모든 송금 금액 합)
 		long repaymentAmount = transfers.stream()
 			.mapToLong(TransferEntity::getAmount)
 			.sum();
 
-		// 중도상환 상태인 송금 건 중, 수수료 대상(paymentDifference > 0)만 추출해 수수료 총합 계산
+		// 중도상환 상태인 송금 중, 수수료 대상인(paymentDifference > 0) 건들의 총 수수료
 		long totalEarlyRepaymentCharge = transfers.stream()
 			.filter(t -> t.getStatus() == TransferStatus.EARLY_REPAYMENT && t.getPaymentDifference() > 0)
 			.mapToLong(t -> calculateEarlyRepaymentFee(t.getPaymentDifference(), form))
 			.sum();
 
-		// ContractDetailResponse DTO로 결과 구성
 		return ContractDetailResponse.builder()
 			.userIsCreditor(userIsCreditor)
 			.contracteeName(contracteeName)
@@ -105,15 +99,15 @@ public class ContractService {
 
 	/**
 	 * 이번 회차의 예상 납부 금액을 계산하는 메서드
-	 * - 중도상환이 이미 완료된 경우 납부할 금액은 0
-	 * - 이번 회차의 송금 내역을 기준으로 paymentDifference(차이) 계산
+	 * - 이미 중도상환이 완료된 경우 납부할 금액은 0
+	 * - 이번 회차의 송금 내역 기준 paymentDifference(차액) 확인
 	 */
 	@Transactional
 	public ExpectedPaymentAmountResponse selectExpectedPaymentAmount(Integer formId) {
 		FormEntity form = getForm(formId);
 		ContractEntity contract = getContract(form);
 
-		// 이미 중도상환된 경우 추가 납부 없음
+		// 이미 중도상환된 경우는 추가 납부 없음
 		if (contract.getTotalEarlyRepaymentFee() > 0) {
 			return ExpectedPaymentAmountResponse.builder()
 				.monthlyRemainingPayment(0L)
@@ -121,14 +115,14 @@ public class ContractService {
 				.build();
 		}
 
-		// 회차 기준 송금 내역 중 paymentDifference가 존재하는 경우만 납부금으로 간주
 		List<TransferEntity> transfers = transferRepository.findByFormOrderByTransactionDateDesc(form);
 		int currentRound = contract.getCurrentPaymentRound();
 
+		// 현재 회차의 송금 내역 중 paymentDifference가 존재하는 경우만 납부 예정액으로 처리
 		long monthlyRemaining = transfers.stream()
 			.filter(t -> t.getCurrentRound() == currentRound)
 			.findFirst()
-			.map(t -> Math.max(0, t.getPaymentDifference())) // 음수 방지
+			.map(t -> Math.max(0, t.getPaymentDifference()))
 			.orElse(0L);
 
 		return ExpectedPaymentAmountResponse.builder()
@@ -138,9 +132,9 @@ public class ContractService {
 	}
 
 	/**
-	 * 계약에 대한 누적 이자 정보 및 예상 만기 납부금액 정보를 조회하는 메서드
+	 * 계약에 대한 누적 이자 정보 및 예상 만기 납부금액 정보를 조회
 	 * - 납부한 원금/이자/연체이자 및 중도상환 수수료 포함
-	 * - 이번 회차의 미납 금액 및 만기 시 납부 예상 금액까지 포함
+	 * - 이번 회차 미납 금액 / 만기 납부 예상금액까지 포함
 	 */
 	@Transactional
 	public InterestResponse selectInterestResponse(Integer formId) {
@@ -168,22 +162,24 @@ public class ContractService {
 	}
 
 	/**
-	 * 이번 회차 미납 금액을 계산하는 메서드
-	 * - PaymentPreviewService의 스케줄을 기준으로 이 회차 납부해야 할 금액 추출
-	 * - 이미 송금된 금액이 있다면 차감하고, 연체액이 있으면 더함
-	 * - 최종적으로 음수가 되지 않도록 0 이하일 경우 0으로 반환
+	 * 이번 회차 미납 금액 계산
+	 * - EnhancedPaymentPreviewService로부터 스케줄을 받아,
+	 *   해당 회차 금액을 구한 뒤 이미 납부된 금액 차감 및 연체액 반영
+	 * - 결과가 음수가 되지 않도록 0으로 보정
 	 */
 	private long getUnpaidAmount(FormEntity form, ContractEntity contract, int round) {
-		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(
-			new PaymentPreviewRequest(form), PageRequest.of(0, 1000));
+		// EnhancedPaymentPreviewService에서 전체 회차 스케줄 조회
+		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService
+			.calculateEnhancedPaymentPreview(form, contract);
 
-		long unpaid = preview.getSchedulePage().stream()
-			.filter(p -> p.getInstallmentNumber().equals(round))
+		// 이번 회차에서 납부해야 할 금액
+		long unpaid = preview.getScheduleList().stream()
+			.filter(s -> s.getInstallmentNumber() == round)
 			.findFirst()
-			.map(PaymentScheduleResponse::getPaymentAmount)
+			.map(EnhancedPaymentScheduleResponse::getPaymentAmount)
 			.orElse(0L);
 
-		// 연체가 없을 경우 실제 납부한 금액을 차감함
+		// 연체가 없으면, 이미 납부한 금액만큼 차감
 		if (contract.getOverdueAmount() == 0) {
 			long paidThisRound = transferRepository.findByForm(form)
 				.orElse(Collections.emptyList())
@@ -193,22 +189,23 @@ public class ContractService {
 				.sum();
 			unpaid -= paidThisRound;
 		} else {
+			// 연체가 있으면 그 금액을 합산
 			unpaid += contract.getOverdueAmount();
 		}
 
-		return Math.max(0, unpaid); // 음수 방지
+		return Math.max(0, unpaid);
 	}
 
 	/**
-	 * 특정 사용자와 상대방 간의 계약을 반환한다 (채권자/채무자 구분 포함)
+	 * 특정 사용자와 상대방 간의 계약을 반환 (채권자/채무자 구분 포함)
 	 */
 	@Transactional
 	public List<ContractWithPartnerResponse> selectContractWithPartner(Integer userId, Integer partnerId) {
 		LocalDateTime now = LocalDateTime.now();
-		List<FormEntity> creditorForms = formRepository.findUserIsCreditorSideForms(userId, partnerId,
-			PageRequest.of(0, 1000)).getContent();
-		List<FormEntity> debtorForms = formRepository.findUserIsDebtorSideForms(userId, partnerId,
-			PageRequest.of(0, 1000)).getContent();
+		List<FormEntity> creditorForms = formRepository.findUserIsCreditorSideForms(
+			userId, partnerId, PageRequest.of(0, 1000)).getContent();
+		List<FormEntity> debtorForms = formRepository.findUserIsDebtorSideForms(
+			userId, partnerId, PageRequest.of(0, 1000)).getContent();
 
 		List<ContractWithPartnerResponse> responses = new ArrayList<>();
 
@@ -226,12 +223,12 @@ public class ContractService {
 	}
 
 	/**
-	 * 특정 상태의 전체 계약을 사용자 기준으로 조회하여 요약 정보를 반환
+	 * 특정 상태의 전체 계약(사용자 기준) 조회 → 요약 정보 반환
 	 */
 	@Transactional
 	public List<ContractPreviewResponse> selectAllContractByStatus(FormStatus formStatus, AuthUser authUser) {
-		Page<FormEntity> allForms = formRepository.findAllWithFilters(authUser.getId(), formStatus, null,
-			PageRequest.of(0, 1000));
+		Page<FormEntity> allForms = formRepository.findAllWithFilters(
+			authUser.getId(), formStatus, null, PageRequest.of(0, 1000));
 		UserEntity user = getUser(authUser.getId());
 
 		return allForms.stream()
@@ -248,8 +245,11 @@ public class ContractService {
 					.contracteeName(contracteeName)
 					.maturityDate(form.getMaturityDate().toLocalDate())
 					.nextRepaymentAmount(interest.getUnpaidAmount())
-					.totalAmountDue(interest.getPaidPrincipalAmount() + interest.getPaidInterestAmount()
-						+ interest.getPaidOverdueInterestAmount())
+					.totalAmountDue(
+						interest.getPaidPrincipalAmount()
+							+ interest.getPaidInterestAmount()
+							+ interest.getPaidOverdueInterestAmount()
+					)
 					.totalRepaymentAmount(interest.getExpectedPaymentAmountAtMaturity())
 					.build();
 			})
@@ -257,12 +257,12 @@ public class ContractService {
 	}
 
 	/**
-	 * 사용자의 전체 송금 요약 정보를 계산 (송금한 금액, 받을 금액 등)
+	 * 사용자의 전체 송금 요약 정보를 계산
 	 */
 	@Transactional
 	public AmountResponse selectAmounts(AuthUser authUser) {
-		Page<FormEntity> forms = formRepository.findAllWithFilters(authUser.getId(), null, null,
-			PageRequest.of(0, 1000));
+		Page<FormEntity> forms = formRepository.findAllWithFilters(
+			authUser.getId(), null, null, PageRequest.of(0, 1000));
 		String username = authUser.getUsername();
 
 		long paid = 0, expectedPay = 0, received = 0, expectedReceive = 0;
@@ -270,11 +270,13 @@ public class ContractService {
 		for (FormEntity form : forms) {
 			InterestResponse interest = selectInterestResponse(form.getId());
 			if (form.getCreditorName().equals(username)) {
-				received += interest.getPaidPrincipalAmount() + interest.getPaidInterestAmount()
+				received += interest.getPaidPrincipalAmount()
+					+ interest.getPaidInterestAmount()
 					+ interest.getPaidOverdueInterestAmount();
 				expectedReceive += interest.getExpectedPaymentAmountAtMaturity();
 			} else {
-				paid += interest.getPaidPrincipalAmount() + interest.getPaidInterestAmount()
+				paid += interest.getPaidPrincipalAmount()
+					+ interest.getPaidInterestAmount()
 					+ interest.getPaidOverdueInterestAmount();
 				expectedPay += interest.getExpectedPaymentAmountAtMaturity();
 			}
@@ -289,51 +291,238 @@ public class ContractService {
 	}
 
 	/**
-	 * 월별 납부 계획 데이터를 반환 (캘린더 뷰용)
+	 * 월별 납부 계획(캘린더 뷰) 반환
+	 *  - 이 로직도 전부 EnhancedPaymentPreviewService 스케줄을 활용해서 계산합니다.
 	 */
 	@Transactional
-	public Map<Integer, MonthlyContractResponse> selectMonthlyContracts(AuthUser user, LocalDate now,
-		LocalDate viewDate) {
-		Map<Integer, MonthlyContractResponse> map = new HashMap<>();
-		Page<FormEntity> forms = formRepository.findAllWithFilters(user.getId(), null, null, PageRequest.of(0, 1000));
-		long monthGap = ChronoUnit.MONTHS.between(now.withDayOfMonth(1), viewDate.withDayOfMonth(1));
+	public List<MonthlyContractDetail> selectMonthlyContracts(Integer userId, LocalDate viewDate) {
+		// (viewDate -1month), (viewDate), (viewDate +1month) 총 3개의 YearMonth
+		YearMonth prevMonth = YearMonth.from(viewDate).minusMonths(1);
+		YearMonth currMonth = YearMonth.from(viewDate);
+		YearMonth nextMonth = YearMonth.from(viewDate).plusMonths(1);
 
-		for (FormEntity form : forms) {
-			LocalDate maturity = form.getMaturityDate().toLocalDate();
-			if (maturity.isBefore(viewDate))
-				continue;
+		List<YearMonth> targetMonths = Arrays.asList(prevMonth, currMonth, nextMonth);
 
-			int day = maturity.getDayOfMonth();
-			MonthlyContractResponse daily = map.computeIfAbsent(day, d -> new MonthlyContractResponse());
+		// 최종 반환할 전체 Detail 목록
+		List<MonthlyContractDetail> allDetails = new ArrayList<>();
 
-			boolean isCreditor = form.getCreditorName().equals(user.getUsername());
-			String contracteeName = isCreditor ? form.getDebtorName() : form.getCreditorName();
-			ContractEntity contract = getContract(form);
+		// 필요한 데이터 조회
+		UserEntity userEntity = getUser(userId);
+		List<FormEntity> allForms = formRepository
+			.findAllWithFilters(userId, null, null, PageRequest.of(0, 1000))
+			.getContent();
 
-			long repaymentAmount;
+		LocalDate now = LocalDate.now();
+		YearMonth nowYm = YearMonth.from(now);
 
-			if (monthGap == 0) {
-				// 이번 달 납부 계획
-				repaymentAmount = contract.getTotalEarlyRepaymentFee() > 0 ? 0L :
-					calculateCurrentMonthRepayment(form, contract, viewDate);
-			} else if (monthGap > 0) {
-				// 미래 달 납부 계획
-				repaymentAmount = calculateFutureMonthRepayment(form, contract, (int)monthGap);
-			} else {
-				// 과거 송금 내역
-				repaymentAmount = calculatePastMonthPaidAmount(form, viewDate);
+		// 3개월을 순회
+		for (YearMonth ym : targetMonths) {
+			for (FormEntity form : allForms) {
+
+				// 만기 지났으면 스킵할지 여부
+				LocalDate maturity = form.getMaturityDate().toLocalDate();
+				if (maturity.isBefore(ym.atDay(1))) {
+					continue;
+				}
+
+				ContractEntity contract = getContract(form);
+				boolean isCreditor = form.getCreditorName().equals(userEntity.getUserName());
+				String contracteeName = isCreditor ? form.getDebtorName() : form.getCreditorName();
+
+				// 과거 달 vs 현재/미래 달 구분
+				if (ym.isBefore(nowYm)) {
+					// (과거) => 실제 송금(Transfer) 기준으로 여러 Detail 생성
+					List<MonthlyContractDetail> pastDetails = findTransferDetailsForMonth(
+						form, ym, isCreditor, contracteeName
+					);
+					allDetails.addAll(pastDetails);
+				} else {
+					// (현재 or 미래) => EnhancedPaymentPreviewService에서 스케줄별 Detail 생성
+					List<MonthlyContractDetail> futureDetails = computeDetailsFromPreview(
+						form, contract, ym, isCreditor, contracteeName
+					);
+					allDetails.addAll(futureDetails);
+				}
 			}
-
-			MonthlyContractDetail detail = MonthlyContractDetail.builder()
-				.userIsCreditor(isCreditor)
-				.contracteeName(contracteeName)
-				.repaymentAmount(repaymentAmount)
-				.build();
-
-			daily.getContracts().add(detail);
 		}
 
-		return map;
+		return allDetails;
+	}
+
+	@Transactional
+	public void dailyContractUpdateJob() {
+		LocalDate today = LocalDate.now();
+
+		// 1) 진행중(IN_PROGRESS) 또는 연체(OVERDUE) 상태인 Form 조회
+		List<FormEntity> targetForms = formRepository.findByStatusIn(
+			Arrays.asList(FormStatus.IN_PROGRESS, FormStatus.OVERDUE)
+		);
+
+		for (FormEntity form : targetForms) {
+			// 해당 Form에 연결된 Contract 조회
+			ContractEntity contract = contractRepository.findByForm(form)
+				.orElse(null);
+			if (contract == null) {
+				continue;
+			}
+
+			LocalDate nextDueDate = contract.getNextRepaymentDate();
+			if (nextDueDate == null) {
+				// nextRepaymentDate가 없다면 스킵 (또는 완납/만기 등)
+				continue;
+			}
+
+			// 2) nextRepaymentDate가 지났다면(어제 날짜보다 이전)
+			if (nextDueDate.isBefore(today)) {
+				// 이번 회차 납부가 완납되었는지 체크
+				boolean fullyPaid = checkIfFullyPaid(form, contract);
+				if (!fullyPaid) {
+					// => 연체 처리
+					handleOverdue(form, contract);
+				} else {
+					// => 완납이면 다음 회차로 이동
+					moveToNextRound(form, contract);
+				}
+			}
+
+			// 3) 만약 이미 OVERDUE 상태인데 납부 완료로 연체 해소되었다면 → 다시 IN_PROGRESS
+			//   (혹은 overdueAmount=0이 되었는지 체크)
+			if (form.getStatus() == FormStatus.OVERDUE) {
+				boolean isOverdueCleared = checkIfOverdueCleared(form, contract);
+				if (isOverdueCleared) {
+					form.updateStatus(FormStatus.IN_PROGRESS);
+					// 필요하다면 overdueAmount=0 등 리셋
+					contract.setOverdueAmount(0L);
+					contractRepository.save(contract);
+					formRepository.save(form);
+				}
+			}
+		}
+	}
+
+	/**
+	 * 이번 회차(Contract.currentPaymentRound)에 대해
+	 * 실제 납부(Transfer) 합계가 스케줄상의 납부액보다 큰지 검사
+	 */
+	private boolean checkIfFullyPaid(FormEntity form, ContractEntity contract) {
+		int round = contract.getCurrentPaymentRound();
+
+		// 1) 스케줄에서 이번 회차 납부 예정액 가져오기
+		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService.calculateEnhancedPaymentPreview(form,
+			contract);
+		long scheduledAmount = preview.getScheduleList().stream()
+			.filter(s -> s.getInstallmentNumber() == round)
+			.findFirst()
+			.map(EnhancedPaymentScheduleResponse::getPaymentAmount)
+			.orElse(0L);
+
+		// 2) 실제 납부액(Transfer) 합
+		List<TransferEntity> transfers = transferRepository.findByForm(form).orElse(Collections.emptyList());
+		long paid = transfers.stream()
+			.filter(t -> t.getCurrentRound() == round)
+			.mapToLong(TransferEntity::getAmount)
+			.sum();
+
+		return (paid >= scheduledAmount);
+	}
+
+	/**
+	 * 연체 처리
+	 * - Form 상태를 OVERDUE로
+	 * - 연체 횟수(overdueCount) 증가
+	 * - overdueAmount = "미납액"
+	 */
+	private void handleOverdue(FormEntity form, ContractEntity contract) {
+		form.updateStatus(FormStatus.OVERDUE);
+
+		// overdueCount++
+		contract.setOverdueCount(contract.getOverdueCount() + 1);
+
+		// 이번 회차 스케줄액 - 실제 납부액 = overdueAmount
+		int round = contract.getCurrentPaymentRound();
+		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService.calculateEnhancedPaymentPreview(form,
+			contract);
+		long scheduledAmount = preview.getScheduleList().stream()
+			.filter(s -> s.getInstallmentNumber() == round)
+			.findFirst()
+			.map(EnhancedPaymentScheduleResponse::getPaymentAmount)
+			.orElse(0L);
+
+		List<TransferEntity> transfers = transferRepository.findByForm(form).orElse(Collections.emptyList());
+		long paid = transfers.stream()
+			.filter(t -> t.getCurrentRound() == round)
+			.mapToLong(TransferEntity::getAmount)
+			.sum();
+
+		long notPaid = Math.max(0, scheduledAmount - paid);
+		contract.setOverdueAmount(notPaid);
+
+		// 연체 이자(누적) 등 추가 계산이 있으면 여기서 수행
+		// ex) contract.setOverdueInterestAmount( contract.getOverdueInterestAmount() + something );
+
+		// DB 저장
+		contractRepository.save(contract);
+		formRepository.save(form);
+	}
+
+	/**
+	 * 다음 회차로 이동
+	 * - currentPaymentRound++
+	 * - nextRepaymentDate = 다음 회차의 paymentDate(없으면 만기 처리)
+	 * - 만약 이전에 연체였다면 해소
+	 */
+	private void moveToNextRound(FormEntity form, ContractEntity contract) {
+		int round = contract.getCurrentPaymentRound();
+		contract.setCurrentPaymentRound(round + 1);
+
+		// 다음 회차 스케줄
+		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService
+			.calculateEnhancedPaymentPreview(form, contract);
+
+		Optional<EnhancedPaymentScheduleResponse> nextScheduleOpt = preview.getScheduleList().stream()
+			.filter(s -> s.getInstallmentNumber() == (round + 1))
+			.findFirst();
+
+		if (nextScheduleOpt.isPresent()) {
+			// 다음 회차 납부일
+			LocalDateTime nextPayDate = nextScheduleOpt.get().getPaymentDate();
+			contract.setNextRepaymentDate(nextPayDate.toLocalDate());
+		} else {
+			// 더 이상 회차가 없다면 => 만기
+			form.updateStatus(FormStatus.COMPLETED);
+			log.info("moveToNextRound: 모든 회차 완료 -> COMPLETED");
+		}
+
+		// 만약 이전에 연체였는데 이번 회차 완납으로 해소됐을 수 있으므로
+		// overdueAmount=0
+		contract.setOverdueAmount(0L);
+		if (form.getStatus() == FormStatus.OVERDUE) {
+			form.updateStatus(FormStatus.IN_PROGRESS);
+		}
+
+		contractRepository.save(contract);
+		formRepository.save(form);
+	}
+
+	/**
+	 * 연체가 해소됐는지 체크
+	 * - overdueAmount=0인가?
+	 * - 혹은 이번 회차 납부분도 충분?
+	 */
+	private boolean checkIfOverdueCleared(FormEntity form, ContractEntity contract) {
+		if (contract.getOverdueAmount() > 0) {
+			return false;
+		}
+		// 2) 만약 여러 회차에 걸쳐 연체될 가능성이 있다면?
+		//    "모든 과거 회차가 납부 완료"인지 검사하는 식의 로직도 가능
+
+		// 3) 연체 이자를 별도로 추적한다면 "연체 이자도 모두 납부되었는지" 확인
+		// if (contract.getOverdueInterestAmount() > someThreshold) {
+		//     return false;
+		// }
+
+		// 여기서는 간단히 "overdueAmount == 0이면 해소"로 가정
+		return true;
 	}
 
 	/**
@@ -341,95 +530,59 @@ public class ContractService {
 	 */
 	private ContractWithPartnerResponse buildPartnerResponse(FormEntity f, boolean isCreditor) {
 		ContractEntity contract = getContract(f);
-		ExpectedPaymentAmountResponse nextPayment = selectExpectedPaymentAmount(f.getId());
+		// EnhancedPaymentPreviewService 통해 스케줄 조회
+		EnhancedPaymentPreviewResponse nextPreview = enhancedPaymentPreviewService.calculateEnhancedPaymentPreview(f,
+			contract);
+
+		// 현재 회차 스케줄 항목 납부액
+		long nextRepayment = nextPreview.getScheduleList().stream()
+			.filter(s -> s.getInstallmentNumber() == contract.getCurrentPaymentRound())
+			.findFirst()
+			.map(EnhancedPaymentScheduleResponse::getPaymentAmount)
+			.orElse(0L);
+
 		return ContractWithPartnerResponse.builder()
 			.userIsCreditor(isCreditor)
-			.nextRepaymentAmount(nextPayment.getMonthlyRemainingPayment())
+			.nextRepaymentAmount(nextRepayment)
 			.nextRepaymentDate(contract.getNextRepaymentDate())
 			.contractDuration(f.getContractDate().toLocalDate() + " ~ " + f.getMaturityDate().toLocalDate())
 			.build();
 	}
 
 	/**
-	 * 중도상환 수수료 계산 로직
-	 * - paymentDifference가 음수일 경우 0으로 간주
-	 * - 수수료율은 계약서(form)에 정의된 수수료율 사용
+	 * 중도상환 수수료 계산
 	 */
 	private long calculateEarlyRepaymentFee(long paymentDifference, FormEntity form) {
 		BigDecimal safeDiff = BigDecimal.valueOf(Math.max(0, paymentDifference));
 		return safeDiff.multiply(form.getEarlyRepaymentFeeRate()).longValue();
 	}
 
-	private long calculateCurrentMonthRepayment(FormEntity form, ContractEntity contract, LocalDate viewDate) {
-		PaymentPreviewRequest request = new PaymentPreviewRequest(form);
-		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(request, PageRequest.of(0, 100));
+	// ──────────────── 레포지토리 조회 유틸 메서드 ────────────────
 
-		Optional<PaymentScheduleResponse> schedule = preview.getSchedulePage().stream()
-			.filter(p -> p.getInstallmentNumber().equals(contract.getCurrentPaymentRound()))
-			.findFirst();
-
-		long expected = schedule.map(PaymentScheduleResponse::getPaymentAmount).orElse(0L);
-		long paid = transferRepository.findByForm(form).orElse(Collections.emptyList()).stream()
-			.filter(t -> {
-				LocalDate transferDate = t.getTransactionDate().toLocalDate();
-				return transferDate.getYear() == viewDate.getYear()
-					&& transferDate.getMonth() == viewDate.getMonth();
-			})
-			.mapToLong(TransferEntity::getAmount)
-			.sum();
-
-		long overdue = contract.getOverdueAmount();
-		return Math.max(0, expected + overdue - paid);
-	}
-
-	private long calculateFutureMonthRepayment(FormEntity form, ContractEntity contract, int installmentNumber) {
-		PaymentPreviewRequest request = new PaymentPreviewRequest(form);
-		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(request, PageRequest.of(0, 100));
-
-		return preview.getSchedulePage().stream()
-			.filter(p -> p.getInstallmentNumber().intValue() == installmentNumber)
-			.findFirst()
-			.map(p -> p.getPaymentAmount() + contract.getOverdueAmount())
-			.orElse(0L);
-	}
-
-	private long calculatePastMonthPaidAmount(FormEntity form, LocalDate viewDate) {
-		return transferRepository.findByForm(form).orElse(Collections.emptyList()).stream()
-			.filter(t -> {
-				LocalDate transferDate = t.getTransactionDate().toLocalDate();
-				return transferDate.getYear() == viewDate.getYear()
-					&& transferDate.getMonth() == viewDate.getMonth();
-			})
-			.mapToLong(TransferEntity::getAmount)
-			.sum();
-	}
-
-	// ===== Repository 조회 유틸 메서드 =====
-
-	/** 계약서 ID로 FormEntity 조회 */
 	private FormEntity getForm(Integer formId) {
 		return formRepository.findById(formId)
 			.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
 	}
 
-	/** FormEntity로 연결된 계약 정보 조회 */
 	private ContractEntity getContract(FormEntity form) {
 		return contractRepository.findByForm(form)
 			.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
 	}
 
-	/** 사용자 ID로 사용자 정보 조회 */
 	private UserEntity getUser(Integer userId) {
 		return userRepository.findById(userId)
 			.orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 	}
 
-	/** 계약서에 연결된 송금 내역 조회 */
 	private List<TransferEntity> getTransfers(FormEntity form) {
 		return transferRepository.findByForm(form)
-			.orElseThrow(() -> new TransferException(ErrorCode.TRANSFER_NOT_FOUND));
+			.orElse(Collections.emptyList());
 	}
 
+	/**
+	 * 신규 계약(Contract) 생성 시
+	 * - EnhancedPaymentPreviewService를 통해 전체 회차 스케줄을 받아 총 원금/이자 설정
+	 */
 	@Transactional
 	public void createContract(FormEntity form) {
 		ContractEntity contract = ContractEntity.builder()
@@ -449,17 +602,15 @@ public class ContractService {
 			))
 			.build();
 
-		PaymentPreviewRequest request = new PaymentPreviewRequest(form);
-		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(request,
-			PageRequest.of(0, 1000));
+		// EnhancedPaymentPreviewService 이용
+		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService
+			.calculateEnhancedPaymentPreview(form, contract);
 
-		long maturityPayment = preview.getSchedulePage()
-			.stream()
-			.mapToLong(PaymentScheduleResponse::getPrincipal)
+		long maturityPayment = preview.getScheduleList().stream()
+			.mapToLong(EnhancedPaymentScheduleResponse::getPrincipal)
 			.sum();
-		long maturityInterest = preview.getSchedulePage()
-			.stream()
-			.mapToLong(PaymentScheduleResponse::getInterest)
+		long maturityInterest = preview.getScheduleList().stream()
+			.mapToLong(EnhancedPaymentScheduleResponse::getInterest)
 			.sum();
 
 		contract.setExpectedMaturityPayment(maturityPayment);
@@ -474,7 +625,7 @@ public class ContractService {
 	}
 
 	/**
-	 * 송금 생성 시 계약 상태 업데이트 처리 (정상 납부 / 중도상환 / 연체 모두 처리)
+	 * 송금 생성 시 계약 상태 업데이트 (정상 납부 / 중도상환 / 연체 등) 처리
 	 */
 	@Transactional
 	public void updateContract(TransferCreateRequest request) {
@@ -483,81 +634,179 @@ public class ContractService {
 		ContractEntity contract = contractRepository.findByForm(form)
 			.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
 
-		long amount = request.getAmount(); // 실제 송금된 금액
-		long repaymentAmount = request.getRepaymentAmount(); // 이번 회차 예상 납부 금액
-		long diff = amount - repaymentAmount;
+		long leftover = request.getAmount(); // 이번 송금된 총액
+		log.info("===== updateContract: leftover(송금액) = {}", leftover);
 
-		long overdueAmount = contract.getOverdueAmount();
-		long remainingPrincipal = contract.getRemainingPrincipal();
-		long remainingPrincipalMinusOverdue = contract.getRemainingPrincipalMinusOverdue();
+		// 0) 먼저 연체액(overdueAmount)와 연체이자 등을 처리(연체라면 우선 해소)
+		leftover = clearOverdueIfAny(form, contract, leftover);
 
-		// 1. 연체금 먼저 처리
-		if (overdueAmount > 0) {
-			if (amount >= overdueAmount) {
-				long overdueInterest = BigDecimal.valueOf(overdueAmount)
-					.multiply(form.getOverdueInterestRate()).longValue();
+		// 1) "여러 회차"를 반복하며 leftover를 상환
+		//    (한 회차를 이자→원금 순으로 상환 후 leftover가 남으면 다음 회차로 이동)
+		while (leftover > 0) {
+			// 현재 회차 스케줄 정보 가져오기
+			EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService
+				.calculateEnhancedPaymentPreview(form, contract);
 
-				amount -= overdueAmount;
-				overdueAmount = 0;
-				remainingPrincipal -= overdueAmount;
-				remainingPrincipalMinusOverdue -= overdueAmount;
+			Optional<EnhancedPaymentScheduleResponse> scheduleOpt = preview.getScheduleList().stream()
+				.filter(s -> s.getInstallmentNumber() == contract.getCurrentPaymentRound())
+				.findFirst();
 
-				contract.setOverdueAmount(overdueAmount);
-				contract.setOverdueInterestAmount(contract.getOverdueInterestAmount() + overdueInterest);
-				contract.setInterestAmount(contract.getInterestAmount() + overdueInterest);
-			} else {
-				long overdueInterest = BigDecimal.valueOf(amount)
-					.multiply(form.getOverdueInterestRate()).longValue();
-
-				overdueAmount -= amount;
-				remainingPrincipal -= amount;
-				remainingPrincipalMinusOverdue -= amount;
-
-				contract.setOverdueAmount(overdueAmount);
-				contract.setOverdueInterestAmount(contract.getOverdueInterestAmount() + overdueInterest);
-				contract.setInterestAmount(contract.getInterestAmount() + overdueInterest);
-				contract.setRemainingPrincipal(remainingPrincipal);
-				contract.setRemainingPrincipalMinusOverdue(remainingPrincipalMinusOverdue);
+			if (scheduleOpt.isEmpty()) {
+				// 더 이상 회차가 없으면 -> 만기
+				log.info("모든 회차 상환 완료로 만기 처리.");
+				form.updateStatus(FormStatus.COMPLETED);
 				contractRepository.save(contract);
-				return;
+				formRepository.save(form);
+				return; // 종료
+			}
+
+			EnhancedPaymentScheduleResponse schedule = scheduleOpt.get();
+			long roundInterest = schedule.getInterest();   // 이번 회차 이자
+			long roundPrincipal = schedule.getPrincipal(); // 이번 회차 원금
+			long roundTotal = schedule.getPaymentAmount(); // (이자 + 원금)
+
+			log.info("현재회차={}, 이자={}, 원금={}, 회차필요={}",
+				contract.getCurrentPaymentRound(), roundInterest, roundPrincipal, roundTotal);
+
+			// 1-1) 이번 회차 이자를 우선 충족
+			long usedForInterest = Math.min(leftover, roundInterest);
+			leftover -= usedForInterest;
+			// Contract에 누적 이자 증가
+			contract.setInterestAmount(contract.getInterestAmount() + usedForInterest);
+
+			// 1-2) 남은 돈으로 이번 회차 원금을 충족
+			long usedForPrincipal = 0;
+			if (leftover > 0) {
+				usedForPrincipal = Math.min(leftover, roundPrincipal);
+				leftover -= usedForPrincipal;
+
+				// 원금 차감
+				long newRemPrincipal = contract.getRemainingPrincipal() - usedForPrincipal;
+				contract.setRemainingPrincipal(newRemPrincipal);
+			}
+
+			long totalUsedThisRound = usedForInterest + usedForPrincipal;
+			log.info("이 회차에 사용된 금액(이자+원금)={}, leftover={}", totalUsedThisRound, leftover);
+
+			// 1-3) 회차 완납 여부 판단
+			if (totalUsedThisRound >= roundTotal) {
+				// 이번 회차 완납 -> 다음 회차로 이동
+				moveToNextRound(form, contract);
+			} else {
+				// 이번 회차를 전부 충족 못함 -> 미납(연체) 처리
+				long notPaid = roundTotal - totalUsedThisRound;
+				log.info("회차 완납 실패, notPaid={}", notPaid);
+
+				contract.setOverdueAmount(notPaid);
+				form.updateStatus(FormStatus.OVERDUE);
+				contractRepository.save(contract);
+				formRepository.save(form);
+				break; // leftover가 0이거나 더이상 진행 불가
 			}
 		}
 
-		// 2. 정상 납부 or 중도상환 구분
-		if (diff >= 0) {
-			// 정상 납부 or 연체 상환
-			long interest = BigDecimal.valueOf(amount).multiply(form.getInterestRate()).longValue();
-			contract.setTotalEarlyRepaymentFee(0L);
-			contract.setInterestAmount(contract.getInterestAmount() + interest);
+		// leftover가 남았지만, 모든 회차가 이미 완납된 경우 -> 위 moveToNextRound에서 COMPLETED 처리 가능
+		// 혹은 leftover > 0이면 환불할지, 추가 회차가 있는지, 정책에 따라 결정
 
-			remainingPrincipal -= amount;
-			remainingPrincipalMinusOverdue -= overdueAmount;
-		} else {
-			// 중도상환 처리
-			long earlyRepaymentFee = calculateEarlyRepaymentFee(-diff, form);
-			long interest = BigDecimal.valueOf(repaymentAmount).multiply(form.getInterestRate()).longValue();
+		contractRepository.save(contract);
+		formRepository.save(form);
+	}
 
-			contract.setTotalEarlyRepaymentFee(-diff);
-			contract.setExpectedMaturityPayment(contract.getExpectedMaturityPayment() + earlyRepaymentFee);
-			contract.setInterestAmount(contract.getInterestAmount() + interest);
+	/**
+	 * 과거 달(ym)에 해당하는 모든 Transfer 내역을 찾아,
+	 * "송금 일자"를 scheduledPaymentDate로, 송금 금액을 repaymentAmount로 하는
+	 * 여러 MonthlyContractDetail을 생성
+	 */
+	private List<MonthlyContractDetail> findTransferDetailsForMonth(
+		FormEntity form, YearMonth ym,
+		boolean isCreditor, String contracteeName
+	) {
+		List<MonthlyContractDetail> details = new ArrayList<>();
 
-			remainingPrincipal -= repaymentAmount;
-			remainingPrincipalMinusOverdue -= repaymentAmount;
+		List<TransferEntity> transfers = transferRepository.findByForm(form)
+			.orElse(Collections.emptyList());
 
-			// 남은 송금 금액에서 이자, 수수료 뺀 만큼 원금 차감
-			long surplus = amount - repaymentAmount;
-			long surplusInterest = BigDecimal.valueOf(surplus).multiply(form.getInterestRate()).longValue();
-			long surplusFee = calculateEarlyRepaymentFee(surplus, form);
-			long principalReduce = surplus - surplusInterest - surplusFee;
+		// 이 달(ym)에 해당하는 모든 Transfer를 찾아서
+		// 각각 detail로 매핑
+		transfers.stream()
+			.filter(t -> {
+				LocalDate txDate = t.getTransactionDate().toLocalDate();
+				return YearMonth.from(txDate).equals(ym);
+			})
+			.forEach(t -> {
+				MonthlyContractDetail detail = MonthlyContractDetail.builder()
+					.userIsCreditor(isCreditor)
+					.contracteeName(contracteeName)
+					.repaymentAmount(t.getAmount()) // 실제 송금액
+					.scheduledPaymentDate(t.getTransactionDate().toLocalDate()) // 실제 송금일
+					.build();
 
-			contract.setInterestAmount(contract.getInterestAmount() + surplusInterest);
-			remainingPrincipal -= principalReduce;
-			remainingPrincipalMinusOverdue -= principalReduce;
+				details.add(detail);
+			});
+
+		return details;
+	}
+
+	/**
+	 * 현재나 미래 달(ym)에 대해서, EnhancedPaymentPreviewService 스케줄에서
+	 * "paymentDate가 ym에 속하는 모든 회차"를 찾아
+	 * Detail을 여러 개 생성
+	 */
+	private List<MonthlyContractDetail> computeDetailsFromPreview(
+		FormEntity form, ContractEntity contract, YearMonth ym,
+		boolean isCreditor, String contracteeName
+	) {
+		List<MonthlyContractDetail> details = new ArrayList<>();
+
+		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService
+			.calculateEnhancedPaymentPreview(form, contract);
+
+		// 스케줄 중에서 "paymentDate의 YearMonth가 ym"인 회차들을 추출
+		preview.getScheduleList().stream()
+			.filter(s -> YearMonth.from(s.getPaymentDate().toLocalDate()).equals(ym))
+			.forEach(s -> {
+				// 회차별 날짜(s.getPaymentDate()) 를 scheduledPaymentDate로
+				// 납부 예정액(s.getPaymentAmount())를 repaymentAmount로
+				MonthlyContractDetail detail = MonthlyContractDetail.builder()
+					.userIsCreditor(isCreditor)
+					.contracteeName(contracteeName)
+					.repaymentAmount(s.getPaymentAmount())
+					.scheduledPaymentDate(s.getPaymentDate().toLocalDate())
+					.build();
+
+				details.add(detail);
+			});
+
+		return details;
+	}
+
+	private long clearOverdueIfAny(FormEntity form, ContractEntity contract, long leftover) {
+		long result = leftover;
+
+		long odAmount = contract.getOverdueAmount();
+		if (odAmount > 0) {
+			// 여기서는 overdueAmount에 "원금+연체이자"가 섞여있다고 가정
+			// 더 정교하게 "overdueInterestAmount"를 별도 필드로 관리하려면, 이자→원금 순으로 더 세밀히 처리
+
+			if (result >= odAmount) {
+				// 연체액 전부 해소
+				result -= odAmount;
+				contract.setOverdueAmount(0L);
+
+				// 상태를 IN_PROGRESS 복귀
+				form.updateStatus(FormStatus.IN_PROGRESS);
+			} else {
+				// 부분 해소
+				long remain = odAmount - result;
+				contract.setOverdueAmount(remain);
+				result = 0;
+				// 아직 연체 중
+				form.updateStatus(FormStatus.OVERDUE);
+			}
 		}
 
-		contract.setRemainingPrincipal(remainingPrincipal);
-		contract.setRemainingPrincipalMinusOverdue(remainingPrincipalMinusOverdue);
-		contractRepository.save(contract);
+		// result = "연체 차감 후 남은 돈"
+		return result;
 	}
 
 }
