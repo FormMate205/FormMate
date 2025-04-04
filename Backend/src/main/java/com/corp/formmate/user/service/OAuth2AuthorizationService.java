@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,10 +19,17 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class OAuth2AuthorizationService {
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtTokenService jwtTokenService;
+
+    @Autowired
+    public OAuth2AuthorizationService(
+            @Qualifier("customStringRedisTemplate") RedisTemplate<String, String> redisTemplate,
+            JwtTokenService jwtTokenService) {
+        this.redisTemplate = redisTemplate;
+        this.jwtTokenService = jwtTokenService;
+    }
 
     // 인증 코드 유효 시간 (5분)
     private static final long AUTH_CODE_EXPIRATION = 5 * 60;
