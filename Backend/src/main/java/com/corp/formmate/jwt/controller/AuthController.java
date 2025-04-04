@@ -131,7 +131,8 @@ public class AuthController {
         LoginResponse loginResponse = new LoginResponse(
                 user.getId(),
                 user.getEmail(),
-                user.getUserName()
+                user.getUserName(),
+                false
         );
 
         user.login();
@@ -370,11 +371,18 @@ public class AuthController {
             // 리프레시 토큰을 쿠키에 저장
             jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
+            // 추가정보(주소, 전화번호)가 필요한지 확인
+            boolean needsAdditionalInfo = user.getAddress() == null ||
+                    user.getPhoneNumber() == null ||
+                    user.getAddress().isEmpty() ||
+                    user.getPhoneNumber().isEmpty();
+
             // 응답 객체 생성
             LoginResponse loginResponse = new LoginResponse(
                     user.getId(),
                     user.getEmail(),
-                    user.getUserName()
+                    user.getUserName(),
+                    needsAdditionalInfo
             );
 
             user.login();
