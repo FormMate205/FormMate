@@ -93,7 +93,7 @@ export const useGetNotificationList = ({
     };
 };
 
-// 읽지 않은 알림 개수 조회
+// 읽지 않은 알림 개수 조회 (Polling)
 const getUnreadNotificationCount =
     async (): Promise<GetUnreadNotificationCountResponse> => {
         const response = await api.get<GetUnreadNotificationCountResponse>(
@@ -106,6 +106,7 @@ export const useUnreadNotificationCount = () => {
     return useQuery({
         queryKey: ['unreadNotificationCount'],
         queryFn: () => getUnreadNotificationCount(),
+        refetchInterval: 30000, // 30초마다 조회
     });
 };
 

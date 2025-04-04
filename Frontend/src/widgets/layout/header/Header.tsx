@@ -2,11 +2,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Icons } from '@/shared';
 
 interface HeaderProps {
-    isHome?: boolean;
     title: string;
+    isHome?: boolean;
+    unreadCount?: number;
 }
 
-const Header = ({ isHome = false, title }: HeaderProps) => {
+const Header = ({ isHome = false, title, unreadCount }: HeaderProps) => {
     const { pathname } = useLocation();
     const navigate = useNavigate();
 
@@ -53,9 +54,12 @@ const Header = ({ isHome = false, title }: HeaderProps) => {
                 <button
                     aria-label='알림'
                     onClick={onNavigateNotify}
-                    className='flex items-center justify-center'
+                    className='relative mr-1 flex items-center justify-center'
                 >
                     <Icons name='bell' size={18} className='fill-line-900' />
+                    {(unreadCount ?? 0) > 0 && (
+                        <span className='absolute -top-[3px] -right-[2px] h-[6px] w-[6px] rounded-full bg-red-500'></span>
+                    )}
                 </button>
             )}
         </div>
