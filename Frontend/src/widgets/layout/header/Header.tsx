@@ -58,7 +58,7 @@ const Header = ({ isHome = false, title, unreadCount }: HeaderProps) => {
                 >
                     <Icons name='bell' size={18} className='fill-line-900' />
                     {(unreadCount ?? 0) > 0 && (
-                        <span className='absolute -top-[3px] -right-[2px] h-[6px] w-[6px] rounded-full bg-red-500'></span>
+                        <span className='animate-pop absolute -top-[3px] -right-[2px] h-[6px] w-[6px] rounded-full bg-red-500'></span>
                     )}
                 </button>
             )}
