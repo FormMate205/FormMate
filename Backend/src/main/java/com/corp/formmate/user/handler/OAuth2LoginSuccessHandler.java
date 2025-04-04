@@ -5,12 +5,14 @@ import com.corp.formmate.jwt.properties.JwtProperties;
 import com.corp.formmate.jwt.service.JwtTokenService;
 import com.corp.formmate.user.entity.Provider;
 import com.corp.formmate.user.entity.UserEntity;
+import com.corp.formmate.user.service.OAuth2AuthorizationService;
 import com.corp.formmate.user.service.OAuth2UserInfo;
 import com.corp.formmate.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -26,13 +28,15 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private final OAuth2AuthorizationService oauth2AuthorizationService;
     private final UserService userService;
-    private final JwtTokenService jwtTokenService;
-    private final JwtProperties jwtProperties;
+
+    // 프론트엔드 URL을 환경변수나 설정에서 가져오도록 조정
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException{
-
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
         OAuth2User oAuth2User  = oauthToken.getPrincipal();
 
@@ -63,14 +67,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     user.getAddress().isEmpty() ||
                     user.getPhoneNumber().isEmpty();
 
-            // JWT 토큰 생성
-            Token token = jwtTokenService.createTokens(user.getId());
-
-            // refresh token 쿠키에 저장
-            jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
+            // 일회용 인증 코드 생성
+            String authCode = oauth2AuthorizationService.generateAuthorizationCode(user.getId());
 
             // 리다이렉트 URL 결정 (c추가 정보 필요 여부에 따라)
-            String targetUrl = determineTargetUrl(token.getAccessToken(), needsAdditionalInfo);
+            String targetUrl = determineTargetUrl(authCode, needsAdditionalInfo);
 
             // 리다이렉트
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
@@ -84,16 +85,30 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     /**
      * 로그인 후 리다이렉트 할 URL 결정
      */
-    private String determineTargetUrl(String accessToken, boolean needsAdditionalInfo) {
+//    private String determineTargetUrl(String authCode, boolean needsAdditionalInfo) {
+//        if (needsAdditionalInfo) {
+//            // 추가 정보가 필요한 경우 프로필 완성 페이지로 이동
+//            return UriComponentsBuilder.fromUriString("/login/oauthInfo")
+//                    .queryParam("code", authCode)
+//                    .build().toUriString();
+//        } else {
+//            // 추가 정보가 필요 없는 경우 메인 페이지로 이동
+//            return UriComponentsBuilder.fromUriString("/")
+//                    .queryParam("code", authCode)
+//                    .build().toUriString();
+//        }
+//    }
+
+    private String determineTargetUrl(String authCode, boolean needsAdditionalInfo) {
         if (needsAdditionalInfo) {
             // 추가 정보가 필요한 경우 프로필 완성 페이지로 이동
-            return UriComponentsBuilder.fromUriString("/complete-profile")
-                    .queryParam("token", accessToken)
+            return UriComponentsBuilder.fromUriString(frontendUrl + "/login/oauthInfo")
+                    .queryParam("code", authCode)
                     .build().toUriString();
         } else {
             // 추가 정보가 필요 없는 경우 메인 페이지로 이동
-            return UriComponentsBuilder.fromUriString("/")
-                    .queryParam("token", accessToken)
+            return UriComponentsBuilder.fromUriString(frontendUrl + "/")
+                    .queryParam("code", authCode)
                     .build().toUriString();
         }
     }

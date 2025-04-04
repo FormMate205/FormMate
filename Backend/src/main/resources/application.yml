@@ -176,6 +176,9 @@ firebase:
   config-path: ${FIREBASE_PATH}
   project-id: ${FIREBASE_ID}
 
+frontend:
+  url: http://localhost:5173
+
 ---
 # test ???
 spring:
