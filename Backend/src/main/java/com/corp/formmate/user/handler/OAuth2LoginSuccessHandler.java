@@ -85,31 +85,31 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     /**
      * 로그인 후 리다이렉트 할 URL 결정
      */
-//    private String determineTargetUrl(String authCode, boolean needsAdditionalInfo) {
-//        if (needsAdditionalInfo) {
-//            // 추가 정보가 필요한 경우 프로필 완성 페이지로 이동
-//            return UriComponentsBuilder.fromUriString("/login/oauthInfo")
-//                    .queryParam("code", authCode)
-//                    .build().toUriString();
-//        } else {
-//            // 추가 정보가 필요 없는 경우 메인 페이지로 이동
-//            return UriComponentsBuilder.fromUriString("/")
-//                    .queryParam("code", authCode)
-//                    .build().toUriString();
-//        }
-//    }
-
     private String determineTargetUrl(String authCode, boolean needsAdditionalInfo) {
         if (needsAdditionalInfo) {
             // 추가 정보가 필요한 경우 프로필 완성 페이지로 이동
-            return UriComponentsBuilder.fromUriString(frontendUrl + "/login/oauthInfo")
+            return UriComponentsBuilder.fromUriString("/login/oauthInfo")
                     .queryParam("code", authCode)
                     .build().toUriString();
         } else {
             // 추가 정보가 필요 없는 경우 메인 페이지로 이동
-            return UriComponentsBuilder.fromUriString(frontendUrl + "/")
+            return UriComponentsBuilder.fromUriString("/")
                     .queryParam("code", authCode)
                     .build().toUriString();
         }
     }
+
+//    private String determineTargetUrl(String authCode, boolean needsAdditionalInfo) {
+//        if (needsAdditionalInfo) {
+//            // 추가 정보가 필요한 경우 프로필 완성 페이지로 이동
+//            return UriComponentsBuilder.fromUriString(frontendUrl + "/login/oauthInfo")
+//                    .queryParam("code", authCode)
+//                    .build().toUriString();
+//        } else {
+//            // 추가 정보가 필요 없는 경우 메인 페이지로 이동
+//            return UriComponentsBuilder.fromUriString(frontendUrl + "/")
+//                    .queryParam("code", authCode)
+//                    .build().toUriString();
+//        }
+//    }
 }
