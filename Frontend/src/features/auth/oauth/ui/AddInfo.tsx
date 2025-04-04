@@ -50,6 +50,8 @@ const AddInfo = () => {
         console.log('code: ', code);
         if (!code) {
             navigate('/');
+        } else {
+            navigate(window.location.pathname, { replace: true });
         }
     }, [code, navigate]);
 
