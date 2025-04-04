@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.corp.formmate.alert.dto.AlertCountResponse;
@@ -90,12 +91,12 @@ public class AlertController {
 			)
 		))
 	})
-	@GetMapping("/history/{alertId}")
+	@GetMapping("/history")
 	public ResponseEntity<Page<AlertListResponse>> selectUnreadAlerts(
 		@CurrentUser AuthUser authUser,
 
-		@Parameter(description = "알림 ID", required = true, example = "1")
-		@PathVariable Integer alertId,
+		@Parameter(description = "알림 ID", example = "1")
+		@RequestParam(required = false) Integer alertId,
 
 		@Parameter(description = "페이징 정보")
 		Pageable pageable
