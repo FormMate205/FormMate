@@ -10,7 +10,7 @@ import ChatInput from '../../entities/chat/ui/ChatInput';
 
 const Chat = () => {
     const location = useLocation();
-    const { isFin } = location.state;
+    const { isFin, creditorId } = location.state;
 
     const { user } = useUserStore();
     const { roomId } = useParams();
@@ -23,6 +23,8 @@ const Chat = () => {
         isConnected,
         scrollRef,
     } = useConnectWs({ user, roomId });
+
+    console.log('messages', messages);
 
     const displayProfile = showName(messages);
     return (
@@ -48,6 +50,7 @@ const Chat = () => {
                             formId={chat.formId!}
                             children={chat.content}
                             type={chat.messageType}
+                            creditorId={creditorId}
                             signId={chat.targetUserId}
                         />
                     ) : (

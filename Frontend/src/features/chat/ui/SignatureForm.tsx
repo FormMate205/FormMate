@@ -7,9 +7,10 @@ import { useSignature } from '../model/useSignature';
 interface SignatureFormProps {
     formId: string;
     type: MessageType;
+    creditorId: string;
 }
 
-const SignatureForm = ({ formId, type }: SignatureFormProps) => {
+const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
     // 입력 및 인증 상태 관리
     const {
         name,
@@ -27,10 +28,9 @@ const SignatureForm = ({ formId, type }: SignatureFormProps) => {
         setCode,
 
         handleRequestVerification,
-        handleVerifyCode,
         handleRecaptchaChange,
         handleRecaptchaExpired,
-    } = useSignature({ formId, type });
+    } = useSignature({ formId, type, creditorId });
 
     return (
         <div className='flex w-full flex-col'>
@@ -89,29 +89,25 @@ const SignatureForm = ({ formId, type }: SignatureFormProps) => {
                                     onChange={(e) => setCode(e.target.value)}
                                     isEmpty={codeIsEmpty}
                                 />
-                                <Button
-                                    variant='default'
-                                    className='whitespace-nowrap'
-                                    onClick={handleVerifyCode}
-                                >
-                                    확인
-                                </Button>
                             </div>
+                            <ReCAPTCHA
+                                sitekey={
+                                    import.meta.env.VITE_RECAPTCHA_SITE_KEY
+                                }
+                                onChange={handleRecaptchaChange}
+                                onExpired={handleRecaptchaExpired}
+                            />
                         </div>
-                    )}
-
-                    {isVerified && (
-                        <ReCAPTCHA
-                            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                            onChange={handleRecaptchaChange}
-                            onExpired={handleRecaptchaExpired}
-                        />
                     )}
 
                     {tokenIsEmpty && (
                         <p className='text-red-500'>
                             ReCAPTCHA 인증이 필요합니다.
                         </p>
+                    )}
+
+                    {isVerified && (
+                        <p className='text-red-500'>인증에 실패하였습니다.</p>
                     )}
                 </div>
             </div>

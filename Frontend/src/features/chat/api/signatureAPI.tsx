@@ -13,7 +13,9 @@ const postRequstDebtor = async ({
     phoneNumber,
 }: SignatureRequest) => {
     const reponse = await api.post('/form/confirm/debtor', {
-        params: { formId, userName, phoneNumber },
+        formId,
+        userName,
+        phoneNumber,
     });
     return reponse.data;
 };
@@ -38,7 +40,9 @@ const postRequstCreditor = async ({
     phoneNumber,
 }: SignatureRequest) => {
     const reponse = await api.post('/form/confirm/creditor', {
-        params: { formId, userName, phoneNumber },
+        formId,
+        userName,
+        phoneNumber,
     });
     return reponse.data;
 };
@@ -64,7 +68,10 @@ const postConfirmDebtor = async ({
     recaptchaToken,
 }: TerminationRequest) => {
     const reponse = await api.patch(`/form/confirm/debtor`, {
-        params: { formId, phoneNumber, verificationCode, recaptchaToken },
+        formId,
+        phoneNumber,
+        verificationCode,
+        recaptchaToken,
     });
 
     return reponse.data;
@@ -98,7 +105,10 @@ const postConfirmCreditor = async ({
     recaptchaToken,
 }: TerminationRequest) => {
     const reponse = await api.patch(`/form/confirm/creditor`, {
-        params: { formId, phoneNumber, verificationCode, recaptchaToken },
+        formId,
+        phoneNumber,
+        verificationCode,
+        recaptchaToken,
     });
 
     return reponse.data;
@@ -147,9 +157,7 @@ const postTerminateFirst = async ({
 }: SignatureRequest) => {
     const reponse = await api.post(
         `/form/${formId}/termination/firstSign/verify`,
-        {
-            params: { userName, phoneNumber },
-        },
+        { userName, phoneNumber },
     );
 
     return reponse.data;
@@ -176,9 +184,7 @@ const postTerminateSecond = async ({
 }: SignatureRequest) => {
     const reponse = await api.post(
         `/form/${formId}/termination/secondSign/verify`,
-        {
-            params: { userName, phoneNumber },
-        },
+        { userName, phoneNumber },
     );
 
     return reponse.data;
@@ -207,9 +213,7 @@ const postTerminateFirstConfirm = async ({
 }: TerminationRequest) => {
     const reponse = await api.post(
         `/form/${formId}/termination/firstSign/confirm`,
-        {
-            params: { phoneNumber, verificationCode, recaptchaToken },
-        },
+        { phoneNumber, verificationCode, recaptchaToken },
     );
 
     return reponse.data;
@@ -244,9 +248,7 @@ const postTerminateSecondConfirm = async ({
 }: TerminationRequest) => {
     const reponse = await api.post(
         `/form/${formId}/termination/secondSign/confirm`,
-        {
-            params: { phoneNumber, verificationCode, recaptchaToken },
-        },
+        { phoneNumber, verificationCode, recaptchaToken },
     );
 
     return reponse.data;
