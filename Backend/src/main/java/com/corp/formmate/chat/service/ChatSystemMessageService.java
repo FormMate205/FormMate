@@ -35,7 +35,7 @@ public class ChatSystemMessageService {
     private final FormService formService;
 
     /**
-     * 시스템 메세지 생성 메서드
+     * 시스템 메세지 생성 메서드 (요청 상대가 없는)
      */
     @Transactional
     public ChatResponse createSystemMessage(SystemMessageRequest request) {
@@ -96,6 +96,67 @@ public class ChatSystemMessageService {
     }
 
     /**
+     * 시스템 메세지 생성 메서드 (요청 상대가 있는)
+     */
+    @Transactional
+    public ChatResponse createSystemMessageWithRequest(SystemMessageRequest request, Integer targetUserId) {
+        try {
+            // 시스템 사용자 조회
+            UserEntity systemUser = userService.selectById(SystemConstants.SYSTEM_USER_ID);
+
+            // 계약 엔티티 조회
+            FormEntity form = formService.selectById(request.getFormId());
+
+            // 요청자 정보가 있는 경우 메세지 내용 가공
+            String finalContent = request.getContent();
+            if (request.getRequestedByUserId() != null) {
+                UserEntity requester = userService.selectById(request.getRequestedByUserId());
+                finalContent = finalContent.replace("{userName}", requester.getUserName());
+            }
+
+            // 채권자 정보가 있는 경우 치환
+            if (request.getCreditorId() != null) {
+                UserEntity creditor = userService.selectById(request.getCreditorId());
+                finalContent = finalContent.replace("{creditorName}", creditor.getUserName());
+            }
+
+            // 채무자 정보가 있는 경우 치환
+            if (request.getDebtorId() != null) {
+                UserEntity debtor = userService.selectById(request.getDebtorId());
+                finalContent = finalContent.replace("{debtorName}", debtor.getUserName());
+            }
+
+            // 상대방 정보가 있는 경우 치환
+            if (request.getCounterpartyId() != null) {
+                UserEntity counterparty = userService.selectById(request.getCounterpartyId());
+                finalContent = finalContent.replace("{counterpartyName}", counterparty.getUserName());
+            }
+
+            // 시스템 메세지 생성 및 저장
+            ChatEntity chat = ChatEntity.builder()
+                    .form(form)
+                    .writer(systemUser)
+                    .content(finalContent)
+                    .messageType(request.getMessageType())
+                    .isRead(false)
+                    .build();
+
+            ChatEntity savedChat = chatRepository.save(chat);
+
+            // 채팅 응답 DTO 생성
+            ChatResponse response = createChatResponseFromEntityWithTarget(savedChat, targetUserId);
+
+            // 채팅방에 실시간 전송
+            messagingTemplate.convertAndSend("/topic/chat/" + savedChat.getId(), response);
+
+            return response;
+        } catch (Exception e) {
+            log.error("시스템 메시지 생성 중 오류 발생", e);
+            throw new ChatException(ErrorCode.CHAT_SEND_ERROR);
+        }
+    }
+
+    /**
      * 계약서 생성 이벤트 처리
      */
     @EventListener
@@ -132,11 +193,11 @@ public class ChatSystemMessageService {
         SystemMessageRequest thirdRequest = SystemMessageRequest.builder()
                 .formId(form.getId())
                 .content("{debtorName}님의 서명을 기다립니다.")
-                .messageType(MessageType.SIGNATURE_REQUEST)
+                .messageType(MessageType.SIGNATURE_REQUEST_CONTRACT)
                 .debtorId(debtorId)
                 .build();
 
-        createSystemMessage(thirdRequest);
+        createSystemMessageWithRequest(thirdRequest, debtorId);
     }
 
     /**
@@ -196,7 +257,7 @@ public class ChatSystemMessageService {
         SystemMessageRequest request = SystemMessageRequest.builder()
                 .formId(form.getId())
                 .content("{creditorName}님과 {debtorName}님의 금전 차용증 계약서가 수정되었습니다. 계약 내용을 확인한 후, 서명하고 최종 승인해주세요.\n\n계약서 수정은 생성자인 {userName}님에게 권한이 있습니다.")
-                .messageType(MessageType.CONTRACT_SHARED)
+                .messageType(MessageType.SYSTEM_NOTIFICATION)
                 .requestedByUserId(requestedByUserId)
                 .creditorId(creditorId)
                 .debtorId(debtorId)
@@ -217,11 +278,11 @@ public class ChatSystemMessageService {
         SystemMessageRequest thirdRequest = SystemMessageRequest.builder()
                 .formId(form.getId())
                 .content("{debtorName}님의 서명을 기다립니다.")
-                .messageType(MessageType.SIGNATURE_REQUEST)
+                .messageType(MessageType.SIGNATURE_REQUEST_CONTRACT)
                 .debtorId(debtorId)
                 .build();
 
-        createSystemMessage(thirdRequest);
+        createSystemMessageWithRequest(thirdRequest, debtorId);
     }
 
     /**
@@ -249,11 +310,11 @@ public class ChatSystemMessageService {
         SystemMessageRequest secondRequest = SystemMessageRequest.builder()
                 .formId(form.getId())
                 .content("{creditorName}님의 서명을 기다립니다.")
-                .messageType(MessageType.SIGNATURE_REQUEST)
+                .messageType(MessageType.SIGNATURE_REQUEST_CONTRACT)
                 .creditorId(creditorId)
                 .build();
 
-        createSystemMessage(secondRequest);
+        createSystemMessageWithRequest(secondRequest, creditorId);
     }
 
     /**
@@ -300,12 +361,12 @@ public class ChatSystemMessageService {
         SystemMessageRequest request = SystemMessageRequest.builder()
                 .formId(form.getId())
                 .content("{userName}님이 계약 종료를 요청했습니다. {counterpartyName}님의 서명을 기다립니다.")
-                .messageType(MessageType.SIGNATURE_REQUEST)
+                .messageType(MessageType.SIGNATURE_REQUEST_TERMINATION)
                 .requestedByUserId(requestedByUserId)
                 .counterpartyId(counterpartyId)
                 .build();
 
-        createSystemMessage(request);
+        createSystemMessageWithRequest(request, counterpartyId);
     }
 
     /**
@@ -351,10 +412,12 @@ public class ChatSystemMessageService {
         SystemMessageRequest request = SystemMessageRequest.builder()
                 .formId(form.getId())
                 .content("{userName}님이 계약 종료에 서명했습니다. {counterpartyName}님의 서명을 기다립니다.")
-                .messageType(MessageType.SIGNATURE_REQUEST)
+                .messageType(MessageType.SIGNATURE_REQUEST_TERMINATION)
                 .requestedByUserId(requestedByUserId)
                 .counterpartyId(counterpartyId)
                 .build();
+
+        createSystemMessageWithRequest(request, counterpartyId);
     }
 
     /**
@@ -388,8 +451,23 @@ public class ChatSystemMessageService {
                 .isRead(chatEntity.getIsRead())
                 .createdAt(chatEntity.getCreatedAt())
                 .messageType(chatEntity.getMessageType())
-                .isCreditorMessage(chatEntity.isCreditorMessage())
-                .isDebtorMessage(chatEntity.isDebtorMessage())
+                .build();
+    }
+
+    /**
+     * 채팅 엔티티를 응답 DTO로 변환
+     */
+    private ChatResponse createChatResponseFromEntityWithTarget(ChatEntity chatEntity, Integer targetUserId) {
+        return ChatResponse.builder()
+                .id(chatEntity.getId())
+                .formId(chatEntity.getForm().getId())
+                .writerId(chatEntity.getWriter().getId())
+                .writerName(chatEntity.getWriter().getUserName())
+                .content(chatEntity.getContent())
+                .isRead(chatEntity.getIsRead())
+                .createdAt(chatEntity.getCreatedAt())
+                .messageType(chatEntity.getMessageType())
+                .targetUserId(targetUserId)
                 .build();
     }
 
