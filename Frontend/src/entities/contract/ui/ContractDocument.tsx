@@ -7,6 +7,7 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { formatCurrency } from '@/shared/model/formatCurrency';
+import { getSignatureStatus } from '../model/getSignatureStatus';
 import { ContractDocs } from '../model/types';
 
 const styles = {
@@ -30,6 +31,7 @@ const ContractDocument = ({
     isPdfMode = false,
 }: ContractDocumentProps) => {
     const {
+        status,
         creditorName,
         creditorPhone,
         debtorName,
@@ -152,11 +154,15 @@ const ContractDocument = ({
                 <div className='flex flex-col items-end text-right font-medium'>
                     <div>
                         <span>{creditorName}</span>
-                        <span className={styles.subtext}>(전자서명 완료)</span>
+                        <span className={styles.subtext}>
+                            {getSignatureStatus(status, 'creditor')}
+                        </span>
                     </div>
                     <div>
                         <span>{debtorName}</span>
-                        <span className={styles.subtext}>(전자서명 완료)</span>
+                        <span className={styles.subtext}>
+                            {getSignatureStatus(status, 'debtor')}
+                        </span>
                     </div>
                 </div>
             </article>
