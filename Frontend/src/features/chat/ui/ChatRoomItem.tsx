@@ -44,9 +44,11 @@ const ChatRoomItem = ({
                 <p className='text-line-700 text-sm whitespace-nowrap'>
                     {lastMessageTime}
                 </p>
-                <div className='bg-primary-100 text-primary-500 flex items-center justify-center rounded-lg px-2 py-[2px] text-sm font-medium'>
-                    {unreadCount}
-                </div>
+                {Number(unreadCount) > 0 && (
+                    <div className='bg-primary-100 text-primary-500 flex items-center justify-center rounded-lg px-2 py-[2px] text-sm font-medium'>
+                        {unreadCount}
+                    </div>
+                )}
             </div>
         </button>
     );
