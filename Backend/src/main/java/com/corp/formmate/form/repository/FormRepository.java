@@ -1,5 +1,6 @@
 package com.corp.formmate.form.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -73,11 +74,13 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 	List<FormEntity> findAllByCreditorIdOrDebtorId(Integer creditorId, Integer debtorId);
 
 	@Query("SELECT f FROM FormEntity f WHERE (f.creditor.id = :userId OR f.debtor.id = :userId) " +
-			"AND (:statuses IS NULL OR f.status IN :statuses) " +
-			"AND (:name IS NULL OR f.creditorName LIKE %:name% OR f.debtorName LIKE %:name%)")
+		"AND (:statuses IS NULL OR f.status IN :statuses) " +
+		"AND (:name IS NULL OR f.creditorName LIKE %:name% OR f.debtorName LIKE %:name%)")
 	Page<FormEntity> findAllWithFiltersMultiStatus(
-			@Param("userId") Integer userId,
-			@Param("statuses") List<FormStatus> statuses,
-			@Param("name") String name,
-			Pageable pageable);
+		@Param("userId") Integer userId,
+		@Param("statuses") List<FormStatus> statuses,
+		@Param("name") String name,
+		Pageable pageable);
+
+	List<FormEntity> findByStatusIn(Collection<FormStatus> statuses);
 }
