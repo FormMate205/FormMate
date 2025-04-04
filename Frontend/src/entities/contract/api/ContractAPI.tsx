@@ -29,9 +29,15 @@ const getContractAmountChart = async (): Promise<ContractAmountChart> => {
 };
 
 export const useGetContractAmountChart = () => {
+    const accessToken =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('accessToken')
+            : null;
+
     return useQuery({
         queryKey: ['contractAmountChart'],
         queryFn: getContractAmountChart,
+        enabled: !!accessToken,
     });
 };
 

@@ -10,7 +10,7 @@ import { formatCurrency } from '@/shared/model/formatCurrency';
 import { ContractDocs } from '../model/types';
 
 const styles = {
-    container: 'flex flex-col gap-4 pt-4 p-6 bg-white text-black ',
+    container: 'flex flex-col gap-4 pt-4 p-6 bg-white text-black w-full',
     title: 'text-2xl font-medium text-center py-4 border-b border-[#bfc0d1]',
     label: 'font-semibold text-[#716b8a]',
     divider: 'border-t border-[#d1d5db] my-2',
