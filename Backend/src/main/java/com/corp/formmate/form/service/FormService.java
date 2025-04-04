@@ -461,7 +461,7 @@ public class FormService {
 	 * 계약 파기 첫 번째 당사자 인증 확인 및 서명
 	 */
 	@Transactional
-	public FormTerminationResponse confirmFirstSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request, FormTerminationSignRequest signRequest) {
+	public FormTerminationResponse confirmFirstSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -479,11 +479,6 @@ public class FormService {
 		// 채권자나 채무자만 서명 가능
 		if (!isParticipant(form, userId)) {
 			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
-		}
-
-		// 동의 확인
-		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
-			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
 		}
 
 		// 인증번호 확인
@@ -541,7 +536,7 @@ public class FormService {
 	 * 계약 파기 두 번째 당사자 인증 확인 및 서명 (계약 종료)
 	 */
 	@Transactional
-	public FormTerminationResponse confirmSecondSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request, FormTerminationSignRequest signRequest) {
+	public FormTerminationResponse confirmSecondSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -558,11 +553,6 @@ public class FormService {
 
 		if (!isParticipant(form, userId)) {
 			throw new FormException(ErrorCode.FORM_TERMINATION_NOT_ALLOWED);
-		}
-
-		// 동의 확인
-		if (signRequest.getConsent() == null || !signRequest.getConsent()) {
-			throw new FormException(ErrorCode.FORM_TERMINATION_CONSENT_REQUIRED);
 		}
 
 		// 인증번호 확인
