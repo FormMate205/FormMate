@@ -2,12 +2,10 @@ package com.corp.formmate.contract.controller;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +16,7 @@ import com.corp.formmate.contract.dto.ContractPreviewResponse;
 import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
-import com.corp.formmate.contract.dto.MonthlyContractResponse;
+import com.corp.formmate.contract.dto.MonthlyContractDetail;
 import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.global.annotation.CurrentUser;
@@ -63,7 +61,8 @@ public class ContractController {
 		)
 	})
 	@GetMapping("/{formId}")
-	public ResponseEntity<ContractDetailResponse> selectContractDetail(@CurrentUser AuthUser user, @PathVariable Integer formId) {
+	public ResponseEntity<ContractDetailResponse> selectContractDetail(@CurrentUser AuthUser user,
+		@PathVariable Integer formId) {
 		return ResponseEntity.ok(contractService.selectContractDetail(user, formId));
 	}
 
@@ -163,7 +162,8 @@ public class ContractController {
 		)
 	})
 	@GetMapping
-	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam String status, @CurrentUser AuthUser authUser) {
+	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam String status,
+		@CurrentUser AuthUser authUser) {
 		FormStatus formStatus = null;
 		if (!status.equals("ALL")) {
 			for (FormStatus s : FormStatus.values()) {
@@ -201,17 +201,14 @@ public class ContractController {
 		return ResponseEntity.ok(contractService.selectAmounts(authUser));
 	}
 
-	@Operation(summary = "메인화면 납부 계획(내역)", description = "메인화면 달력(additionalProp1 = day라고 생각하면 됨)")
+	@Operation(summary = "메인화면 납부 계획(내역)", description = "메인화면 달력(과거, 현재, 미래) - 과거면 실제 납부 기록, 미래면 예상 납부 스케줄 반환")
 	@ApiResponses({
 		@ApiResponse(
 			responseCode = "200",
 			description = "납부 계획(내역) 조회 성공",
 			content = @Content(
 				mediaType = "application/json",
-				schema = @Schema(
-					type = "object",
-					additionalPropertiesSchema = MonthlyContractResponse.class
-				)
+				array = @ArraySchema(schema = @Schema(implementation = MonthlyContractDetail.class))
 			)
 		),
 		@ApiResponse(
@@ -224,8 +221,13 @@ public class ContractController {
 		)
 	})
 	@GetMapping("/schedule")
-	public ResponseEntity<Map<Integer, MonthlyContractResponse>> selectMonthlyContracts(@CurrentUser AuthUser authUser, @RequestParam
-		LocalDate now, @RequestParam LocalDate viewDate) {
-		return ResponseEntity.ok(contractService.selectMonthlyContracts(authUser, now, viewDate));
+	public ResponseEntity<List<MonthlyContractDetail>> selectMonthlyContracts(
+		@CurrentUser AuthUser authUser,
+		@RequestParam LocalDate viewDate
+	) {
+		Integer userId = authUser.getId();
+		List<MonthlyContractDetail> details = contractService.selectMonthlyContracts(userId, viewDate);
+		return ResponseEntity.ok(details);
 	}
+
 }
