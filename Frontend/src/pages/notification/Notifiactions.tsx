@@ -1,7 +1,12 @@
+import { useMemo } from 'react';
 import { mapNotificationListToItems } from '@/entities/notification/model/mapNotificationItem';
 import { NotificationItemProps } from '@/entities/notification/model/types';
 import NotificationGroup from '@/entities/notification/ui/NotificationGroup';
-import { useGetUnreadNotificationList } from '@/features/notifications/api/NotificationAPI';
+import {
+    useGetNotificationList,
+    useGetUnreadNotificationList,
+} from '@/features/notifications/api/NotificationAPI';
+import { getMinAlertId } from '@/features/notifications/model/getMinAlertId';
 import { Footer, Header } from '@/widgets';
 
 const pastNotifications: NotificationItemProps[] = [
@@ -40,6 +45,16 @@ const pastNotifications: NotificationItemProps[] = [
 const Notifications = () => {
     const { data: unread } = useGetUnreadNotificationList();
     const unreadNotifications = mapNotificationListToItems(unread ?? []);
+    const minAlertId = useMemo(() => getMinAlertId(unread), [unread]);
+    const { notifications: read, lastItemRef } = useGetNotificationList({
+        alertId: minAlertId ?? '',
+        pageable: {
+            page: '0',
+            size: '10',
+        },
+    });
+
+    const readNotifications = mapNotificationListToItems(readNotifications);
 
     return (
         <div className='flex h-screen flex-col justify-between py-2'>
@@ -56,7 +71,7 @@ const Notifications = () => {
                     />
                     <NotificationGroup
                         label='이전 알림'
-                        notifications={pastNotifications}
+                        notifications={readNotifications}
                     />
                 </div>
             </section>

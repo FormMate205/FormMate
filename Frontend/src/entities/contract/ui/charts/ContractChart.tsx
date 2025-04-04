@@ -1,4 +1,4 @@
-import { RadialBar, RadialBarChart } from 'recharts';
+import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts';
 import {
     Card,
     CardContent,
@@ -6,17 +6,22 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { ChartConfig, ChartContainer } from '@/components/ui/chart';
+import {
+    ChartConfig,
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+} from '@/components/ui/chart';
 import { useGetContractAmountChart } from '../../api/ContractAPI';
 
 const chartConfig = {
-    edge: {
+    received: {
         label: '받은 금액',
-        color: '#E51D74',
-    },
-    other: {
-        label: '보낸 금액',
         color: '#4C6AFF',
+    },
+    paid: {
+        label: '보낸 금액',
+        color: '#E51D74',
     },
 } satisfies ChartConfig;
 
@@ -44,14 +49,14 @@ const ContractChart = () => {
 
     const chartData = [
         {
-            name: chartConfig.edge.label,
-            visitors: receivedPercent,
-            fill: chartConfig.edge.color,
+            name: chartConfig.received.label,
+            received: receivedPercent,
+            fill: chartConfig.received.color,
         },
         {
-            name: chartConfig.other.label,
-            visitors: sentPercent,
-            fill: chartConfig.other.color,
+            name: chartConfig.paid.label,
+            paid: sentPercent,
+            fill: chartConfig.paid.color,
         },
     ];
 
@@ -68,14 +73,51 @@ const ContractChart = () => {
                         className='mx-auto aspect-square max-h-[250px]'
                     >
                         <RadialBarChart
-                            data={chartData}
-                            startAngle={-90}
-                            endAngle={360}
-                            innerRadius={60}
-                            outerRadius={100}
+                            innerRadius={50}
+                            outerRadius={110}
+                            startAngle={90}
+                            endAngle={-270}
+                            data={[]} // 개별 data 사용 중이므로 무의미
                         >
+                            <PolarAngleAxis
+                                type='number'
+                                domain={[0, 100]}
+                                tick={false}
+                            />
+                            <ChartTooltip
+                                cursor={false}
+                                content={
+                                    <ChartTooltipContent
+                                        hideLabel
+                                        nameKey='name'
+                                        labelFormatter={(dataKey) => {
+                                            switch (dataKey) {
+                                                case 'paid':
+                                                    return '보낸 금액';
+                                                case 'received':
+                                                    return '받은 금액';
+                                                default:
+                                                    return dataKey;
+                                            }
+                                        }}
+                                    />
+                                }
+                            />
+
+                            {/* 받은 금액 */}
                             <RadialBar
-                                dataKey='visitors'
+                                dataKey='received'
+                                data={[chartData[0]]}
+                                fill={chartData[0].fill}
+                                background
+                                cornerRadius={10}
+                            />
+
+                            {/* 보낸 금액 */}
+                            <RadialBar
+                                dataKey='paid'
+                                data={[chartData[1]]}
+                                fill={chartData[1].fill}
                                 background
                                 cornerRadius={10}
                             />
@@ -86,24 +128,26 @@ const ContractChart = () => {
                     <div className='flex items-center gap-2 leading-none'>
                         <div
                             className='h-2.5 w-2.5 rounded-xl'
-                            style={{ backgroundColor: chartConfig.other.color }}
+                            style={{
+                                backgroundColor: chartConfig.received.color,
+                            }}
                         />
                         <div>
-                            보낸 금액{' '}
+                            받은 금액{' '}
                             <span className='text-line-900'>
-                                {paidAmount.toLocaleString()}원
+                                {receivedAmount.toLocaleString()}원
                             </span>
                         </div>
                     </div>
                     <div className='flex items-center gap-2 leading-none'>
                         <div
                             className='h-2.5 w-2.5 rounded-xl'
-                            style={{ backgroundColor: chartConfig.edge.color }}
+                            style={{ backgroundColor: chartConfig.paid.color }}
                         />
                         <div>
-                            받은 금액{' '}
+                            보낸 금액{' '}
                             <span className='text-line-900'>
-                                {receivedAmount.toLocaleString()}원
+                                {paidAmount.toLocaleString()}원
                             </span>
                         </div>
                     </div>

@@ -77,14 +77,12 @@ export type GetContractStatusCountResponse = {
 };
 
 // 보낼, 받을 금액 (차트)
-export type ContractAmountSummary = {
+export type ContractAmountChart = {
     paidAmount: number;
     expectedTotalRepayment: number;
     receivedAmount: number;
     expectedTotalReceived: number;
 };
-
-export type GetContractAmountChart = ContractAmountSummary;
 
 // 계약 상세 조회 상단 내용
 export type ContractDetailOverview = {

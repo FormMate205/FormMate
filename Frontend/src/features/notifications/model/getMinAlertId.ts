@@ -1,8 +1,10 @@
 import { Notification } from '@/entities/notification/model/types';
 
-// 가장 작은 alertId를 찾기
-export const getMinAlertId = (notifications: Notification[]): string => {
-    return Math.min(
-        ...notifications.map((n) => parseInt(n.alertId, 10)),
-    ).toString();
+export const getMinAlertId = (notifications: Notification[]): string | null => {
+    if (!notifications.length) return null;
+    const minId = notifications
+        .map((n) => parseInt(n.alertId, 10))
+        .reduce((min, id) => Math.min(min, id), Infinity);
+
+    return minId.toString();
 };
