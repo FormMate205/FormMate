@@ -1,5 +1,6 @@
 package com.corp.formmate.transfer.service;
 
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -186,14 +187,17 @@ public class TransferService {
 		String receiverName = transferEntity.getReceiver().getUserName();
 		String receiverAccountLast4 = getLast4Digits(transferEntity.getReceiver().getAccountNumber());
 
+		NumberFormat formatter = NumberFormat.getNumberInstance();
+		String formattedAmount = formatter.format(amount);
+
 		// 입금자 알림
 		String depositTitle = receiverName + "(" + receiverAccountLast4 + ") 입금 알림";
-		String depositContent = "입금 " + amount + "원 | " + senderName;
+		String depositContent = "입금 " + formattedAmount + "원 | " + senderName;
 		alertService.createAlert(transferEntity.getReceiver(), "입금", depositTitle, depositContent);
 
 		// 출금자 알림
 		String withdrawTitle = senderName + "(" + senderAccountLast4 + ") 출금 알림";
-		String withdrawContent = "출금 " + amount + "원 | " + receiverName;
+		String withdrawContent = "출금 " + formattedAmount + "원 | " + receiverName;
 		alertService.createAlert(transferEntity.getSender(), "출금", withdrawTitle, withdrawContent);
 
 		return TransferCreateResponse.fromEntity(transferEntity);
@@ -232,14 +236,17 @@ public class TransferService {
 		String receiverName = transferEntity.getReceiver().getUserName();
 		String receiverAccountLast4 = getLast4Digits(transferEntity.getReceiver().getAccountNumber());
 
+		NumberFormat formatter = NumberFormat.getNumberInstance();
+		String formattedBalance = formatter.format(transactionBalance);
+
 		// 입금자 알림
 		String depositTitle = receiverName + "(" + receiverAccountLast4 + ") 입금 알림";
-		String depositContent = "입금 " + transactionBalance + "원 | " + senderName;
+		String depositContent = "입금 " + formattedBalance + "원 | " + senderName;
 		alertService.createAlert(transferEntity.getReceiver(), "입금", depositTitle, depositContent);
 
 		// 출금자 알림
 		String withdrawTitle = senderName + "(" + senderAccountLast4 + ") 출금 알림";
-		String withdrawContent = "출금 " + transactionBalance + "원 | " + receiverName;
+		String withdrawContent = "출금 " + formattedBalance + "원 | " + receiverName;
 		alertService.createAlert(transferEntity.getSender(), "출금", withdrawTitle, withdrawContent);
 	}
 

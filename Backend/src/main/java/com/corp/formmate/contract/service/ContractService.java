@@ -1,6 +1,7 @@
 package com.corp.formmate.contract.service;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.corp.formmate.alert.service.AlertService;
 import com.corp.formmate.contract.dto.AmountResponse;
 import com.corp.formmate.contract.dto.ContractDetailResponse;
 import com.corp.formmate.contract.dto.ContractPreviewResponse;
@@ -56,6 +58,7 @@ public class ContractService {
 	private final TransferRepository transferRepository;
 	private final EnhancedPaymentPreviewService enhancedPaymentPreviewService;
 	private final UserRepository userRepository;
+	private final AlertService alertService;
 
 	/**
 	 * 계약 상세 정보를 조회하는 메서드
@@ -457,8 +460,29 @@ public class ContractService {
 		long notPaid = Math.max(0, scheduledAmount - paid);
 		contract.setOverdueAmount(notPaid);
 
+		NumberFormat formatter = NumberFormat.getNumberInstance();
+		String formattedNotPaid = formatter.format(notPaid);
+
 		// 연체 이자(누적) 등 추가 계산이 있으면 여기서 수행
 		// ex) contract.setOverdueInterestAmount( contract.getOverdueInterestAmount() + something );
+
+		String creditorName = form.getCreditorName();
+		String debtorName = form.getDebtorName();
+
+		alertService.createAlert(
+			form.getDebtor(),
+			"연체",
+			"연체가 발생했습니다!",
+			creditorName + "님께 " + formattedNotPaid + "원을 이체하세요"
+		);
+
+		// 받을 사람 (채권자)
+		alertService.createAlert(
+			form.getCreator(),
+			"연체",
+			"연체가 발생했습니다!",
+			debtorName + "님께서 " + formattedNotPaid + "원을 아직 송금하지 않았어요"
+		);
 
 		// DB 저장
 		contractRepository.save(contract);
@@ -809,4 +833,31 @@ public class ContractService {
 		return result;
 	}
 
+	public void notifyRepaymentDueContracts() {
+		List<ContractEntity> dueContracts = contractRepository.findByNextRepaymentDate(LocalDate.now());
+		for (ContractEntity contract : dueContracts) {
+			FormEntity form = contract.getForm();
+			String senderName = form.getDebtorName();
+			String receiverName = form.getCreditorName();
+			Long amount = enhancedPaymentPreviewService.getCurrentRoundAmount(form, contract);
+			NumberFormat formatter = NumberFormat.getNumberInstance();
+			String formattedAmount = formatter.format(amount);
+
+			// 알림 - 보낼 사람 (채무자)
+			alertService.createAlert(
+				form.getDebtor(),
+				"상환일",
+				"오늘은 상환일입니다!",
+				receiverName + "님께 " + formattedAmount + "원을 상환하세요"
+			);
+
+			// 알림 - 받는 사람 (채권자)
+			alertService.createAlert(
+				form.getCreditor(),
+				"상환일",
+				"오늘은 상환일입니다!",
+				senderName + "님께서 " + formattedAmount + "원을 상환할 예정입니다"
+			);
+		}
+	}
 }
