@@ -1,4 +1,7 @@
+import { Suspense } from 'react';
+import { useContractAmount } from '@/entities/home/model/useContractAmount';
 import { useUserStore } from '@/entities/user/model/userStore';
+import ListLoading from '@/shared/ui/ListLoading';
 import { Footer, Header } from '@/widgets';
 import AccountInfo from '../../features/home/ui/AccountInfo';
 import Schedule from '../../features/home/ui/Schedule';
@@ -10,6 +13,7 @@ interface HomeProps {
 
 const Home = ({ userName }: HomeProps) => {
     userName = useUserStore((state) => state.user?.userName ?? '사용자');
+    const { data } = useContractAmount();
 
     return (
         <div className='flex h-screen flex-col overflow-hidden'>
@@ -30,7 +34,9 @@ const Home = ({ userName }: HomeProps) => {
                     </div>
 
                     <AccountInfo />
-                    <TodaySettlement />
+                    <Suspense fallback={<ListLoading />}>
+                        {data && <TodaySettlement data={data} />}
+                    </Suspense>
                     <Schedule />
                 </div>
             </div>

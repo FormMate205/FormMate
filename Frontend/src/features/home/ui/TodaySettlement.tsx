@@ -1,12 +1,11 @@
-import { useContractAmount } from '@/entities/home/model/useContractAmount';
+import { ContractAmountResponse } from '@/entities/home/model/types';
 
-const TodaySettlement = () => {
-    const { data, isLoading, isError } = useContractAmount();
+interface TodaySettlementProps {
+    data: ContractAmountResponse;
+}
 
-    if (isLoading) return <p>로딩 중...</p>;
-    if (isError || !data) return <p>정산 금액을 불러오지 못했습니다.</p>;
-
-    const { expectedTotalRepayment, expectedTotalReceived } = data;
+const TodaySettlement = ({ data }: TodaySettlementProps) => {
+    const { expectedTotalRepayment, expectedTotalReceived } = data!;
 
     return (
         <div>
