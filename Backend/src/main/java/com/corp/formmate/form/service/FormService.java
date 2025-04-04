@@ -379,9 +379,6 @@ public class FormService {
 		eventPublisher.publishEvent(new FormTerminationRequestedEvent(form, userId));
 
 		return FormTerminationResponse.builder()
-				.formId(form.getId())
-				.status(form.getStatus().name())
-				.statusKorName(form.getStatus().getKorName())
 				.requestedById(userId)
 				.build();
 	}
@@ -390,7 +387,7 @@ public class FormService {
 	 * 계약 파기 취소
 	 */
 	@Transactional
-	public FormTerminationResponse cancelTermination(Integer formId, Integer userId) {
+	public Integer cancelTermination(Integer formId, Integer userId) {
 		// 사용자와 계약 조회
 		UserEntity user = userService.selectById(userId);
 		FormEntity form = selectById(formId);
@@ -413,13 +410,7 @@ public class FormService {
 		log.info("계약 파기 취소 이벤트 발행: form Id={}, 취소자 ID={}", formId, userId);
 		eventPublisher.publishEvent(new FormTerminationCancelledEvent(form, userId));
 
-		return FormTerminationResponse.builder()
-				.formId(form.getId())
-				.status(form.getStatus().name())
-				.statusKorName(form.getStatus().getKorName())
-				.requestedById(userId)
-				.build();
-
+		return userId;
 	}
 
 	/**
