@@ -1,14 +1,7 @@
 import ProgressBar from '@/entities/contract/ui/charts/ProgressBar';
 import DetailOverviewItem from '@/entities/contract/ui/DetailOverviewItem';
+import { getDday } from '@/shared/lib/date';
 import { useGetContractDetailOverview } from '../api/ContractAPI';
-
-// API 수정 필요) 특정 계약 상대와의 계약 조회 -> 계약의 종류/ 원금 데이터 / 현재까지 상환 데이터 필요
-const contractData = {
-    userIsCreditor: true,
-    loanAmount: 100000000,
-};
-
-const { userIsCreditor, loanAmount } = contractData;
 
 const formatDate = (dateArr: number[]): string => {
     const [year, month, day] = dateArr;
@@ -19,6 +12,7 @@ const ContractDetailOverview = ({ formId }: { formId: string }) => {
     const { data } = useGetContractDetailOverview(formId);
     if (!data) return null;
     const {
+        userIsCreditor,
         contracteeName,
         overdueCount,
         overdueLimit,
@@ -26,9 +20,10 @@ const ContractDetailOverview = ({ formId }: { formId: string }) => {
         nextRepaymentDate,
         earlyRepaymentCount,
         totalEarlyRepaymentCharge,
+        repaymentAmount,
         remainingPrincipal,
     } = data;
-
+    const loanAmount = repaymentAmount + remainingPrincipal;
     const nextDateString = formatDate(nextRepaymentDate);
 
     const summaryData = [
@@ -36,12 +31,11 @@ const ContractDetailOverview = ({ formId }: { formId: string }) => {
             tag: '연체',
             mainText: `${overdueCount}회/${overdueLimit}회`,
             subText: `${overdueAmount.toLocaleString()}원 미납`,
-            withIcon: true,
         },
         {
             tag: '진행',
-            mainText: `${nextDateString}`,
-            subText: `다음 상환 일정 ${nextRepaymentDate}`,
+            mainText: `${getDday(nextDateString)}`,
+            subText: `다음 상환 일정 ${nextDateString}`,
         },
         {
             tag: '중도',
@@ -66,19 +60,16 @@ const ContractDetailOverview = ({ formId }: { formId: string }) => {
 
             <div className='border-line-200 flex flex-col gap-8 border-b py-4'>
                 <div className='flex flex-col gap-2'>
-                    {summaryData.map(
-                        ({ tag, mainText, subText, withIcon }, idx) => (
-                            <DetailOverviewItem
-                                key={idx}
-                                tagText={tag}
-                                mainText={mainText}
-                                subText={subText}
-                                withIcon={withIcon}
-                            />
-                        ),
-                    )}
+                    {summaryData.map(({ tag, mainText, subText }, idx) => (
+                        <DetailOverviewItem
+                            key={idx}
+                            tagText={tag}
+                            mainText={mainText}
+                            subText={subText}
+                        />
+                    ))}
                 </div>
-                <ProgressBar amount={remainingPrincipal} goal={loanAmount} />
+                <ProgressBar amount={repaymentAmount} goal={loanAmount} />
             </div>
         </section>
     );

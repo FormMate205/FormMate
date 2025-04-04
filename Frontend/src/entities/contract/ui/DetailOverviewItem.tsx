@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Icons, TagItem } from '@/shared';
+import { TagItem } from '@/shared';
 import { TagColor } from '@/shared/model/types';
 
 const tagColorMap: Record<string, TagColor> = {
@@ -9,37 +9,35 @@ const tagColorMap: Record<string, TagColor> = {
     이자: 'line',
 };
 
+const textColorMap: Record<TagColor, string> = {
+    primary: 'text-primary-700',
+    subPurple: 'text-subPurple-700',
+    subPink: 'text-subPink-700',
+    line: 'text-line-700',
+};
+
 interface DetailOverviewItemProps {
     tagText: string;
     color?: string;
     mainText: string;
     subText: string;
-    withIcon?: boolean;
 }
 
 const DetailOverviewItem = ({
     tagText,
     mainText,
     subText,
-    withIcon,
 }: DetailOverviewItemProps) => {
     const color = tagColorMap[tagText] || 'primary';
     return (
         <div className='flex items-center gap-2'>
             <TagItem text={tagText} color={color} />
             <div className='text-line-900 flex items-center gap-1'>
-                <span className={cn('font-medium', `text-${color}-600`)}>
+                <span className={cn('font-medium', textColorMap[color])}>
                     {mainText}
                 </span>
                 <span>|</span>
                 <span>{subText}</span>
-                {withIcon && (
-                    <Icons
-                        name='question'
-                        size={14}
-                        className='fill-line-900'
-                    />
-                )}
             </div>
         </div>
     );

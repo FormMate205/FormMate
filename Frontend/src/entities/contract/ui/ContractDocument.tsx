@@ -30,6 +30,7 @@ const ContractDocument = ({
     isPdfMode = false,
 }: ContractDocumentProps) => {
     const {
+        status,
         creditorName,
         creditorPhone,
         debtorName,
@@ -49,6 +50,14 @@ const ContractDocument = ({
     const [accordionValue, setAccordionValue] = useState<string | undefined>(
         'item-1',
     );
+
+    const getSignatureStatus = (role: 'creditor' | 'debtor') => {
+        if (status === '상대 승인전') return '(전자서명 미완료)';
+        if (status === '상대승인후') {
+            return role === 'debtor' ? '(전자서명 완료)' : '(전자서명 미완료)';
+        }
+        return '(전자서명 완료)';
+    };
 
     useEffect(() => {
         if (isPdfMode) setAccordionValue('item-1');
@@ -152,11 +161,15 @@ const ContractDocument = ({
                 <div className='flex flex-col items-end text-right font-medium'>
                     <div>
                         <span>{creditorName}</span>
-                        <span className={styles.subtext}>(전자서명 완료)</span>
+                        <span className={styles.subtext}>
+                            {getSignatureStatus('creditor')}
+                        </span>
                     </div>
                     <div>
                         <span>{debtorName}</span>
-                        <span className={styles.subtext}>(전자서명 완료)</span>
+                        <span className={styles.subtext}>
+                            {getSignatureStatus('debtor')}
+                        </span>
                     </div>
                 </div>
             </article>
