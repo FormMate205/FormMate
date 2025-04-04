@@ -285,8 +285,71 @@ public class AuthController {
     }
 
     // 일회용 코드 토큰으로 변경
+    @Operation(
+            summary = "OAuth 인증 코드로 토큰 발급",
+            description = "OAuth2 인증 코드를 이용해 액세스 토큰과 리프레시 토큰을 발급받고 사용자 정보를 반환합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "토큰 발급 및 사용자 정보 반환 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class),
+                            examples = @ExampleObject(value = """
+                    {
+                      "userId": 1,
+                      "email": "user@example.com",
+                      "userName": "홍길동"
+                    }
+                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "인증 코드 누락",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(type = "string"),
+                            examples = @ExampleObject(value = "\"인증코드가 필요합니다.\"")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(type = "string"),
+                            examples = @ExampleObject(value = "\"유효하지 않은 인증코드입니다.\"")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 내부 오류",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(type = "string"),
+                            examples = @ExampleObject(value = "\"토큰 교환 중 오류가 발생했습니다.\"")
+                    )
+            )
+    })
     @PostMapping("/exchange-code")
-    public ResponseEntity<?> exchangeCodeFormToken(@RequestBody Map<String, String> request, HttpServletResponse response) {
+    public ResponseEntity<?> exchangeCodeFormToken(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "OAuth 인증 코드",
+                    required = true,
+                    content = @Content(schema = @Schema(
+                            type = "object",
+                            example = """
+                    {
+                      "code": "abc123xyz"
+                    }
+                """
+                    ))
+            )
+            @RequestBody Map<String, String> request,
+            HttpServletResponse response
+    ) {
 
         String authCode = request.get("code");
         if (authCode == null || authCode.isEmpty()) {
