@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { mapNotificationListToItems } from '@/entities/notification/model/mapNotificationItem';
 import NotificationGroup from '@/entities/notification/ui/NotificationGroup';
 import {
     useGetNotificationList,
     useGetUnreadNotificationList,
+    useUpdateNotificationList,
 } from '@/features/notifications/api/NotificationAPI';
 import { getMinAlertId } from '@/features/notifications/model/getMinAlertId';
 import { Footer, Header } from '@/widgets';
@@ -13,6 +15,14 @@ const Notifications = () => {
     const unreadNotifications = mapNotificationListToItems(unread ?? []);
     const minAlertId = getMinAlertId(unread);
 
+    // 읽지 않은 알림 서버에 읽음 처리
+    const { mutate: markAllAsRead } = useUpdateNotificationList();
+    useEffect(() => {
+        if (unread && unread.length > 0) {
+            markAllAsRead();
+        }
+    }, [unread, markAllAsRead]);
+
     // 읽은 알림 호출
     const { notifications: read, lastItemRef } = useGetNotificationList({
         alertId: minAlertId,
@@ -21,11 +31,8 @@ const Notifications = () => {
             size: '10',
         },
     });
-
     const readNotifications = mapNotificationListToItems(read);
     const lastIndex = readNotifications.length - 1;
-
-    console.log('readNotifications', readNotifications);
 
     return (
         <div className='flex h-screen flex-col justify-between py-2'>
