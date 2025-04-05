@@ -81,6 +81,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     needsAdditionalInfo  // 추가 정보 필요 여부 필드 추가
             );
 
+            // 응답 헤더에 인증 코드 추가
+            response.setHeader("X-Auth-Code", authCode);
+
             // JSON 응답 설정
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
