@@ -1,13 +1,12 @@
 package com.corp.formmate.user.handler;
 
-import com.corp.formmate.jwt.dto.Token;
-import com.corp.formmate.jwt.properties.JwtProperties;
-import com.corp.formmate.jwt.service.JwtTokenService;
+import com.corp.formmate.user.dto.LoginResponse;
 import com.corp.formmate.user.entity.Provider;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.OAuth2AuthorizationService;
 import com.corp.formmate.user.service.OAuth2UserInfo;
 import com.corp.formmate.user.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,6 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
@@ -75,25 +73,22 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             // 일회용 인증 코드 생성
             String authCode = oauth2AuthorizationService.generateAuthorizationCode(user.getId());
 
-            // 리다이렉트 URL 결정 (추가 정보 필요 여부에 따라)
-            String targetUrl = determineTargetUrl(authCode, needsAdditionalInfo);
-            log.info("리다이렉트 URL: {}", targetUrl);
+            // LoginResponse DTO 생성 및 응답 설정
+            LoginResponse loginResponse = new LoginResponse(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getUserName(),
+                    needsAdditionalInfo  // 추가 정보 필요 여부 필드 추가
+            );
 
-//            // 응답 상태 코드 로깅 추가
-//            log.info("리다이렉트 전 응답 상태 코드: {}", response.getStatus());
-//
-//            // 리다이렉트
-//            getRedirectStrategy().sendRedirect(request, response, targetUrl);
-//            log.info("리다이렉트 완료: {}", targetUrl);
+            // JSON 응답 설정
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(loginResponse));
 
-            // 명시적으로 상태 코드 설정
-            response.setStatus(HttpServletResponse.SC_FOUND); // 302 Found
-            response.setHeader("Location", targetUrl);
+            log.info("OAuth2 로그인 처리 완료: userId={}, needsAdditionalInfo={}", user.getId(), needsAdditionalInfo);
 
-            log.info("리다이렉트 설정 완료: {}, 상태 코드: {}", targetUrl, response.getStatus());
 
-            // 응답 커밋
-            response.flushBuffer();
         } catch (Exception e) {
             log.error("OAuth2 로그인 실패", e);
             getRedirectStrategy().sendRedirect(request, response, "/login?error=oauth_failed");
@@ -101,38 +96,4 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     }
 
-    /**
-     * 로그인 후 리다이렉트 할 URL 결정
-     */
-    private String determineTargetUrl(String authCode, boolean needsAdditionalInfo) {
-        String targetUrl;
-        if (needsAdditionalInfo) {
-            // 추가 정보가 필요한 경우 프로필 완성 페이지로 이동
-            targetUrl = UriComponentsBuilder.fromUriString("/login/oauthInfo")
-                    .queryParam("code", authCode)
-                    .build().toUriString();
-            log.info("추가 정보가 필요한 사용자의 리다이렉트 URL: {}", targetUrl);
-        } else {
-            // 추가 정보가 필요 없는 경우 메인 페이지로 이동
-            targetUrl = UriComponentsBuilder.fromUriString("/")
-                    .queryParam("code", authCode)
-                    .build().toUriString();
-            log.info("추가 정보가 필요 없는 사용자의 리다이렉트 URL: {}", targetUrl);
-        }
-        return targetUrl;
-    }
-
-//    private String determineTargetUrl(String authCode, boolean needsAdditionalInfo) {
-//        if (needsAdditionalInfo) {
-//            // 추가 정보가 필요한 경우 프로필 완성 페이지로 이동
-//            return UriComponentsBuilder.fromUriString(frontendUrl + "/login/oauthInfo")
-//                    .queryParam("code", authCode)
-//                    .build().toUriString();
-//        } else {
-//            // 추가 정보가 필요 없는 경우 메인 페이지로 이동
-//            return UriComponentsBuilder.fromUriString(frontendUrl + "/")
-//                    .queryParam("code", authCode)
-//                    .build().toUriString();
-//        }
-//    }
 }
