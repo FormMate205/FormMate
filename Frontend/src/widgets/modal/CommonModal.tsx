@@ -7,6 +7,7 @@ import {
     DialogFooter,
     DialogTrigger,
     DialogClose,
+    DialogDescription,
 } from '@/components/ui/dialog';
 import { Icons } from '@/shared';
 
@@ -27,12 +28,13 @@ const CommonModal = ({
         <Dialog>
             <DialogTrigger>{triggerChildren}</DialogTrigger>
             <DialogContent className='flex flex-col items-center gap-4 bg-white'>
-                <div className='flex w-full justify-end'>
+                <div className='flex justify-end w-full'>
                     <DialogClose>
                         <Icons name='close' />
                     </DialogClose>
                 </div>
                 <DialogTitle></DialogTitle>
+                <DialogDescription></DialogDescription>
                 {children}
                 <DialogFooter className='w-full'>
                     <Button

@@ -28,18 +28,18 @@ const Chat = () => {
 
     const displayProfile = showName(messages);
     return (
-        <div className='bg-line-50 flex h-screen w-full flex-col items-center justify-between px-4 py-2'>
+        <div className='flex flex-col items-center justify-between w-full h-screen px-4 py-2 bg-line-50'>
             <Header title='채팅' />
 
             {/* 계약서 팝업 */}
-            <div className='flex w-full justify-end'>
+            <div className='flex justify-end w-full'>
                 <FormModal formId={roomId!} />
             </div>
 
             {/* 채팅 내용 */}
             <div
                 ref={scrollRef}
-                className='scrollbar-none my-1 flex w-full flex-1 flex-col-reverse gap-2 overflow-y-auto'
+                className='flex flex-col-reverse flex-1 w-full gap-2 my-1 overflow-y-auto scrollbar-none'
             >
                 {messages.map((chat, index) => {
                     return chat.messageType == 'CONTRACT_SHARED' ||
@@ -71,7 +71,7 @@ const Chat = () => {
 
             {/* 연결 상태 표시 */}
             {!isConnected && (
-                <div className='w-full bg-red-100 p-2 text-center text-red-600'>
+                <div className='w-full p-2 text-center text-red-600 bg-red-100'>
                     연결이 끊어졌습니다. 새로고침을 시도해주세요.
                 </div>
             )}
