@@ -24,8 +24,6 @@ const Chat = () => {
         scrollRef,
     } = useConnectWs({ user, roomId });
 
-    console.log('messages', messages);
-
     const displayProfile = showName(messages);
     return (
         <div className='flex flex-col items-center justify-between w-full h-screen px-4 py-2 bg-line-50'>

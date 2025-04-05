@@ -1,4 +1,6 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { MessageType } from '@/entities/chat/model/types';
 import { useUserStore } from '@/entities/user/model/userStore';
 import {
@@ -11,107 +13,131 @@ import {
     usePostTerminateSecond,
     usePostTerminateSecondConfirm,
 } from '../api/signatureAPI';
+import {
+    signatureFormSchema,
+    SignatureFormValues,
+} from './signatureFormSchema';
 
 interface UseSignatureProps {
     formId: string;
     type: MessageType;
     creditorId?: string;
-    requstedById?: string;
+    requestedById?: string;
 }
 
 export const useSignature = ({
     formId,
     type,
     creditorId,
-    requstedById,
+    requestedById,
 }: UseSignatureProps) => {
     const { user } = useUserStore();
 
-    const [name, setName] = useState('');
-    const [phone, setPhone] = useState('');
-    const [code, setCode] = useState('');
-    const [recaptchaToken, setRecaptchaToken] = useState('');
-
-    // 유효성 검사 상태
-    const [nameIsEmpty, setNameIsEmpty] = useState(false);
-    const [phoneIsEmpty, setPhoneIsEmpty] = useState(false);
-    const [codeIsEmpty, setCodeIsEmpty] = useState(false);
-    const [tokenIsEmpty, setTokenIsEmpty] = useState(false);
+    // 폼 상태 관리
+    const form = useForm<SignatureFormValues>({
+        resolver: zodResolver(signatureFormSchema),
+        defaultValues: {
+            name: '',
+            phone: '',
+            code: '',
+            recaptchaToken: '',
+        },
+    });
 
     // 인증 관련 상태
     const [isSent, setIsSent] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
+    const [tokenIsEmpty, setTokenIsEmpty] = useState(false);
+    const [verificationMessage, setVerificationMessage] = useState<
+        string | null
+    >(null);
+    const [verificationSuccess, setVerificationSuccess] = useState<
+        boolean | null
+    >(null);
+
+    // 인증 응답 처리 함수
+    const handleVerificationResponse = (response: boolean) => {
+        if (response) {
+            setVerificationSuccess(true);
+            setVerificationMessage('인증이 완료되었습니다.');
+            setIsVerified(true);
+        } else {
+            setVerificationSuccess(false);
+            setVerificationMessage('인증을 실패했습니다. 다시 시도해주세요.');
+            setIsVerified(false);
+        }
+    };
 
     // API 호출
     // 채무자 인증 요청 api
     const { mutate: requestDebtor } = usePostRequestDebtor({
         formId,
-        userName: name,
-        phoneNumber: phone,
+        userName: form.getValues('name'),
+        phoneNumber: form.getValues('phone'),
     });
 
     // 채권자 인증 요청 api
     const { mutate: requestCreditor } = usePostRequestCreditor({
         formId,
-        userName: name,
-        phoneNumber: phone,
+        userName: form.getValues('name'),
+        phoneNumber: form.getValues('phone'),
     });
 
     // 채무자 인증 확인 api
     const { mutate: confirmDebtor } = usePostConfirmDebtor({
         formId,
-        phoneNumber: phone,
-        verificationCode: code,
-        recaptchaToken: recaptchaToken,
+        phoneNumber: form.getValues('phone'),
+        verificationCode: form.getValues('code')!,
+        recaptchaToken: form.getValues('recaptchaToken')!,
+        onSuccess: handleVerificationResponse,
     });
 
     // 채권자 인증 확인 api
     const { mutate: confirmCreditor } = usePostConfirmCreditor({
         formId,
-        phoneNumber: phone,
-        verificationCode: code,
-        recaptchaToken: recaptchaToken,
+        phoneNumber: form.getValues('phone'),
+        verificationCode: form.getValues('code')!,
+        recaptchaToken: form.getValues('recaptchaToken')!,
+        onSuccess: handleVerificationResponse,
     });
 
     // 계약파기 첫번째 인증 요청 api
     const { mutate: requestFirst } = usePostTerminateFirst({
         formId,
-        userName: name,
-        phoneNumber: phone,
+        userName: form.getValues('name'),
+        phoneNumber: form.getValues('phone'),
     });
 
     // 계약파기 두번째 인증 요청 api
     const { mutate: requestSecond } = usePostTerminateSecond({
         formId,
-        userName: name,
-        phoneNumber: phone,
+        userName: form.getValues('name'),
+        phoneNumber: form.getValues('phone'),
     });
 
     // 계약파기 첫번째 인증 확인 api
     const { mutate: confirmFirst } = usePostTerminateFirstConfirm({
         formId,
-        phoneNumber: phone,
-        verificationCode: code,
-        recaptchaToken: recaptchaToken,
+        phoneNumber: form.getValues('phone'),
+        verificationCode: form.getValues('code')!,
+        recaptchaToken: form.getValues('recaptchaToken')!,
+        onSuccess: handleVerificationResponse,
     });
 
     // 계약파기 두번째 인증 확인 api
     const { mutate: confirmSecond } = usePostTerminateSecondConfirm({
         formId,
-        phoneNumber: phone,
-        verificationCode: code,
-        recaptchaToken: recaptchaToken,
+        phoneNumber: form.getValues('phone'),
+        verificationCode: form.getValues('code')!,
+        recaptchaToken: form.getValues('recaptchaToken')!,
+        onSuccess: handleVerificationResponse,
     });
 
     // 인증번호 요청
-    const handleRequestVerification = () => {
-        const isNameValid = name.trim() !== '';
-        const isPhoneValid = phone.trim() !== '';
+    const handleRequestVerification = async () => {
+        const result = await form.trigger(['name', 'phone']);
 
-        setNameIsEmpty(!isNameValid);
-        setPhoneIsEmpty(!isPhoneValid);
-
-        if (isNameValid && isPhoneValid) {
+        if (result) {
             if (type === 'SIGNATURE_REQUEST_CONTRACT') {
                 if (creditorId === user?.id) {
                     requestCreditor();
@@ -121,7 +147,7 @@ export const useSignature = ({
             }
 
             if (type === 'SIGNATURE_REQUEST_TERMINATION') {
-                if (requstedById !== user?.id) {
+                if (requestedById !== user?.id) {
                     requestFirst();
                 } else {
                     requestSecond();
@@ -129,15 +155,18 @@ export const useSignature = ({
             }
 
             setIsSent(true);
+            // 새로운 인증 요청 시 기존 메시지 초기화
+            setVerificationMessage(null);
+            setVerificationSuccess(null);
         }
     };
 
     // 인증번호 확인 핸들러
     const handleVerifyCode = () => {
-        const isCodeValid = code.trim() !== '';
-        const isTokenValid = recaptchaToken.trim() !== '';
+        const isCodeValid = !!form.getValues('code');
+        const isTokenValid = !!form.getValues('recaptchaToken');
 
-        setCodeIsEmpty(!isCodeValid);
+        form.trigger('code');
         setTokenIsEmpty(!isTokenValid);
 
         if (isCodeValid && isTokenValid) {
@@ -150,51 +179,40 @@ export const useSignature = ({
             }
 
             if (type === 'SIGNATURE_REQUEST_TERMINATION') {
-                if (requstedById !== user?.id) {
+                if (requestedById !== user?.id) {
                     confirmFirst();
                 } else {
                     confirmSecond();
                 }
             }
-
-            setIsVerified(true);
         }
     };
 
     // ReCAPTCHA 토큰 설정 핸들러
     const handleRecaptchaChange = (token: string | null) => {
         if (!token) {
-            setRecaptchaToken('');
+            form.setValue('recaptchaToken', '');
+            setTokenIsEmpty(true);
             return;
         }
 
-        setRecaptchaToken(token);
+        form.setValue('recaptchaToken', token);
         setTokenIsEmpty(false);
     };
 
     // ReCAPTCHA 만료 핸들러
     const handleRecaptchaExpired = () => {
-        setRecaptchaToken('');
+        form.setValue('recaptchaToken', '');
         setTokenIsEmpty(true);
     };
 
     return {
-        name,
-        phone,
-        code,
-        recaptchaToken,
-        nameIsEmpty,
-        phoneIsEmpty,
-        codeIsEmpty,
-        tokenIsEmpty,
+        form,
         isSent,
         isVerified,
-
-        setName,
-        setPhone,
-        setCode,
-        setRecaptchaToken,
-
+        tokenIsEmpty,
+        verificationMessage,
+        verificationSuccess,
         handleRequestVerification,
         handleVerifyCode,
         handleRecaptchaChange,
