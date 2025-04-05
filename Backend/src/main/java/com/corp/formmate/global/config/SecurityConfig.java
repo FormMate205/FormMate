@@ -125,10 +125,10 @@ public class SecurityConfig {
 		));
 
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "X-Auth-Code"));
 
 		// 클라이언트에 노출할 응답 헤더 지정
-		configuration.setExposedHeaders(Arrays.asList("Authorization"));
+		configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Auth-Code"));
 
 		configuration.setAllowCredentials(true);
 		// 1시간동안 preflight 결과 캐싱
