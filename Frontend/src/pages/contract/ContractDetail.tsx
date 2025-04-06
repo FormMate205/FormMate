@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import ContractDetailOverview from '@/entities/contract/ui/ContractDetailOverview';
+import { usePostTerminate } from '@/features/contract/api/terminateAPI';
 import EarlyTerminateAlert from '@/features/contract/ui/EarlyTerminateAlert';
 import ContractTabs from '@/features/contract/ui/tabs/ContractTabs';
 import { Header } from '@/widgets';
@@ -8,6 +9,19 @@ import { Header } from '@/widgets';
 const ContractDetail = () => {
     const navigate = useNavigate();
     const { formId } = useParams();
+
+    const { mutate: terminate } = usePostTerminate(formId!);
+
+    const handleEarlyTerminate = () => {
+        // 계약 조기 종료 요청
+        terminate();
+
+        // 채팅으로 이동
+        navigate(`/chat/${formId}`, {
+            state: { isFin: false },
+        });
+    };
+
     return (
         <div className='flex h-screen flex-col'>
             <div className='bg-line-50 flex flex-col px-4 py-2'>
@@ -32,7 +46,7 @@ const ContractDetail = () => {
                         </div>
                         <div className='text-line-700'>
                             <EarlyTerminateAlert
-                                onConfirm={() => navigate(`/chat/${formId}`)}
+                                onConfirm={handleEarlyTerminate}
                             />
                         </div>
                     </div>

@@ -1,10 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
-import {
-    SignatureRequest,
-    TerminationRequest,
-    TerminationResponse,
-} from '../model/types';
+import { SignatureRequest, TerminationRequest } from '../model/types';
 
 // 채무자 서명 요청
 const postRequestDebtor = async ({
@@ -134,21 +130,6 @@ export const usePostConfirmCreditor = ({
             }),
         mutationKey: ['confirmCreditor', formId],
         onSuccess: onSuccess,
-    });
-
-    return { mutate };
-};
-
-// 계약파기 요청
-const postTerminate = async (formId: string): Promise<TerminationResponse> => {
-    const response = await api.post(`/form/${formId}/termination`);
-    return response.data;
-};
-
-export const usePostTerminate = (formId: string) => {
-    const { mutate } = useMutation({
-        mutationFn: () => postTerminate(formId),
-        mutationKey: ['terminate', formId],
     });
 
     return { mutate };

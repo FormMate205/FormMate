@@ -15,10 +15,9 @@ import { useSignature } from '../model/useSignature';
 interface SignatureFormProps {
     formId: string;
     type: MessageType;
-    creditorId: string;
 }
 
-const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
+const SignatureForm = ({ formId, type }: SignatureFormProps) => {
     // 입력 및 인증 상태 관리
     const {
         form,
@@ -29,18 +28,18 @@ const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
         handleVerifyCode,
         handleRecaptchaChange,
         handleRecaptchaExpired,
-    } = useSignature({ formId, type, creditorId });
+    } = useSignature({ formId, type });
 
     return (
-        <div className='flex flex-col w-full'>
+        <div className='flex w-full flex-col'>
             <p className='text-2xl font-semibold'>Formmate 전자 인증</p>
             <Form {...form}>
-                <form className='flex flex-col gap-4 mt-10 mb-5'>
+                <form className='mt-10 mb-5 flex flex-col gap-4'>
                     <FormField
                         control={form.control}
                         name='name'
                         render={({ field }) => (
-                            <FormItem className='flex flex-col w-full gap-1'>
+                            <FormItem className='flex w-full flex-col gap-1'>
                                 <FormLabel className='text-lg'>성명</FormLabel>
                                 <FormControl>
                                     <Input
@@ -58,7 +57,7 @@ const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
                         control={form.control}
                         name='phone'
                         render={({ field }) => (
-                            <FormItem className='flex flex-col w-full gap-1'>
+                            <FormItem className='flex w-full flex-col gap-1'>
                                 <FormLabel className='text-lg'>
                                     전화번호
                                 </FormLabel>
@@ -83,13 +82,13 @@ const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
                                 <FormMessage className='text-subPink-700' />
 
                                 {isSent && (
-                                    <div className='flex flex-col items-center w-full gap-5'>
-                                        <div className='flex flex-col w-full gap-1'>
-                                            <p className='pl-1 text-primary-500'>
+                                    <div className='flex w-full flex-col items-center gap-5'>
+                                        <div className='flex w-full flex-col gap-1'>
+                                            <p className='text-primary-500 pl-1'>
                                                 입력하신 전화번호로 인증번호가
                                                 전송되었습니다.
                                             </p>
-                                            <p className='pl-1 text-primary-500'>
+                                            <p className='text-primary-500 pl-1'>
                                                 '로봇이 아닙니다' 체크 후
                                                 인증번호를 입력하세요.
                                             </p>

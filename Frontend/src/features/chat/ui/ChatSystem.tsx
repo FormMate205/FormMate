@@ -10,17 +10,10 @@ interface ChatSystemProps {
     formId: string;
     children: ReactNode;
     type: MessageType;
-    creditorId: string;
     signId?: string;
 }
 
-const ChatSystem = ({
-    formId,
-    children,
-    type,
-    creditorId,
-    signId,
-}: ChatSystemProps) => {
+const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
     const { user } = useUserStore();
 
     // 서명 요청 타입 체크
@@ -30,7 +23,7 @@ const ChatSystem = ({
 
     return (
         <div className='border-primary-200 flex w-[260px] flex-col gap-6 rounded-2xl border bg-white px-3 py-4'>
-            <div className='flex items-center justify-between w-full'>
+            <div className='flex w-full items-center justify-between'>
                 <p className='text-lg font-semibold'>
                     {type == 'CONTRACT_SHARED'
                         ? '금전 차용 계약서'
@@ -48,11 +41,7 @@ const ChatSystem = ({
                     triggerChildren={<div>서명하기</div>}
                     children={
                         signId && signId == user?.id ? (
-                            <SignatureForm
-                                formId={formId}
-                                type={type}
-                                creditorId={creditorId}
-                            />
+                            <SignatureForm formId={formId} type={type} />
                         ) : (
                             <BlockModal />
                         )

@@ -21,14 +21,12 @@ import {
 interface UseSignatureProps {
     formId: string;
     type: MessageType;
-    creditorId?: string;
     requestedById?: string;
 }
 
 export const useSignature = ({
     formId,
     type,
-    creditorId,
     requestedById,
 }: UseSignatureProps) => {
     const { user } = useUserStore();
@@ -139,7 +137,7 @@ export const useSignature = ({
 
         if (result) {
             if (type === 'SIGNATURE_REQUEST_CONTRACT') {
-                if (creditorId === user?.id) {
+                if (requestedById === user?.id) {
                     requestCreditor();
                 } else {
                     requestDebtor();
@@ -171,7 +169,7 @@ export const useSignature = ({
 
         if (isCodeValid && isTokenValid) {
             if (type === 'SIGNATURE_REQUEST_CONTRACT') {
-                if (creditorId === user?.id) {
+                if (requestedById === user?.id) {
                     confirmCreditor();
                 } else {
                     confirmDebtor();

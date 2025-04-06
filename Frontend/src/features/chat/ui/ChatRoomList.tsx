@@ -15,7 +15,7 @@ const ChatRoomList = () => {
 
     const onClick = (room: ChatRoom) => {
         navigate(`/chat/${room.formId}`, {
-            state: { isFin: room.isCompleted, creditorId: room.creditorId },
+            state: { isFin: room.isCompleted },
         });
     };
 
