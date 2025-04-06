@@ -26,6 +26,7 @@ import {
     OauthAddInfoPage,
     ChatRooms,
 } from '@/pages';
+import OAuthCallback from '@/pages/login/OAuthCallback';
 import Transaction from '@/pages/transaction/Transaction';
 import { ErrorFallBack } from '@/shared/ui/ErrorFallBack';
 import FormDraftLanding from '@/widgets/landing/FormDraftLanding';
@@ -51,6 +52,7 @@ export const router = createBrowserRouter([
                 path: '/login/oauthInfo',
                 element: <OauthAddInfoPage />,
             },
+            { path: '/oauth/callback', element: <OAuthCallback /> },
             // 계약 생성
             { path: '/form', element: <FormMatch /> },
             { path: '/form/check', element: <FormCheck /> },
