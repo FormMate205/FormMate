@@ -16,6 +16,11 @@ interface ChatSystemProps {
 const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
     const { user } = useUserStore();
 
+    // 서명 요청 타입 체크
+    const isSignatureRequest =
+        type === 'SIGNATURE_REQUEST_CONTRACT' ||
+        type === 'SIGNATURE_REQUEST_TERMINATION';
+
     return (
         <div className='border-primary-200 flex w-[260px] flex-col gap-6 rounded-2xl border bg-white px-3 py-4'>
             <div className='flex w-full items-center justify-between'>
@@ -31,20 +36,20 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
 
             {children}
 
-            <CommonModal
-                triggerChildren={<div>서명하기</div>}
-                children={
-                    signId && signId == user?.id ? (
-                        <SignatureForm formId={formId} type={type} />
-                    ) : (
-                        <BlockModal />
-                    )
-                }
-                confirmText={
-                    signId && signId == user?.id ? '인증 완료' : '확인'
-                }
-                onClick={() => {}}
-            />
+            {isSignatureRequest && (
+                <CommonModal
+                    triggerChildren={<div>서명하기</div>}
+                    children={
+                        signId && signId == user?.id ? (
+                            <SignatureForm formId={formId} type={type} />
+                        ) : (
+                            <BlockModal />
+                        )
+                    }
+                    confirmText='닫기'
+                    onClick={() => {}}
+                />
+            )}
         </div>
     );
 };

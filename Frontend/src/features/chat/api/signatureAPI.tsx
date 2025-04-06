@@ -1,21 +1,19 @@
 import { useMutation } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
-import {
-    SignatureRequest,
-    TerminationRequest,
-    TerminationResponse,
-} from '../model/types';
+import { SignatureRequest, TerminationRequest } from '../model/types';
 
 // 채무자 서명 요청
-const postRequstDebtor = async ({
+const postRequestDebtor = async ({
     formId,
     userName,
     phoneNumber,
 }: SignatureRequest) => {
-    const reponse = await api.post('/form/confirm/debtor', {
-        params: { formId, userName, phoneNumber },
+    const response = await api.post('/form/confirm/debtor', {
+        formId,
+        userName,
+        phoneNumber,
     });
-    return reponse.data;
+    return response.data;
 };
 
 export const usePostRequestDebtor = ({
@@ -24,7 +22,7 @@ export const usePostRequestDebtor = ({
     phoneNumber,
 }: SignatureRequest) => {
     const { mutate } = useMutation({
-        mutationFn: () => postRequstDebtor({ formId, userName, phoneNumber }),
+        mutationFn: () => postRequestDebtor({ formId, userName, phoneNumber }),
         mutationKey: ['requestDebtor', formId],
     });
 
@@ -32,15 +30,17 @@ export const usePostRequestDebtor = ({
 };
 
 // 채권자 서명 요청
-const postRequstCreditor = async ({
+const postRequestCreditor = async ({
     formId,
     userName,
     phoneNumber,
 }: SignatureRequest) => {
-    const reponse = await api.post('/form/confirm/creditor', {
-        params: { formId, userName, phoneNumber },
+    const response = await api.post('/form/confirm/creditor', {
+        formId,
+        userName,
+        phoneNumber,
     });
-    return reponse.data;
+    return response.data;
 };
 
 export const usePostRequestCreditor = ({
@@ -49,7 +49,8 @@ export const usePostRequestCreditor = ({
     phoneNumber,
 }: SignatureRequest) => {
     const { mutate } = useMutation({
-        mutationFn: () => postRequstCreditor({ formId, userName, phoneNumber }),
+        mutationFn: () =>
+            postRequestCreditor({ formId, userName, phoneNumber }),
         mutationKey: ['requestCreditor', formId],
     });
 
@@ -63,11 +64,14 @@ const postConfirmDebtor = async ({
     verificationCode,
     recaptchaToken,
 }: TerminationRequest) => {
-    const reponse = await api.patch(`/form/confirm/debtor`, {
-        params: { formId, phoneNumber, verificationCode, recaptchaToken },
+    const response = await api.patch(`/form/confirm/debtor`, {
+        formId,
+        phoneNumber,
+        verificationCode,
+        recaptchaToken,
     });
 
-    return reponse.data;
+    return response.data;
 };
 
 export const usePostConfirmDebtor = ({
@@ -75,7 +79,8 @@ export const usePostConfirmDebtor = ({
     phoneNumber,
     verificationCode,
     recaptchaToken,
-}: TerminationRequest) => {
+    onSuccess,
+}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
     const { mutate } = useMutation({
         mutationFn: () =>
             postConfirmDebtor({
@@ -85,6 +90,7 @@ export const usePostConfirmDebtor = ({
                 recaptchaToken,
             }),
         mutationKey: ['confirmDebtor', formId],
+        onSuccess: onSuccess,
     });
 
     return { mutate };
@@ -97,11 +103,14 @@ const postConfirmCreditor = async ({
     verificationCode,
     recaptchaToken,
 }: TerminationRequest) => {
-    const reponse = await api.patch(`/form/confirm/creditor`, {
-        params: { formId, phoneNumber, verificationCode, recaptchaToken },
+    const response = await api.patch(`/form/confirm/creditor`, {
+        formId,
+        phoneNumber,
+        verificationCode,
+        recaptchaToken,
     });
 
-    return reponse.data;
+    return response.data;
 };
 
 export const usePostConfirmCreditor = ({
@@ -109,7 +118,8 @@ export const usePostConfirmCreditor = ({
     phoneNumber,
     verificationCode,
     recaptchaToken,
-}: TerminationRequest) => {
+    onSuccess,
+}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
     const { mutate } = useMutation({
         mutationFn: () =>
             postConfirmCreditor({
@@ -119,21 +129,7 @@ export const usePostConfirmCreditor = ({
                 recaptchaToken,
             }),
         mutationKey: ['confirmCreditor', formId],
-    });
-
-    return { mutate };
-};
-
-// 계약파기 요청
-const postTerminate = async (formId: string): Promise<TerminationResponse> => {
-    const reponse = await api.post(`/form/${formId}/termination`);
-    return reponse.data;
-};
-
-export const usePostTerminate = (formId: string) => {
-    const { mutate } = useMutation({
-        mutationFn: () => postTerminate(formId),
-        mutationKey: ['terminate', formId],
+        onSuccess: onSuccess,
     });
 
     return { mutate };
@@ -145,14 +141,12 @@ const postTerminateFirst = async ({
     userName,
     phoneNumber,
 }: SignatureRequest) => {
-    const reponse = await api.post(
+    const response = await api.post(
         `/form/${formId}/termination/firstSign/verify`,
-        {
-            params: { userName, phoneNumber },
-        },
+        { userName, phoneNumber },
     );
 
-    return reponse.data;
+    return response.data;
 };
 
 export const usePostTerminateFirst = ({
@@ -174,14 +168,12 @@ const postTerminateSecond = async ({
     userName,
     phoneNumber,
 }: SignatureRequest) => {
-    const reponse = await api.post(
+    const response = await api.post(
         `/form/${formId}/termination/secondSign/verify`,
-        {
-            params: { userName, phoneNumber },
-        },
+        { userName, phoneNumber },
     );
 
-    return reponse.data;
+    return response.data;
 };
 
 export const usePostTerminateSecond = ({
@@ -205,14 +197,12 @@ const postTerminateFirstConfirm = async ({
     verificationCode,
     recaptchaToken,
 }: TerminationRequest) => {
-    const reponse = await api.post(
+    const response = await api.post(
         `/form/${formId}/termination/firstSign/confirm`,
-        {
-            params: { phoneNumber, verificationCode, recaptchaToken },
-        },
+        { phoneNumber, verificationCode, recaptchaToken },
     );
 
-    return reponse.data;
+    return response.data;
 };
 
 export const usePostTerminateFirstConfirm = ({
@@ -220,7 +210,8 @@ export const usePostTerminateFirstConfirm = ({
     phoneNumber,
     verificationCode,
     recaptchaToken,
-}: TerminationRequest) => {
+    onSuccess,
+}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
     const { mutate } = useMutation({
         mutationFn: () =>
             postTerminateFirstConfirm({
@@ -230,6 +221,7 @@ export const usePostTerminateFirstConfirm = ({
                 recaptchaToken,
             }),
         mutationKey: ['terminateFirstConfirm', formId],
+        onSuccess: onSuccess,
     });
 
     return { mutate };
@@ -242,14 +234,12 @@ const postTerminateSecondConfirm = async ({
     verificationCode,
     recaptchaToken,
 }: TerminationRequest) => {
-    const reponse = await api.post(
+    const response = await api.post(
         `/form/${formId}/termination/secondSign/confirm`,
-        {
-            params: { phoneNumber, verificationCode, recaptchaToken },
-        },
+        { phoneNumber, verificationCode, recaptchaToken },
     );
 
-    return reponse.data;
+    return response.data;
 };
 
 export const usePostTerminateSecondConfirm = ({
@@ -257,7 +247,8 @@ export const usePostTerminateSecondConfirm = ({
     phoneNumber,
     verificationCode,
     recaptchaToken,
-}: TerminationRequest) => {
+    onSuccess,
+}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
     const { mutate } = useMutation({
         mutationFn: () =>
             postTerminateSecondConfirm({
@@ -267,6 +258,7 @@ export const usePostTerminateSecondConfirm = ({
                 recaptchaToken,
             }),
         mutationKey: ['terminateSecondConfirm', formId],
+        onSuccess: onSuccess,
     });
 
     return { mutate };

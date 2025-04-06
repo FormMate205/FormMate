@@ -39,20 +39,6 @@ const LoginForm = () => {
             }
         }
     };
-    //const response = await api.get('/users/profile');
-    // return response.data;
-
-    // const handleGoogleLogin = async () => {
-    //     try {
-    //         const response = await api.get('/oauth2/authorization/google');
-
-    //         // 이 부분은 작동하지 않음. OAuth는 브라우저 리디렉션이 핵심이므로.
-    //         const data = await response.data;
-    //         console.log('응답:', data);
-    //     } catch (error) {
-    //         console.error('소셜 로그인 실패:', error);
-    //     }
-    // };
 
     return (
         <form
@@ -104,11 +90,9 @@ const LoginForm = () => {
                     src='/assets/images/google.png'
                     alt='구글'
                     className='h-10 w-10 cursor-pointer'
-                    // onClick={handleGoogleLogin}
                     onClick={() => {
                         window.location.href =
                             'https://j12a205.p.ssafy.io/oauth2/authorization/google';
-                        // 'http://localhost:5173/oauth2/authorization/google';
                     }}
                 />
                 <img

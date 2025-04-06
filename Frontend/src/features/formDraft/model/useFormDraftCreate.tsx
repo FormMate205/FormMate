@@ -27,6 +27,9 @@ export const useFormDraftCreate = ({
     // 계약서 생성 API
     const { data, mutate } = usePostFormDraft();
 
+    // 계약 생성 완료 상태
+    const [isContractCreated, setIsContractCreated] = useState(false);
+
     // 채팅 내역
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
@@ -341,8 +344,8 @@ export const useFormDraftCreate = ({
     };
 
     // 계약서 생성 처리
-    const createContract = async () => {
-        try {
+    useEffect(() => {
+        if (data) {
             messageIdCounterRef.current += 1;
             const completeMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
@@ -356,16 +359,36 @@ export const useFormDraftCreate = ({
             // 계약서 생성 종료
             setCurrentQuestion(null);
             setInputEnabled(false);
+            setIsContractCreated(true);
 
+            console.log('계약서 생성 완료', data);
+            const timer = setTimeout(() => {
+                navigate(`/chat/${data?.formId}`, {
+                    state: {
+                        isFin: false,
+                        creditorId: data.creditorId,
+                    },
+                });
+            }, 100);
+
+            return () => clearTimeout(timer);
+        }
+    }, [data, navigate]);
+
+    const createContract = async () => {
+        try {
+            messageIdCounterRef.current += 1;
+            const loadingMessage: ChatMessage = {
+                id: messageIdCounterRef.current.toString(),
+                writerId: BOT_ID,
+                writerName: '페이봇',
+                content: '계약서를 생성하고 있습니다. 잠시만 기다려주세요.',
+            };
+
+            setChatHistory((prev) => [...prev, loadingMessage]);
+
+            // API 호출
             mutate(formDraft);
-
-            if (!data) {
-                console.log('계약서 생성 중');
-            } else {
-                navigate(`/chat/${data?.formId}`);
-            }
-
-            console.log('계약서 생성 ', formDraft);
         } catch (error) {
             console.error('계약서 생성 오류:', error);
 
@@ -391,6 +414,7 @@ export const useFormDraftCreate = ({
         inputValue,
         formDraft,
         currentTermIndex,
+        isContractCreated,
 
         // 액션
         setInputValue,
