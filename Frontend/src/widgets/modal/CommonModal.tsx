@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -7,6 +7,7 @@ import {
     DialogFooter,
     DialogTrigger,
     DialogClose,
+    DialogDescription,
 } from '@/components/ui/dialog';
 import { Icons } from '@/shared';
 
@@ -23,23 +24,34 @@ const CommonModal = ({
     confirmText,
     onClick,
 }: CommonModalProps) => {
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+    const handleConfirm = () => {
+        onClick();
+
+        // 모달 닫기
+        if (closeButtonRef.current) {
+            closeButtonRef.current.click();
+        }
+    };
     return (
         <Dialog>
             <DialogTrigger>{triggerChildren}</DialogTrigger>
             <DialogContent className='flex flex-col items-center gap-4 bg-white'>
-                <div className='flex w-full justify-end'>
-                    <DialogClose>
+                <div className='flex justify-end w-full'>
+                    <DialogClose ref={closeButtonRef}>
                         <Icons name='close' />
                     </DialogClose>
                 </div>
                 <DialogTitle></DialogTitle>
+                <DialogDescription></DialogDescription>
                 {children}
                 <DialogFooter className='w-full'>
                     <Button
                         variant={'primary'}
                         children={confirmText}
                         className='rounded-lg'
-                        onClick={onClick}
+                        onClick={handleConfirm}
                     />
                 </DialogFooter>
             </DialogContent>

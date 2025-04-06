@@ -8,7 +8,7 @@ const inputVariants = cva('rounded w-full border py-3 px-4', {
         variant: {
             default:
                 'border-[var(--color-line-200)] placeholder-[var(--color-line-700)] focus:border-[var(--color-line-500)]',
-            nessesary:
+            necessary:
                 'border-[var(--color-line-200)] placeholder-[var(--color-line-700)] focus:border-[var(--color-line-500)]',
             valid: 'border-[var(--color-line-200)] placeholder-[var(--color-line-700)] focus:border-[var(--color-line-500)]',
             search: 'bg-[var(--color-line-50)] border-[var(--color-line-50)] placeholder-[var(--color-line-300)] focus:border-none pl-10',
@@ -20,7 +20,7 @@ const inputVariants = cva('rounded w-full border py-3 px-4', {
 });
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-    variant?: 'default' | 'nessesary' | 'valid' | 'search';
+    variant?: 'default' | 'necessary' | 'valid' | 'search';
     isEmpty?: boolean;
     isValid?: boolean;
 }
@@ -37,7 +37,7 @@ function Input({
         const classes = [];
 
         // 필수 입력값이 비어있는 경우우
-        if (variant === 'nessesary' && isEmpty) {
+        if (variant === 'necessary' && isEmpty) {
             classes.push('!border-[var(--color-subPink-700)]');
         }
 
@@ -56,7 +56,7 @@ function Input({
     return (
         <div className='relative w-full'>
             {variant === 'search' && (
-                <div className='pointer-events-none absolute top-1/2 left-4 -translate-y-1/2'>
+                <div className='absolute -translate-y-1/2 pointer-events-none top-1/2 left-4'>
                     <Icons name='search' size={16} color='fill-line-500' />
                 </div>
             )}
