@@ -1,52 +1,59 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { exchangeCodeForToken } from '@/entities/auth/api/exchangeCode';
 import { useUserStore } from '@/entities/user/model/userStore';
 
 export const useSocialLoginEffect = () => {
-    const [searchParams] = useSearchParams();
-    const code = searchParams.get('code');
     const navigate = useNavigate();
     const setUser = useUserStore((s) => s.setUser);
-    const [hasExchanged, setHasExchanged] = useState(false);
 
     useEffect(() => {
-        if (!code || hasExchanged) return;
-
-        const fetch = async () => {
+        const handleSocialLogin = async () => {
             try {
-                const response = await exchangeCodeForToken(code);
-                const accessToken = response.headers['authorization']?.replace(
-                    'Bearer ',
-                    '',
-                );
-                if (accessToken)
-                    localStorage.setItem('accessToken', accessToken);
-
-                const { userId, userName, email, needsAdditionalInfo } =
-                    response.data;
-
-                setUser({
-                    id: userId,
-                    userName,
-                    email,
-                    isLogged: true,
-                    hasAccount: false,
+                const res = await fetch('/api/login/oauth2/code/google', {
+                    credentials: 'include',
                 });
-                setHasExchanged(true);
 
-                // 리디렉트 분기: 최초 소셜 로그인 여부
-                if (needsAdditionalInfo) {
-                    navigate('/login/oauthInfo', { replace: true });
-                } else {
-                    navigate('/', { replace: true });
+                const data = await res.json();
+                const authCode = res.headers.get('x-auth-code');
+
+                if (!authCode) {
+                    console.error('X-Auth-Code 헤더가 없습니다.');
+                    return navigate('/login');
                 }
-            } catch (error) {
-                console.error('OAuth exchange 실패:', error);
+
+                if (data.needsAdditionalInfo) {
+                    sessionStorage.setItem('oauthAuthCode', authCode);
+                    navigate('/login/oauthInfo');
+                } else {
+                    const tokenRes = await exchangeCodeForToken(authCode);
+                    const accessToken = tokenRes.headers[
+                        'authorization'
+                    ]?.replace('Bearer ', '');
+
+                    if (accessToken) {
+                        localStorage.setItem('accessToken', accessToken);
+                    }
+
+                    const { userId, userName, email, hasAccount } =
+                        tokenRes.data;
+
+                    setUser({
+                        id: userId,
+                        userName,
+                        email,
+                        isLogged: true,
+                        hasAccount: hasAccount ?? true,
+                    });
+
+                    navigate('/');
+                }
+            } catch (err) {
+                console.error('소셜 로그인 처리 중 에러 발생:', err);
                 navigate('/login');
             }
         };
 
-        fetch();
-    }, [code, hasExchanged, navigate, setUser]);
+        handleSocialLogin();
+    }, [navigate, setUser]);
 };
