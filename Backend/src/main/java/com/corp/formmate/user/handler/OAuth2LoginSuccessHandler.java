@@ -20,6 +20,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
@@ -28,10 +30,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final OAuth2AuthorizationService oauth2AuthorizationService;
     private final UserService userService;
-
-    // 프론트엔드 URL을 환경변수나 설정에서 가져오도록 조정
-    @Value("${frontend.url}")
-    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException{
@@ -73,24 +71,16 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             // 일회용 인증 코드 생성
             String authCode = oauth2AuthorizationService.generateAuthorizationCode(user.getId());
 
-            // LoginResponse DTO 생성 및 응답 설정
-            LoginResponse loginResponse = new LoginResponse(
-                    user.getId(),
-                    user.getEmail(),
-                    user.getUserName(),
-                    needsAdditionalInfo  // 추가 정보 필요 여부 필드 추가
-            );
+            // 리다이렉트 URL 구성
+            String redirectUrl = "/oauth/callback"
+                    + "?authCode=" + authCode
+                    + "&needsAdditionalInfo=" + needsAdditionalInfo
+                    + "&userId=" + user.getId()
+                    + "&email=" + URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8)
+                    + "&userName=" + URLEncoder.encode(user.getUserName(), StandardCharsets.UTF_8);
 
-            // 응답 헤더에 인증 코드 추가
-            response.setHeader("X-Auth-Code", authCode);
-
-            // JSON 응답 설정
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(new ObjectMapper().writeValueAsString(loginResponse));
-
-            log.info("OAuth2 로그인 처리 완료: userId={}, needsAdditionalInfo={}", user.getId(), needsAdditionalInfo);
-
+            // 리다이렉트 실행
+            getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 
         } catch (Exception e) {
             log.error("OAuth2 로그인 실패", e);
