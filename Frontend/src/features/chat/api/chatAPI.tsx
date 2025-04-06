@@ -65,6 +65,7 @@ const getMessages = async ({
     const response = await api.get(`/chat/rooms/${formId}`, {
         params: { page, size },
     });
+
     return response.data;
 };
 

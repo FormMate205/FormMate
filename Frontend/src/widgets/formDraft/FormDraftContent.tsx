@@ -7,9 +7,11 @@ import ChatBox from '@/features/chat/ui/ChatBox';
 import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
 import FormSelector from '@/features/formDraft/ui/FormSelector';
 import { maskUserName } from '@/shared/model/maskUserName';
+import useNavigationGuard from '@/shared/model/useNavigationGuard';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 import NotiContainer from '../../features/formDraft/ui/NotiContainer';
+import NavigationGuardModal from '../modal/NavigationGuardModal';
 
 interface FormDraftContentProps {
     user: User;
@@ -34,6 +36,7 @@ const FormDraftContent = ({ user, partner }: FormDraftContentProps) => {
         handleRepaymentMethodSelect,
         handleSpecialTermSelect,
         currentTermIndex,
+        isContractCreated,
     } = useFormDraftCreate({
         userId,
         userName,
@@ -68,15 +71,19 @@ const FormDraftContent = ({ user, partner }: FormDraftContentProps) => {
         sendMessage(inputValue);
     };
 
+    // 경로 이탈 감지 모달
+    const { showModal, confirmNavigation, cancelNavigation } =
+        useNavigationGuard({ shouldBlock: !isContractCreated });
+
     return (
-        <div className='z-10 flex w-full flex-col items-center justify-between px-4 py-2'>
+        <div className='z-10 flex flex-col items-center justify-between w-full px-4 py-2'>
             <Header title='계약 생성' />
 
             <NotiContainer name={maskUserName(receiverName)} />
 
             {/* 채팅 내용 */}
             <div
-                className='scrollbar-none my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
+                className='flex flex-col flex-1 w-full gap-2 my-1 overflow-y-auto scrollbar-none'
                 ref={chatContainerRef}
             >
                 {chatHistory.length > 0 &&
@@ -118,6 +125,14 @@ const FormDraftContent = ({ user, partner }: FormDraftContentProps) => {
                 value={inputValue}
                 onChange={onChange}
                 onClick={onClick}
+            />
+
+            <NavigationGuardModal
+                title='계약 생성을 그만두시겠습니까?'
+                description='페이지를 벗어나면 지금까지 입력한 모든 내용이 사라집니다.'
+                isOpen={showModal}
+                onConfirm={confirmNavigation}
+                onCancel={cancelNavigation}
             />
         </div>
     );
