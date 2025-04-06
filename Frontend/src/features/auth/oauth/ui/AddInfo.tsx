@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
     requestVerificationCode,
@@ -21,6 +21,7 @@ interface PostcodeData {
 
 const AddInfo = () => {
     const navigate = useNavigate();
+    const code = sessionStorage.getItem('oauthAuthCode');
     const token = localStorage.getItem('accessToken');
 
     const [form, setForm] = useState({
@@ -40,9 +41,6 @@ const AddInfo = () => {
         verify: false,
         code: false,
     });
-
-    const [searchParams] = useSearchParams();
-    const code = searchParams.get('code');
 
     useEffect(() => {
         if (!code) {
@@ -174,6 +172,7 @@ const AddInfo = () => {
 
         try {
             await addProfile(payload, token as string);
+            sessionStorage.removeItem('oauthAuthCode');
             navigate('/');
         } catch (e) {
             console.error(e);
