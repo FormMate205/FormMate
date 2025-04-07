@@ -29,7 +29,26 @@ const OAuthCallback = () => {
                 if (needsAdditionalInfo) {
                     console.log('추가 정보 입력이 필요합니다');
                     sessionStorage.setItem('oauthAuthCode', authCode);
-                    navigate('/login/oauthInfo');
+                    console.log(
+                        '리다이렉트 직전 - 현재 URL:',
+                        window.location.href,
+                    );
+                    // navigate('/login/oauthInfo');
+                    // window.location.href = '/login/oauthInfo';
+                    try {
+                        // 타임아웃을 사용하여 비동기적으로 리다이렉트
+                        console.log('타임아웃으로 리다이렉트 시도');
+                        setTimeout(() => {
+                            console.log('타임아웃 내부 - 리다이렉트 실행');
+                            window.location.href = '/login/oauthInfo';
+                        }, 100);
+
+                        // 백업 리다이렉트 방식도 시도
+                        console.log('직접 리다이렉트 시도');
+                        window.location.replace('/login/oauthInfo');
+                    } catch (e) {
+                        console.error('리다이렉트 중 에러 발생:', e);
+                    }
                     return;
                 }
 
