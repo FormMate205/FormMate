@@ -216,8 +216,6 @@ public class TransferService {
 			.transactionBalance(transactionBalance)
 			.build();
 
-		bankService.createBankTransfer(bankTransferRequest);
-
 		TransferEntity transferEntity = TransferEntity.builder()
 			.form(formEntity)
 			.sender(formEntity.getCreditor())
@@ -248,6 +246,8 @@ public class TransferService {
 		String withdrawTitle = senderName + "(" + senderAccountLast4 + ") 출금 알림";
 		String withdrawContent = "출금 " + formattedBalance + "원 | " + receiverName;
 		alertService.createAlert(transferEntity.getSender(), "출금", withdrawTitle, withdrawContent);
+
+		bankService.createBankTransfer(bankTransferRequest);
 	}
 
 	@Transactional(readOnly = true)
