@@ -16,6 +16,7 @@ const Home = ({ userName }: HomeProps) => {
     userName = useUserStore((state) => state.user?.userName ?? '사용자');
     const { data: unreadAlert } = useUnreadNotificationCount();
     const { data: accountInfo } = useContractAmount();
+    console.log('accountInfo:', accountInfo);
 
     return (
         <div className='flex h-screen flex-col overflow-hidden'>
