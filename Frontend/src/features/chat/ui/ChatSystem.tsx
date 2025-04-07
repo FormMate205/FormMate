@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MessageType } from '@/entities/chat/model/types';
 import BlockModal from '@/entities/chat/ui/BlockModal';
 import { useUserStore } from '@/entities/user/model/userStore';
+import { NavigateToPage } from '@/shared/ui/NavigateToPage';
 import { CommonModal } from '@/widgets';
 import FormModal from '../../../entities/chat/ui/FormModal';
 import { useConnectWs } from '../model/useConnectWs';
@@ -43,8 +44,8 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
         return isDebtorSign || isCreditorSign;
     };
 
-    const navigateToSignature = () => {
-        navigate('/signature', {
+    const handleNavigateToSign = () => {
+        navigate(`/chat/${formId}/signature`, {
             state: { formId, type, creditorId: formInfo.creditorId },
         });
     };
@@ -66,12 +67,20 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
 
             {isSignatureRequest && (
                 <CommonModal
-                    triggerChildren={<div>서명하기</div>}
+                    triggerChildren={
+                        <div
+                            className='bg-primary-500 w-full rounded-lg px-4 py-2 font-medium text-white'
+                            aria-label='서명하기 버튼'
+                        >
+                            서명하기
+                        </div>
+                    }
                     children={
                         canUserSign() ? (
-                            <div onClick={navigateToSignature}>
-                                서명 페이지로 이동합니다.
-                            </div>
+                            <NavigateToPage
+                                title='서명'
+                                handleNavigate={handleNavigateToSign}
+                            />
                         ) : (
                             <BlockModal />
                         )

@@ -1,4 +1,3 @@
-import { Signature } from 'lucide-react';
 import { createBrowserRouter } from 'react-router-dom';
 import {
     Chat,
@@ -26,6 +25,7 @@ import {
     EnterPassword,
     OauthAddInfoPage,
     ChatRooms,
+    Signature,
 } from '@/pages';
 import OAuthCallback from '@/pages/login/OAuthCallback';
 import Transaction from '@/pages/transaction/Transaction';
@@ -69,7 +69,7 @@ export const router = createBrowserRouter([
             { path: '/chat/:roomId', element: <Chat /> },
 
             // 전자 서명
-            { path: '/signature', element: <Signature /> },
+            { path: '/chat/:roomId/signature', element: <Signature /> },
 
             // 계약 관리
             { path: '/transaction', element: <Transaction /> },
