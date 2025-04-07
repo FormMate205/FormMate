@@ -15,7 +15,7 @@ import { useSignature } from '@/features/signature/model/useSignature';
 const Signature = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { formId, type, creditorId, signId } = location.state;
+    const { formId, type, creditorId, requestedById } = location.state;
 
     // 입력 및 인증 상태 관리
     const {
@@ -27,10 +27,12 @@ const Signature = () => {
         handleVerifyCode,
         handleRecaptchaChange,
         handleRecaptchaExpired,
-    } = useSignature({ formId, type, creditorId, requestedById: signId });
+    } = useSignature({ formId, type, creditorId, requestedById });
 
     const handleClose = () => {
-        navigate(`/chat/${formId}`, { state: { isFin: false } });
+        navigate(`/chat/${formId}`, {
+            state: { isFin: false, requestedById: undefined },
+        });
     };
 
     return (
