@@ -15,9 +15,10 @@ import { useSignature } from '../model/useSignature';
 interface SignatureFormProps {
     formId: string;
     type: MessageType;
+    creditorId?: string;
 }
 
-const SignatureForm = ({ formId, type }: SignatureFormProps) => {
+const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
     // 입력 및 인증 상태 관리
     const {
         form,
@@ -28,7 +29,7 @@ const SignatureForm = ({ formId, type }: SignatureFormProps) => {
         handleVerifyCode,
         handleRecaptchaChange,
         handleRecaptchaExpired,
-    } = useSignature({ formId, type });
+    } = useSignature({ formId, type, creditorId });
 
     return (
         <div className='flex w-full flex-col'>

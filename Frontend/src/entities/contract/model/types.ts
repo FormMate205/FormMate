@@ -63,6 +63,12 @@ export type ContractStatus =
 
 export type ContractStatusLabel = '전체' | '대기' | '진행' | '연체' | '완료';
 
+// 계약 파기 상태 관련 태그
+// NONE(정상): 계약 파기 신청 안한 상황
+// REQUESTED(신청): 한 사람이 계약 파기 신청 후 상대의 동의를 기다리는 상황
+// SIGNED(상대방 서명): 상대가 서명한 상황
+export type TerminationStatus = 'NONE' | 'REQUESTED' | 'SIGNED';
+
 // 특약 사항
 export interface SpecialTerm {
     specialTermIndex: string;

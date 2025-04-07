@@ -21,11 +21,12 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
     const [isLoadingMore, setIsLoadingMore] = useState(false); // 추가 데이터 로드 중 상태
 
     // 채팅 내역 가져오기
-    const { messages, fetchNextPage, lastItemRef, refetch } = useGetMessages({
-        formId: roomId!,
-        page: '0',
-        size: '20',
-    });
+    const { messages, formInfo, fetchNextPage, lastItemRef, refetch } =
+        useGetMessages({
+            formId: roomId!,
+            page: '0',
+            size: '20',
+        });
 
     // 메시지가 변경될 때 스크롤 위치 조정
     useEffect(() => {
@@ -147,6 +148,7 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
         fetchNextPage,
         lastItemRef,
         message,
+        formInfo,
         setMessage,
         sendMessage,
         isConnected,
