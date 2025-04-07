@@ -2,6 +2,8 @@ package com.corp.formmate.chat.controller;
 
 import com.corp.formmate.chat.dto.*;
 import com.corp.formmate.chat.service.ChatService;
+import com.corp.formmate.form.entity.FormEntity;
+import com.corp.formmate.form.service.FormService;
 import com.corp.formmate.global.annotation.CurrentUser;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.dto.ErrorResponse;
@@ -42,6 +44,7 @@ public class ChatController {
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
     private final UserService userService;
+    private final FormService formService;
 
     /**
      * 웹소켓을 통한 메세지 전송 처리
@@ -322,13 +325,20 @@ public class ChatController {
     ) {
         log.info("채팅 내역 Slice 조회 요청: 폼 ID={}, 사용자 ID={}, 페이지={}, 크기={}", formId, authUser.getId(), page, size);
 
+        FormEntity form = formService.selectById(formId);
         Slice<ChatResponse> chatSlice  = chatService.selectChatHistorySlice(formId, authUser.getId(), page, size);
 
         // 메세지 읽음 처리
         chatService.markAsRead(formId, authUser.getId());
 
         // Slice 객체를 간소화된 응답 객체로 변환
-        ChatSliceResponse response = ChatSliceResponse.fromSlice(chatSlice);
+        ChatSliceResponse response = ChatSliceResponse.fromSlice(
+                chatSlice,
+                form.getCreditor().getId(),
+                form.getDebtor().getId(),
+                form.getStatus(),
+                form.getIsTerminationProcess()
+        );
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
