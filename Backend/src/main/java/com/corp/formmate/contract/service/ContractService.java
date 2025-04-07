@@ -266,7 +266,7 @@ public class ContractService {
 		Page<FormEntity> forms = formRepository.findAllWithFilters(
 			userId, null, null, PageRequest.of(0, 1000));
 		UserEntity user = getUser(userId);
-		String username = user.getUsername();
+		String username = user.getUserName();
 
 		long paid = 0, expectedPay = 0, received = 0, expectedReceive = 0;
 
