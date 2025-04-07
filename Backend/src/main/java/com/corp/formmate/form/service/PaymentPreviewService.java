@@ -305,4 +305,5 @@ public class PaymentPreviewService {
 	private int getLastDayOfMonth(LocalDateTime date) {
 		return date.toLocalDate().lengthOfMonth();
 	}
+
 }

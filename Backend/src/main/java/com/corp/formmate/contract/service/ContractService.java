@@ -31,11 +31,11 @@ import com.corp.formmate.form.dto.EnhancedPaymentScheduleResponse;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.form.repository.FormRepository;
-import com.corp.formmate.form.service.EnhancedPaymentPreviewService;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.ContractException;
 import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.global.error.exception.UserException;
+import com.corp.formmate.paymentschedule.service.PaymentScheduleService;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
@@ -55,9 +55,9 @@ public class ContractService {
 	private final ContractRepository contractRepository;
 	private final FormRepository formRepository;
 	private final TransferRepository transferRepository;
-	private final EnhancedPaymentPreviewService enhancedPaymentPreviewService;
 	private final UserRepository userRepository;
 	private final AlertService alertService;
+	private final PaymentScheduleService paymentScheduleService;
 
 	/**
 	 * 계약 상세 정보를 조회하는 메서드
@@ -626,6 +626,7 @@ public class ContractService {
 		contract.setExpectedInterestAmountAtMaturity(maturityInterest);
 
 		contractRepository.save(contract);
+		paymentScheduleService.createSchedules(form, contract);
 	}
 
 	public ContractEntity selectTransferByForm(FormEntity form) {
