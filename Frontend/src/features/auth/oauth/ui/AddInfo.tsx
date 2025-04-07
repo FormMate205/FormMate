@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { exchangeCodeForToken } from '@/entities/auth/api/exchangeCode';
 import {
     requestVerificationCode,
     verifyCode,
@@ -43,10 +44,45 @@ const AddInfo = () => {
     });
 
     useEffect(() => {
-        if (!code) {
-            navigate('/');
-            return;
-        }
+        const initializeAuth = async () => {
+            if (!code) {
+                navigate('/');
+                return;
+            }
+
+            // 토큰이 없는 경우에만 교환 시도
+            if (
+                !localStorage.getItem('accessToken') ||
+                localStorage.getItem('accessToken') === 'null'
+            ) {
+                try {
+                    console.log('추가 정보 페이지에서 토큰 교환 시도...');
+                    const response = await exchangeCodeForToken(code);
+
+                    // 액세스 토큰 추출 및 저장
+                    const accessToken = response.headers['authorization'];
+                    console.log('accessToken:', accessToken);
+                    if (accessToken) {
+                        // const tokenValue = accessToken.startsWith('Bearer ')
+                        //     ? accessToken.replace('Bearer ', '')
+                        //     : accessToken;
+
+                        localStorage.setItem('accessToken', accessToken);
+                        console.log('액세스 토큰 저장 완료:', accessToken);
+                    } else {
+                        console.error(
+                            '토큰 교환 응답에 authorization 헤더가 없습니다.',
+                        );
+                    }
+                } catch (error) {
+                    console.error(
+                        '추가 정보 페이지에서 토큰 교환 중 오류:',
+                        error,
+                    );
+                }
+            }
+        };
+        initializeAuth();
     }, [code, navigate]);
 
     const handleChange = (key: string, value: string) => {
@@ -170,6 +206,7 @@ const AddInfo = () => {
         };
 
         try {
+            console.log('token:', token);
             await addProfile(payload, token as string);
             sessionStorage.removeItem('oauthAuthCode');
             navigate('/');
