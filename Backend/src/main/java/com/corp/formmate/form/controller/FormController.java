@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.corp.formmate.form.dto.FormConfirmRequest;
 import com.corp.formmate.form.dto.FormConfirmVerifyRequest;
-import com.corp.formmate.form.dto.FormConfirmVerifyResponse;
 import com.corp.formmate.form.dto.FormCountResponse;
 import com.corp.formmate.form.dto.FormCreateRequest;
 import com.corp.formmate.form.dto.FormDetailResponse;
@@ -434,7 +433,7 @@ public class FormController {
 					description = "인증번호 확인 성공 및 계약 상태 변경 완료",
 					content = @Content(
 							mediaType = "application/json",
-							schema = @Schema(implementation = FormConfirmVerifyResponse.class)
+							schema = @Schema(implementation = boolean.class)
 					)
 			),
 			@ApiResponse(
@@ -465,7 +464,7 @@ public class FormController {
 			)
 	})
 	@PatchMapping("/confirm/debtor")
-	public ResponseEntity<FormConfirmVerifyResponse> confirmVerifyDebtorFormStatus(
+	public ResponseEntity<Boolean> confirmVerifyDebtorFormStatus(
 		@CurrentUser AuthUser authUser,
 
 		@io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -488,8 +487,8 @@ public class FormController {
 		@Valid @RequestBody FormConfirmVerifyRequest request) {
 
 		Integer userId = authUser.getId();
-		FormConfirmVerifyResponse response = formService.confirmVerifyDebtorFormStatus(userId, request);
-		return ResponseEntity.status(HttpStatus.OK).body(response);
+		Boolean isSuccess = formService.confirmVerifyDebtorFormStatus(userId, request);
+		return ResponseEntity.status(HttpStatus.OK).body(isSuccess);
 	}
 
 	@Operation(summary = "채권자 인증번호 요청", description = "채권자 본인 확인을 위한 인증번호를 요청합니다.")
@@ -542,7 +541,7 @@ public class FormController {
 					description = "인증번호 확인 성공 및 계약 상태 변경 완료",
 					content = @Content(
 							mediaType = "application/json",
-							schema = @Schema(implementation = FormConfirmVerifyResponse.class)
+							schema = @Schema(implementation = boolean.class)
 					)
 			),
 			@ApiResponse(
@@ -573,11 +572,11 @@ public class FormController {
 			)
 	})
 	@PatchMapping("/confirm/creditor")
-	public ResponseEntity<FormConfirmVerifyResponse> confirmVerifyCreditorFormStatus(
+	public ResponseEntity<Boolean> confirmVerifyCreditorFormStatus(
 		@CurrentUser AuthUser authUser,
 
 		@io.swagger.v3.oas.annotations.parameters.RequestBody(
-				description = "채권자 인증번호 확인 요청 정보", // 수정: "채무자"에서 "채권자"로 변경
+				description = "채권자 인증번호 확인 요청 정보",
 				required = true,
 				content = @Content(
 						schema = @Schema(implementation = FormConfirmVerifyRequest.class),
@@ -596,8 +595,8 @@ public class FormController {
 		@Valid @RequestBody FormConfirmVerifyRequest request) {
 
 		Integer userId = authUser.getId();
-		FormConfirmVerifyResponse response = formService.confirmVerifyCreditorFormStatus(userId, request);
-		return ResponseEntity.status(HttpStatus.OK).body(response);
+		Boolean isSuccess = formService.confirmVerifyCreditorFormStatus(userId, request);
+		return ResponseEntity.status(HttpStatus.OK).body(isSuccess);
 	}
 
 }
