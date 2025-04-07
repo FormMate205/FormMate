@@ -55,10 +55,27 @@ const OAuthCallback = () => {
                 const response = await exchangeCodeForToken(authCode);
 
                 // 액세스 토큰 확인 및 저장
-                const accessToken =
+                let accessToken =
                     response.headers['authorization'] ||
-                    response.headers['Authorization'];
+                    response.headers['Authorization'] ||
+                    response.headers.authorization ||
+                    response.headers.Authorization;
                 console.log('받은 액세스 토큰:', accessToken);
+
+                if (!accessToken && response.request) {
+                    const allHeaders = response.request.getAllResponseHeaders();
+                    console.log('모든 응답 헤더 문자열:', allHeaders);
+
+                    // 문자열에서 authorization 헤더 추출 시도
+                    const authMatch = /authorization:\s*([^\r\n]+)/i.exec(
+                        allHeaders,
+                    );
+                    if (authMatch) {
+                        accessToken = authMatch[1];
+                    }
+                }
+
+                console.log('추출한 액세스 토큰:', accessToken);
 
                 if (!accessToken) {
                     console.error(
@@ -68,11 +85,11 @@ const OAuthCallback = () => {
                     return;
                 }
 
-                const tokenValue = accessToken.startsWith('Bearer ')
-                    ? accessToken.replace('Bearer ', '')
-                    : accessToken;
+                // const tokenValue = accessToken.startsWith('Bearer ')
+                //     ? accessToken.replace('Bearer ', '')
+                //     : accessToken;
 
-                localStorage.setItem('accessToken', tokenValue);
+                localStorage.setItem('accessToken', accessToken);
                 console.log('액세스 토큰 저장 완료');
 
                 // 사용자 정보 설정
