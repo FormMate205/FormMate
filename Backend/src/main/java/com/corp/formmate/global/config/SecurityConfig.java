@@ -59,7 +59,8 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 					// 모든 API 경로에 접근 허용 (개발 편의를 위해)
-					.requestMatchers("/api/**", "/oauth2/**", "/login/oauth2/code/**", "/auth/**", "/ws/**").permitAll()
+					.requestMatchers("/api/**", "/oauth2/**", "/login/oauth2/code/**", "/auth/**", "/ws/**",
+							"/api/auth/token/**", "/login/oauthInfo/**").permitAll()
 					.anyRequest()
 					.authenticated()
 				//				// 공개 API 경로 설정
@@ -75,7 +76,7 @@ public class SecurityConfig {
 				.redirectionEndpoint(endpoint -> endpoint
 					.baseUri("/api/login/oauth2/code/*") // 중요: 리디렉션 엔드포인트 설정
 				)
-				.defaultSuccessUrl("/")
+//				.defaultSuccessUrl("/")
 				.successHandler(oAuth2LoginSuccessHandler)
 			)
 //			// 인증 실패 시 401 응답 반환하도록 설정 (리다이렉트 방지)
@@ -124,10 +125,10 @@ public class SecurityConfig {
 		));
 
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "X-Auth-Code"));
 
 		// 클라이언트에 노출할 응답 헤더 지정
-		configuration.setExposedHeaders(Arrays.asList("Authorization"));
+		configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Auth-Code"));
 
 		configuration.setAllowCredentials(true);
 		// 1시간동안 preflight 결과 캐싱

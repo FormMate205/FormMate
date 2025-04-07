@@ -9,14 +9,11 @@ import com.corp.formmate.global.constants.SystemConstants;
 import com.corp.formmate.user.entity.UserEntity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "chats")
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -56,24 +53,11 @@ public class ChatEntity implements Serializable {
 	@Builder.Default
 	private MessageType messageType = MessageType.CHAT;  // 기본값 설정
 
+	@Column(name = "target_user_id", nullable = true)
+	private Integer targetUserId;
+
 	// 시스템 메세지인지 확인
 	public boolean isSystemMessage() {
 		return writer != null && writer.getId().equals(SystemConstants.SYSTEM_USER_ID); // Id가 0인 사용자가 시스템
-	}
-
-	// 채권자가 보낸 메세지인지 확인
-	public boolean isCreditorMessage() {
-		if (isSystemMessage()) {
-			return false;
-		}
-		return writer.getId().equals(form.getCreditor().getId());
-	}
-
-	// 채무자가 보낸 메서드인지 확인
-	public boolean isDebtorMessage() {
-		if (isSystemMessage()) {
-			return false;
-		}
-		return writer.getId().equals(form.getDebtor().getId());
 	}
 }

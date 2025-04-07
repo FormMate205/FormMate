@@ -40,7 +40,6 @@ import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
-import com.corp.formmate.user.dto.AuthUser;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
 
@@ -66,13 +65,13 @@ public class ContractService {
 	 * - 계약 상태에 따라 연체, 상환액, 중도상환 수수료 등을 종합적으로 계산하여 반환
 	 */
 	@Transactional
-	public ContractDetailResponse selectContractDetail(AuthUser user, Integer formId) {
+	public ContractDetailResponse selectContractDetail(Integer userId, Integer formId) {
 		FormEntity form = getForm(formId);
 		ContractEntity contract = getContract(form);
-		UserEntity userEntity = getUser(user.getId());
+		UserEntity userEntity = getUser(userId);
 		List<TransferEntity> transfers = getTransfers(form);
 
-		boolean userIsCreditor = form.getCreditorName().equals(userEntity.getUserName());
+		boolean userIsCreditor = form.getCreditor().equals(userEntity);
 		String contracteeName = userIsCreditor ? form.getDebtorName() : form.getCreditorName();
 
 		// 현재까지 납부한 총액 (모든 송금 금액 합)
@@ -229,10 +228,10 @@ public class ContractService {
 	 * 특정 상태의 전체 계약(사용자 기준) 조회 → 요약 정보 반환
 	 */
 	@Transactional
-	public List<ContractPreviewResponse> selectAllContractByStatus(FormStatus formStatus, AuthUser authUser) {
+	public List<ContractPreviewResponse> selectAllContractByStatus(FormStatus formStatus, Integer userId) {
 		Page<FormEntity> allForms = formRepository.findAllWithFilters(
-			authUser.getId(), formStatus, null, PageRequest.of(0, 1000));
-		UserEntity user = getUser(authUser.getId());
+			userId, formStatus, null, PageRequest.of(0, 1000));
+		UserEntity user = getUser(userId);
 
 		return allForms.stream()
 			.map(form -> {
@@ -263,10 +262,11 @@ public class ContractService {
 	 * 사용자의 전체 송금 요약 정보를 계산
 	 */
 	@Transactional
-	public AmountResponse selectAmounts(AuthUser authUser) {
+	public AmountResponse selectAmounts(Integer userId) {
 		Page<FormEntity> forms = formRepository.findAllWithFilters(
-			authUser.getId(), null, null, PageRequest.of(0, 1000));
-		String username = authUser.getUsername();
+			userId, null, null, PageRequest.of(0, 1000));
+		UserEntity user = getUser(userId);
+		String username = user.getUserName();
 
 		long paid = 0, expectedPay = 0, received = 0, expectedReceive = 0;
 
@@ -311,9 +311,8 @@ public class ContractService {
 
 		// 필요한 데이터 조회
 		UserEntity userEntity = getUser(userId);
-		List<FormEntity> allForms = formRepository
-			.findAllWithFilters(userId, null, null, PageRequest.of(0, 1000))
-			.getContent();
+		List<FormStatus> statuses = List.of(FormStatus.IN_PROGRESS, FormStatus.OVERDUE);
+		List<FormEntity> allForms = formRepository.findAllByStatuses(userId, statuses);
 
 		LocalDate now = LocalDate.now();
 		YearMonth nowYm = YearMonth.from(now);
@@ -321,30 +320,16 @@ public class ContractService {
 		// 3개월을 순회
 		for (YearMonth ym : targetMonths) {
 			for (FormEntity form : allForms) {
-
-				// 만기 지났으면 스킵할지 여부
-				LocalDate maturity = form.getMaturityDate().toLocalDate();
-				if (maturity.isBefore(ym.atDay(1))) {
-					continue;
-				}
-
 				ContractEntity contract = getContract(form);
 				boolean isCreditor = form.getCreditorName().equals(userEntity.getUserName());
 				String contracteeName = isCreditor ? form.getDebtorName() : form.getCreditorName();
 
-				// 과거 달 vs 현재/미래 달 구분
 				if (ym.isBefore(nowYm)) {
-					// (과거) => 실제 송금(Transfer) 기준으로 여러 Detail 생성
-					List<MonthlyContractDetail> pastDetails = findTransferDetailsForMonth(
-						form, ym, isCreditor, contracteeName
-					);
-					allDetails.addAll(pastDetails);
+					// 과거 달: 실제 송금 내역 기반
+					allDetails.addAll(findTransferDetailsForMonth(form, ym, isCreditor, contracteeName));
 				} else {
-					// (현재 or 미래) => EnhancedPaymentPreviewService에서 스케줄별 Detail 생성
-					List<MonthlyContractDetail> futureDetails = computeDetailsFromPreview(
-						form, contract, ym, isCreditor, contracteeName
-					);
-					allDetails.addAll(futureDetails);
+					// 현재 / 미래 달: 예측 스케줄 기반
+					allDetails.addAll(computeDetailsFromPreview(form, contract, ym, isCreditor, contracteeName));
 				}
 			}
 		}

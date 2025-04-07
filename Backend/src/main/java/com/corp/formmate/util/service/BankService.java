@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.corp.formmate.global.error.code.ErrorCode;
@@ -23,6 +24,8 @@ import com.corp.formmate.util.dto.BankTransferResponse;
 import com.corp.formmate.util.dto.BankVerifyOneWonRequest;
 import com.corp.formmate.util.dto.BankVerifyOneWonResponse;
 import com.corp.formmate.util.header.BankHeader;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -274,7 +277,6 @@ public class BankService {
 		try {
 			log.debug("Bank API Request: {}", requestEntity.getBody());
 
-			// API 호출
 			ResponseEntity<T> response = restTemplate.exchange(
 				url,
 				HttpMethod.POST,
@@ -284,14 +286,40 @@ public class BankService {
 
 			log.debug("Bank API Response: {}", response.getBody());
 
-			// 응답 처리
 			if (response.getStatusCode().is2xxSuccessful()) {
 				return response.getBody();
 			} else {
 				throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
 			}
+		} catch (HttpClientErrorException e) {
+			String body = e.getResponseBodyAsString();
+			log.error("Bank API Error Response: {}", body);
+
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode root = mapper.readTree(body);
+				String code = root.at("/Header/responseCode").asText();
+				if (code.isEmpty()) {
+					code = root.path("responseCode").asText();
+				}
+				switch (code) {
+					case "A1003" -> throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
+					case "A1014" -> throw new TransferException(ErrorCode.INSUFFICIENT_BALANCE);
+					case "A1086" -> throw new TransferException(ErrorCode.VERIFY_NOT_FOUND);
+					case "A1087" -> throw new TransferException(ErrorCode.EXPIRED_VERIFY_TIME);
+					case "A1088" -> throw new TransferException(ErrorCode.VERIFY_NOT_MATCHED);
+					default -> throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
+				}
+			} catch (TransferException te) {
+				throw te;
+			} catch (Exception parsingException) {
+				log.error("API 응답 파싱 실패: {}", parsingException.getMessage(), parsingException);
+				throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
+			}
+		} catch (TransferException te) {
+			throw te;
 		} catch (Exception e) {
-			log.error("Bank API Error: {}", e.getMessage(), e);
+			log.error("Unexpected Bank API Error: {}", e.getMessage(), e);
 			throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
 		}
 	}

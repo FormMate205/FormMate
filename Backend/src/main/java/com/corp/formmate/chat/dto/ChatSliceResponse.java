@@ -1,5 +1,8 @@
 package com.corp.formmate.chat.dto;
 
+import com.corp.formmate.form.dto.FormInformation;
+import com.corp.formmate.form.entity.FormStatus;
+import com.corp.formmate.form.entity.TerminationProcess;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,10 +40,15 @@ public class ChatSliceResponse {
     @Schema(description = "비어있는지 여부", example = "false")
     private boolean empty;
 
+    @Schema(description = "계약 정보")
+    private FormInformation formInformation;
+
     /**
      * Spring Data의 Slice 객체로부터 간소화된 응답 객체를 생성합니다.
      */
-    public static <T> ChatSliceResponse fromSlice(Slice<ChatResponse> slice) {
+    public static <T> ChatSliceResponse fromSlice(Slice<ChatResponse> slice,
+                                                  Integer creditorId, Integer debtorId,
+                                                  FormStatus formStatus, TerminationProcess terminationStatus) {
         return ChatSliceResponse.builder()
                 .content(slice.getContent())
                 .pageNumber(slice.getNumber())
@@ -49,6 +57,12 @@ public class ChatSliceResponse {
                 .last(slice.isLast())
                 .numberOfElements(slice.getNumberOfElements())
                 .empty(slice.isEmpty())
+                .formInformation(FormInformation.builder()
+                        .creditorId(creditorId)
+                        .debtorId(debtorId)
+                        .formStatus(formStatus)
+                        .terminationStatus(terminationStatus)
+                        .build())
                 .build();
     }
 }

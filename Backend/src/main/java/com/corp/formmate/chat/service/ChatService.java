@@ -252,8 +252,7 @@ public class ChatService {
                 .isRead(chatEntity.getIsRead())
                 .createdAt(chatEntity.getCreatedAt())
                 .messageType(chatEntity.getMessageType())
-                .isCreditorMessage(chatEntity.isCreditorMessage())
-                .isDebtorMessage(chatEntity.isDebtorMessage())
+                .targetUserId(chatEntity.getTargetUserId())
                 .build();
     }
 

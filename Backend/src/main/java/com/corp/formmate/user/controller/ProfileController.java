@@ -1,5 +1,7 @@
 package com.corp.formmate.user.controller;
 
+import com.corp.formmate.global.annotation.CurrentUser;
+import com.corp.formmate.user.dto.AuthUser;
 import com.corp.formmate.user.dto.ProfileCompletionRequest;
 import com.corp.formmate.user.dto.ProfileCompletionResponse;
 import com.corp.formmate.user.entity.UserEntity;
@@ -136,10 +138,10 @@ public class ProfileController {
                     required = true,
                     content = @Content(schema = @Schema(implementation = ProfileCompletionRequest.class))
             )
-            @Valid @RequestBody ProfileCompletionRequest request) {
-        // 현재 인증된 사용자 정보 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = ((UserDetails) authentication.getPrincipal()).getUsername();
+            @Valid @RequestBody ProfileCompletionRequest request,
+            @CurrentUser AuthUser authUser
+    ) {
+        String email = authUser.getEmail();
 
         // 전화번호 정규화
         String normalizedPhone = messageService.normalizePhoneNumber(request.getPhoneNumber());

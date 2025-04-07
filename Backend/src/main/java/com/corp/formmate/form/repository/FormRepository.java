@@ -83,4 +83,11 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 		Pageable pageable);
 
 	List<FormEntity> findByStatusIn(Collection<FormStatus> statuses);
+
+	@Query("SELECT f FROM FormEntity f WHERE (f.creditor.id = :userId OR f.debtor.id = :userId) " +
+		"AND f.status IN :statuses")
+	List<FormEntity> findAllByStatuses(
+		@Param("userId") Integer userId,
+		@Param("statuses") List<FormStatus> statuses
+	);
 }

@@ -252,7 +252,7 @@ public class FormTerminationController {
                     description = "인증 확인 및 서명 정보",
                     required = true,
                     content = @Content(
-                            schema = @Schema(implementation = FormTerminationConfirmRequest.class),
+                            schema = @Schema(implementation = FormTerminationVerifyConfirmRequest.class),
                             examples = @ExampleObject(
                                     value = """
                     {
@@ -264,11 +264,11 @@ public class FormTerminationController {
                             )
                     )
             )
-            @Valid @RequestBody FormTerminationConfirmRequest request,
+            @Valid @RequestBody FormTerminationVerifyConfirmRequest request,
             @CurrentUser AuthUser authUser
             ) {
         log.info("계약 파기 첫 번째 서명 인증 확인 - 계약 ID: {}, 요청자: {}", formId, authUser.getId());
-        boolean isSuccess = formService.confirmFirstSignVerification(formId, authUser.getId(), request.getVerifyRequest(), request.getSignRequest());
+        boolean isSuccess = formService.confirmFirstSignVerification(formId, authUser.getId(), request);
         return ResponseEntity.status(HttpStatus.OK).body(isSuccess);
     }
 
@@ -385,7 +385,7 @@ public class FormTerminationController {
                     description = "인증 확인 및 서명 정보",
                     required = true,
                     content = @Content(
-                            schema = @Schema(implementation = FormTerminationConfirmRequest.class),
+                            schema = @Schema(implementation = FormTerminationVerifyConfirmRequest.class),
                             examples = @ExampleObject(
                                     value = """
                     {
@@ -397,11 +397,11 @@ public class FormTerminationController {
                             )
                     )
             )
-            @Valid @RequestBody FormTerminationConfirmRequest request,
+            @Valid @RequestBody FormTerminationVerifyConfirmRequest request,
             @CurrentUser AuthUser authUser
     ) {
         log.info("계약 파기 두 번째 서명 인증 확인 - 계약 ID: {}, 요청자: {}", formId, authUser.getId());
-        Boolean isSuccess = formService.confirmSecondSignVerification(formId, authUser.getId(), request.getVerifyRequest(), request.getSignRequest());
+        Boolean isSuccess = formService.confirmSecondSignVerification(formId, authUser.getId(), request);
         return ResponseEntity.status(HttpStatus.OK).body(isSuccess);
     }
 }
