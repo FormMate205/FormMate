@@ -79,6 +79,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     + "&email=" + URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8)
                     + "&userName=" + URLEncoder.encode(user.getUserName(), StandardCharsets.UTF_8);
 
+            log.info("리다이렉트 URL: {}", redirectUrl);
+
             // 리다이렉트 실행
             getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 
