@@ -68,6 +68,13 @@ export const useSignature = ({
         }
     };
 
+    // 인증 오류 처리 함수 (채권자 잔액 부족)
+    const handleVerificationError = (error: Error) => {
+        if (error?.message === '잔액이 부족합니다.') {
+            setVerificationMessage(error.message);
+        }
+    };
+
     // API 호출
     // 채무자 인증 요청 api
     const { mutate: requestDebtor } = usePostRequestDebtor(formId);
@@ -85,6 +92,7 @@ export const useSignature = ({
     const { mutate: confirmCreditor } = usePostConfirmCreditor({
         formId,
         onSuccess: handleVerificationResponse,
+        onError: handleVerificationError,
     });
 
     // 계약파기 첫번째 인증 요청 api

@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useSignature } from '@/features/signature/model/useSignature';
+import ConfirmModal from '@/widgets/modal/ConfirmModal';
 
 const Signature = () => {
     const location = useLocation();
@@ -29,6 +30,12 @@ const Signature = () => {
         handleRecaptchaExpired,
     } = useSignature({ formId, type, creditorId, requestedById });
 
+    // 송금 페이지 이동
+    const navigateToTransfer = () => {
+        navigate('/');
+    };
+
+    // 서명 페이지 닫기
     const handleClose = () => {
         navigate(`/chat/${formId}`, {
             state: { isFin: false, requestedById: undefined },
@@ -38,7 +45,7 @@ const Signature = () => {
     return (
         <div className='flex h-screen w-full flex-col px-4 py-2'>
             <div className='h-full py-4'>
-                <p className='text-2xl font-semibold'>Formmate 전자 서명</p>
+                <p className='text-2xl font-semibold'>FormMate 전자 서명</p>
                 <Form {...form}>
                     <form className='mt-10 mb-5 flex flex-col gap-4'>
                         <FormField
@@ -130,6 +137,19 @@ const Signature = () => {
                                                     >
                                                         {verificationMessage}
                                                     </p>
+                                                )}
+
+                                                {verificationMessage ===
+                                                    '잔액이 부족합니다.' && (
+                                                    <ConfirmModal
+                                                        description='잔액이 부족하여 계약 체결이 불가능합니다. 충전 후 재시도 해주세요.'
+                                                        title='잔액을 충전하시겠습니까?'
+                                                        open={true}
+                                                        onConfirm={() =>
+                                                            navigateToTransfer()
+                                                        }
+                                                        onClose={() => {}}
+                                                    />
                                                 )}
                                             </div>
                                             <ReCAPTCHA
