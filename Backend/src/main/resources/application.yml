@@ -114,6 +114,7 @@ server:
       charset: UTF-8
       force: true
     context-path: ""
+  forward-headers-strategy: framework
 
 logging:
   level:
