@@ -298,8 +298,10 @@ public class BankService {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
 				JsonNode root = mapper.readTree(body);
-				String code = root.path("Header").path("responseCode").asText();
-
+				String code = root.at("/Header/responseCode").asText();
+				if (code.isEmpty()) {
+					code = root.path("responseCode").asText();
+				}
 				switch (code) {
 					case "A1003" -> throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
 					case "A1014" -> throw new TransferException(ErrorCode.INSUFFICIENT_BALANCE);
