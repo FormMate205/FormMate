@@ -40,7 +40,6 @@ import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
-import com.corp.formmate.user.dto.AuthUser;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
 
@@ -263,10 +262,11 @@ public class ContractService {
 	 * 사용자의 전체 송금 요약 정보를 계산
 	 */
 	@Transactional
-	public AmountResponse selectAmounts(AuthUser authUser) {
+	public AmountResponse selectAmounts(Integer userId) {
 		Page<FormEntity> forms = formRepository.findAllWithFilters(
-			authUser.getId(), null, null, PageRequest.of(0, 1000));
-		String username = authUser.getUsername();
+			userId, null, null, PageRequest.of(0, 1000));
+		UserEntity user = getUser(userId);
+		String username = user.getUsername();
 
 		long paid = 0, expectedPay = 0, received = 0, expectedReceive = 0;
 
