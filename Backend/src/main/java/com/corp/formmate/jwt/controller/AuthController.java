@@ -296,14 +296,7 @@ public class AuthController {
                     description = "토큰 발급 및 사용자 정보 반환 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = LoginResponse.class),
-                            examples = @ExampleObject(value = """
-                    {
-                      "userId": 1,
-                      "email": "user@example.com",
-                      "userName": "홍길동"
-                    }
-                """)
+                            schema = @Schema(implementation = LoginResponse.class)
                     )
             ),
             @ApiResponse(
