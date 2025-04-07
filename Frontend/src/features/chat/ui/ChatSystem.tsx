@@ -1,11 +1,12 @@
 import { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MessageType } from '@/entities/chat/model/types';
 import BlockModal from '@/entities/chat/ui/BlockModal';
 import { useUserStore } from '@/entities/user/model/userStore';
+import { NavigateToPage } from '@/shared/ui/NavigateToPage';
 import { CommonModal } from '@/widgets';
 import FormModal from '../../../entities/chat/ui/FormModal';
 import { useConnectWs } from '../model/useConnectWs';
-import SignatureForm from './SignatureForm';
 
 interface ChatSystemProps {
     formId: string;
@@ -15,6 +16,7 @@ interface ChatSystemProps {
 }
 
 const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
+    const navigate = useNavigate();
     const { user } = useUserStore();
     const { formInfo } = useConnectWs({ user, roomId: formId });
 
@@ -42,6 +44,12 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
         return isDebtorSign || isCreditorSign;
     };
 
+    const handleNavigateToSign = () => {
+        navigate(`/chat/${formId}/signature`, {
+            state: { formId, type, creditorId: formInfo.creditorId, signId },
+        });
+    };
+
     return (
         <div className='border-primary-200 flex w-[260px] flex-col gap-6 rounded-2xl border bg-white px-3 py-4'>
             <div className='flex w-full items-center justify-between'>
@@ -59,13 +67,19 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
 
             {isSignatureRequest && (
                 <CommonModal
-                    triggerChildren={<div>서명하기</div>}
+                    triggerChildren={
+                        <div
+                            className='bg-primary-500 w-full rounded-lg px-4 py-2 font-medium text-white'
+                            aria-label='서명하기 버튼'
+                        >
+                            서명하기
+                        </div>
+                    }
                     children={
                         canUserSign() ? (
-                            <SignatureForm
-                                formId={formId}
-                                type={type}
-                                creditorId={formInfo.creditorId}
+                            <NavigateToPage
+                                title='서명'
+                                handleNavigate={handleNavigateToSign}
                             />
                         ) : (
                             <BlockModal />
