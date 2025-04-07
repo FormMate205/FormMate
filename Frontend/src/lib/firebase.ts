@@ -32,19 +32,15 @@ export async function registerServiceWorker() {
 export async function requestPermission() {
     const permission = await Notification.requestPermission();
 
-    if (permission === 'granted') {
-        const registration = await navigator.serviceWorker.getRegistration();
-        if (!registration) {
-            console.warn('Service worker not found.');
-            return;
-        }
-        const currentToken = await getToken(messaging, {
-            vapidKey: import.meta.env.VITE_VAPID,
-            serviceWorkerRegistration: registration,
-        });
+    if (permission !== 'granted') return null;
 
-        // 토큰 등록
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) return null;
 
-        console.log('FCM 토큰:', currentToken);
-    }
+    const token = await getToken(messaging, {
+        vapidKey: import.meta.env.VITE_VAPID,
+        serviceWorkerRegistration: registration,
+    });
+
+    return token;
 }
