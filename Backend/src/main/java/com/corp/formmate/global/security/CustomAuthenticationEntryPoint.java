@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
@@ -30,7 +31,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
 
-        log.error("Authentication failed: {}", authException.getMessage());
+        log.error("인증 실패: {}", authException.getMessage());
 
         ErrorCode errorCode;
 
@@ -39,7 +40,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             errorCode = ErrorCode.LOGIN_BAD_CREDENTIALS;
         } else if (authException instanceof UsernameNotFoundException) {
             errorCode = ErrorCode.USER_NOT_FOUND;
-        } else if (authException instanceof InsufficientAuthenticationException) {
+        } else if (authException instanceof InsufficientAuthenticationException
+                || authException instanceof AuthenticationCredentialsNotFoundException) {
             errorCode = ErrorCode.UNAUTHORIZED;
         } else {
             errorCode = ErrorCode.LOGIN_FAILED;
@@ -50,8 +52,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                 .message(errorCode.getMessage())
                 .build();
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(errorCode.getStatus());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
 
         objectMapper.writeValue(response.getOutputStream(), errorResponse);
     }
