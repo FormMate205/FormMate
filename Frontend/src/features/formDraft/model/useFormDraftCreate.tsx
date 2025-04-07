@@ -273,7 +273,11 @@ export const useFormDraftCreate = ({
                     break;
 
                 case 'repaymentDay':
-                    updated.repaymentDay = answer;
+                    if (updated.interestRate == '0') {
+                        updated.repaymentDay = '0';
+                    } else {
+                        updated.repaymentDay = answer;
+                    }
                     break;
 
                 case 'earlyRepaymentFeeRate':
