@@ -176,13 +176,6 @@ public class TransferService {
 				TransferStatus.OVERDUE);
 		} // 해당 구문 빠져나오기 전 contract 관련한 처리 로직 필요
 
-		// Entity 저장 전 외부 은행 API 이체 로직 실행
-		onTransferEvent(BankTransferRequest.builder()
-			.depositAccountNo(receiver.getAccountNumber())
-			.withdrawalAccountNo(sender.getAccountNumber())
-			.transactionBalance(amount)
-			.build());
-
 		transferRepository.save(transferEntity);
 
 		String senderName = transferEntity.getSender().getUserName();
@@ -202,6 +195,13 @@ public class TransferService {
 		String withdrawTitle = senderName + "(" + senderAccountLast4 + ") 출금 알림";
 		String withdrawContent = "출금 " + formattedAmount + "원 | " + receiverName;
 		alertService.createAlert(transferEntity.getSender(), "출금", withdrawTitle, withdrawContent);
+
+		// 외부 은행 API 이체 로직 실행
+		onTransferEvent(BankTransferRequest.builder()
+			.depositAccountNo(receiver.getAccountNumber())
+			.withdrawalAccountNo(sender.getAccountNumber())
+			.transactionBalance(amount)
+			.build());
 
 		return TransferCreateResponse.fromEntity(transferEntity);
 	}

@@ -320,7 +320,6 @@ public class FormService {
 			request.getRecaptchaToken());
 
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
-		transferService.createInitialTransfer(formEntity);
 
 		formEntity.updateStatus(FormStatus.IN_PROGRESS);
 		formRepository.save(formEntity);
@@ -330,6 +329,8 @@ public class FormService {
 		// 채팅 발송 위한 이벤트 발행
 		log.info("채권자 서명 & 계약 체결 이벤트 발행: 폼 ID={}", formEntity.getId());
 		eventPublisher.publishEvent(new CreditorSignatureCompletedEvent(formEntity));
+
+		transferService.createInitialTransfer(formEntity);
 
 		return FormConfirmVerifyResponse.fromEntity(formEntity);
 	}
