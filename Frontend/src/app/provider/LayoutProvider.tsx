@@ -1,10 +1,9 @@
 import { Outlet } from 'react-router-dom';
 import { useUserService } from '@/entities/user/model/userService';
-import { useSocialLoginEffect } from '@/shared/model/useSocialLoginEffect';
 
 const LayoutProvider = () => {
     useUserService(); // 일반 로그인 상태 확인
-    useSocialLoginEffect(); // 소셜 로그인
+    // useSocialLoginEffect(); // 소셜 로그인
 
     return (
         <div className='flex min-h-screen w-full justify-center'>
