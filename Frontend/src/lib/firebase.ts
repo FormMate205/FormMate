@@ -29,7 +29,7 @@ export async function registerServiceWorker() {
     });
 }
 
-export async function requestPermission() {
+export async function getDeviceToken() {
     const permission = await Notification.requestPermission();
 
     if (permission !== 'granted') return null;
