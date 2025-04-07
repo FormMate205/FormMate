@@ -131,8 +131,7 @@ public class AuthController {
         LoginResponse loginResponse = new LoginResponse(
                 user.getId(),
                 user.getEmail(),
-                user.getUserName(),
-                false
+                user.getUserName()
         );
 
         user.login();
@@ -296,14 +295,7 @@ public class AuthController {
                     description = "토큰 발급 및 사용자 정보 반환 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = LoginResponse.class),
-                            examples = @ExampleObject(value = """
-                    {
-                      "userId": 1,
-                      "email": "user@example.com",
-                      "userName": "홍길동"
-                    }
-                """)
+                            schema = @Schema(implementation = LoginResponse.class)
                     )
             ),
             @ApiResponse(
@@ -371,18 +363,11 @@ public class AuthController {
             // 리프레시 토큰을 쿠키에 저장
             jwtTokenService.setRefreshTokenCookie(response, token.getRefreshToken(), jwtProperties.isSecureFlag());
 
-            // 추가정보(주소, 전화번호)가 필요한지 확인
-            boolean needsAdditionalInfo = user.getAddress() == null ||
-                    user.getPhoneNumber() == null ||
-                    user.getAddress().isEmpty() ||
-                    user.getPhoneNumber().isEmpty();
-
             // 응답 객체 생성
             LoginResponse loginResponse = new LoginResponse(
                     user.getId(),
                     user.getEmail(),
-                    user.getUserName(),
-                    needsAdditionalInfo
+                    user.getUserName()
             );
 
             user.login();

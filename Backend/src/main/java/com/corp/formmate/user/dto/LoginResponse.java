@@ -18,7 +18,4 @@ public class LoginResponse {
 
     @Schema(description = "사용자 이름", example = "홍길동")
     private String userName;
-
-    @Schema(description = "추가 정보 필요 여부", example = "true")
-    private Boolean needsAdditionalInfo;
 }
