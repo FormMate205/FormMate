@@ -1,8 +1,8 @@
-import axios from '@/shared/api/instance';
+import api from '@/shared/api/instance';
 import { AdditionalInfo } from '../model/types';
 
 export const addProfile = (data: AdditionalInfo, token: string) => {
-    return axios.post('/auth/profile/complete', data, {
+    return api.post('/auth/profile/complete', data, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
