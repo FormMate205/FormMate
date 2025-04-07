@@ -83,7 +83,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 
         } catch (Exception e) {
-            log.error("OAuth2 로그인 실패", e);
+            log.error("OAuth2 처리 중 예외 발생: {}", e.getMessage(), e);
             getRedirectStrategy().sendRedirect(request, response, "/login?error=oauth_failed");
         }
 
