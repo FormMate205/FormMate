@@ -19,7 +19,7 @@ const OAuthCallback = () => {
                     console.error(
                         '인증 코드가 없습니다. 로그인 페이지로 이동동',
                     );
-                    // navigate('/login');
+                    navigate('/login');
                     return;
                 }
 
@@ -29,7 +29,24 @@ const OAuthCallback = () => {
                 if (needsAdditionalInfo) {
                     console.log('추가 정보 입력이 필요합니다');
                     sessionStorage.setItem('oauthAuthCode', authCode);
-                    navigate('/login/oauthInfo');
+                    console.log(
+                        '리다이렉트 직전 - 현재 URL:',
+                        window.location.href,
+                    );
+                    try {
+                        // 타임아웃을 사용하여 비동기적으로 리다이렉트
+                        console.log('타임아웃으로 리다이렉트 시도');
+                        setTimeout(() => {
+                            console.log('타임아웃 내부 - 리다이렉트 실행');
+                            window.location.href = '/login/oauthInfo';
+                        }, 100);
+
+                        // 백업 리다이렉트 방식도 시도
+                        console.log('직접 리다이렉트 시도');
+                        window.location.replace('/login/oauthInfo');
+                    } catch (e) {
+                        console.error('리다이렉트 중 에러 발생:', e);
+                    }
                     return;
                 }
 
@@ -38,22 +55,41 @@ const OAuthCallback = () => {
                 const response = await exchangeCodeForToken(authCode);
 
                 // 액세스 토큰 확인 및 저장
-                const accessToken = response.headers['authorization'];
+                let accessToken =
+                    response.headers['authorization'] ||
+                    response.headers['Authorization'] ||
+                    response.headers.authorization ||
+                    response.headers.Authorization;
                 console.log('받은 액세스 토큰:', accessToken);
+
+                if (!accessToken && response.request) {
+                    const allHeaders = response.request.getAllResponseHeaders();
+                    console.log('모든 응답 헤더 문자열:', allHeaders);
+
+                    // 문자열에서 authorization 헤더 추출 시도
+                    const authMatch = /authorization:\s*([^\r\n]+)/i.exec(
+                        allHeaders,
+                    );
+                    if (authMatch) {
+                        accessToken = authMatch[1];
+                    }
+                }
+
+                console.log('추출한 액세스 토큰:', accessToken);
 
                 if (!accessToken) {
                     console.error(
-                        '액세스 토큰이 없습니다. 로그인 페이지로 이동동',
+                        '액세스 토큰이 없습니다. 로그인 페이지로 이동',
                     );
-                    // navigate('/login');
+                    navigate('/login');
                     return;
                 }
 
-                const tokenValue = accessToken.startsWith('Bearer ')
-                    ? accessToken.replace('Bearer ', '')
-                    : accessToken;
+                // const tokenValue = accessToken.startsWith('Bearer ')
+                //     ? accessToken.replace('Bearer ', '')
+                //     : accessToken;
 
-                localStorage.setItem('accessToken', tokenValue);
+                localStorage.setItem('accessToken', accessToken);
                 console.log('액세스 토큰 저장 완료');
 
                 // 사용자 정보 설정
@@ -75,7 +111,7 @@ const OAuthCallback = () => {
                     'OAuth 콜백 처리 중 오류 발생(로그인 페이지로 이동):',
                     e,
                 );
-                // navigate('/login');
+                navigate('/login');
             }
         };
 
