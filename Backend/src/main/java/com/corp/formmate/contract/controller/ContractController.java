@@ -61,9 +61,10 @@ public class ContractController {
 		)
 	})
 	@GetMapping("/{formId}")
-	public ResponseEntity<ContractDetailResponse> selectContractDetail(@CurrentUser AuthUser user,
+	public ResponseEntity<ContractDetailResponse> selectContractDetail(@CurrentUser AuthUser authUser,
 		@PathVariable Integer formId) {
-		return ResponseEntity.ok(contractService.selectContractDetail(user, formId));
+		Integer userId = authUser.getId();
+		return ResponseEntity.ok(contractService.selectContractDetail(userId, formId));
 	}
 
 	@Operation(summary = "납부 예정 금액 조회(송금 화면)", description = "이번 달 남은 상환 금액(연체액 포함 금액) / 중도상환수수료")
@@ -137,6 +138,7 @@ public class ContractController {
 	public ResponseEntity<List<ContractWithPartnerResponse>> selectContractWithPartner(@PathVariable Integer userId,
 		@CurrentUser
 		AuthUser authUser) {
+
 		Integer currentUserId = authUser.getId();
 		return ResponseEntity.ok(contractService.selectContractWithPartner(currentUserId, userId));
 	}
@@ -164,6 +166,7 @@ public class ContractController {
 	@GetMapping
 	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam String status,
 		@CurrentUser AuthUser authUser) {
+		Integer userId = authUser.getId();
 		FormStatus formStatus = null;
 		if (!status.equals("ALL")) {
 			for (FormStatus s : FormStatus.values()) {
@@ -174,7 +177,7 @@ public class ContractController {
 			}
 		}
 
-		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatus, authUser));
+		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatus, userId));
 	}
 
 	@Operation(summary = "보낸 금액/받을 금액", description = "계약관리-목록 화면")
@@ -198,7 +201,8 @@ public class ContractController {
 	})
 	@GetMapping("/amount")
 	public ResponseEntity<AmountResponse> selectAmounts(@CurrentUser AuthUser authUser) {
-		return ResponseEntity.ok(contractService.selectAmounts(authUser));
+		Integer userId = authUser.getId();
+		return ResponseEntity.ok(contractService.selectAmounts(userId));
 	}
 
 	@Operation(summary = "메인화면 납부 계획(내역)", description = "메인화면 달력(과거, 현재, 미래) - 과거면 실제 납부 기록, 미래면 예상 납부 스케줄 반환")

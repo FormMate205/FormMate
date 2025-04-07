@@ -66,13 +66,13 @@ public class ContractService {
 	 * - 계약 상태에 따라 연체, 상환액, 중도상환 수수료 등을 종합적으로 계산하여 반환
 	 */
 	@Transactional
-	public ContractDetailResponse selectContractDetail(AuthUser user, Integer formId) {
+	public ContractDetailResponse selectContractDetail(Integer userId, Integer formId) {
 		FormEntity form = getForm(formId);
 		ContractEntity contract = getContract(form);
-		UserEntity userEntity = getUser(user.getId());
+		UserEntity userEntity = getUser(userId);
 		List<TransferEntity> transfers = getTransfers(form);
 
-		boolean userIsCreditor = form.getCreditorName().equals(userEntity.getUserName());
+		boolean userIsCreditor = form.getCreditor().equals(userEntity);
 		String contracteeName = userIsCreditor ? form.getDebtorName() : form.getCreditorName();
 
 		// 현재까지 납부한 총액 (모든 송금 금액 합)
@@ -229,10 +229,10 @@ public class ContractService {
 	 * 특정 상태의 전체 계약(사용자 기준) 조회 → 요약 정보 반환
 	 */
 	@Transactional
-	public List<ContractPreviewResponse> selectAllContractByStatus(FormStatus formStatus, AuthUser authUser) {
+	public List<ContractPreviewResponse> selectAllContractByStatus(FormStatus formStatus, Integer userId) {
 		Page<FormEntity> allForms = formRepository.findAllWithFilters(
-			authUser.getId(), formStatus, null, PageRequest.of(0, 1000));
-		UserEntity user = getUser(authUser.getId());
+			userId, formStatus, null, PageRequest.of(0, 1000));
+		UserEntity user = getUser(userId);
 
 		return allForms.stream()
 			.map(form -> {

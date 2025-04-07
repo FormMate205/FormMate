@@ -310,10 +310,14 @@ public class BankService {
 					case "A1088" -> throw new TransferException(ErrorCode.VERIFY_NOT_MATCHED);
 					default -> throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
 				}
+			} catch (TransferException te) {
+				throw te;
 			} catch (Exception parsingException) {
 				log.error("API 응답 파싱 실패: {}", parsingException.getMessage(), parsingException);
 				throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
 			}
+		} catch (TransferException te) {
+			throw te;
 		} catch (Exception e) {
 			log.error("Unexpected Bank API Error: {}", e.getMessage(), e);
 			throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
