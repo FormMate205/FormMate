@@ -99,11 +99,10 @@ const LoginForm = () => {
                     src='/assets/images/naver.png'
                     alt='네이버'
                     className='h-10 w-10 cursor-pointer'
-                />
-                <img
-                    src='/assets/images/kakao.png'
-                    alt='카카오'
-                    className='h-10 w-10 cursor-pointer'
+                    onClick={() => {
+                        window.location.href =
+                            'https://j12a205.p.ssafy.io/oauth2/authorization/naver';
+                    }}
                 />
             </div>
         </form>
