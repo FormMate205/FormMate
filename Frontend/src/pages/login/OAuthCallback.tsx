@@ -19,7 +19,7 @@ const OAuthCallback = () => {
                     console.error(
                         '인증 코드가 없습니다. 로그인 페이지로 이동동',
                     );
-                    // navigate('/login');
+                    navigate('/login');
                     return;
                 }
 
@@ -33,8 +33,6 @@ const OAuthCallback = () => {
                         '리다이렉트 직전 - 현재 URL:',
                         window.location.href,
                     );
-                    // navigate('/login/oauthInfo');
-                    // window.location.href = '/login/oauthInfo';
                     try {
                         // 타임아웃을 사용하여 비동기적으로 리다이렉트
                         console.log('타임아웃으로 리다이렉트 시도');
@@ -57,14 +55,16 @@ const OAuthCallback = () => {
                 const response = await exchangeCodeForToken(authCode);
 
                 // 액세스 토큰 확인 및 저장
-                const accessToken = response.headers['authorization'];
+                const accessToken =
+                    response.headers['authorization'] ||
+                    response.headers['Authorization'];
                 console.log('받은 액세스 토큰:', accessToken);
 
                 if (!accessToken) {
                     console.error(
-                        '액세스 토큰이 없습니다. 로그인 페이지로 이동동',
+                        '액세스 토큰이 없습니다. 로그인 페이지로 이동',
                     );
-                    // navigate('/login');
+                    navigate('/login');
                     return;
                 }
 
@@ -94,7 +94,7 @@ const OAuthCallback = () => {
                     'OAuth 콜백 처리 중 오류 발생(로그인 페이지로 이동):',
                     e,
                 );
-                // navigate('/login');
+                navigate('/login');
             }
         };
 

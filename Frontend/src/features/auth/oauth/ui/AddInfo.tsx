@@ -164,7 +164,6 @@ const AddInfo = () => {
         setError('');
 
         const payload: AdditionalInfo = {
-            userName: form.userName,
             phoneNumber: form.phoneNumber,
             address: form.address,
             addressDetail: form.addressDetail,
