@@ -139,7 +139,12 @@ public class ProfileController {
             @Valid @RequestBody ProfileCompletionRequest request) {
         // 현재 인증된 사용자 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = ((UserDetails) authentication.getPrincipal()).getUsername();
+
+        if (!(authentication.getPrincipal() instanceof UserDetails userDetails)) {
+            throw new IllegalStateException("인증 정보가 올바르지 않습니다.");
+        }
+
+        String email = userDetails.getUsername();
 
         // 전화번호 정규화
         String normalizedPhone = messageService.normalizePhoneNumber(request.getPhoneNumber());
