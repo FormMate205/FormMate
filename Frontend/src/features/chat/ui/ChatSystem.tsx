@@ -4,6 +4,7 @@ import BlockModal from '@/entities/chat/ui/BlockModal';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { CommonModal } from '@/widgets';
 import FormModal from '../../../entities/chat/ui/FormModal';
+import { useConnectWs } from '../model/useConnectWs';
 import SignatureForm from './SignatureForm';
 
 interface ChatSystemProps {
@@ -15,11 +16,31 @@ interface ChatSystemProps {
 
 const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
     const { user } = useUserStore();
+    const { formInfo } = useConnectWs({ user, roomId: formId });
 
     // 서명 요청 타입 체크
     const isSignatureRequest =
         type === 'SIGNATURE_REQUEST_CONTRACT' ||
         type === 'SIGNATURE_REQUEST_TERMINATION';
+
+    // 사인 폼 모달을 띄우는 조건
+    const canUserSign = () => {
+        if (!signId || signId !== user?.id) {
+            return false;
+        }
+
+        // 채무자 차례
+        const isDebtorSign =
+            formInfo.formStatus === 'BEFORE_APPROVAL' &&
+            formInfo.debtorId === user.id;
+
+        // 채권자 차례
+        const isCreditorSign =
+            formInfo.formStatus === 'AFTER_APPROVAL' &&
+            formInfo.creditorId === user.id;
+
+        return isDebtorSign || isCreditorSign;
+    };
 
     return (
         <div className='border-primary-200 flex w-[260px] flex-col gap-6 rounded-2xl border bg-white px-3 py-4'>
@@ -40,8 +61,12 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
                 <CommonModal
                     triggerChildren={<div>서명하기</div>}
                     children={
-                        signId && signId == user?.id ? (
-                            <SignatureForm formId={formId} type={type} />
+                        canUserSign() ? (
+                            <SignatureForm
+                                formId={formId}
+                                type={type}
+                                creditorId={formInfo.creditorId}
+                            />
                         ) : (
                             <BlockModal />
                         )
