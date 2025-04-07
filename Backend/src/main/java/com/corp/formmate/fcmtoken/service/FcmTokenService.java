@@ -132,7 +132,11 @@ public class FcmTokenService {
 		if (!userEntity.isLogged()) {
 			return null;
 		}
-		return fcmTokenRepository.findByUser(userEntity).orElse(null);
+		FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUser(userEntity).orElse(null);
+		if (fcmTokenEntity == null || !fcmTokenEntity.isActive()) {
+			return null;
+		}
+		return fcmTokenEntity;
 	}
 
 	// 회원가입 할때만 가져다가 사용할 로직
