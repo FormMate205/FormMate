@@ -3,7 +3,6 @@ import { useUserService } from '@/entities/user/model/userService';
 
 const LayoutProvider = () => {
     useUserService(); // 일반 로그인 상태 확인
-    // useSocialLoginEffect(); // 소셜 로그인
 
     return (
         <div className='flex min-h-screen w-full justify-center'>

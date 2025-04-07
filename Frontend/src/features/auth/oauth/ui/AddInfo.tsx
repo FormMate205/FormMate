@@ -58,15 +58,9 @@ const AddInfo = () => {
                 try {
                     console.log('추가 정보 페이지에서 토큰 교환 시도...');
                     const response = await exchangeCodeForToken(code);
-
-                    // 액세스 토큰 추출 및 저장
                     const accessToken = response.headers['authorization'];
                     console.log('accessToken:', accessToken);
                     if (accessToken) {
-                        // const tokenValue = accessToken.startsWith('Bearer ')
-                        //     ? accessToken.replace('Bearer ', '')
-                        //     : accessToken;
-
                         localStorage.setItem('accessToken', accessToken);
                         console.log('액세스 토큰 저장 완료:', accessToken);
                     } else {
