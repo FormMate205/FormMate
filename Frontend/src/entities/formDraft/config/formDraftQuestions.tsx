@@ -92,6 +92,23 @@ export const formDraftQuestions: Record<string, Question> = {
             min: '0',
             max: '20',
         },
+        next: 'repaymentDay',
+    },
+    repaymentDay: {
+        id: 'repaymentDay',
+        question: '납부일을 입력해주세요.',
+        type: 'number',
+        condition: [
+            '✅ 숫자로만 입력해주세요.',
+            '✅ 이자가 없으면 0으로 자동 입력됩니다.',
+            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
+        ],
+        validation: {
+            regex: '^\\d+$',
+            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
+            min: '0',
+            max: '31',
+        },
         next: 'repayment',
     },
     repayment: {
@@ -103,23 +120,7 @@ export const formDraftQuestions: Record<string, Question> = {
             { label: '아니오', value: false },
         ],
         next: (answer) =>
-            answer === '네' ? 'repaymentDay' : 'earlyRepaymentFeeRate',
-    },
-    repaymentDay: {
-        id: 'repaymentDay',
-        question: '분할 납부일을 입력해주세요.',
-        type: 'number',
-        condition: [
-            '✅ 숫자로만 입력해주세요.',
-            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
-        ],
-        validation: {
-            regex: '^\\d+$',
-            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
-            min: '1',
-            max: '31',
-        },
-        next: 'repaymentMethod',
+            answer === '네' ? 'repaymentMethod' : 'earlyRepaymentFeeRate',
     },
     repaymentMethod: {
         id: 'repaymentMethod',

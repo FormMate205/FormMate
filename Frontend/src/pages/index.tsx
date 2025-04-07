@@ -26,3 +26,5 @@ export { default as SelectRecipient } from './transfer/SelectRecipient';
 export { default as TransferComplete } from './transfer/TransferComplete';
 export { default as EnterAmount } from './transfer/EnterAmount';
 export { default as EnterPassword } from './transfer/EnterPassword';
+// Signature
+export { default as Signature } from './signature/Signature';
