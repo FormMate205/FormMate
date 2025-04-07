@@ -129,7 +129,7 @@ public class UserServiceTest {
 
         // then
         assertThat(foundUser).isNotNull();
-        assertThat(foundUser.getEmail()).isEqualTo(id);
+        assertThat(foundUser.getId()).isEqualTo(id);
         verify(userRepository, times(1)).findById(id);
     }
 
@@ -281,5 +281,168 @@ public class UserServiceTest {
         assertThat(result.getEmail()).isEqualTo(email);
         verify(userRepository, times(1)).findByEmail(email);
         verify(userRepository, never()).save(any(UserEntity.class));
+    }
+
+    @Test
+    @DisplayName("OAuth2 사용자 정보로 사용자 조회 또는 생성 - 신규 사용자")
+    void getOrCreateOAuth2USer_NewUser() {
+        // given
+        String email = "new-oauth@example.com";
+        OAuth2UserInfo userInfo = OAuth2UserInfo.builder()
+                .id("oauth-id")
+                .email(email)
+                .name("신규 OAuth 사용자")
+                .build();
+
+        UserEntity newUser = UserEntity.builder()
+                .email(email)
+                .userName("신규 OAuth 사용자")
+                .provider(Provider.GOOGLE)
+                .role(Role.USER)
+                .build();
+
+        setEntityId(newUser, 1);
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userRepository.save(any(UserEntity.class))).thenReturn(newUser);
+
+        // when
+        UserEntity result = userService.getOrCreateOAuth2User(userInfo, Provider.GOOGLE);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getEmail()).isEqualTo(email);
+        verify(userRepository, times(1)).findByEmail(email);
+        verify(userRepository, times(1)).save(any(UserEntity.class));
+        verify(fcmTokenService, times(1)).register(any(UserEntity.class));
+    }
+
+    @Test
+    @DisplayName("이름과 전화번호로 사용자 찾기 - 성공")
+    void selecByUserNameAndPhoneNumber_Success() {
+        // given
+        String userName = "테스트유저";
+        String phoneNumber = "01012345678";
+
+        UserEntity mockUser = UserEntity.builder()
+                .email("test@example.com")
+                .userName(userName)
+                .phoneNumber(phoneNumber)
+                .build();
+
+        setEntityId(mockUser, 1);
+
+        when(userRepository.findByUserNameAndPhoneNumber(userName, phoneNumber))
+                .thenReturn(Optional.of(mockUser));
+
+        // when
+        UserEntity result = userService.selectByUserNameAndPhoneNumber(userName, phoneNumber);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getUserName()).isEqualTo(userName);
+        assertThat(result.getPhoneNumber()).isEqualTo(phoneNumber);
+        verify(userRepository, times(1)).findByUserNameAndPhoneNumber(userName, phoneNumber);
+    }
+
+    @Test
+    @DisplayName("이름과 전화번호로 사용자 찾기 - 실패")
+    void selecByUserNameAndPhoneNumber_NotFound() {
+        // given
+        String userName = "존재하지 않는 사용자";
+        String phoneNumber = "01012345678";
+
+        when(userRepository.findByUserNameAndPhoneNumber(userName, phoneNumber))
+                .thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userService.selectByUserNameAndPhoneNumber(userName, phoneNumber))
+                .isInstanceOf(UserException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
+
+        verify(userRepository, times(1)).findByUserNameAndPhoneNumber(userName, phoneNumber);
+    }
+
+    @Test
+    @DisplayName("비밀번호 확인 - 성공")
+    void verifyPassword_Success(){
+        // given
+        int userId = 1;
+        String rawPassword = "Password123!";
+        String encodedPassword = "encodedPassword";
+
+        UserEntity user = UserEntity.builder()
+                .email("test@example.com")
+                .password(encodedPassword)
+                .build();
+
+        setEntityId(user, userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
+
+        // when
+        boolean result = userService.verifyPassword(userId, rawPassword);
+
+        // then
+        assertThat(result).isTrue();
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordEncoder, times(1)).matches(rawPassword, encodedPassword);
+
+    }
+
+    @Test
+    @DisplayName("비밀번호 확인 - 실패")
+    void verifyPassword_Failed() {
+        // given
+        int userId = 1;
+        String rawPassword = "WrongPassword123!";
+        String encodedPassword = "encodedPassword";
+
+        UserEntity user = UserEntity.builder()
+                .email("test@example.com")
+                .password(encodedPassword)
+                .build();
+
+        setEntityId(user, userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(false);
+
+        // when
+        boolean result = userService.verifyPassword(userId, rawPassword);
+
+        // then
+        assertThat(result).isFalse();
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordEncoder, times(1)).matches(rawPassword, encodedPassword);
+    }
+
+    @Test
+    @DisplayName("비밀번호 업데이트 - 성공")
+    void updatePassword_Success() {
+        // given
+        int userId = 1;
+        String newPassword = "NewPassword123!";
+        String encodedNewPassword = "encodedNewPassword";
+
+        UserEntity user = UserEntity.builder()
+                .email("test@example.com")
+                .password("oldEncodedPassword")
+                .build();
+
+        setEntityId(user, userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(newPassword)).thenReturn(encodedNewPassword);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(user);
+
+        // when
+        userService.updatePassword(userId, newPassword);
+
+        // then
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordEncoder, times(1)).encode(newPassword);
+        verify(userRepository, times(1)).save(any(UserEntity.class));
     }
 }
