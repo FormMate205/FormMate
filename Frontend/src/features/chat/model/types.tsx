@@ -1,8 +1,12 @@
 import { ChatMessage } from '@/entities/chat/model/types';
+import {
+    ContractStatus,
+    TerminationStatus,
+} from '@/entities/contract/model/types';
 import { InfinitySlice } from '@/shared/model/types';
 
 export interface ChatRoom {
-    formId: string; // formId
+    formId: string;
     creditorId: string;
     creditorName: string;
     debtorId: string;
@@ -11,6 +15,13 @@ export interface ChatRoom {
     lastMessageTime: string[];
     unreadCount: string;
     isCompleted: boolean;
+}
+
+export interface FormInformation {
+    creditorId: string;
+    debtorId: string;
+    formStatus: ContractStatus;
+    terminationStatus: TerminationStatus;
 }
 
 // 채팅방 목록 response
@@ -26,7 +37,9 @@ export type ChatHistoryRequest = {
 };
 
 // 개별 채팅 내역 response
-export type ChatHistoryResponse = { content: ChatMessage[] } & InfinitySlice;
+export type ChatHistoryResponse = { content: ChatMessage[] } & InfinitySlice & {
+        formInformation: FormInformation;
+    };
 
 // 서명 request
 export type SignatureRequest = {
