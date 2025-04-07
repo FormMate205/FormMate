@@ -320,30 +320,16 @@ public class ContractService {
 		// 3개월을 순회
 		for (YearMonth ym : targetMonths) {
 			for (FormEntity form : allForms) {
-
-				// 만기 지났으면 스킵할지 여부
-				LocalDate maturity = form.getMaturityDate().toLocalDate();
-				if (maturity.isBefore(ym.atDay(1))) {
-					continue;
-				}
-
 				ContractEntity contract = getContract(form);
 				boolean isCreditor = form.getCreditorName().equals(userEntity.getUserName());
 				String contracteeName = isCreditor ? form.getDebtorName() : form.getCreditorName();
 
-				// 과거 달 vs 현재/미래 달 구분
 				if (ym.isBefore(nowYm)) {
-					// (과거) => 실제 송금(Transfer) 기준으로 여러 Detail 생성
-					List<MonthlyContractDetail> pastDetails = findTransferDetailsForMonth(
-						form, ym, isCreditor, contracteeName
-					);
-					allDetails.addAll(pastDetails);
+					// 과거 달: 실제 송금 내역 기반
+					allDetails.addAll(findTransferDetailsForMonth(form, ym, isCreditor, contracteeName));
 				} else {
-					// (현재 or 미래) => EnhancedPaymentPreviewService에서 스케줄별 Detail 생성
-					List<MonthlyContractDetail> futureDetails = computeDetailsFromPreview(
-						form, contract, ym, isCreditor, contracteeName
-					);
-					allDetails.addAll(futureDetails);
+					// 현재 / 미래 달: 예측 스케줄 기반
+					allDetails.addAll(computeDetailsFromPreview(form, contract, ym, isCreditor, contracteeName));
 				}
 			}
 		}

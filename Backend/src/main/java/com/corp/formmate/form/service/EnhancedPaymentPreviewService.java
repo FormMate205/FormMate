@@ -67,7 +67,8 @@ public class EnhancedPaymentPreviewService {
 		FormEntity form, ContractEntity contract, BigDecimal baseRate) {
 
 		List<EnhancedPaymentScheduleResponse> schedules = new ArrayList<>();
-		int totalMonths = calculateTotalMonths(form.getRepaymentDay(), form.getMaturityDate());
+		LocalDateTime nextRepaymentDate = contract.getNextRepaymentDate().atStartOfDay();
+		int totalMonths = calculateTotalMonths(nextRepaymentDate, form.getMaturityDate());
 
 		long monthlyPrincipal = form.getLoanAmount() / totalMonths;
 		long remainingPrincipal = contract.getRemainingPrincipal();
@@ -102,7 +103,7 @@ public class EnhancedPaymentPreviewService {
 			schedules.add(
 				EnhancedPaymentScheduleResponse.builder()
 					.installmentNumber(round)
-					.paymentDate(calculatePaymentDate(form.getRepaymentDay(), form.getMaturityDate(), round))
+					.paymentDate(calculatePaymentDate(nextRepaymentDate, form.getRepaymentDay(), round))
 					.principal(principal)
 					.interest(interest)
 					.overdueInterest(overdueInterest)
@@ -133,7 +134,8 @@ public class EnhancedPaymentPreviewService {
 		FormEntity form, ContractEntity contract, BigDecimal baseRate) {
 
 		List<EnhancedPaymentScheduleResponse> schedules = new ArrayList<>();
-		int totalMonths = calculateTotalMonths(form.getRepaymentDay(), form.getMaturityDate());
+		LocalDateTime nextRepaymentDate = contract.getNextRepaymentDate().atStartOfDay();
+		int totalMonths = calculateTotalMonths(nextRepaymentDate, form.getMaturityDate());
 
 		// 월 이자율
 		BigDecimal monthlyRate = baseRate.divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_UP);
@@ -184,7 +186,7 @@ public class EnhancedPaymentPreviewService {
 			schedules.add(
 				EnhancedPaymentScheduleResponse.builder()
 					.installmentNumber(round)
-					.paymentDate(calculatePaymentDate(form.getRepaymentDay(), form.getMaturityDate(), round))
+					.paymentDate(calculatePaymentDate(nextRepaymentDate, form.getRepaymentDay(), round))
 					.principal(principal)
 					.interest(interest)
 					.overdueInterest(overdueInterest)
@@ -215,7 +217,8 @@ public class EnhancedPaymentPreviewService {
 		FormEntity form, ContractEntity contract, BigDecimal baseRate) {
 
 		List<EnhancedPaymentScheduleResponse> schedules = new ArrayList<>();
-		int totalMonths = calculateTotalMonths(form.getRepaymentDay(), form.getMaturityDate());
+		LocalDateTime nextRepaymentDate = contract.getNextRepaymentDate().atStartOfDay();
+		int totalMonths = calculateTotalMonths(nextRepaymentDate, form.getMaturityDate());
 
 		BigDecimal monthlyRate = baseRate.divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_UP);
 		long monthlyInterest = BigDecimal.valueOf(form.getLoanAmount())
@@ -243,7 +246,7 @@ public class EnhancedPaymentPreviewService {
 			schedules.add(
 				EnhancedPaymentScheduleResponse.builder()
 					.installmentNumber(round)
-					.paymentDate(calculatePaymentDate(form.getRepaymentDay(), form.getMaturityDate(), round))
+					.paymentDate(calculatePaymentDate(nextRepaymentDate, form.getRepaymentDay(), round))
 					.principal(principal)
 					.interest(monthlyInterest)
 					.overdueInterest(overdueInterest)
@@ -267,16 +270,10 @@ public class EnhancedPaymentPreviewService {
 
 	/**
 	 * [회차 수 계산]
-	 * - repaymentDay=0 이면 일시상환으로 회차=1
-	 * - 그 외면 현재일부터 만기일까지의 개월 수
 	 */
-	private int calculateTotalMonths(int repaymentDay, LocalDateTime maturityDate) {
-		if (repaymentDay == 0) {
-			return 1;
-		}
-		LocalDateTime now = LocalDateTime.now();
+	private int calculateTotalMonths(LocalDateTime nextRepaymentDate, LocalDateTime maturityDate) {
 		long months = ChronoUnit.MONTHS.between(
-			now.withDayOfMonth(1),
+			nextRepaymentDate.withDayOfMonth(1),
 			maturityDate.withDayOfMonth(1)
 		);
 		return Math.max(1, (int)months);
@@ -284,17 +281,12 @@ public class EnhancedPaymentPreviewService {
 
 	/**
 	 * [회차별 납부일 계산]
-	 * - 실제 로직은 사업 요구사항에 맞춰 조정 가능
 	 */
-	private LocalDateTime calculatePaymentDate(int repaymentDay, LocalDateTime maturityDate, int installmentNumber) {
-		if (repaymentDay == 0) {
-			// 일시상환 - 그냥 만기일
-			return maturityDate;
-		}
-		// 단순히 "현재일자 + installmentNumber개월" 형태로 예시
-		LocalDateTime date = LocalDateTime.now().plusMonths(installmentNumber);
-		int day = Math.min(repaymentDay, date.toLocalDate().lengthOfMonth());
-		return date.withDayOfMonth(day).withHour(0).withMinute(0).withSecond(0).withNano(0);
+	private LocalDateTime calculatePaymentDate(LocalDateTime nextRepaymentDate, int repaymentDay,
+		int installmentNumber) {
+		LocalDateTime baseMonth = nextRepaymentDate.plusMonths(installmentNumber - 1);
+		int day = Math.min(repaymentDay, baseMonth.toLocalDate().lengthOfMonth());
+		return baseMonth.withDayOfMonth(day).withHour(0).withMinute(0).withSecond(0).withNano(0);
 	}
 
 	public Long getCurrentRoundAmount(FormEntity form, ContractEntity contract) {
