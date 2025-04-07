@@ -46,7 +46,7 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
 
     const handleNavigateToSign = () => {
         navigate(`/chat/${formId}/signature`, {
-            state: { formId, type, creditorId: formInfo.creditorId },
+            state: { formId, type, creditorId: formInfo.creditorId, signId },
         });
     };
 

@@ -15,7 +15,7 @@ import { useSignature } from '@/features/signature/model/useSignature';
 const Signature = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { formId, type, creditorId } = location.state;
+    const { formId, type, creditorId, signId } = location.state;
 
     // 입력 및 인증 상태 관리
     const {
@@ -27,7 +27,7 @@ const Signature = () => {
         handleVerifyCode,
         handleRecaptchaChange,
         handleRecaptchaExpired,
-    } = useSignature({ formId, type, creditorId });
+    } = useSignature({ formId, type, creditorId, requestedById: signId });
 
     const handleClose = () => {
         navigate(`/chat/${formId}`, { state: { isFin: false } });
