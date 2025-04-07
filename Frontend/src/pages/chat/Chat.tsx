@@ -66,13 +66,6 @@ const Chat = () => {
                 })}
             </div>
 
-            {/* 연결 상태 표시 */}
-            {!isConnected && (
-                <div className='w-full bg-red-100 p-2 text-center text-red-600'>
-                    연결이 끊어졌습니다. 새로고침을 시도해주세요.
-                </div>
-            )}
-
             {/* 채팅 입력창 */}
             <ChatInput
                 isActive={isConnected && !isFin}

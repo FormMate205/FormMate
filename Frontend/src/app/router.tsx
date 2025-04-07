@@ -25,6 +25,7 @@ import {
     EnterPassword,
     OauthAddInfoPage,
     ChatRooms,
+    Signature,
 } from '@/pages';
 import OAuthCallback from '@/pages/login/OAuthCallback';
 import Transaction from '@/pages/transaction/Transaction';
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
                 element: <OauthAddInfoPage />,
             },
             { path: '/oauth/callback', element: <OAuthCallback /> },
+
             // 계약 생성
             { path: '/form', element: <FormMatch /> },
             { path: '/form/check', element: <FormCheck /> },
@@ -61,9 +63,14 @@ export const router = createBrowserRouter([
                 element: <FormDraftLanding />,
             },
             { path: '/draft', element: <FormDraft /> },
+
             // 채팅
             { path: '/chat', element: <ChatRooms /> },
             { path: '/chat/:roomId', element: <Chat /> },
+
+            // 전자 서명
+            { path: '/chat/:roomId/signature', element: <Signature /> },
+
             // 계약 관리
             { path: '/transaction', element: <Transaction /> },
             { path: '/contracts', element: <Contracts /> },
