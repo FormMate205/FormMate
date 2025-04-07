@@ -311,9 +311,8 @@ public class ContractService {
 
 		// 필요한 데이터 조회
 		UserEntity userEntity = getUser(userId);
-		List<FormEntity> allForms = formRepository
-			.findAllWithFilters(userId, null, null, PageRequest.of(0, 1000))
-			.getContent();
+		List<FormStatus> statuses = List.of(FormStatus.IN_PROGRESS, FormStatus.OVERDUE);
+		List<FormEntity> allForms = formRepository.findAllByStatuses(userId, statuses);
 
 		LocalDate now = LocalDate.now();
 		YearMonth nowYm = YearMonth.from(now);
