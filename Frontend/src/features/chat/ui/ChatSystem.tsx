@@ -1,11 +1,11 @@
 import { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MessageType } from '@/entities/chat/model/types';
 import BlockModal from '@/entities/chat/ui/BlockModal';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { CommonModal } from '@/widgets';
 import FormModal from '../../../entities/chat/ui/FormModal';
 import { useConnectWs } from '../model/useConnectWs';
-import SignatureForm from './SignatureForm';
 
 interface ChatSystemProps {
     formId: string;
@@ -15,6 +15,7 @@ interface ChatSystemProps {
 }
 
 const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
+    const navigate = useNavigate();
     const { user } = useUserStore();
     const { formInfo } = useConnectWs({ user, roomId: formId });
 
@@ -42,6 +43,12 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
         return isDebtorSign || isCreditorSign;
     };
 
+    const navigateToSignature = () => {
+        navigate('/signature', {
+            state: { formId, type, creditorId: formInfo.creditorId },
+        });
+    };
+
     return (
         <div className='border-primary-200 flex w-[260px] flex-col gap-6 rounded-2xl border bg-white px-3 py-4'>
             <div className='flex w-full items-center justify-between'>
@@ -62,11 +69,9 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
                     triggerChildren={<div>서명하기</div>}
                     children={
                         canUserSign() ? (
-                            <SignatureForm
-                                formId={formId}
-                                type={type}
-                                creditorId={formInfo.creditorId}
-                            />
+                            <div onClick={navigateToSignature}>
+                                서명 페이지로 이동합니다.
+                            </div>
                         ) : (
                             <BlockModal />
                         )

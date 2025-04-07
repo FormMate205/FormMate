@@ -1,4 +1,5 @@
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
     Form,
@@ -9,16 +10,13 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MessageType } from '@/entities/chat/model/types';
 import { useSignature } from '@/features/signature/model/useSignature';
+import { Header } from '@/widgets';
 
-interface SignatureFormProps {
-    formId: string;
-    type: MessageType;
-    creditorId?: string;
-}
+const Signature = () => {
+    const location = useLocation();
+    const { formId, type, creditorId } = location.state;
 
-const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
     // 입력 및 인증 상태 관리
     const {
         form,
@@ -32,8 +30,8 @@ const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
     } = useSignature({ formId, type, creditorId });
 
     return (
-        <div className='flex w-full flex-col'>
-            <p className='text-2xl font-semibold'>Formmate 전자 인증</p>
+        <div className='flex h-screen w-full flex-col px-4 py-2'>
+            <Header title='Formmate 전자 인증' />
             <Form {...form}>
                 <form className='mt-10 mb-5 flex flex-col gap-4'>
                     <FormField
@@ -74,11 +72,10 @@ const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
                                     <Button
                                         type='button'
                                         variant='default'
+                                        children='인증'
                                         className='whitespace-nowrap'
                                         onClick={handleRequestVerification}
-                                    >
-                                        인증
-                                    </Button>
+                                    />
                                 </div>
                                 <FormMessage className='text-subPink-700' />
 
@@ -145,4 +142,4 @@ const SignatureForm = ({ formId, type, creditorId }: SignatureFormProps) => {
     );
 };
 
-export default SignatureForm;
+export default Signature;
