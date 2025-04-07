@@ -37,7 +37,7 @@ public class FormTerminationController {
                     description = "계약 파기 요청 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = FormTerminationResponse.class)
+                            schema = @Schema(implementation = String.class)
                     )
             ),
             @ApiResponse(
@@ -96,13 +96,13 @@ public class FormTerminationController {
             )
     })
     @PostMapping("")
-    public ResponseEntity<FormTerminationResponse> requestTermination(
+    public ResponseEntity<String> requestTermination(
             @Parameter(description = "계약 ID", required = true, example = "42")
             @PathVariable("formId") int formId,
             @CurrentUser AuthUser authUser) {
         log.info("계약 파기 요청 - 계약 ID: {}, 요청자: {}", formId, authUser.getId());
-        FormTerminationResponse response = formService.requestTermination(formId, authUser.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        formService.requestTermination(formId, authUser.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body("계약 파기가 신청되었습니다.");
     }
 
     // 계약 파기 첫 번째 서명 인증 요청
@@ -200,7 +200,7 @@ public class FormTerminationController {
                     description = "서명 인증 확인 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = String.class)
+                            schema = @Schema(implementation = boolean.class)
                     )
             ),
             @ApiResponse(
@@ -245,7 +245,7 @@ public class FormTerminationController {
             )
     })
     @PostMapping("/firstSign/confirm")
-    public ResponseEntity<String> confirmFirstSignVerification(
+    public ResponseEntity<Boolean> confirmFirstSignVerification(
             @Parameter(description = "계약 ID", required = true, example = "42")
             @PathVariable Integer formId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -268,8 +268,8 @@ public class FormTerminationController {
             @CurrentUser AuthUser authUser
             ) {
         log.info("계약 파기 첫 번째 서명 인증 확인 - 계약 ID: {}, 요청자: {}", formId, authUser.getId());
-        formService.confirmFirstSignVerification(formId, authUser.getId(), request);
-        return ResponseEntity.status(HttpStatus.OK).body("첫 번째 서명이 완료되었습니다.");
+        boolean isSuccess = formService.confirmFirstSignVerification(formId, authUser.getId(), request);
+        return ResponseEntity.status(HttpStatus.OK).body(isSuccess);
     }
 
     // 계약 파기 두 번째 서명 인증 요청
@@ -333,7 +333,7 @@ public class FormTerminationController {
                     description = "서명 인증 확인 성공 (계약 종료)",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = String.class)
+                            schema = @Schema(implementation = boolean.class)
                     )
             ),
             @ApiResponse(
@@ -378,7 +378,7 @@ public class FormTerminationController {
             )
     })
     @PostMapping("/secondSign/confirm")
-    public ResponseEntity<String> confirmSecondSignVerification(
+    public ResponseEntity<Boolean> confirmSecondSignVerification(
             @Parameter(description = "계약 ID", required = true, example = "42")
             @PathVariable Integer formId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -401,7 +401,7 @@ public class FormTerminationController {
             @CurrentUser AuthUser authUser
     ) {
         log.info("계약 파기 두 번째 서명 인증 확인 - 계약 ID: {}, 요청자: {}", formId, authUser.getId());
-        formService.confirmSecondSignVerification(formId, authUser.getId(), request);
-        return ResponseEntity.status(HttpStatus.OK).body("두 번째 서명이 완료되었습니다. 계약이 종료되었습니다.");
+        Boolean isSuccess = formService.confirmSecondSignVerification(formId, authUser.getId(), request);
+        return ResponseEntity.status(HttpStatus.OK).body(isSuccess);
     }
 }
