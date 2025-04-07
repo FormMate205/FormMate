@@ -1,5 +1,7 @@
 package com.corp.formmate.transfer.service;
 
+import static org.springframework.transaction.event.TransactionPhase.*;
+
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.corp.formmate.alert.service.AlertService;
 import com.corp.formmate.contract.entity.ContractEntity;
@@ -174,7 +177,7 @@ public class TransferService {
 		} // 해당 구문 빠져나오기 전 contract 관련한 처리 로직 필요
 
 		// Entity 저장 전 외부 은행 API 이체 로직 실행
-		bankService.createBankTransfer(BankTransferRequest.builder()
+		onTransferEvent(BankTransferRequest.builder()
 			.depositAccountNo(receiver.getAccountNumber())
 			.withdrawalAccountNo(sender.getAccountNumber())
 			.transactionBalance(amount)
@@ -247,7 +250,7 @@ public class TransferService {
 		String withdrawContent = "출금 " + formattedBalance + "원 | " + receiverName;
 		alertService.createAlert(transferEntity.getSender(), "출금", withdrawTitle, withdrawContent);
 
-		bankService.createBankTransfer(bankTransferRequest);
+		onTransferEvent(bankTransferRequest);
 	}
 
 	@Transactional(readOnly = true)
@@ -277,6 +280,12 @@ public class TransferService {
 		if (accountNumber == null || accountNumber.length() < 4)
 			return "****";
 		return accountNumber.substring(accountNumber.length() - 4);
+	}
+
+	@TransactionalEventListener(phase = AFTER_COMMIT)
+	public void onTransferEvent(BankTransferRequest bankTransferRequest) {
+		// 커밋된 이후에 외부 API 호출
+		bankService.createBankTransfer(bankTransferRequest);
 	}
 }
 
