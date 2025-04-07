@@ -1,21 +1,21 @@
 package com.corp.formmate.form.service;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import com.corp.formmate.chat.event.*;
-import com.corp.formmate.form.dto.*;
-import com.corp.formmate.form.entity.TerminationProcess;
-import com.corp.formmate.user.service.IdentityVerificationService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.chat.event.CreditorSignatureCompletedEvent;
+import com.corp.formmate.chat.event.DebtorSignatureCompletedEvent;
+import com.corp.formmate.chat.event.FirstPartyTerminationSignedEvent;
+import com.corp.formmate.chat.event.FormCreatedEvent;
+import com.corp.formmate.chat.event.FormTerminationCancelledEvent;
+import com.corp.formmate.chat.event.FormTerminationCompletedEvent;
+import com.corp.formmate.chat.event.FormTerminationRequestedEvent;
+import com.corp.formmate.chat.event.FormUpdatedEvent;
 import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.dto.FormConfirmRequest;
 import com.corp.formmate.form.dto.FormConfirmVerifyRequest;
@@ -25,19 +25,22 @@ import com.corp.formmate.form.dto.FormCreateRequest;
 import com.corp.formmate.form.dto.FormDetailResponse;
 import com.corp.formmate.form.dto.FormListResponse;
 import com.corp.formmate.form.dto.FormPartnerResponse;
+import com.corp.formmate.form.dto.FormTerminationResponse;
+import com.corp.formmate.form.dto.FormTerminationVerifyConfirmRequest;
+import com.corp.formmate.form.dto.FormTerminationVerifyRequest;
 import com.corp.formmate.form.dto.FormUpdateRequest;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
+import com.corp.formmate.form.entity.TerminationProcess;
 import com.corp.formmate.form.repository.FormRepository;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
-import com.corp.formmate.global.error.exception.PasswordException;
 import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.specialterm.dto.SpecialTermResponse;
 import com.corp.formmate.specialterm.service.SpecialTermService;
 import com.corp.formmate.transfer.service.TransferService;
 import com.corp.formmate.user.entity.UserEntity;
-import com.corp.formmate.user.service.MessageService;
+import com.corp.formmate.user.service.IdentityVerificationService;
 import com.corp.formmate.user.service.UserService;
 import com.corp.formmate.user.service.VerificationService;
 
@@ -164,10 +167,10 @@ public class FormService {
 			formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.BEFORE_APPROVAL) +
 				formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.AFTER_APPROVAL);
 
-//		Integer formActiveCount = formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS);
+		//		Integer formActiveCount = formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS);
 		// 진행중 상태 (종료 요청과 첫번째 서명 완료 상태 포함)
 		Integer formActiveCount =
-				formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS);
+			formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.IN_PROGRESS);
 
 		// 완료 상태
 		Integer formCompletedCount = formRepository.countByCreditorIdOrDebtorIdAndStatus(userId, FormStatus.COMPLETED);
@@ -246,7 +249,8 @@ public class FormService {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
-		identityVerificationService.verifyIdentity(userEntity.getUserName(), phoneNumber, verificationCode, request.getRecaptchaToken());
+		identityVerificationService.verifyIdentity(userEntity.getUserName(), phoneNumber, verificationCode,
+			request.getRecaptchaToken());
 
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
 
@@ -312,14 +316,15 @@ public class FormService {
 			throw new FormException(ErrorCode.INVALID_FORM_STATUS);
 		}
 
-		identityVerificationService.verifyIdentity(userEntity.getUserName(), phoneNumber, verificationCode, request.getRecaptchaToken());
+		identityVerificationService.verifyIdentity(userEntity.getUserName(), phoneNumber, verificationCode,
+			request.getRecaptchaToken());
 
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
 		transferService.createInitialTransfer(formEntity);
 
-		formEntity.setStatus(FormStatus.IN_PROGRESS);
+		formEntity.updateStatus(FormStatus.IN_PROGRESS);
 		formRepository.save(formEntity);
-		
+
 		contractService.createContract(formEntity);
 
 		// 채팅 발송 위한 이벤트 발행
@@ -366,7 +371,7 @@ public class FormService {
 
 		// 이미 파기 프로세스 중인지 확인
 		if (form.getIsTerminationProcess() == TerminationProcess.REQUESTED
-		|| form.getIsTerminationProcess() == TerminationProcess.SIGNED) {
+			|| form.getIsTerminationProcess() == TerminationProcess.SIGNED) {
 			throw new FormException(ErrorCode.FORM_TERMINATION_ALREADY_REQUESTED);
 		}
 
@@ -379,8 +384,8 @@ public class FormService {
 		eventPublisher.publishEvent(new FormTerminationRequestedEvent(form, userId));
 
 		return FormTerminationResponse.builder()
-				.requestedById(userId)
-				.build();
+			.requestedById(userId)
+			.build();
 	}
 
 	/**
@@ -421,7 +426,7 @@ public class FormService {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getUserName().equals(request.getUserName()) ||
-		!user.getPhoneNumber().equals(request.getPhoneNumber())) {
+			!user.getPhoneNumber().equals(request.getPhoneNumber())) {
 			throw new FormException(ErrorCode.INVALID_USER_INFO);
 		}
 
@@ -452,7 +457,8 @@ public class FormService {
 	 * 계약 파기 첫 번째 당사자 인증 확인 및 서명
 	 */
 	@Transactional
-	public void confirmFirstSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
+	public void confirmFirstSignVerification(Integer formId, Integer userId,
+		FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -473,7 +479,8 @@ public class FormService {
 		}
 
 		// 인증번호 확인
-		identityVerificationService.verifyIdentity(user.getUserName(), request.getPhoneNumber(), request.getVerificationCode(), request.getRecaptchaToken());
+		identityVerificationService.verifyIdentity(user.getUserName(), request.getPhoneNumber(),
+			request.getVerificationCode(), request.getRecaptchaToken());
 
 		// 계약 상태 변경
 		form.signTerminationProcess();
@@ -492,7 +499,7 @@ public class FormService {
 		// 사용자 인증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getUserName().equals(request.getUserName()) ||
-				!user.getPhoneNumber().equals(request.getPhoneNumber())) {
+			!user.getPhoneNumber().equals(request.getPhoneNumber())) {
 			throw new FormException(ErrorCode.INVALID_USER_INFO);
 		}
 
@@ -520,7 +527,8 @@ public class FormService {
 	 * 계약 파기 두 번째 당사자 인증 확인 및 서명 (계약 종료)
 	 */
 	@Transactional
-	public void confirmSecondSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
+	public void confirmSecondSignVerification(Integer formId, Integer userId,
+		FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -540,7 +548,8 @@ public class FormService {
 		}
 
 		// 인증번호 확인
-		identityVerificationService.verifyIdentity(user.getUserName(), request.getPhoneNumber(), request.getVerificationCode(), request.getRecaptchaToken());
+		identityVerificationService.verifyIdentity(user.getUserName(), request.getPhoneNumber(),
+			request.getVerificationCode(), request.getRecaptchaToken());
 
 		// 계약 상태를 종료로 변경
 		form.setStatus(FormStatus.COMPLETED);
