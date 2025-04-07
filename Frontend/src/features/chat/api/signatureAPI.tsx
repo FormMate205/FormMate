@@ -16,13 +16,9 @@ const postRequestDebtor = async ({
     return response.data;
 };
 
-export const usePostRequestDebtor = ({
-    formId,
-    userName,
-    phoneNumber,
-}: SignatureRequest) => {
+export const usePostRequestDebtor = (formId: string) => {
     const { mutate } = useMutation({
-        mutationFn: () => postRequestDebtor({ formId, userName, phoneNumber }),
+        mutationFn: (req: SignatureRequest) => postRequestDebtor(req),
         mutationKey: ['requestDebtor', formId],
     });
 
@@ -43,14 +39,9 @@ const postRequestCreditor = async ({
     return response.data;
 };
 
-export const usePostRequestCreditor = ({
-    formId,
-    userName,
-    phoneNumber,
-}: SignatureRequest) => {
+export const usePostRequestCreditor = (formId: string) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postRequestCreditor({ formId, userName, phoneNumber }),
+        mutationFn: (req: SignatureRequest) => postRequestCreditor(req),
         mutationKey: ['requestCreditor', formId],
     });
 
@@ -76,19 +67,13 @@ const postConfirmDebtor = async ({
 
 export const usePostConfirmDebtor = ({
     formId,
-    phoneNumber,
-    verificationCode,
-    recaptchaToken,
     onSuccess,
-}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+}) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postConfirmDebtor({
-                formId,
-                phoneNumber,
-                verificationCode,
-                recaptchaToken,
-            }),
+        mutationFn: (req: TerminationRequest) => postConfirmDebtor(req),
         mutationKey: ['confirmDebtor', formId],
         onSuccess: onSuccess,
     });
@@ -115,19 +100,13 @@ const postConfirmCreditor = async ({
 
 export const usePostConfirmCreditor = ({
     formId,
-    phoneNumber,
-    verificationCode,
-    recaptchaToken,
     onSuccess,
-}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+}) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postConfirmCreditor({
-                formId,
-                phoneNumber,
-                verificationCode,
-                recaptchaToken,
-            }),
+        mutationFn: (req: TerminationRequest) => postConfirmCreditor(req),
         mutationKey: ['confirmCreditor', formId],
         onSuccess: onSuccess,
     });
@@ -149,13 +128,9 @@ const postTerminateFirst = async ({
     return response.data;
 };
 
-export const usePostTerminateFirst = ({
-    formId,
-    userName,
-    phoneNumber,
-}: SignatureRequest) => {
+export const usePostTerminateFirst = (formId: string) => {
     const { mutate } = useMutation({
-        mutationFn: () => postTerminateFirst({ formId, userName, phoneNumber }),
+        mutationFn: (req: SignatureRequest) => postTerminateFirst(req),
         mutationKey: ['terminateFirst', formId],
     });
 
@@ -176,14 +151,9 @@ const postTerminateSecond = async ({
     return response.data;
 };
 
-export const usePostTerminateSecond = ({
-    formId,
-    userName,
-    phoneNumber,
-}: SignatureRequest) => {
+export const usePostTerminateSecond = (formId: string) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postTerminateSecond({ formId, userName, phoneNumber }),
+        mutationFn: (req: SignatureRequest) => postTerminateSecond(req),
         mutationKey: ['terminateSecond', formId],
     });
 
@@ -207,19 +177,13 @@ const postTerminateFirstConfirm = async ({
 
 export const usePostTerminateFirstConfirm = ({
     formId,
-    phoneNumber,
-    verificationCode,
-    recaptchaToken,
     onSuccess,
-}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+}) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postTerminateFirstConfirm({
-                formId,
-                phoneNumber,
-                verificationCode,
-                recaptchaToken,
-            }),
+        mutationFn: (req: TerminationRequest) => postTerminateFirstConfirm(req),
         mutationKey: ['terminateFirstConfirm', formId],
         onSuccess: onSuccess,
     });
@@ -244,19 +208,14 @@ const postTerminateSecondConfirm = async ({
 
 export const usePostTerminateSecondConfirm = ({
     formId,
-    phoneNumber,
-    verificationCode,
-    recaptchaToken,
     onSuccess,
-}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+}) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postTerminateSecondConfirm({
-                formId,
-                phoneNumber,
-                verificationCode,
-                recaptchaToken,
-            }),
+        mutationFn: (req: TerminationRequest) =>
+            postTerminateSecondConfirm(req),
         mutationKey: ['terminateSecondConfirm', formId],
         onSuccess: onSuccess,
     });
