@@ -9,48 +9,78 @@ const OAuthCallback = () => {
     const setUser = useUserStore((s) => s.setUser);
 
     useEffect(() => {
-        const authCode = params.get('authCode');
-        const needsAdditionalInfo =
-            params.get('needsAdditionalInfo') === 'true';
-        const userName = params.get('userName') || '';
-        const email = params.get('email') || '';
-        const userId = params.get('userId');
+        const handleOAuthCallback = async () => {
+            try {
+                const authCode = params.get('authCode');
+                const needsAdditionalInfo =
+                    params.get('needsAdditionalInfo') === 'true';
 
-        if (!authCode) {
-            navigate('/login');
-            return;
-        }
-
-        if (needsAdditionalInfo) {
-            sessionStorage.setItem('oauthAuthCode', authCode); // 인증코드 임시 보관
-            navigate('/login/oauthInfo');
-        } else {
-            (async () => {
-                try {
-                    const response = await exchangeCodeForToken(authCode); // POST 요청
-                    const accessToken = response.headers[
-                        'authorization'
-                    ]?.replace('Bearer ', '');
-                    if (accessToken) {
-                        localStorage.setItem('accessToken', accessToken);
-                    }
-
-                    setUser({
-                        id: userId!,
-                        userName,
-                        email,
-                        isLogged: true,
-                        hasAccount: true,
-                    });
-
-                    navigate('/');
-                } catch (e) {
-                    console.error('토큰 교환 실패', e);
-                    navigate('/login');
+                if (!authCode) {
+                    console.error(
+                        '인증 코드가 없습니다. 로그인 페이지로 이동동',
+                    );
+                    // navigate('/login');
+                    return;
                 }
-            })();
-        }
-    }, []);
+
+                console.log('인증 코드:', authCode);
+                console.log('추가 정보 필요 여부:', needsAdditionalInfo);
+
+                if (needsAdditionalInfo) {
+                    console.log('추가 정보 입력이 필요합니다');
+                    sessionStorage.setItem('oauthAuthCode', authCode);
+                    navigate('/login/oauthInfo');
+                    return;
+                }
+
+                // 인증 코드로 토큰 교환
+                console.log('토큰 교환 시도...');
+                const response = await exchangeCodeForToken(authCode);
+
+                // 액세스 토큰 확인 및 저장
+                const accessToken = response.headers['authorization'];
+                console.log('받은 액세스 토큰:', accessToken);
+
+                if (!accessToken) {
+                    console.error(
+                        '액세스 토큰이 없습니다. 로그인 페이지로 이동동',
+                    );
+                    // navigate('/login');
+                    return;
+                }
+
+                const tokenValue = accessToken.startsWith('Bearer ')
+                    ? accessToken.replace('Bearer ', '')
+                    : accessToken;
+
+                localStorage.setItem('accessToken', tokenValue);
+                console.log('액세스 토큰 저장 완료');
+
+                // 사용자 정보 설정
+                const { userId, userName, email } = response.data;
+                console.log('사용자 정보:', { userId, userName, email });
+
+                setUser({
+                    id: userId,
+                    userName,
+                    email,
+                    isLogged: true,
+                    hasAccount: true,
+                });
+
+                console.log('사용자 로그인 처리 완료');
+                navigate('/');
+            } catch (e) {
+                console.error(
+                    'OAuth 콜백 처리 중 오류 발생(로그인 페이지로 이동):',
+                    e,
+                );
+                // navigate('/login');
+            }
+        };
+
+        handleOAuthCallback();
+    }, [params, navigate, setUser]);
 
     return null; // 로딩 상태 보여줘도 됨
 };
