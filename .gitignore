@@ -166,6 +166,3 @@ dockerfile
 
 ### Nginx ###
 nginx.conf
-
-### Firebase ###
-firebase-admin-key.json
