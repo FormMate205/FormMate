@@ -256,14 +256,9 @@ public class FormTerminationController {
                             examples = @ExampleObject(
                                     value = """
                     {
-                        "verifyRequest": {
                             "phoneNumber": "01012345678",
                             "verificationCode": "123456",
                             "recaptchaToken": "03AGdBq24PBgaJFuQxxxx..."
-                        },
-                        "signRequest": {
-                            "consent": true
-                        }
                     }
                     """
                             )
@@ -394,14 +389,9 @@ public class FormTerminationController {
                             examples = @ExampleObject(
                                     value = """
                     {
-                        "verifyRequest": {
                             "phoneNumber": "01012345678",
                             "verificationCode": "123456",
                             "recaptchaToken": "03AGdBq24PBgaJFuQxxxx..."
-                        },
-                        "signRequest": {
-                            "consent": true
-                        }
                     }
                     """
                             )
