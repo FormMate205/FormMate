@@ -36,32 +36,36 @@ const ChatSystem = ({
             return false;
         }
 
-        // 채무자 차례
-        const isDebtorSign =
-            formInfo.formStatus === 'BEFORE_APPROVAL' &&
-            formInfo.debtorId === user.id;
-
-        // 채권자 차례
-        const isCreditorSign =
-            formInfo.formStatus === 'AFTER_APPROVAL' &&
-            formInfo.creditorId === user.id;
-
         // 계약 파기
-        // 첫번쨰 차례
-        const isFirstSign =
-            (formInfo.formStatus === 'IN_PROGRESS' ||
-                formInfo.formStatus === 'OVERDUE') &&
-            formInfo.terminationStatus === 'REQUESTED' &&
-            requestedById !== user.id;
+        if (requestedById) {
+            // 첫번쨰 차례
+            const isFirstSign =
+                (formInfo.formStatus === 'IN_PROGRESS' ||
+                    formInfo.formStatus === 'OVERDUE') &&
+                formInfo.terminationStatus === 'REQUESTED' &&
+                requestedById !== user.id;
 
-        // 두번째 차례
-        const isSecondSign =
-            (formInfo.formStatus === 'IN_PROGRESS' ||
-                formInfo.formStatus === 'OVERDUE') &&
-            formInfo.terminationStatus === 'SIGNED' &&
-            requestedById === user.id;
+            // 두번째 차례
+            const isSecondSign =
+                (formInfo.formStatus === 'IN_PROGRESS' ||
+                    formInfo.formStatus === 'OVERDUE') &&
+                formInfo.terminationStatus === 'SIGNED' &&
+                requestedById === user.id;
 
-        return isDebtorSign || isCreditorSign || isFirstSign || isSecondSign;
+            return isFirstSign || isSecondSign;
+        } else {
+            // 채무자 차례
+            const isDebtorSign =
+                formInfo.formStatus === 'BEFORE_APPROVAL' &&
+                formInfo.debtorId === user.id;
+
+            // 채권자 차례
+            const isCreditorSign =
+                formInfo.formStatus === 'AFTER_APPROVAL' &&
+                formInfo.creditorId === user.id;
+
+            return isDebtorSign || isCreditorSign;
+        }
     };
 
     const handleNavigateToSign = () => {
