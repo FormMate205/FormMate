@@ -1,5 +1,4 @@
-import { FormDraftRequest } from '@/entities/formDraft/model/types';
-import { Question } from '@/features/formDraft/model/types';
+import { FormDraftRequest, Question } from '@/entities/formDraft/model/types';
 
 // 범위 검증
 export const validateRange = (
