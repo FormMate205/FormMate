@@ -2,6 +2,8 @@ package com.corp.formmate.chat.service;
 
 import com.corp.formmate.chat.dto.*;
 import com.corp.formmate.chat.entity.ChatEntity;
+import com.corp.formmate.chat.entity.ChatReadEntity;
+import com.corp.formmate.chat.repository.ChatReadRepository;
 import com.corp.formmate.chat.repository.ChatRepository;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
@@ -20,9 +22,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +35,7 @@ import java.util.stream.Collectors;
 public class ChatService {
 
     private final ChatRepository chatRepository;
+    private final ChatReadRepository chatReadRepository;
     private final FormService formService;
     private final UserService userService;
 
@@ -57,10 +62,16 @@ public class ChatService {
                     .writer(user)
                     .content(chatRequest.getContent())
                     .messageType(chatRequest.getMessageType())
-                    .isRead(false)
                     .build();
 
             ChatEntity savedChat = chatRepository.save(chat);
+
+            // 본인이 작성한 메시지도 읽음 처리
+            ChatReadEntity read = ChatReadEntity.builder()
+                    .chat(savedChat)
+                    .user(user)
+                    .build();
+            chatReadRepository.save(read);
 
             // 응답 DTO 생성
             return createChatResponseFromEntity(savedChat);
@@ -153,13 +164,30 @@ public class ChatService {
     private List<ChatRoomResponse> createChatRoomsFromForms(List<FormEntity> forms, Integer userId, boolean isCompleted) {
         List<ChatRoomResponse> chatRooms = new ArrayList<>();
 
+        // 사용자 정보 미리 조회
+        UserEntity user = userService.selectById(userId);
+
+        // 현재 사용자가 읽은 모든 chatId 가져오기 (한 번에 캐싱)
+        List<ChatReadEntity> readEntities = chatReadRepository.findByUser(user);
+        Set<Integer> readChatIds = readEntities.stream()
+                .map(e -> e.getChat().getId())
+                .collect(Collectors.toSet());
+
         for (FormEntity form : forms) {
             // 가장 최근 채팅 메세지 조회
             ChatEntity lastChat = chatRepository.findTopByFormOrderByCreatedAtDesc(form)
                     .orElse(null);
 
-            // 안 읽은 메세지 수 조회
-            Integer unreadCount = chatRepository.countByFormAndIsReadFalseAndWriterIdNot(form, userId);
+            // 해당 폼의 전체 채팅 조회
+            List<ChatEntity> chats = chatRepository.findByFormAndIsDeletedFalse(form);
+
+            // 안 읽은 메세지 수 계산
+            int unreadCount = 0;
+            for (ChatEntity chat : chats) {
+                if (!chat.getWriter().getId().equals(userId) && !readChatIds.contains(chat.getId())) {
+                    unreadCount++;
+                }
+            }
 
             ChatRoomResponse room = ChatRoomResponse.builder()
                     .formId(form.getId())
@@ -175,6 +203,7 @@ public class ChatService {
 
             chatRooms.add(room);
         }
+
         return chatRooms;
     }
 
@@ -213,16 +242,31 @@ public class ChatService {
     @Transactional
     public void markAsRead(Integer formId, Integer userId) {
         try {
-            // 계약 조회
             FormEntity form = formService.selectById(formId);
+            UserEntity user = userService.selectById(userId);
 
-            // 사용자가 해당 계약의 채권자나 채무자인지 조회
             if (!isParticipantInForm(form, userId)) {
                 throw new ChatException(ErrorCode.CHAT_ROOM_ACCESS_DENIED);
             }
 
-            // 자신이 보내지 않은 메세지만 읽음 처리
-            chatRepository.markAsReadByFormAndWriterIdNot(form.getId(), userId);
+            // 해당 form의 모든 채팅 메세지 가져오기
+            List<ChatEntity> chatList = chatRepository.findByFormAndIsDeletedFalse(form);
+
+            for (ChatEntity chat : chatList) {
+                // 본인이 작성한 메세지는 제외
+                if (chat.getWriter().getId().equals(userId)) continue;
+
+                // 이미 읽었는지 확인
+                boolean alreadyRead = chatReadRepository.findByChatAndUser(chat, user).isPresent();
+                if (!alreadyRead) {
+                    ChatReadEntity read = ChatReadEntity.builder()
+                            .chat(chat)
+                            .user(user)
+                            .build(); // readAt은 PrePersist로 자동 설정
+                    chatReadRepository.save(read);
+                }
+            }
+
         } catch (ChatException e) {
             log.error("메세지 읽음 처리 중 에러 발생: {}", e.getMessage());
             throw e;
@@ -249,7 +293,6 @@ public class ChatService {
                 .writerId(chatEntity.getWriter().getId())
                 .writerName(chatEntity.getWriter().getUserName())
                 .content(chatEntity.getContent())
-                .isRead(chatEntity.getIsRead())
                 .createdAt(chatEntity.getCreatedAt())
                 .messageType(chatEntity.getMessageType())
                 .targetUserId(chatEntity.getTargetUserId())
