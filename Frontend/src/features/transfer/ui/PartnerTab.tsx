@@ -57,7 +57,7 @@ const PartnerTab = () => {
     };
 
     const handleSelectContract = () => {
-        // toDo: store에 값 저장
+        // toDo: store에 값 저장 (partnerName, formId, partnerId)
         navigate('amount');
     };
 

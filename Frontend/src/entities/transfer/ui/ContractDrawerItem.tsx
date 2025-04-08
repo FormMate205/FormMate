@@ -19,7 +19,7 @@ const ContractDrawerItem = ({ contract, onClick }: Props) => {
             <div className='flex items-center gap-6'>
                 <div
                     className={cn(
-                        'text-lg font-medium',
+                        'text-lg font-medium whitespace-nowrap',
                         isOverdue ? 'text-subPink-600' : 'text-primary-500',
                     )}
                 >

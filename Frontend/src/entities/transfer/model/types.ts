@@ -24,4 +24,10 @@ export interface ContractByPartnerItem {
     contractDuration: string; // 계약 기간
 }
 
+// 납부 예정 금액 정보(송금 화면)
 export type GetContractsByPartnerResponse = ContractByPartnerItem[];
+
+export type GetScheduledPaymentInfoResponse = {
+    monthlyRemainingPayment: number;
+    earlyRepaymentFeeRate: number;
+};
