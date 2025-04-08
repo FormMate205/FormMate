@@ -4,10 +4,6 @@ import { getDeviceToken, registerServiceWorker } from '@/lib/firebase';
 import { router } from './router';
 
 const App = () => {
-    // useEffect(() => {
-    //     registerServiceWorker();
-    //     requestPermission();
-    // }, []);
     useEffect(() => {
         const isSafePath = !window.location.pathname.startsWith(
             '/oauth2/authorization',

@@ -51,7 +51,7 @@ export const useActivateDeviceToken = () => {
 };
 
 // 알림 비활성화
-const deactivateDeviceToken = async (token: string) => {
+export const deactivateDeviceToken = async (token: string) => {
     const response = await api.patch('/fcmtoken/deactivate', { token });
     return response.data;
 };
