@@ -43,7 +43,7 @@ const RepaymentMethodSelector = ({
                                 </div>
                             }
                             children={
-                                <FormDraftScheduleModal type={option.label} />
+                                <FormDraftScheduleModal type={option.value} />
                             }
                         />
                         <Button
