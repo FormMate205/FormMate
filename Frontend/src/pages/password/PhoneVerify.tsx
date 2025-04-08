@@ -1,4 +1,4 @@
-import PhoneVerifyForm from './ui/PhoneVerifyForm';
+import PhoneVerifyForm from '@/features/myInfo/ui/PhoneVerifyForm';
 
 const PhoneVerify = () => {
     return (
