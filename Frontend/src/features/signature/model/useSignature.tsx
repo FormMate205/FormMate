@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MessageType } from '@/entities/chat/model/types';
@@ -69,10 +70,9 @@ export const useSignature = ({
     };
 
     // 인증 오류 처리 함수 (채권자 잔액 부족)
-    const handleVerificationError = (error: Error) => {
-        if (error?.message === '잔액이 부족합니다.') {
-            setVerificationMessage(error.message);
-        }
+    const handleVerificationError = (error: AxiosError) => {
+        setVerificationMessage(error.message);
+        setVerificationSuccess(false);
     };
 
     // API 호출
