@@ -39,7 +39,7 @@ const MyInfo = () => {
                         {userDetail && (
                             <>
                                 <UserInfo
-                                    isOAuth={false} // 소셜 로그인 여부 판단 로직 나중에 추가
+                                    isOAuth={userDetail.provider !== 'LOCAL'}
                                     userName={userDetail.userName}
                                     phoneNumber={userDetail.phoneNumber}
                                     email={userDetail.email}

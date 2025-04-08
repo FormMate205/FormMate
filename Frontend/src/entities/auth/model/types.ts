@@ -7,4 +7,5 @@ export interface GetUserDetailResponse {
     addressDetail: string;
     bankName: string;
     accountNumber: string;
+    provider: 'LOCAL' | 'GOOGLE' | 'NAVER';
 }
