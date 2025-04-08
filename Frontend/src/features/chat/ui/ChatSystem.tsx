@@ -2,10 +2,10 @@ import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageType } from '@/entities/chat/model/types';
 import BlockModal from '@/entities/chat/ui/BlockModal';
+import FormUpdateModal from '@/entities/formDraft/ui/FormUpdateModal';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { NavigateToPage } from '@/shared/ui/NavigateToPage';
 import { CommonModal } from '@/widgets';
-import FormModal from '../../../entities/chat/ui/FormModal';
 import { useConnectWs } from '../model/useConnectWs';
 
 interface ChatSystemProps {
@@ -90,7 +90,7 @@ const ChatSystem = ({
                         : '서명 대기'}
                 </p>
                 {type == 'CONTRACT_SHARED' && (
-                    <FormModal formId={formId} isDraft={true} />
+                    <FormUpdateModal formId={formId} />
                 )}
             </div>
 
