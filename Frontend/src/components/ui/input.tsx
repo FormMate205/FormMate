@@ -56,7 +56,7 @@ function Input({
     return (
         <div className='relative w-full'>
             {variant === 'search' && (
-                <div className='absolute -translate-y-1/2 pointer-events-none top-1/2 left-4'>
+                <div className='pointer-events-none absolute top-1/2 left-4 -translate-y-1/2'>
                     <Icons name='search' size={16} color='fill-line-500' />
                 </div>
             )}
