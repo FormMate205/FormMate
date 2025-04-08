@@ -12,6 +12,28 @@ const SubscriptionToggle = () => {
     const { mutate: deactivate } = useDeactivateDeviceToken();
 
     const handleToggle = async () => {
+        const isTryingToSubscribe = !isSubscribed;
+        // 알림을 구독하려고 했을 때
+        if (isTryingToSubscribe) {
+            if (Notification.permission === 'denied') {
+                alert(
+                    '브라우저 알림 권한이 차단되어 있어요.\n설정에서 알림을 허용해주세요!',
+                );
+                return;
+            }
+
+            if (Notification.permission === 'default') {
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    alert(
+                        '알림 권한이 허용되지 않았어요.\n' +
+                            '알림을 받으려면 브라우저에서 권한을 허용해야 해요!',
+                    );
+                    return;
+                }
+            }
+        }
+
         const token = await getDeviceToken();
         if (!token) {
             alert('알림 권한이 허용되지 않았습니다.');
