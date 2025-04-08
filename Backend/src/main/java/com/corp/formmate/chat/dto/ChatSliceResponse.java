@@ -48,7 +48,8 @@ public class ChatSliceResponse {
      */
     public static <T> ChatSliceResponse fromSlice(Slice<ChatResponse> slice,
                                                   Integer creditorId, Integer debtorId,
-                                                  FormStatus formStatus, TerminationProcess terminationStatus) {
+                                                  FormStatus formStatus, TerminationProcess terminationStatus,
+                                                  Integer terminationRequestedId) {
         return ChatSliceResponse.builder()
                 .content(slice.getContent())
                 .pageNumber(slice.getNumber())
@@ -62,6 +63,7 @@ public class ChatSliceResponse {
                         .debtorId(debtorId)
                         .formStatus(formStatus)
                         .terminationStatus(terminationStatus)
+                        .terminationRequestedId(terminationRequestedId)
                         .build())
                 .build();
     }

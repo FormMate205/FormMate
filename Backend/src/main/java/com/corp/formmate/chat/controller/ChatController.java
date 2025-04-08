@@ -337,7 +337,8 @@ public class ChatController {
                 form.getCreditor().getId(),
                 form.getDebtor().getId(),
                 form.getStatus(),
-                form.getIsTerminationProcess()
+                form.getIsTerminationProcess(),
+                form.getTerminationRequestedUser().getId()
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
