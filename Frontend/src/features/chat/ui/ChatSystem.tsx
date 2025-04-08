@@ -82,7 +82,7 @@ const ChatSystem = ({
     };
 
     return (
-        <div className='border-primary-200 flex w-[260px] flex-col gap-6 rounded-2xl border bg-white px-3 py-4'>
+        <div className='border-primary-200 flex w-[260px] flex-col gap-6 rounded-2xl border bg-white px-3 py-4 whitespace-pre-wrap'>
             <div className='flex w-full items-center justify-between'>
                 <p className='text-lg font-semibold'>
                     {type == 'CONTRACT_SHARED'
