@@ -9,10 +9,10 @@ const postTerminate = async (formId: string): Promise<TerminationResponse> => {
 };
 
 export const usePostTerminate = (formId: string) => {
-    const { data, mutate } = useMutation({
+    const { mutate } = useMutation({
         mutationFn: () => postTerminate(formId),
         mutationKey: ['terminate', formId],
     });
 
-    return { data, mutate };
+    return { mutate };
 };

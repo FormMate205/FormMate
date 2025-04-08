@@ -38,7 +38,7 @@ const Signature = () => {
     // 서명 페이지 닫기
     const handleClose = () => {
         navigate(`/chat/${formId}`, {
-            state: { isFin: false, requestedById: undefined },
+            state: { isFin: false },
         });
     };
 

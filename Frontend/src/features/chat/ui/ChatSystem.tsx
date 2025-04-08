@@ -36,8 +36,22 @@ const ChatSystem = ({
             return false;
         }
 
+        if (type === 'SIGNATURE_REQUEST_CONTRACT') {
+            // 채무자 차례
+            const isDebtorSign =
+                formInfo.formStatus === 'BEFORE_APPROVAL' &&
+                formInfo.debtorId === user.id;
+
+            // 채권자 차례
+            const isCreditorSign =
+                formInfo.formStatus === 'AFTER_APPROVAL' &&
+                formInfo.creditorId === user.id;
+
+            return isDebtorSign || isCreditorSign;
+        }
+
         // 계약 파기
-        if (requestedById) {
+        if (type === 'SIGNATURE_REQUEST_TERMINATION') {
             // 첫번쨰 차례
             const isFirstSign =
                 (formInfo.formStatus === 'IN_PROGRESS' ||
@@ -53,18 +67,6 @@ const ChatSystem = ({
                 requestedById === user.id;
 
             return isFirstSign || isSecondSign;
-        } else {
-            // 채무자 차례
-            const isDebtorSign =
-                formInfo.formStatus === 'BEFORE_APPROVAL' &&
-                formInfo.debtorId === user.id;
-
-            // 채권자 차례
-            const isCreditorSign =
-                formInfo.formStatus === 'AFTER_APPROVAL' &&
-                formInfo.creditorId === user.id;
-
-            return isDebtorSign || isCreditorSign;
         }
     };
 

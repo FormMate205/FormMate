@@ -10,7 +10,7 @@ const ContractDetail = () => {
     const navigate = useNavigate();
     const { formId } = useParams();
 
-    const { mutate: terminate, data } = usePostTerminate(formId!);
+    const { mutate: terminate } = usePostTerminate(formId!);
 
     const handleEarlyTerminate = () => {
         // 계약 조기 종료 요청
@@ -18,7 +18,7 @@ const ContractDetail = () => {
 
         // 채팅으로 이동
         navigate(`/chat/${formId}`, {
-            state: { isFin: false, requestedById: data?.requestedById },
+            state: { isFin: false },
         });
     };
 

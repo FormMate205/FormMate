@@ -10,7 +10,7 @@ import ChatInput from '../../entities/chat/ui/ChatInput';
 
 const Chat = () => {
     const location = useLocation();
-    const { isFin, requestedById } = location.state;
+    const { isFin } = location.state;
 
     const { user } = useUserStore();
     const { roomId } = useParams();
@@ -18,6 +18,7 @@ const Chat = () => {
     const {
         messages,
         message,
+        formInfo,
         setMessage,
         sendMessage,
         isConnected,
@@ -48,7 +49,7 @@ const Chat = () => {
                             formId={chat.formId!}
                             children={chat.content}
                             type={chat.messageType}
-                            requestedById={requestedById}
+                            requestedById={formInfo.terminationRequestedId!}
                         />
                     ) : (
                         <ChatBox
