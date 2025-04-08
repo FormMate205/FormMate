@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FormPartner } from '@/entities/formDraft/model/types';
 import useFormPartnerStore from '@/entities/formPartner/model/formPartnerStore';
 import { useGetRecentFormPartner } from '@/features/formPartner/api/formPartnerAPI';
-import { maskUserName } from '@/shared/model/maskUserName';
+import { maskUserName } from '@/shared/lib/maskUserName';
 import ArrowListItem from '@/shared/ui/ArrowListItem';
 
 interface RecentPartnersProps {

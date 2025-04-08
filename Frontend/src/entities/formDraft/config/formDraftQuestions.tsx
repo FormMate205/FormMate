@@ -1,4 +1,4 @@
-import { Question } from '@/features/formDraft/model/types';
+import { Question } from '../model/types';
 
 // 특약 조항
 export const specialTermsInfo = [
@@ -57,7 +57,7 @@ export const formDraftQuestions: Record<string, Question> = {
     },
     maturityDate: {
         id: 'maturityDate',
-        question: '상환 날짜를 선택한 후 확인 버튼을 눌러주세요.',
+        question: '상환 만기 날짜를 선택한 후 확인 버튼을 눌러주세요.',
         type: 'date',
         next: 'interestRate',
     },
@@ -92,9 +92,25 @@ export const formDraftQuestions: Record<string, Question> = {
             min: '0',
             max: '20',
         },
+        next: 'repaymentDay',
+    },
+    repaymentDay: {
+        id: 'repaymentDay',
+        question: '매달 납부일을 입력해주세요.',
+        type: 'number',
+        condition: [
+            '✅ 숫자로만 입력해주세요.',
+            '✅ 이자가 없는 원금 상환의 경우 0으로 자동 입력됩니다.',
+            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
+        ],
+        validation: {
+            regex: '^\\d+$',
+            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
+            min: '1',
+            max: '31',
+        },
         next: 'repayment',
     },
-
     repayment: {
         id: 'repayment',
         question: '분할 납부를 희망하십니까?',
@@ -104,7 +120,7 @@ export const formDraftQuestions: Record<string, Question> = {
             { label: '아니오', value: false },
         ],
         next: (answer) =>
-            answer === '네' ? 'repaymentMethod' : 'repaymentDay',
+            answer === '네' ? 'repaymentMethod' : 'earlyRepaymentFeeRate',
     },
     repaymentMethod: {
         id: 'repaymentMethod',
@@ -128,23 +144,6 @@ export const formDraftQuestions: Record<string, Question> = {
         condition: [
             '✅ 미리보기 버튼을 누르면, 입력한 정보를 기반으로 납부 일정과 예상 납부 금액을 확인할 수 있습니다.',
         ],
-        next: 'repaymentDay',
-    },
-    repaymentDay: {
-        id: 'repaymentDay',
-        question: '매달 납부일을 입력해주세요.',
-        type: 'number',
-        condition: [
-            '✅ 숫자로만 입력해주세요.',
-            '✅ 이자가 없는 원금 상환의 경우 0으로 자동 입력됩니다.',
-            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
-        ],
-        validation: {
-            regex: '^\\d+$',
-            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
-            min: '0',
-            max: '31',
-        },
         next: 'earlyRepaymentFeeRate',
     },
     earlyRepaymentFeeRate: {
