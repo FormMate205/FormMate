@@ -166,6 +166,7 @@ public class FormEntity implements Serializable {
 	// 파기 프로세스 취소
 	public void cancelTerminationProcess() {
 		this.isTerminationProcess = TerminationProcess.NONE;
+		this.terminationRequestedUser = null;
 	}
 
 	public void updateStatus(FormStatus status) {
