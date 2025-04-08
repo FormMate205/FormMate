@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button';
-import { Option } from '@/features/formDraft/model/types';
+import { CommonModal } from '@/widgets';
+import { Option } from '../model/types';
+import FormDraftScheduleModal from './FormDraftScheduleModal';
 
 interface RepaymentMethodSelectorProps {
     options: Option[];
@@ -31,7 +33,19 @@ const RepaymentMethodSelector = ({
                     </div>
 
                     <div className='flex w-full gap-4'>
-                        <Button variant='choiceEmpty' children='미리보기' />
+                        <CommonModal
+                            triggerChildren={
+                                <div
+                                    className='border-primary-500 text-primary-500 rounded-[4px] border bg-white px-3 py-2 text-sm font-medium'
+                                    aria-label='예상 납부 내역 미리보기 버튼'
+                                >
+                                    미리보기
+                                </div>
+                            }
+                            children={
+                                <FormDraftScheduleModal type={option.value} />
+                            }
+                        />
                         <Button
                             variant='choiceFill'
                             children='선택하기'

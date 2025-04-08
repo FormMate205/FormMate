@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { AccountInfo } from '@/features/account/model/types';
 import { Icons } from '@/shared';
-import { formatCurrency } from '@/shared/model/formatCurrency';
+import { formatCurrency } from '@/shared/lib/formatCurrency';
 
 interface AccountSummaryProps {
     accountInfo: AccountInfo;
