@@ -144,7 +144,7 @@ public class JwtTokenProvider {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             return Arrays.stream(cookies)
-                    .filter(cookie -> "refresh_token".equals(cookie.getName()))
+                    .filter(cookie -> "refreshToken".equals(cookie.getName()))
                     .findFirst()
                     .map(Cookie::getValue)
                     .orElse(null);
