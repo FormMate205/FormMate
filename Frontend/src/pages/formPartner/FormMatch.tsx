@@ -1,10 +1,7 @@
-import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import { ChangeEvent, Suspense, useState } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { Input } from '@/components/ui/input';
 import NewPartnerDrawer from '@/features/formPartner/ui/NewPartnerDrawer';
 import RecentPartners from '@/features/formPartner/ui/RecentPartners';
-import { ErrorFallBack } from '@/shared/ui/ErrorFallBack';
 import ListLoading from '@/shared/ui/ListLoading';
 import { Header } from '@/widgets';
 
@@ -39,18 +36,9 @@ const FormMatch = () => {
                         {searchValue ? '검색 결과' : '최근 계약 상대'}
                     </div>
 
-                    <QueryErrorResetBoundary>
-                        {({ reset }) => (
-                            <ErrorBoundary
-                                onReset={reset}
-                                FallbackComponent={ErrorFallBack}
-                            >
-                                <Suspense fallback={<ListLoading />}>
-                                    <RecentPartners searchValue={searchValue} />
-                                </Suspense>
-                            </ErrorBoundary>
-                        )}
-                    </QueryErrorResetBoundary>
+                    <Suspense fallback={<ListLoading />}>
+                        <RecentPartners searchValue={searchValue} />
+                    </Suspense>
                 </div>
 
                 <div className='sticky right-0 bottom-0 left-0 bg-white pt-2 pb-4'>
