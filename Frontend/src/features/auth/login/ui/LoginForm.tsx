@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { refreshToken } from '@/lib/refreshToken';
 import { login } from '../../../../entities/auth/api/login';
 import { LoginFormSchema } from '../model/types';
 import { useLoginForm } from '../model/useLoginForm';
@@ -18,6 +19,7 @@ const LoginForm = () => {
     const onSubmit = async (data: LoginFormSchema) => {
         try {
             await login(data);
+            await refreshToken(); // FCM 토큰 갱신
 
             // 유저 정보 쿼리 갱신
             await queryClient.invalidateQueries({ queryKey: ['user'] });
