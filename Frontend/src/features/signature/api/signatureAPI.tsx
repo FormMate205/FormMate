@@ -101,14 +101,17 @@ const postConfirmCreditor = async ({
 export const usePostConfirmCreditor = ({
     formId,
     onSuccess,
+    onError,
 }: {
     formId: string;
     onSuccess?: (data: boolean) => void;
+    onError?: (error: Error) => void;
 }) => {
     const { mutate } = useMutation({
         mutationFn: (req: TerminationRequest) => postConfirmCreditor(req),
         mutationKey: ['confirmCreditor', formId],
         onSuccess: onSuccess,
+        onError: onError,
     });
 
     return { mutate };

@@ -22,6 +22,7 @@ export interface FormInformation {
     debtorId: string;
     formStatus: ContractStatus;
     terminationStatus: TerminationStatus;
+    terminationRequestedId: string | null;
 }
 
 // 채팅방 목록 response
