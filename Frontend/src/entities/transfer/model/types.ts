@@ -17,11 +17,11 @@ export type TabListItem = {
 };
 
 export interface ContractByPartnerItem {
-    formId: string;
-    userIsCreditor: boolean;
-    nextRepaymentAmount: number;
-    nextRepaymentDate: string;
-    contractDuration: string;
+    formId: string; // 계약 번호
+    userIsCreditor: boolean; // 채권자, 채무자 표시
+    nextRepaymentAmount: number; // 다음 상환금액
+    nextRepaymentDate: string; // 다음 상환일
+    contractDuration: string; // 계약 기간
 }
 
 export type GetContractsByPartnerResponse = ContractByPartnerItem[];
