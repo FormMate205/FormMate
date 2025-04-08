@@ -15,20 +15,11 @@ export const useUserService = () => {
                 setUser(data);
                 setLoggedIn(true);
             } else {
-                console.log(
-                    'useUserService: 사용자 데이터 없음, 리다이렉트 검사',
-                );
-
                 if (
                     !location.pathname.startsWith('/login') &&
                     location.pathname !== '/oauth/callback'
                 ) {
-                    console.log('useUserService: 로그인 페이지로 리다이렉트');
                     navigate('/login');
-                } else {
-                    console.log(
-                        'useUserService: 로그인 관련 페이지이므로 리다이렉트 하지 않음',
-                    );
                 }
                 clearUser();
             }

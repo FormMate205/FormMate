@@ -8,7 +8,6 @@ export { default as Chat } from './chat/Chat';
 export { default as ChatRooms } from './chat/ChatRooms';
 export { default as Home } from './home/Home';
 export { default as Login } from './login/Login';
-export { default as Landing } from './login/LandingPage';
 export { default as Signup } from './signup/Signup';
 export { default as OauthAddInfoPage } from './signup/OauthAddInfo';
 export { default as PasswordReset } from './password/PasswordReset';
