@@ -7,7 +7,7 @@ const QueryProvider = ({ children }: { children: ReactNode }) => {
     return (
         <QueryClientProvider client={queryClient}>
             {children}
-            <ReactQueryDevtools />
+            <ReactQueryDevtools buttonPosition={'bottom-left'} />
         </QueryClientProvider>
     );
 };

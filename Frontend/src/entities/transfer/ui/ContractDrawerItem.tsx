@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils';
 import { getDday } from '@/shared/lib/date';
-import { ContractItem } from '../model/types';
+import { ContractByPartnerItem } from '../model/types';
 
 interface Props {
-    contract: ContractItem;
-    onClick?: (contract: ContractItem) => void;
+    contract: ContractByPartnerItem;
+    onClick?: (contract: ContractByPartnerItem) => void;
 }
 
 const ContractDrawerItem = ({ contract, onClick }: Props) => {

@@ -6,7 +6,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { formatCurrency } from '@/shared/model/formatCurrency';
+import { formatCurrency } from '@/shared/lib/formatCurrency';
 import { getSignatureStatus } from '../model/getSignatureStatus';
 import { ContractDocs } from '../model/types';
 
