@@ -55,21 +55,23 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 	Page<UserEntity> findDistinctContractedUsersByUserId(@Param("userId") Integer userId, @Param("input") String input,
 		Pageable pageable);
 
-	@Query("SELECT f\n"
-		+ "FROM FormEntity f\n"
-		+ "WHERE f.creditor = :userId\n"
-		+ "  AND f.debtor = :partnerId\n"
-		+ "ORDER BY f.contractDate\n")
-	Page<FormEntity> findUserIsCreditorSideForms(@Param("userId") Integer userId, @Param("partnerId") Integer partnerId,
-		Pageable pageable);
+	@Query("SELECT f " +
+			"FROM FormEntity f " +
+			"WHERE f.creditor.id = :userId " +
+			"  AND f.debtor.id = :partnerId " +
+			"ORDER BY f.contractDate")
+	Page<FormEntity> findUserIsCreditorSideForms(@Param("userId") Integer userId,
+												 @Param("partnerId") Integer partnerId,
+												 Pageable pageable);
 
-	@Query("SELECT f\n"
-		+ "FROM FormEntity f\n"
-		+ "WHERE f.creditor = :partnerId\n"
-		+ "  AND f.debtor = :userId\n"
-		+ "ORDER BY f.contractDate\n")
-	Page<FormEntity> findUserIsDebtorSideForms(@Param("userId") Integer userId, @Param("partnerId") Integer partnerId,
-		Pageable pageable);
+	@Query("SELECT f " +
+			"FROM FormEntity f " +
+			"WHERE f.creditor.id = :partnerId " +
+			"  AND f.debtor.id = :userId " +
+			"ORDER BY f.contractDate")
+	Page<FormEntity> findUserIsDebtorSideForms(@Param("userId") Integer userId,
+											   @Param("partnerId") Integer partnerId,
+											   Pageable pageable);
 
 	List<FormEntity> findAllByCreditorIdOrDebtorId(Integer creditorId, Integer debtorId);
 

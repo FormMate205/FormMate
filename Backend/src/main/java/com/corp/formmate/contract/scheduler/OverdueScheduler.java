@@ -17,7 +17,7 @@ public class OverdueScheduler {
 
 	@Scheduled(cron = "0 01 00 * * *")
 	public void scheduleOverdue() {
-		contractService.dailyContractUpdateJob();
-		contractService.notifyRepaymentDueContracts();
+//		contractService.dailyContractUpdateJob();
+//		contractService.notifyRepaymentDueContracts();
 	}
 }
