@@ -270,7 +270,7 @@ public class ContractService {
 	}
 
 	/**
-	 * 사용자의 전체 송금 요약 정보를 계산 25-04-08 여기 부터 시작하자 
+	 * 사용자의 전체 송금 요약 정보를 계산 25-04-08 여기 부터 시작하자
 	 */
 	@Transactional
 	public AmountResponse selectAmounts(Integer userId) {
@@ -279,28 +279,47 @@ public class ContractService {
 		UserEntity user = getUser(userId);
 		String username = user.getUserName();
 
-		long paid = 0, expectedPay = 0, received = 0, expectedReceive = 0;
+		long paid = 0L, expectedPay = 0L, received = 0L, expectedReceive = 0L;
 
 		for (FormEntity form : forms) {
-			InterestResponse interest = selectInterestResponse(form.getId());
-			if (form.getCreditorName().equals(username)) {
-				received += interest.getPaidPrincipalAmount()
-					+ interest.getPaidInterestAmount()
-					+ interest.getPaidOverdueInterestAmount();
-				expectedReceive += interest.getExpectedPaymentAmountAtMaturity();
-			} else {
-				paid += interest.getPaidPrincipalAmount()
-					+ interest.getPaidInterestAmount()
-					+ interest.getPaidOverdueInterestAmount();
-				expectedPay += interest.getExpectedPaymentAmountAtMaturity();
+			FormStatus status = form.getStatus();
+
+			if (status == FormStatus.BEFORE_APPROVAL || status == FormStatus.AFTER_APPROVAL) {
+				continue; // 스케줄 없음
+			}
+
+			ContractEntity contract = getContract(form);
+			List<PaymentScheduleEntity> schedules = paymentScheduleService.selectByContract(contract);
+			boolean isCreditor = form.getCreditorName().equals(username);
+
+			for (PaymentScheduleEntity s : schedules) {
+				long scheduled = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount();
+				long actual = s.getActualPaidAmount() != null ? s.getActualPaidAmount() : 0L;
+				long unpaid = Math.max(0, scheduled - actual);
+
+				if (Boolean.TRUE.equals(s.getIsPaid())) {
+					// 납부된 금액은 상태 상관없이 집계
+					if (isCreditor)
+						received += actual;
+					else
+						paid += actual;
+				} else {
+					// ✅ IN_PROGRESS 또는 OVERDUE일 때만 미납 금액 포함
+					if (status == FormStatus.IN_PROGRESS || status == FormStatus.OVERDUE) {
+						if (isCreditor)
+							expectedReceive += unpaid;
+						else
+							expectedPay += unpaid;
+					}
+				}
 			}
 		}
 
 		return AmountResponse.builder()
 			.paidAmount(paid)
-			.expectedTotalRepayment(expectedPay)
+			.expectedTotalRepayment(paid + expectedPay)
 			.receivedAmount(received)
-			.expectedTotalReceived(expectedReceive)
+			.expectedTotalReceived(received + expectedReceive)
 			.build();
 	}
 
