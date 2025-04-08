@@ -77,7 +77,6 @@ public class ChatSystemMessageService {
                     .writer(systemUser)
                     .content(finalContent)
                     .messageType(request.getMessageType())
-                    .isRead(false)
                     .build();
 
             ChatEntity savedChat = chatRepository.save(chat);
@@ -138,7 +137,6 @@ public class ChatSystemMessageService {
                     .writer(systemUser)
                     .content(finalContent)
                     .messageType(request.getMessageType())
-                    .isRead(false)
                     .targetUserId(targetUserId)
                     .build();
 
@@ -459,7 +457,6 @@ public class ChatSystemMessageService {
                 .writerId(chatEntity.getWriter().getId())
                 .writerName(chatEntity.getWriter().getUserName())
                 .content(chatEntity.getContent())
-                .isRead(chatEntity.getIsRead())
                 .createdAt(chatEntity.getCreatedAt())
                 .messageType(chatEntity.getMessageType())
                 .build();
@@ -475,7 +472,6 @@ public class ChatSystemMessageService {
                 .writerId(chatEntity.getWriter().getId())
                 .writerName(chatEntity.getWriter().getUserName())
                 .content(chatEntity.getContent())
-                .isRead(chatEntity.getIsRead())
                 .createdAt(chatEntity.getCreatedAt())
                 .messageType(chatEntity.getMessageType())
                 .targetUserId(targetUserId)
