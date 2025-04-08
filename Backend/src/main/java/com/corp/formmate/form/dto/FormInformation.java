@@ -25,4 +25,7 @@ public class FormInformation {
 
     @Schema(description = "파기 상태", example = "NONE")
     private TerminationProcess terminationStatus;
+
+    @Schema(description = "파기 신청자", example = "1")
+    private Integer terminationRequestedId;
 }

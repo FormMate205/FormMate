@@ -2,9 +2,6 @@ package com.corp.formmate.form.service;
 
 import java.util.List;
 
-import com.corp.formmate.form.dto.*;
-import com.corp.formmate.form.entity.TerminationProcess;
-import com.corp.formmate.user.service.IdentityVerificationService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +29,7 @@ import com.corp.formmate.form.dto.FormTerminationVerifyRequest;
 import com.corp.formmate.form.dto.FormUpdateRequest;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
+import com.corp.formmate.form.entity.TerminationProcess;
 import com.corp.formmate.form.repository.FormRepository;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
@@ -40,6 +38,7 @@ import com.corp.formmate.specialterm.dto.SpecialTermResponse;
 import com.corp.formmate.specialterm.service.SpecialTermService;
 import com.corp.formmate.transfer.service.TransferService;
 import com.corp.formmate.user.entity.UserEntity;
+import com.corp.formmate.user.service.IdentityVerificationService;
 import com.corp.formmate.user.service.UserService;
 import com.corp.formmate.user.service.VerificationService;
 
@@ -329,6 +328,8 @@ public class FormService {
 		log.info("채권자 서명 & 계약 체결 이벤트 발행: 폼 ID={}", formEntity.getId());
 		eventPublisher.publishEvent(new CreditorSignatureCompletedEvent(formEntity));
 
+		transferService.createInitialTransfer(formEntity);
+
 		return true;
 	}
 
@@ -375,6 +376,12 @@ public class FormService {
 
 		// 파기 프로세스 시작 설정
 		form.startTerminationProcess();
+
+		// 파기 신청 사용자 등록
+		UserEntity requestedUser = userService.selectById(userId);
+		form.updateTerminationRequestedUser(requestedUser);
+
+		// form 저장
 		formRepository.save(form);
 
 		// 계약 파기 요청 이벤트 발생
@@ -449,7 +456,8 @@ public class FormService {
 	 * 계약 파기 첫 번째 당사자 인증 확인 및 서명
 	 */
 	@Transactional
-	public boolean confirmFirstSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
+	public boolean confirmFirstSignVerification(Integer formId, Integer userId,
+		FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -520,7 +528,8 @@ public class FormService {
 	 * 계약 파기 두 번째 당사자 인증 확인 및 서명 (계약 종료)
 	 */
 	@Transactional
-	public boolean confirmSecondSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
+	public boolean confirmSecondSignVerification(Integer formId, Integer userId,
+		FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -552,6 +561,55 @@ public class FormService {
 		eventPublisher.publishEvent(new FormTerminationCompletedEvent(form));
 
 		return true;
+	}
+
+	/**
+	 * 사용자가 서명 가능한 유저인지 확인
+	 */
+	@Transactional
+	public boolean isCurrentSigner(Integer formId, Integer userId) {
+		log.info("isCurrentSigner 호출 - formId: {}, userId: {}", formId, userId);
+
+		FormEntity form = formRepository.findById(formId)
+				.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
+		UserEntity user = userService.selectById(userId);
+
+		log.info("폼 상태: {}, terminationProcess: {}, creditorId: {}, debtorId: {}, terminationRequestedId: {}",
+				form.getStatus(), form.getIsTerminationProcess(),
+				form.getCreditor().getId(), form.getDebtor().getId(),
+				form.getTerminationRequestedUser() != null ? form.getTerminationRequestedUser().getId() : null);
+
+		// 파기 서명일 경우
+		if (form.getIsTerminationProcess() != TerminationProcess.NONE) {
+			UserEntity requestedUser = form.getTerminationRequestedUser();
+
+			// 파기 요청자 정보가 없다면 false
+			if (requestedUser == null) return false;
+
+			boolean isRequester = requestedUser.getId().equals(userId);
+
+			if (!isRequester && form.getIsTerminationProcess() == TerminationProcess.REQUESTED) {
+				// 상대방이 먼저 서명 가능
+				return true;
+			} else if (isRequester && form.getIsTerminationProcess() == TerminationProcess.SIGNED) {
+				// 요청자가 마지막 서명 가능 (단, 완료 상태는 제외)
+				return form.getStatus() != FormStatus.COMPLETED;
+			}
+		}
+
+		// 일반 계약 서명
+		boolean isDebtor = form.getDebtor().getId().equals(userId);
+		boolean isCreditor = form.getCreditor().getId().equals(userId);
+
+		if (isDebtor && form.getStatus() == FormStatus.BEFORE_APPROVAL) {
+			// 채무자인데 서명 전
+			return true;
+		} else if (isCreditor && form.getStatus() == FormStatus.AFTER_APPROVAL) {
+			// 채권자인데 서명 전
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

@@ -599,4 +599,33 @@ public class FormController {
 		return ResponseEntity.status(HttpStatus.OK).body(isSuccess);
 	}
 
+	@Operation(summary = "현재 사용자가 서명 차례인지 확인", description = "계약서 ID와 사용자 정보를 기반으로 현재 사용자가 서명을 할 차례인지 여부를 반환합니다.")
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "서명 가능 여부 반환",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Boolean.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "계약서 또는 사용자 정보를 찾을 수 없음",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponse.class)
+					)
+			)
+	})
+	@GetMapping("/{formId}/is-current-signer")
+	public ResponseEntity<Boolean> isCurrentSigner(
+			@Parameter(description = "계약서 ID", required = true)
+			@PathVariable Integer formId,
+			@CurrentUser AuthUser authUser
+	) {
+		boolean result = formService.isCurrentSigner(formId, authUser.getId());
+		return ResponseEntity.status(HttpStatus.OK).body(result);
+	}
+
 }

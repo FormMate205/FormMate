@@ -7,16 +7,7 @@ import java.time.LocalDateTime;
 import com.corp.formmate.form.dto.FormUpdateRequest;
 import com.corp.formmate.user.entity.UserEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -124,6 +115,10 @@ public class FormEntity implements Serializable {
 	@Builder.Default
 	private TerminationProcess isTerminationProcess = TerminationProcess.NONE;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "termination_requested_id", foreignKey = @ForeignKey(name = "fk_forms_termination_requested_user"))
+	private UserEntity terminationRequestedUser;
+
 	public void update(FormUpdateRequest request) {
 
 		Integer repaymentDay = request.getRepaymentDay();
@@ -175,5 +170,9 @@ public class FormEntity implements Serializable {
 
 	public void updateStatus(FormStatus status) {
 		this.status = status;
+	}
+
+	public void updateTerminationRequestedUser(UserEntity terminationRequestedUser) {
+		this.terminationRequestedUser = terminationRequestedUser;
 	}
 }
