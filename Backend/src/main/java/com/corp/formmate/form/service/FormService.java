@@ -375,6 +375,12 @@ public class FormService {
 
 		// 파기 프로세스 시작 설정
 		form.startTerminationProcess();
+
+		// 파기 신청 사용자 등록
+		UserEntity requestedUser = userService.selectById(userId);
+		form.updateTerminationRequestedUser(requestedUser);
+
+		// form 저장
 		formRepository.save(form);
 
 		// 계약 파기 요청 이벤트 발생
