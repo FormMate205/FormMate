@@ -1,18 +1,11 @@
-// src/pages/RecipientTab.tsx
-import { useState } from 'react';
+import { debounce } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import { useGetMyPartnerList } from '@/entities/transfer/api/TransferAPI';
 import { ContractItem, TabListItem } from '@/entities/transfer/model/types';
 import TabList from '@/entities/transfer/ui/TabList';
 import ContractDrawer from './ContractDrawer';
-
-const recentRecipients: TabListItem[] = [
-    { id: '1', title: '강지은', subString: '010-1234-5678' },
-];
-
-const contractRecipients: TabListItem[] = [
-    { id: '2', title: '강지은', subString: '010-1234-5678' },
-    { id: '3', title: '강지은', subString: '010-1234-5678' },
-];
 
 const dummyContracts: ContractItem[] = [
     {
@@ -31,12 +24,40 @@ const dummyContracts: ContractItem[] = [
     },
 ];
 
-const RecipientTab = () => {
+const PartnerTab = () => {
     const navigate = useNavigate();
+    const [searchValue, setSearchValue] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedPartner, setSelectedPartner] = useState<TabListItem | null>(
         null,
     );
+
+    const { partners, lastItemRef } = useGetMyPartnerList({
+        input: debouncedSearch,
+        pageable: {
+            page: '0',
+            size: '10',
+        },
+    });
+    const debounceSearch = useMemo(() => {
+        return debounce((value: string) => {
+            setDebouncedSearch(value);
+        }, 300);
+    }, [setDebouncedSearch]);
+
+    useEffect(() => {
+        debounceSearch(searchValue);
+        return () => {
+            debounceSearch.cancel();
+        };
+    }, [searchValue, debounceSearch]);
+
+    const tabItems: TabListItem[] = partners.map((partner) => ({
+        id: partner.userId,
+        title: partner.userName,
+        subString: partner.phoneNumber,
+    }));
 
     const handleClickContractPartner = (item: TabListItem) => {
         setSelectedPartner(item);
@@ -44,22 +65,25 @@ const RecipientTab = () => {
     };
 
     const handleSelectContract = () => {
-        // store에 값 저장
+        // toDo: store에 값 저장
         navigate('amount');
     };
 
     return (
         <>
+            <Input
+                variant='search'
+                placeholder='이름 또는 전화번호 입력'
+                className='my-4'
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+            />
             <div className='flex flex-col gap-14'>
                 <TabList
-                    title='최근 보낸 내역'
-                    items={recentRecipients}
-                    onClickItem={handleClickContractPartner}
-                />
-                <TabList
                     title='나와 계약을 맺은 사람'
-                    items={contractRecipients}
+                    items={tabItems}
                     onClickItem={handleClickContractPartner}
+                    lastItemRef={lastItemRef}
                 />
             </div>
 
@@ -74,4 +98,4 @@ const RecipientTab = () => {
     );
 };
 
-export default RecipientTab;
+export default PartnerTab;
