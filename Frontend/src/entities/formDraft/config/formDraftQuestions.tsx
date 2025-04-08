@@ -3,27 +3,23 @@ import { Question } from '../model/types';
 // 특약 조항
 export const specialTermsInfo = [
     {
-        id: '1',
-        title: '법적 조치 조항',
-        content:
+        specialTermIndex: '1',
+        specialTermDetail:
             '채무자가 계약을 위반할 경우, 채권자는 본 계약을 근거로 법적 조치를 취할 수 있습니다.',
     },
     {
-        id: '2',
-        title: '대여금 사용 용도 제한 조항',
-        content:
+        specialTermIndex: '2',
+        specialTermDetail:
             '빌려간 돈을 생활비 등 특정 용도로 사용해야 하며, 도박 등 부적절한 용도로 사용할 수 없습니다.',
     },
     {
-        id: '3',
-        title: '분쟁 해결 조항',
-        content:
+        specialTermIndex: '3',
+        specialTermDetail:
             '계약과 관련한 분쟁이 발생할 경우 대한민국 법률을 따르며, 관할 법원은 채권자 또는 채무자의 주소지를 고려하여 결정할 수 있습니다.',
     },
     {
-        id: '4',
-        title: '불이행 시 조치 조항',
-        content:
+        specialTermIndex: '4',
+        specialTermDetail:
             '채무자가 계약을 지키지 않을 경우, 발생하는 법적 비용(소송 비용 등)은 채무자가 부담해야 합니다.',
     },
 ];
