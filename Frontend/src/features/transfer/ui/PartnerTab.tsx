@@ -6,12 +6,17 @@ import {
     useGetContractByPartnerList,
     useGetMyPartnerList,
 } from '@/entities/transfer/api/TransferAPI';
-import { TabListItem } from '@/entities/transfer/model/types';
+import {
+    ContractByPartnerItem,
+    TabListItem,
+} from '@/entities/transfer/model/types';
 import TabList from '@/entities/transfer/ui/TabList';
+import useTransferStore from '../model/TransferStore';
 import ContractDrawer from './ContractDrawer';
 
 const PartnerTab = () => {
     const navigate = useNavigate();
+    const { setTransferInfo } = useTransferStore();
     const [searchValue, setSearchValue] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -56,8 +61,16 @@ const PartnerTab = () => {
         setDrawerOpen(true);
     };
 
-    const handleSelectContract = () => {
-        // toDo: store에 값 저장 (partnerName, formId, partnerId)
+    const handleSelectContract = (contract: ContractByPartnerItem) => {
+        if (!selectedPartner) return;
+
+        setTransferInfo({
+            partnerId: selectedPartner.id,
+            partnerName: selectedPartner.title,
+            formId: contract.formId,
+            repaymentAmount: contract.nextRepaymentAmount,
+            amount: 0,
+        });
         navigate('amount');
     };
 

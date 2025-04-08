@@ -39,11 +39,11 @@ const ContractDrawer = ({
                             계약이 없습니다.
                         </p>
                     ) : (
-                        contracts.map((c, idx) => (
+                        contracts.map((contract, idx) => (
                             <ContractDrawerItem
                                 key={idx}
-                                contract={c}
-                                onClick={onSelectContract}
+                                contract={contract}
+                                onClick={() => onSelectContract?.(contract)}
                             />
                         ))
                     )}
