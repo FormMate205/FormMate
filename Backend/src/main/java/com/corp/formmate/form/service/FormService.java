@@ -105,11 +105,22 @@ public class FormService {
 		if (userId != formEntity.getCreator().getId()) {
 			throw new FormException(ErrorCode.INVALID_CREATOR_ID);
 		}
+
+		// 기본 정보 검증
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
+
+		// 계약 정보 업데이트
 		formEntity.update(request);
+
+		// 서명 상태 초기화
+		formEntity.updateStatus(FormStatus.BEFORE_APPROVAL);
+
 		formRepository.save(formEntity);
-		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(formEntity,
-			request.getSpecialTermIndexes());
+
+		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(
+				formEntity,
+				request.getSpecialTermIndexes()
+		);
 
 		// 채팅 발송 위한 이벤트 발행
 		log.info("계약서 수정 이벤트 발행: 폼 ID={}", formEntity.getId());
