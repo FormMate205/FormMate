@@ -16,10 +16,12 @@ export type TabListItem = {
     subString: string;
 };
 
-export interface ContractItem {
+export interface ContractByPartnerItem {
     formId: string;
     userIsCreditor: boolean;
     nextRepaymentAmount: number;
     nextRepaymentDate: string;
     contractDuration: string;
 }
+
+export type GetContractsByPartnerResponse = ContractByPartnerItem[];

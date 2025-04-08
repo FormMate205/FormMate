@@ -1,13 +1,13 @@
 import { Drawer, DrawerContent, DrawerHeader } from '@/components/ui/drawer';
-import { ContractItem } from '@/entities/transfer/model/types';
+import { ContractByPartnerItem } from '@/entities/transfer/model/types';
 import ContractDrawerItem from '@/entities/transfer/ui/ContractDrawerItem';
 
 interface ContractDrawerProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     partnerName: string;
-    contracts: ContractItem[];
-    onSelectContract?: (contract: ContractItem) => void;
+    contracts: ContractByPartnerItem[];
+    onSelectContract?: (contract: ContractByPartnerItem) => void;
 }
 
 const ContractDrawer = ({
@@ -22,7 +22,7 @@ const ContractDrawer = ({
             <DrawerContent className='px-4'>
                 <DrawerHeader></DrawerHeader>
                 <span className='text-lg font-medium'>
-                    {partnerName}과 맺은 계약
+                    {partnerName}님과 맺은 계약
                 </span>
                 <div className='flex flex-col gap-4 pt-2 pb-4'>
                     {contracts.length === 0 ? (

@@ -1,7 +1,11 @@
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
 import { useIntersection } from '@/shared/model/useIntersection';
-import { GetPartnerListRequest, GetPartnerListResponse } from '../model/types';
+import {
+    GetContractsByPartnerResponse,
+    GetPartnerListRequest,
+    GetPartnerListResponse,
+} from '../model/types';
 
 // 나와 계약을 맺은 상대 조회
 const getMyPartnerList = async (
@@ -62,4 +66,20 @@ export const useGetMyPartnerList = ({
         refetch,
         lastItemRef,
     };
+};
+
+// 특정 상대와의 계약 조회
+const getContractByPartnerList = async (
+    userId: string,
+): Promise<GetContractsByPartnerResponse> => {
+    const response = await api.get(`/contract/remain/${userId}`);
+    return response.data;
+};
+
+export const useGetContractByPartnerList = (userId: string) => {
+    return useQuery({
+        queryKey: ['contractByPartnerList', userId],
+        queryFn: () => getContractByPartnerList(userId),
+        enabled: !!userId,
+    });
 };

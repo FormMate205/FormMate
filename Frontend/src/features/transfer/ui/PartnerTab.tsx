@@ -2,27 +2,13 @@ import { debounce } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
-import { useGetMyPartnerList } from '@/entities/transfer/api/TransferAPI';
-import { ContractItem, TabListItem } from '@/entities/transfer/model/types';
+import {
+    useGetContractByPartnerList,
+    useGetMyPartnerList,
+} from '@/entities/transfer/api/TransferAPI';
+import { TabListItem } from '@/entities/transfer/model/types';
 import TabList from '@/entities/transfer/ui/TabList';
 import ContractDrawer from './ContractDrawer';
-
-const dummyContracts: ContractItem[] = [
-    {
-        formId: '1',
-        userIsCreditor: true,
-        nextRepaymentAmount: 10000,
-        nextRepaymentDate: '2025-03-27',
-        contractDuration: '2024.01.01 ~ 2025.10.10',
-    },
-    {
-        formId: '2',
-        userIsCreditor: false,
-        nextRepaymentAmount: 30000,
-        nextRepaymentDate: '2025-04-15',
-        contractDuration: '2023.03.01 ~ 2025.12.31',
-    },
-];
 
 const PartnerTab = () => {
     const navigate = useNavigate();
@@ -40,6 +26,12 @@ const PartnerTab = () => {
             size: '10',
         },
     });
+    const selectedPartnerId = selectedPartner?.id;
+
+    const { data: contracts } = useGetContractByPartnerList(
+        selectedPartnerId || '',
+    );
+
     const debounceSearch = useMemo(() => {
         return debounce((value: string) => {
             setDebouncedSearch(value);
@@ -79,19 +71,25 @@ const PartnerTab = () => {
                 onChange={(e) => setSearchValue(e.target.value)}
             />
             <div className='flex flex-col gap-14'>
-                <TabList
-                    title='나와 계약을 맺은 사람'
-                    items={tabItems}
-                    onClickItem={handleClickContractPartner}
-                    lastItemRef={lastItemRef}
-                />
+                {partners.length === 0 ? (
+                    <div className='py-8 text-center text-gray-400'>
+                        “{debouncedSearch}”에 대한 결과가 없습니다.
+                    </div>
+                ) : (
+                    <TabList
+                        title='나와 계약을 맺은 사람'
+                        items={tabItems}
+                        onClickItem={handleClickContractPartner}
+                        lastItemRef={lastItemRef}
+                    />
+                )}
             </div>
 
             <ContractDrawer
                 open={drawerOpen}
                 onOpenChange={setDrawerOpen}
                 partnerName={selectedPartner?.title || ''}
-                contracts={dummyContracts}
+                contracts={contracts ?? []}
                 onSelectContract={handleSelectContract}
             />
         </>
