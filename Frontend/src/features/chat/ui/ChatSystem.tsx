@@ -12,10 +12,15 @@ interface ChatSystemProps {
     formId: string;
     children: ReactNode;
     type: MessageType;
-    signId?: string;
+    requestedById?: string;
 }
 
-const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
+const ChatSystem = ({
+    formId,
+    children,
+    type,
+    requestedById,
+}: ChatSystemProps) => {
     const navigate = useNavigate();
     const { user } = useUserStore();
     const { formInfo } = useConnectWs({ user, roomId: formId });
@@ -27,26 +32,52 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
 
     // 사인 폼 모달을 띄우는 조건
     const canUserSign = () => {
-        if (!signId || signId !== user?.id) {
+        if (!user?.id) {
             return false;
         }
 
-        // 채무자 차례
-        const isDebtorSign =
-            formInfo.formStatus === 'BEFORE_APPROVAL' &&
-            formInfo.debtorId === user.id;
+        if (type === 'SIGNATURE_REQUEST_CONTRACT') {
+            // 채무자 차례
+            const isDebtorSign =
+                formInfo.formStatus === 'BEFORE_APPROVAL' &&
+                formInfo.debtorId === user.id;
 
-        // 채권자 차례
-        const isCreditorSign =
-            formInfo.formStatus === 'AFTER_APPROVAL' &&
-            formInfo.creditorId === user.id;
+            // 채권자 차례
+            const isCreditorSign =
+                formInfo.formStatus === 'AFTER_APPROVAL' &&
+                formInfo.creditorId === user.id;
 
-        return isDebtorSign || isCreditorSign;
+            return isDebtorSign || isCreditorSign;
+        }
+
+        // 계약 파기
+        if (type === 'SIGNATURE_REQUEST_TERMINATION') {
+            // 첫번쨰 차례
+            const isFirstSign =
+                (formInfo.formStatus === 'IN_PROGRESS' ||
+                    formInfo.formStatus === 'OVERDUE') &&
+                formInfo.terminationStatus === 'REQUESTED' &&
+                requestedById !== user.id;
+
+            // 두번째 차례
+            const isSecondSign =
+                (formInfo.formStatus === 'IN_PROGRESS' ||
+                    formInfo.formStatus === 'OVERDUE') &&
+                formInfo.terminationStatus === 'SIGNED' &&
+                requestedById === user.id;
+
+            return isFirstSign || isSecondSign;
+        }
     };
 
     const handleNavigateToSign = () => {
         navigate(`/chat/${formId}/signature`, {
-            state: { formId, type, creditorId: formInfo.creditorId, signId },
+            state: {
+                formId,
+                type,
+                creditorId: formInfo.creditorId,
+                requestedById,
+            },
         });
     };
 
