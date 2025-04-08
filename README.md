@@ -1,36 +1,91 @@
-# 딜메이트
+# 💼 FormMate
 
-**딜메이트(DealMate)** 는 계약 체결 플랫폼으로, 사용자의 음성 및 입력을 통해 계약서를 빠르고 신뢰성 있게 생성하고 전달하는 혁신적인 서비스입니다.
+<img src="./images/logo.png" alt="FormMate logo" width="600"/>
 
-## 주요 기능
+> **개인 간 금전 대차 계약 관리 플랫폼**
 
-- **실시간 음성 계약 생성**  
-  사용자의 음성 명령이나 채팅 입력을 분석하여 표준 계약서를 자동 생성합니다.
+**FormMate**는 개인 간 금전 거래를 더욱 **안전하고 체계적으로** 관리할 수 있도록 지원하는 플랫폼입니다.  
+챗봇 기반 계약 작성부터 전자서명, 본인 인증, 이체 연동, 상환 일정 관리, 채팅, 추심청구서 발급까지  
+금전 대차 전 과정을 디지털화하여 분쟁 없는 투명한 거래를 실현합니다.
 
-- **간편 인증 시스템**  
-  카카오 인증서 등 다양한 인증 수단을 연동하여 사용자 신원 확인 및 전자서명을 간소화합니다.
+---
 
-- **계약 진행 관리**  
-  계약 체결 후, 상환 일정, 미수금 관리 및 진행 상황을 실시간 알림과 함께 확인할 수 있습니다.
+## 🚀 주요 기능
 
-- **신뢰도 시스템**  
-  거래 및 상환 이력을 기반으로 사용자 신뢰도를 평가하여 안전한 금융 거래 환경을 조성합니다.
+- 🤖 챗봇 기반 **계약서 작성** 및 **전자서명**
+- 🔐 **소셜 로그인 (Google, Naver)** 및 본인 인증
+- 📆 **상환 일정** 자동 등록 및 리마인드 알림
+- 💸 **이체 기능** 연동으로 원클릭 상환
+- 💬 계약 당사자 간 **채팅** 기능
+- 📊 계약별 전체/세부 **상환 현황 대시보드**
 
-## 사용 시나리오
+---
 
-1. **계약 생성 및 체결**
+## 👥 팀원 소개
 
-   - 사용자가 음성 또는 챗봇 인터페이스를 통해 계약 조건을 입력하면, 딜리버리가 자동으로 계약서를 생성합니다.
-   - 생성된 계약서는 양측 사용자에게 전송되며, 인증 수단을 통해 서명이 진행됩니다.
+| 이름   | 역할                | 담당     | GitHub                                               |
+| ------ | ------------------- | -------- | ---------------------------------------------------- |
+| 강지은 | Developer (FE 팀장) | Frontend | [github.com/antdundun](https://github.com/antdundun) |
+| 박상학 | Developer           | Backend  | [github.com/Sang-hak](https://github.com/Sang-hak)   |
+| 오은지 | Developer           | Frontend | [github.com/oille12](https://github.com/oille12)     |
+| 윤이영 | Developer           | Frontend | [github.com/y20ng](https://github.com/y20ng)         |
+| 이동욱 | Developer (BE 팀장) | Backend  | [github.com/2Ludy](https://github.com/2Ludy)         |
+| 차윤영 | Developer (팀장)    | Backend  | [github.com/yuncof](https://github.com/yuncof)       |
 
-2. **계약 관리**
-   - 마이페이지에서 자신의 계약 내역, 상환 일정, 신뢰도 점수 등을 확인할 수 있습니다.
-   - 알림 기능으로 계약 이행 상황과 상환 기한을 실시간으로 받아볼 수 있습니다.
+## 🔍 시스템 아키텍처
 
-## 기술 스택 및 구현
+<img src="./images/architecture.png" alt="FormMate Architecture" width="600"/>
 
-- **음성 인식 및 스크립트화** : OpenAI - Whisper 사용
-- **인증 시스템** : 자체 인증 API 사용
-- **계약서 자동 생성 시스템** : 스크립트 기반 GPT 프롬프팅
-- **알림 및 관리 시스템** : 실시간 알림과 데이터 기반 상환 관리 기능 제공
-- **가상은행 시스템** : 가상은행 API
+---
+
+## 🛠️ 기술 스택
+
+| 구분                 | 기술                                                                                                                                                                                                                                                                                                             | 설명                          |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| 🧠 **언어**          | ![Java](https://img.shields.io/badge/Java%2017-007396?style=flat&logo=java&logoColor=white)<br>![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)                                                                                                          | 백엔드 및 프론트엔드 언어     |
+| 💻 **프론트엔드**    | ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)                                                                                                                                                                                                                        | SPA 구조, 사용자 인터페이스   |
+| ⚙️ **프레임워크**    | ![Spring Boot](https://img.shields.io/badge/SpringBoot-6DB33F?style=flat&logo=springboot&logoColor=white)                                                                                                                                                                                                        | REST API, WebSocket, OAuth 등 |
+| 🗄️ **데이터베이스**  | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)<br>![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)                                                                                                                           | 메인 DB 및 세션 캐싱          |
+| 🔐 **보안 및 인증**  | ![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)<br>![Google OAuth2](https://img.shields.io/badge/Google%20OAuth2-4285F4?style=flat&logo=google&logoColor=white) <br>![Naver OAuth2](https://img.shields.io/badge/Naver%20OAuth2-03C75A?style=flat&logoColor=white) | 인증/인가 처리                |
+| 🔔 **알림/메시징**   | ![WebSocket](https://img.shields.io/badge/WebSocket-000000?style=flat) <br> ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)<br>![CoolSMS](https://img.shields.io/badge/CoolSMS-00B2FF?style=flat&logoColor=white)                                             | 실시간 채팅, 알림, 문자 인증  |
+| ☁️ **배포 & 인프라** | ![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat&logo=amazonaws&logoColor=white)<br>![NGINX](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)<br>![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)                           | EC2, RDS, S3, 환경 구성       |
+| 🔧 **협업 도구**     | ![GitLab](https://img.shields.io/badge/GitLab-FC6D26?style=flat&logo=gitlab&logoColor=white)<br>![Jira](https://img.shields.io/badge/Jira-0052CC?style=flat&logoColor=white)                                                                                                                                     | 형상 및 이슈 관리             |
+| 📘 **문서화**        | ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=black)                                                                                                                                                                                                                  | API 명세 자동화               |
+
+---
+
+## 🧪 실행 방법
+
+### ✅ 사전 준비
+
+- `.env` 또는 환경변수에 다음 정보 설정:
+  - DB, Redis, JWT, OAuth, Mail, Firebase, CoolSMS 등
+
+### ✅ 빌드 및 실행
+
+```bash
+# 빌드
+./gradlew build
+
+# 실행
+java -jar build/libs/formmate-0.0.1-SNAPSHOT.jar
+```
+
+> 기본 포트: **8088**
+
+---
+
+## 📘 API 문서
+
+- Swagger UI: [`http://localhost:8088/api/swagger-ui.html`](http://localhost:8088/api/swagger-ui.html)
+
+---
+
+## 📄 라이선스
+
+```
+본 프로젝트는 교육과정의 일환으로 개발된 비상업적 프로젝트입니다.
+상업적 목적의 사용을 금지합니다.
+```
+
+© 2025 FormMate. All Rights Reserved.
