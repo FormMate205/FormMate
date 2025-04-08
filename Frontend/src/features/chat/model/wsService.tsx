@@ -1,7 +1,7 @@
 import { Stomp } from '@stomp/stompjs';
 
 export const createStompClient = () => {
-    const socketFactory = () => new WebSocket('https://j12a205.p.ssafy.io/ws/');
+    const socketFactory = () => new WebSocket(`${import.meta.env.VITE_WS_URI}`);
     const client = Stomp.over(socketFactory);
 
     // 추가 설정
