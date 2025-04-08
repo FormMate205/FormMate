@@ -27,9 +27,6 @@ public class ChatResponse {
     @Schema(description = "메시지 내용", example = "안녕하세요, 계약과 관련하여 질문이 있습니다.")
     private String content;
 
-    @Schema(description = "읽음 여부", example = "false")
-    private Boolean isRead;
-
     @Schema(description = "작성 시간", example = "2024-03-31T14:30:00")
     private LocalDateTime createdAt;
 
