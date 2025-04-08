@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { registerServiceWorker, requestPermission } from '@/lib/firebase';
+import { getDeviceToken, registerServiceWorker } from '@/lib/firebase';
 import { router } from './router';
 
 const App = () => {
@@ -14,7 +14,7 @@ const App = () => {
         );
         if (isSafePath) {
             registerServiceWorker();
-            requestPermission();
+            getDeviceToken();
         }
     }, []);
 
