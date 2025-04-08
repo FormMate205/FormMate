@@ -1,20 +1,10 @@
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { PlusCircle, MinusCircle, Calendar, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion';
+
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
 import {
     Select,
     SelectContent,
@@ -25,19 +15,23 @@ import {
 import { getSignatureStatus } from '@/entities/contract/model/getSignatureStatus';
 import { ContractDocs } from '@/entities/contract/model/types';
 import { formatCurrency } from '@/shared/lib/formatCurrency';
+import { DatePicker } from '@/shared/ui/DatePicker';
+import { specialTermsInfo } from '../config/formDraftQuestions';
 
 const styles = {
     container:
-        'flex flex-col gap-4 pt-4 p-6 bg-white text-black w-full overflow-y-auto scrollbar-none',
-    title: 'text-2xl font-medium text-center py-4 border-b border-[#bfc0d1]',
-    label: 'font-semibold text-[#716b8a]',
+        'flex flex-col gap-4 bg-white text-black w-full overflow-y-auto scrollbar-none',
+    section: 'flex w-full flex-col gap-3',
+    title: 'text-primary-500 text-lg font-semibold',
+    label: 'font-medium',
     divider: 'border-t border-[#d1d5db] my-2',
     subtext: 'text-sm text-[#716b8a] ml-2',
-    contractValue: 'flex justify-between',
-    section: 'flex justify-between',
+    contractValue: 'flex justify-between items-center',
     groupedValues: 'flex flex-col items-end text-right',
-    inputField: 'w-1/2 text-right',
     dateButton: 'flex items-center gap-2 border p-2 rounded-md',
+    readOnlyField: 'text-gray-600 flex justify-end items-center gap-2',
+    specialTermCard: 'mb-3 border border-gray-200 shadow-sm',
+    termHeader: 'flex justify-between items-center',
 };
 
 interface EditableContractDocumentProps {
@@ -53,13 +47,37 @@ const FormUpdateContent = ({
 }: EditableContractDocumentProps) => {
     const [editableContract, setEditableContract] =
         useState<ContractDocs>(contract);
-    const [accordionValue, setAccordionValue] = useState<string | undefined>(
-        'item-1',
-    );
-    const [newSpecialTerm, setNewSpecialTerm] = useState<string>('');
+
+    // 사용자가 선택한/선택하지 않은 특약 분리
+    const [selectedTerms, setSelectedTerms] = useState<any[]>([]);
+    const [unselectedTerms, setUnselectedTerms] = useState<any[]>([]);
 
     useEffect(() => {
         setEditableContract(contract);
+
+        // 특약사항 분리 로직
+        if (contract.specialTerms) {
+            const selectedIds = contract.specialTerms.map(
+                (term) =>
+                    specialTermsInfo.find(
+                        (info) => info.content === term.specialTermDetail,
+                    )?.id || '',
+            );
+
+            const selected = specialTermsInfo.filter((term) =>
+                selectedIds.includes(term.id),
+            );
+
+            const unselected = specialTermsInfo.filter(
+                (term) => !selectedIds.includes(term.id),
+            );
+
+            setSelectedTerms(selected);
+            setUnselectedTerms(unselected);
+        } else {
+            setSelectedTerms([]);
+            setUnselectedTerms([...specialTermsInfo]);
+        }
     }, [contract]);
 
     const handleChange = (field: keyof ContractDocs, value: any) => {
@@ -68,52 +86,63 @@ const FormUpdateContent = ({
         onContractChange?.(updatedContract);
     };
 
-    // const handleSpecialTermChange = (index: number, value: string) => {
-    //     const updatedTerms = [...editableContract.specialTerms];
-    //     updatedTerms[index] = {
-    //         ...updatedTerms[index],
-    //         specialTermDetail: value,
-    //     };
+    const addSpecialTerm = (termToAdd: any) => {
+        // 선택 목록으로 이동
+        setSelectedTerms([...selectedTerms, termToAdd]);
+        setUnselectedTerms(
+            unselectedTerms.filter((term) => term.id !== termToAdd.id),
+        );
 
-    //     handleChange('specialTerms', updatedTerms);
-    // };
-
-    const addSpecialTerm = () => {
-        if (!newSpecialTerm.trim()) return;
-
+        // contract 업데이트
         const updatedTerms = [...(editableContract.specialTerms || [])];
         updatedTerms.push({
             specialTermIndex: (updatedTerms.length + 1).toString(),
-            specialTermDetail: newSpecialTerm,
+            specialTermDetail: termToAdd.content,
         });
 
         handleChange('specialTerms', updatedTerms);
-        setNewSpecialTerm('');
     };
 
-    const removeSpecialTerm = (index: number) => {
-        const updatedTerms = [...editableContract.specialTerms];
-        updatedTerms.splice(index, 1);
+    const removeSpecialTerm = (termToRemove: any) => {
+        // 미선택 목록으로 이동
+        setUnselectedTerms([...unselectedTerms, termToRemove]);
+        setSelectedTerms(
+            selectedTerms.filter((term) => term.id !== termToRemove.id),
+        );
 
-        // Reindex remaining terms
-        updatedTerms.forEach((term, idx) => {
-            term.specialTermIndex = (idx + 1).toString();
-        });
+        // contract에서 삭제
+        const termIndex = editableContract.specialTerms.findIndex(
+            (term) => term.specialTermDetail === termToRemove.content,
+        );
 
-        handleChange('specialTerms', updatedTerms);
+        if (termIndex !== -1) {
+            const updatedTerms = [...editableContract.specialTerms];
+            updatedTerms.splice(termIndex, 1);
+
+            // Reindex remaining terms
+            updatedTerms.forEach((term, idx) => {
+                term.specialTermIndex = (idx + 1).toString();
+            });
+
+            handleChange('specialTerms', updatedTerms);
+        }
     };
 
     const renderDateField = (
         field: 'contractDate' | 'maturityDate',
         label: string,
+        isEditable: boolean = true,
     ) => {
         const dateValue = editableContract[field];
 
-        if (!isEditMode) {
+        if (!isEditMode || !isEditable) {
             return (
                 <div className={styles.contractValue}>
                     <span className={styles.label}>{label}</span>
-                    <span>{format(new Date(dateValue), 'yyyy.MM.dd')}</span>
+                    <div className={styles.readOnlyField}>
+                        <Calendar className='h-4 w-4' />
+                        <span>{format(new Date(dateValue), 'yyyy.MM.dd')}</span>
+                    </div>
                 </div>
             );
         }
@@ -121,52 +150,29 @@ const FormUpdateContent = ({
         return (
             <div className={styles.contractValue}>
                 <span className={styles.label}>{label}</span>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant='default' className={styles.dateButton}>
-                            {dateValue
-                                ? format(new Date(dateValue), 'yyyy.MM.dd')
-                                : '날짜 선택'}
-                            <CalendarIcon className='h-4 w-4' />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0'>
-                        <Calendar
-                            mode='single'
-                            selected={new Date(dateValue)}
-                            onSelect={(date) =>
-                                handleChange(
-                                    field,
-                                    date?.toISOString() ||
-                                        new Date().toISOString(),
-                                )
-                            }
-                        />
-                    </PopoverContent>
-                </Popover>
+                <DatePicker />
             </div>
         );
     };
 
     return (
         <div id='contract-document' className={styles.container}>
-            <div className={styles.title}>차용증</div>
-
-            <article className='text-md flex flex-col gap-1'>
-                <div className={styles.contractValue}>
-                    <span className={styles.label}>채권자</span>
-                    {isEditMode ? (
-                        <div className='flex gap-2'>
+            <article className='flex flex-col gap-6'>
+                {/* 채권자 정보 */}
+                <div className={styles.section}>
+                    <p className={styles.title}>채권자 정보</p>
+                    <div className={styles.contractValue}>
+                        <span className={styles.label}>이름</span>
+                        <div className={styles.readOnlyField}>
+                            <User className='h-4 w-4' />
+                            <span>{editableContract.creditorName}</span>
+                        </div>
+                    </div>
+                    <div className={styles.contractValue}>
+                        <span className={styles.label}>전화번호</span>
+                        {isEditMode ? (
                             <Input
-                                className={styles.inputField}
-                                value={editableContract.creditorName}
-                                onChange={(e) =>
-                                    handleChange('creditorName', e.target.value)
-                                }
-                                placeholder='이름'
-                            />
-                            <Input
-                                className={styles.inputField}
+                                variant='default'
                                 value={editableContract.creditorPhone}
                                 onChange={(e) =>
                                     handleChange(
@@ -176,69 +182,77 @@ const FormUpdateContent = ({
                                 }
                                 placeholder='전화번호'
                             />
-                        </div>
-                    ) : (
-                        <div>
-                            {editableContract.creditorName} /{' '}
-                            {editableContract.creditorPhone}
-                        </div>
-                    )}
+                        ) : (
+                            <div>{editableContract.creditorPhone}</div>
+                        )}
+                    </div>
                 </div>
 
-                <div className={styles.contractValue}>
-                    <span className={styles.label}>채무자</span>
-                    {isEditMode ? (
-                        <div className='flex gap-2'>
+                {/* 채무자 정보 */}
+                <div className={styles.section}>
+                    <p className={styles.title}>채무자 정보</p>
+                    <div className={styles.contractValue}>
+                        <span className={styles.label}>이름</span>
+                        <div className={styles.readOnlyField}>
+                            <User className='h-4 w-4' />
+                            <span>{editableContract.debtorName}</span>
+                        </div>
+                    </div>
+                    <div className={styles.contractValue}>
+                        <span className={styles.label}>전화번호</span>
+                        {isEditMode ? (
                             <Input
-                                className={styles.inputField}
-                                value={editableContract.debtorName}
-                                onChange={(e) =>
-                                    handleChange('debtorName', e.target.value)
-                                }
-                                placeholder='이름'
-                            />
-                            <Input
-                                className={styles.inputField}
+                                variant='default'
                                 value={editableContract.debtorPhone}
                                 onChange={(e) =>
-                                    handleChange('debtorPhone', e.target.value)
-                                }
-                                placeholder='전화번호'
-                            />
-                        </div>
-                    ) : (
-                        <div>
-                            {editableContract.debtorName} /{' '}
-                            {editableContract.debtorPhone}
-                        </div>
-                    )}
-                </div>
-
-                <hr className={styles.divider} />
-
-                <div className={styles.contractValue}>
-                    <span className={styles.label}>입금계좌</span>
-                    {isEditMode ? (
-                        <div className='flex gap-2'>
-                            <Input
-                                className={styles.inputField}
-                                value={editableContract.creditorBank}
-                                onChange={(e) =>
-                                    handleChange('creditorBank', e.target.value)
-                                }
-                                placeholder='은행'
-                            />
-                            <Input
-                                className={styles.inputField}
-                                value={editableContract.creditorAccount}
-                                onChange={(e) =>
                                     handleChange(
-                                        'creditorAccount',
+                                        'creditorPhone',
                                         e.target.value,
                                     )
                                 }
-                                placeholder='계좌번호'
+                                placeholder='전화번호'
                             />
+                        ) : (
+                            <div>{editableContract.debtorPhone}</div>
+                        )}
+                    </div>
+                </div>
+
+                {/* 계좌 정보 */}
+                <div className={styles.section}>
+                    <p className={styles.title}>입금 계좌</p>
+                    {isEditMode ? (
+                        <div className='flex gap-2'>
+                            <div className='w-1/2'>
+                                <label className='mb-1 block text-sm text-gray-500'>
+                                    은행
+                                </label>
+                                <Input
+                                    value={editableContract.creditorBank}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            'creditorBank',
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder='은행'
+                                />
+                            </div>
+                            <div className='w-1/2'>
+                                <label className='mb-1 block text-sm text-gray-500'>
+                                    계좌번호
+                                </label>
+                                <Input
+                                    value={editableContract.creditorAccount}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            'creditorAccount',
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder='계좌번호'
+                                />
+                            </div>
                         </div>
                     ) : (
                         <div className='flex gap-2'>
@@ -248,42 +262,51 @@ const FormUpdateContent = ({
                     )}
                 </div>
 
-                <hr className={styles.divider} />
+                {/* 계약 일자 */}
+                <div className={styles.section}>
+                    <p className={styles.title}>계약 기간</p>
+                    {renderDateField('contractDate', '계약 체결', false)}
+                    {renderDateField('maturityDate', '계약 만기')}
+                </div>
 
-                {renderDateField('contractDate', '계약 체결')}
-                {renderDateField('maturityDate', '계약 만기')}
-
-                <hr className={styles.divider} />
-
-                <div className={styles.contractValue}>
-                    <span className={styles.label}>상환 방식</span>
-                    {isEditMode ? (
-                        <div className={styles.groupedValues}>
+                {/* 상환 정보 */}
+                <div className={styles.section}>
+                    <p className={styles.title}>상환 정보</p>
+                    <div className={styles.contractValue}>
+                        <span className={styles.label}>상환 방식</span>
+                        {isEditMode ? (
                             <Select
                                 value={editableContract.repaymentMethod}
                                 onValueChange={(value) =>
                                     handleChange('repaymentMethod', value)
                                 }
                             >
-                                <SelectTrigger className='w-40'>
+                                <SelectTrigger>
                                     <SelectValue placeholder='상환 방식 선택' />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value='원리금균등'>
-                                        원리금균등
+                                    <SelectItem value='원리금균등상환'>
+                                        원리금균등상환
                                     </SelectItem>
-                                    <SelectItem value='원금균등'>
-                                        원금균등
+                                    <SelectItem value='원금균등상환'>
+                                        원금균등상환
                                     </SelectItem>
-                                    <SelectItem value='만기일시'>
-                                        만기일시
+                                    <SelectItem value='원금상환'>
+                                        원금상환
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
-                            <div className='mt-2 flex gap-2'>
+                        ) : (
+                            <span>{editableContract.repaymentMethod}</span>
+                        )}
+                    </div>
+
+                    <div className={styles.contractValue}>
+                        <span className={styles.label}>납부일</span>
+                        {isEditMode ? (
+                            <div className='w-1/2'>
                                 <Input
-                                    type='number'
-                                    className='w-20'
+                                    variant='default'
                                     value={editableContract.repaymentDay}
                                     onChange={(e) =>
                                         handleChange(
@@ -291,11 +314,20 @@ const FormUpdateContent = ({
                                             e.target.value,
                                         )
                                     }
-                                    placeholder='일'
+                                    placeholder='납부일'
                                 />
+                            </div>
+                        ) : (
+                            <span>매달 {editableContract.repaymentDay}일</span>
+                        )}
+                    </div>
+
+                    <div className={styles.contractValue}>
+                        <span className={styles.label}>대출 금액</span>
+                        {isEditMode ? (
+                            <div className='w-1/2'>
                                 <Input
-                                    type='number'
-                                    className='w-40'
+                                    variant='default'
                                     value={editableContract.loanAmount}
                                     onChange={(e) =>
                                         handleChange(
@@ -306,151 +338,221 @@ const FormUpdateContent = ({
                                     placeholder='금액'
                                 />
                             </div>
-                        </div>
-                    ) : (
-                        <div className={styles.groupedValues}>
-                            <span>{editableContract.repaymentMethod}</span>
+                        ) : (
                             <span>
-                                매달 {editableContract.repaymentDay}일 /{' '}
                                 {formatCurrency(editableContract.loanAmount)}
                             </span>
-                        </div>
-                    )}
+                        )}
+                    </div>
+
+                    <div className={styles.contractValue}>
+                        <span className={styles.label}>이자율</span>
+                        {isEditMode ? (
+                            <div className='flex w-1/4 items-center'>
+                                <Input
+                                    variant='default'
+                                    value={editableContract.interestRate}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            'interestRate',
+                                            Number(e.target.value),
+                                        )
+                                    }
+                                    placeholder='이자율'
+                                />
+                                <span className='ml-2'>%</span>
+                            </div>
+                        ) : (
+                            <span>{editableContract.interestRate}%</span>
+                        )}
+                    </div>
+
+                    <div className={styles.contractValue}>
+                        <span className={styles.label}>중도상환 수수료</span>
+                        {isEditMode ? (
+                            <div className='flex w-1/4 items-center'>
+                                <Input
+                                    variant='default'
+                                    value={
+                                        editableContract.earlyRepaymentFeeRate
+                                    }
+                                    onChange={(e) =>
+                                        handleChange(
+                                            'earlyRepaymentFeeRate',
+                                            Number(e.target.value),
+                                        )
+                                    }
+                                    placeholder='수수료'
+                                />
+                                <span className='ml-2'>%</span>
+                            </div>
+                        ) : (
+                            <span>
+                                {editableContract.earlyRepaymentFeeRate}%
+                            </span>
+                        )}
+                    </div>
                 </div>
 
-                <div className={styles.contractValue}>
-                    <span className={styles.label}>이자율</span>
+                {/* 특약사항 */}
+                <div className={styles.section}>
+                    <p className={styles.title}>특약 사항</p>
                     {isEditMode ? (
-                        <div className='flex items-center'>
-                            <Input
-                                type='number'
-                                className='w-20'
-                                value={editableContract.interestRate}
-                                onChange={(e) =>
-                                    handleChange(
-                                        'interestRate',
-                                        Number(e.target.value),
-                                    )
-                                }
-                                placeholder='이자율'
-                            />
-                            <span className='ml-2'>%</span>
-                        </div>
-                    ) : (
-                        <span>{editableContract.interestRate}%</span>
-                    )}
-                </div>
-
-                <div className={styles.contractValue}>
-                    <span className={styles.label}>중도상환 수수료</span>
-                    {isEditMode ? (
-                        <div className='flex items-center'>
-                            <Input
-                                type='number'
-                                className='w-20'
-                                value={editableContract.earlyRepaymentFeeRate}
-                                onChange={(e) =>
-                                    handleChange(
-                                        'earlyRepaymentFeeRate',
-                                        Number(e.target.value),
-                                    )
-                                }
-                                placeholder='수수료'
-                            />
-                            <span className='ml-2'>%</span>
-                        </div>
-                    ) : (
-                        <span>{editableContract.earlyRepaymentFeeRate}%</span>
-                    )}
-                </div>
-
-                <hr className={styles.divider} />
-
-                <Accordion
-                    type='single'
-                    collapsible
-                    value={accordionValue}
-                    onValueChange={setAccordionValue}
-                    className='pb-2'
-                >
-                    <AccordionItem value='item-1'>
-                        <AccordionTrigger>
-                            <span className={styles.label}>특약사항</span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            {isEditMode ? (
-                                <div className='flex flex-col gap-3'>
-                                    {editableContract.specialTerms?.map(
-                                        (term, index) => (
-                                            <div
-                                                key={index}
-                                                className='flex gap-2'
+                        <div className='flex flex-col gap-4'>
+                            {/* 선택된 특약 */}
+                            {selectedTerms.length > 0 && (
+                                <div>
+                                    <h3 className='mb-2 font-medium text-[#716b8a]'>
+                                        선택한 특약
+                                    </h3>
+                                    <div className='space-y-3'>
+                                        {selectedTerms.map((term) => (
+                                            <Card
+                                                key={term.id}
+                                                className={
+                                                    styles.specialTermCard
+                                                }
                                             >
-                                                <span className='mt-2'>
-                                                    {term.specialTermIndex}.
-                                                </span>
-                                                <p>{term.specialTermDetail}</p>
-                                                <Button
-                                                    variant='primary'
-                                                    onClick={() =>
-                                                        removeSpecialTerm(index)
-                                                    }
-                                                    className='mt-2'
-                                                >
-                                                    삭제
-                                                </Button>
-                                            </div>
-                                        ),
-                                    )}
-                                    <div className='mt-2 flex gap-2'>
-                                        <Button
-                                            onClick={addSpecialTerm}
-                                            className='mt-2'
-                                        >
-                                            추가
-                                        </Button>
+                                                <CardHeader className='pb-1'>
+                                                    <div
+                                                        className={
+                                                            styles.termHeader
+                                                        }
+                                                    >
+                                                        <CardTitle className='text-base'>
+                                                            {term.title}
+                                                        </CardTitle>
+                                                        <Button
+                                                            variant='default'
+                                                            onClick={() =>
+                                                                removeSpecialTerm(
+                                                                    term,
+                                                                )
+                                                            }
+                                                        >
+                                                            <MinusCircle className='mr-1 h-4 w-4' />{' '}
+                                                            삭제
+                                                        </Button>
+                                                    </div>
+                                                </CardHeader>
+                                                <CardContent className='pt-1'>
+                                                    <p className='text-sm text-gray-600'>
+                                                        {term.content}
+                                                    </p>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
                                     </div>
                                 </div>
-                            ) : (
-                                <div className='flex flex-col gap-2 text-base'>
-                                    {editableContract.specialTerms?.map(
-                                        (term) => (
-                                            <span key={term.specialTermIndex}>
-                                                {term.specialTermIndex}.{' '}
-                                                {term.specialTermDetail}
-                                            </span>
-                                        ),
-                                    )}
+                            )}
+
+                            {/* 선택되지 않은 특약 */}
+                            {unselectedTerms.length > 0 && (
+                                <div>
+                                    <h3 className='mb-2 font-medium text-[#716b8a]'>
+                                        추가 가능한 특약
+                                    </h3>
+                                    <div className='space-y-3'>
+                                        {unselectedTerms.map((term) => (
+                                            <Card
+                                                key={term.id}
+                                                className={
+                                                    styles.specialTermCard
+                                                }
+                                            >
+                                                <CardHeader className='pb-1'>
+                                                    <div
+                                                        className={
+                                                            styles.termHeader
+                                                        }
+                                                    >
+                                                        <CardTitle className='text-base'>
+                                                            {term.title}
+                                                        </CardTitle>
+                                                        <Button
+                                                            variant='default'
+                                                            onClick={() =>
+                                                                addSpecialTerm(
+                                                                    term,
+                                                                )
+                                                            }
+                                                        >
+                                                            <PlusCircle className='mr-1 h-4 w-4' />{' '}
+                                                            추가
+                                                        </Button>
+                                                    </div>
+                                                </CardHeader>
+                                                <CardContent className='pt-1'>
+                                                    <p className='text-sm text-gray-600'>
+                                                        {term.content}
+                                                    </p>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-
-                <div className='flex justify-center p-4 text-lg font-medium'>
-                    {format(new Date(), 'yyyy.MM.dd')}
+                        </div>
+                    ) : (
+                        // 읽기 전용 모드
+                        <div className='flex flex-col gap-2'>
+                            {editableContract.specialTerms?.map((term) => (
+                                <div
+                                    key={term.specialTermIndex}
+                                    className='mb-2 border-b pb-2'
+                                >
+                                    <p className='font-medium'>
+                                        {term.specialTermIndex}.{' '}
+                                        {specialTermsInfo.find(
+                                            (info) =>
+                                                info.content ===
+                                                term.specialTermDetail,
+                                        )?.title || '특약사항'}
+                                    </p>
+                                    <p className='mt-1 text-sm text-gray-600'>
+                                        {term.specialTermDetail}
+                                    </p>
+                                </div>
+                            ))}
+                            {(!editableContract.specialTerms ||
+                                editableContract.specialTerms.length === 0) && (
+                                <p className='text-gray-500 italic'>
+                                    특약사항이 없습니다.
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </div>
 
-                <div className='flex flex-col items-end text-right font-medium'>
-                    <div>
-                        <span>{editableContract.creditorName}</span>
-                        <span className={styles.subtext}>
-                            {getSignatureStatus(
-                                editableContract.status,
-                                'creditor',
-                            )}
-                        </span>
-                    </div>
-                    <div>
-                        <span>{editableContract.debtorName}</span>
-                        <span className={styles.subtext}>
-                            {getSignatureStatus(
-                                editableContract.status,
-                                'debtor',
-                            )}
-                        </span>
-                    </div>
-                </div>
+                {/* 서명 영역 */}
+                <Card className='mt-4 border-gray-200 shadow-sm'>
+                    <CardContent className='pt-4'>
+                        <div className='flex justify-center p-4 text-lg font-medium'>
+                            {format(new Date(), 'yyyy.MM.dd')}
+                        </div>
+
+                        <div className='flex flex-col items-end text-right font-medium'>
+                            <div className='mb-1'>
+                                <span>{editableContract.creditorName}</span>
+                                <span className={styles.subtext}>
+                                    {getSignatureStatus(
+                                        editableContract.status,
+                                        'creditor',
+                                    )}
+                                </span>
+                            </div>
+                            <div>
+                                <span>{editableContract.debtorName}</span>
+                                <span className={styles.subtext}>
+                                    {getSignatureStatus(
+                                        editableContract.status,
+                                        'debtor',
+                                    )}
+                                </span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </article>
         </div>
     );
