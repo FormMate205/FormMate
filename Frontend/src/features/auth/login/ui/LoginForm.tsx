@@ -79,15 +79,21 @@ const LoginForm = () => {
                 <Button type='submit' variant='primary' disabled={!isValid}>
                     로그인
                 </Button>
+                <Button
+                    onClick={() => navigate('/login/signup')}
+                    variant='primaryDisabled'
+                >
+                    회원가입
+                </Button>
             </div>
 
-            <div className='text-line-500 text-center text-sm'>
+            <div className='text-line-500 mt-3 text-center text-sm'>
                 <a href='/login/findPw' className='underline'>
                     비밀번호를 잊으셨나요?
                 </a>
             </div>
 
-            <div className='border-line-200 flex justify-center gap-3 border-t pt-6'>
+            <div className='border-line-200 mt-2 flex justify-center gap-3 border-t pt-8'>
                 <img
                     src='/assets/images/google.png'
                     alt='구글'
