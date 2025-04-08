@@ -31,9 +31,7 @@ const FormUpdateModal = ({ formId }: FormUpdateModal) => {
             children={
                 <div className='flex max-h-[500px] w-full flex-col py-4'>
                     <div className='flex w-full justify-between py-2'>
-                        <p className='text-lg font-semibold'>
-                            금전 차용 계약서
-                        </p>
+                        <p className='text-xl font-bold'>금전 차용 계약서</p>
                         <Button
                             variant={update ? 'choiceFill' : 'choiceEmpty'}
                             children={update ? '저장' : '수정'}
