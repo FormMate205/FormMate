@@ -27,40 +27,28 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentScheduleService {
 
 	private final PaymentScheduleRepository paymentScheduleRepository;
-	private final PaymentPreviewService paymentPreviewService;
-	private final EnhancedPaymentPreviewService enhancedPaymentPreviewService;
 
 	@Transactional
-	public void createSchedules(FormEntity form, ContractEntity contract) {
-		PaymentPreviewRequest previewRequest = PaymentPreviewRequest.builder()
-			.loanAmount(form.getLoanAmount())
-			.interestRate(form.getInterestRate().toString())
-			.repaymentMethod(form.getRepaymentMethod().getKorName())
-			.repaymentDay(form.getRepaymentDay())
-			.maturityDate(form.getMaturityDate())
-			.build();
-
-		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(previewRequest,
-			Pageable.unpaged());
-
+	public void createSchedules(FormEntity form, ContractEntity contract, PaymentPreviewResponse preview) {
 		List<PaymentScheduleEntity> schedules = preview.getSchedulePage().getContent().stream()
-			.map(s -> PaymentScheduleEntity.builder()
-				.contract(contract)
-				.paymentRound(s.getInstallmentNumber())
-				.scheduledPaymentDate(s.getPaymentDate())
-				.scheduledPrincipal(s.getPrincipal())
-				.scheduledInterest(s.getInterest())
-				.overdueAmount(0L)
-				.earlyRepaymentFee(0L)
-				.actualPaidAmount(0L)
-				.actualPaidDate(null)
-				.isPaid(false)
-				.isOverdue(false)
-				.build()
-			).toList();
+				.map(s -> PaymentScheduleEntity.builder()
+						.contract(contract)
+						.paymentRound(s.getInstallmentNumber())
+						.scheduledPaymentDate(s.getPaymentDate())
+						.scheduledPrincipal(s.getPrincipal())
+						.scheduledInterest(s.getInterest())
+						.overdueAmount(0L)
+						.earlyRepaymentFee(0L)
+						.actualPaidAmount(0L)
+						.actualPaidDate(null)
+						.isPaid(false)
+						.isOverdue(false)
+						.build()
+				).toList();
 
 		paymentScheduleRepository.saveAll(schedules);
 	}
+
 
 	@Transactional(readOnly = true)
 	public List<PaymentScheduleEntity> selectByContract(ContractEntity contractEntity) {
