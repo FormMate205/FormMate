@@ -63,7 +63,7 @@ api.interceptors.response.use(
         // 일반 API 요청에서 401 에러 발생 (토큰 만료)
         if (
             error.response?.status === 401 &&
-            !originalRequest._retry &&
+            !originalRequest._ &&
             !isPublicApi
         ) {
             originalRequest._retry = true;
