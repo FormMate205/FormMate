@@ -47,7 +47,7 @@ public class PaymentScheduleEntity {
 	private Long scheduledInterest; // 예정 이자
 
 	@Column(name = "overdue_amount", nullable = false)
-	private Long overdueAmount; // 연체 금액 (해당 회차 기준)
+	private Long overdueAmount; // 연체 이자 (해당 회차 기준)
 
 	@Column(name = "early_repayment_fee", nullable = false)
 	private Long earlyRepaymentFee; // 중도상환 수수료

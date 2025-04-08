@@ -38,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "계약관리 API", description = "계약관리 관련 API")
 public class ContractController {
 
-	// TODO: Input값 valid 추가
 	private final ContractService contractService;
 
 	@Operation(summary = "계약 상세 조회", description = "계약 상세 페이지 상단 내용(연체 횟수 / 연체 금액 / 다음 상환일 / 중도상환 횟수 / 중도상환 수수료 / 남은 금액)")
