@@ -16,31 +16,34 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ContractWithPartnerResponse {
+
+	@Schema(
+		description = "차용증 ID",
+		example = "1"
+	)
+	private Integer formId;
+
 	@Schema(
 		description = "사용자가 채권자인 계약인지 여부",
-		example = "true",
-		required = true
+		example = "true"
 	)
 	private boolean userIsCreditor;
 
 	@Schema(
 		description = "다음 상환 금액",
-		example = "10000",
-		required = true
+		example = "10000"
 	)
 	private Long nextRepaymentAmount;
 
 	@Schema(
 		description = "다음 상환일",
-		example = "2025-03-27",
-		required = true
+		example = "2025-03-27"
 	)
 	private LocalDate nextRepaymentDate;
 
 	@Schema(
 		description = "계약 기간",
-		example = "2024.01.01 ~ 2025.10.10",
-		required = true
+		example = "2024.01.01 ~ 2025.10.10"
 	)
 	private String contractDuration;
 }

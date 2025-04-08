@@ -164,7 +164,10 @@ public enum ErrorCode {
 
 	// FcmToken 관련
 	INVALID_FCM_TOKEN(400, "유효하지 않은 FCM Token 입니다."),
-	FCM_TOKEN_NOT_FOUND(404, "유저의 FCM Token 을 찾을 수 없습니다.");
+	FCM_TOKEN_NOT_FOUND(404, "유저의 FCM Token 을 찾을 수 없습니다."),
+
+	// 납부 계획(PaymentSchedule 관련)
+	PAYMENT_SCHEDULE_NOT_FOUND(404, "납부 계획을 찾을 수 없습니다.");
 
 	private final int status;
 	private final String message;
