@@ -22,6 +22,8 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Schema(description = "예상 납부 스케줄 미리보기 요청")
 public class PaymentPreviewRequest {
 
