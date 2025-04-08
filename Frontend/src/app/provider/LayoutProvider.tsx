@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import { Toaster } from '@/components/ui/sonner';
 import { useUserService } from '@/entities/user/model/userService';
 
 const LayoutProvider = () => {
@@ -8,6 +9,14 @@ const LayoutProvider = () => {
         <div className='flex min-h-screen w-full justify-center'>
             <div className='min-h-screen w-full max-w-[640px] overflow-y-auto'>
                 <Outlet />
+                <Toaster
+                    position='top-right'
+                    toastOptions={{
+                        style: {
+                            marginTop: '8px', // 헤더 높이에 맞게 조정
+                        },
+                    }}
+                />
             </div>
         </div>
     );
