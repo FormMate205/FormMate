@@ -3,7 +3,6 @@ import {
     Chat,
     Home,
     Login,
-    Landing,
     Signup,
     PasswordReset,
     ContractDetail,
@@ -40,8 +39,7 @@ export const router = createBrowserRouter([
         children: [
             // 홈, 회원가입, 로그인
             { path: '/', element: <Home userName='' /> },
-            { path: '/landing', element: <Landing /> },
-            { path: '/landing/signup', element: <Signup /> },
+            { path: '/login/signup', element: <Signup /> },
             { path: '/login', element: <Login /> },
             { path: '/login/findPw', element: <PasswordPhoneVerify /> },
             {
