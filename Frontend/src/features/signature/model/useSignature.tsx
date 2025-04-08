@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MessageType } from '@/entities/chat/model/types';
@@ -68,6 +69,12 @@ export const useSignature = ({
         }
     };
 
+    // 인증 오류 처리 함수 (채권자 잔액 부족)
+    const handleVerificationError = (error: AxiosError) => {
+        setVerificationMessage(error.message);
+        setVerificationSuccess(false);
+    };
+
     // API 호출
     // 채무자 인증 요청 api
     const { mutate: requestDebtor } = usePostRequestDebtor(formId);
@@ -85,6 +92,7 @@ export const useSignature = ({
     const { mutate: confirmCreditor } = usePostConfirmCreditor({
         formId,
         onSuccess: handleVerificationResponse,
+        onError: handleVerificationError,
     });
 
     // 계약파기 첫번째 인증 요청 api

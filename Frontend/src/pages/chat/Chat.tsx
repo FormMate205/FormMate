@@ -1,11 +1,14 @@
 import { useLocation, useParams } from 'react-router-dom';
-import FormModal from '@/entities/chat/ui/FormModal';
+import { useGetContractDetail } from '@/entities/contract/api/ContractAPI';
+import ContractDocument from '@/entities/contract/ui/ContractDocument';
 import { useUserStore } from '@/entities/user/model/userStore';
 import showName from '@/features/chat/model/showName';
 import { useConnectWs } from '@/features/chat/model/useConnectWs';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import ChatSystem from '@/features/chat/ui/ChatSystem';
-import { Header } from '@/widgets';
+import { Icons } from '@/shared';
+import { useContractPdfExport } from '@/shared/model/useContractPdfExport';
+import { CommonModal, Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
 
 const Chat = () => {
@@ -25,13 +28,34 @@ const Chat = () => {
     } = useConnectWs({ user, roomId });
 
     const displayProfile = showName(messages);
+
+    // 계약서 상세보기
+    const { data } = useGetContractDetail(roomId!);
+    const { exportContract } = useContractPdfExport();
+
     return (
         <div className='bg-line-50 flex h-screen w-full flex-col items-center justify-between px-4 py-2'>
             <Header title='채팅' />
 
             {/* 계약서 팝업 */}
             <div className='flex w-full justify-end'>
-                <FormModal formId={roomId!} />
+                <CommonModal
+                    triggerChildren={
+                        <div
+                            className='flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xs'
+                            aria-label='계약서 보기'
+                        >
+                            <Icons
+                                name='docs'
+                                className='fill-line-700'
+                                width={20}
+                            />
+                        </div>
+                    }
+                    children={<ContractDocument contract={data!} />}
+                    confirmText='pdf 다운로드'
+                    onClick={() => exportContract(data!)}
+                />
             </div>
 
             {/* 채팅 내용 */}
@@ -48,7 +72,7 @@ const Chat = () => {
                             formId={chat.formId!}
                             children={chat.content}
                             type={chat.messageType}
-                            signId={chat.targetUserId}
+                            targetUserId={chat.targetUserId}
                         />
                     ) : (
                         <ChatBox

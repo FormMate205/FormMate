@@ -2,20 +2,25 @@ import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageType } from '@/entities/chat/model/types';
 import BlockModal from '@/entities/chat/ui/BlockModal';
+import FormUpdateModal from '@/entities/formDraft/ui/FormUpdateModal';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { NavigateToPage } from '@/shared/ui/NavigateToPage';
 import { CommonModal } from '@/widgets';
-import FormModal from '../../../entities/chat/ui/FormModal';
 import { useConnectWs } from '../model/useConnectWs';
 
 interface ChatSystemProps {
     formId: string;
     children: ReactNode;
     type: MessageType;
-    signId?: string;
+    targetUserId?: string;
 }
 
-const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
+const ChatSystem = ({
+    formId,
+    children,
+    type,
+    targetUserId,
+}: ChatSystemProps) => {
     const navigate = useNavigate();
     const { user } = useUserStore();
     const { formInfo } = useConnectWs({ user, roomId: formId });
@@ -27,26 +32,52 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
 
     // 사인 폼 모달을 띄우는 조건
     const canUserSign = () => {
-        if (!signId || signId !== user?.id) {
+        if (!user?.id) {
             return false;
         }
 
-        // 채무자 차례
-        const isDebtorSign =
-            formInfo.formStatus === 'BEFORE_APPROVAL' &&
-            formInfo.debtorId === user.id;
+        if (type === 'SIGNATURE_REQUEST_CONTRACT') {
+            // 채무자 차례
+            const isDebtorSign =
+                formInfo.formStatus === 'BEFORE_APPROVAL' &&
+                targetUserId === user.id;
 
-        // 채권자 차례
-        const isCreditorSign =
-            formInfo.formStatus === 'AFTER_APPROVAL' &&
-            formInfo.creditorId === user.id;
+            // 채권자 차례
+            const isCreditorSign =
+                formInfo.formStatus === 'AFTER_APPROVAL' &&
+                targetUserId === user.id;
 
-        return isDebtorSign || isCreditorSign;
+            return isDebtorSign || isCreditorSign;
+        }
+
+        // 계약 파기
+        if (type === 'SIGNATURE_REQUEST_TERMINATION') {
+            // 첫번쨰 차례
+            const isFirstSign =
+                (formInfo.formStatus === 'IN_PROGRESS' ||
+                    formInfo.formStatus === 'OVERDUE') &&
+                formInfo.terminationStatus === 'REQUESTED' &&
+                targetUserId !== user.id;
+
+            // 두번째 차례
+            const isSecondSign =
+                (formInfo.formStatus === 'IN_PROGRESS' ||
+                    formInfo.formStatus === 'OVERDUE') &&
+                formInfo.terminationStatus === 'SIGNED' &&
+                targetUserId === user.id;
+
+            return isFirstSign || isSecondSign;
+        }
     };
 
     const handleNavigateToSign = () => {
         navigate(`/chat/${formId}/signature`, {
-            state: { formId, type, creditorId: formInfo.creditorId, signId },
+            state: {
+                formId,
+                type,
+                creditorId: formInfo.creditorId,
+                requestedById: formInfo.terminationRequestedId,
+            },
         });
     };
 
@@ -59,7 +90,7 @@ const ChatSystem = ({ formId, children, type, signId }: ChatSystemProps) => {
                         : '서명 대기'}
                 </p>
                 {type == 'CONTRACT_SHARED' && (
-                    <FormModal formId={formId} isDraft={true} />
+                    <FormUpdateModal formId={formId} />
                 )}
             </div>
 

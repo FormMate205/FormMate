@@ -15,7 +15,7 @@ const buttonVariants = cva(
                 primaryDisabled:
                     'w-full bg-line-300 text-line-700 !text-line-700 text-size-text-xl font-semibold py-3 cursor-not-allowed',
                 choiceEmpty:
-                    'bg-white border border-primary-500 text-primary-500 text-sm font-medium rounded-[4px] px-3 py-2',
+                    'bg-white border border-primary-500 text-primary-500 text-sm font-medium rounded-[4px] px-3 py-2 hover:bg-primary-500 hover:text-white',
                 choiceFill:
                     'bg-primary-500 border border-primary-500 text-white text-sm font-medium rounded-[4px] px-3 py-2',
                 light: 'bg-primary-50 text-primary-500 mt-4 w-full rounded py-2',

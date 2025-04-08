@@ -1,5 +1,5 @@
 import { Transaction } from '@/features/transaction/model/types';
-import { formatCurrency } from '@/shared/model/formatCurrency';
+import { formatCurrency } from '@/shared/lib/formatCurrency';
 
 type TransactionItemProps = Omit<Transaction, 'transactionDate'>;
 
