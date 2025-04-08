@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.corp.formmate.contract.entity.ContractEntity;
 import com.corp.formmate.form.dto.PaymentPreviewRequest;
@@ -11,6 +12,8 @@ import com.corp.formmate.form.dto.PaymentPreviewResponse;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.service.EnhancedPaymentPreviewService;
 import com.corp.formmate.form.service.PaymentPreviewService;
+import com.corp.formmate.global.error.code.ErrorCode;
+import com.corp.formmate.global.error.exception.PaymentScheduleException;
 import com.corp.formmate.paymentschedule.entity.PaymentScheduleEntity;
 import com.corp.formmate.paymentschedule.repository.PaymentScheduleRepository;
 
@@ -27,6 +30,7 @@ public class PaymentScheduleService {
 	private final PaymentPreviewService paymentPreviewService;
 	private final EnhancedPaymentPreviewService enhancedPaymentPreviewService;
 
+	@Transactional
 	public void createSchedules(FormEntity form, ContractEntity contract) {
 		PaymentPreviewRequest previewRequest = PaymentPreviewRequest.builder()
 			.loanAmount(form.getLoanAmount())
@@ -56,6 +60,36 @@ public class PaymentScheduleService {
 			).toList();
 
 		paymentScheduleRepository.saveAll(schedules);
+	}
+
+	@Transactional(readOnly = true)
+	public List<PaymentScheduleEntity> selectByContract(ContractEntity contractEntity) {
+		List<PaymentScheduleEntity> schedules = paymentScheduleRepository.findByContract(contractEntity);
+		if (schedules == null || schedules.isEmpty()) {
+			throw new PaymentScheduleException(ErrorCode.PAYMENT_SCHEDULE_NOT_FOUND);
+		}
+		return schedules;
+	}
+
+	@Transactional(readOnly = true)
+	public List<PaymentScheduleEntity> selectCurrentPaymentSchedule(ContractEntity contractEntity) {
+		Integer currentRound = contractEntity.getCurrentPaymentRound();
+		return paymentScheduleRepository.findByContractAndPaymentRoundLessThanEqualAndIsPaidFalse(contractEntity,
+			currentRound);
+	}
+
+	@Transactional(readOnly = true)
+	public PaymentScheduleEntity selectNextScheduleByContract(ContractEntity contractEntity) {
+		return paymentScheduleRepository.findFirstByContractAndIsPaidOrderByPaymentRoundAsc(contractEntity, false)
+			.orElse(null);
+	}
+
+	@Transactional(readOnly = true)
+	public PaymentScheduleEntity selectById(Integer id) {
+		PaymentScheduleEntity schedule = paymentScheduleRepository.findById(id)
+			.orElseThrow(() -> new PaymentScheduleException(
+				ErrorCode.PAYMENT_SCHEDULE_NOT_FOUND));
+		return schedule;
 	}
 
 }

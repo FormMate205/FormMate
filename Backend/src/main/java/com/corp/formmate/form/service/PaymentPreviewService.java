@@ -266,7 +266,7 @@ public class PaymentPreviewService {
 		LocalDateTime maturityDate = request.getMaturityDate();
 
 		// 상환일이 0이면 분할납부가 없으므로 만기일에 일시 상환
-		if (request.getRepaymentDay() == 0) {
+		if (request.getRepaymentDay() == 0 || request.getInterestRateAsBigDecimal().compareTo(BigDecimal.ZERO) == 0) {
 			return 1;
 		}
 
