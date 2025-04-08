@@ -25,12 +25,12 @@
 
 | 이름   | 역할                | 담당     | GitHub                                               |
 | ------ | ------------------- | -------- | ---------------------------------------------------- |
+| 차윤영 | Developer (팀장)    | Backend  | [github.com/yuncof](https://github.com/yuncof)       |
+| 이동욱 | Developer (BE 팀장) | Backend  | [github.com/2Ludy](https://github.com/2Ludy)         |
 | 강지은 | Developer (FE 팀장) | Frontend | [github.com/antdundun](https://github.com/antdundun) |
 | 박상학 | Developer           | Backend  | [github.com/Sang-hak](https://github.com/Sang-hak)   |
 | 오은지 | Developer           | Frontend | [github.com/oille12](https://github.com/oille12)     |
 | 윤이영 | Developer           | Frontend | [github.com/y20ng](https://github.com/y20ng)         |
-| 이동욱 | Developer (BE 팀장) | Backend  | [github.com/2Ludy](https://github.com/2Ludy)         |
-| 차윤영 | Developer (팀장)    | Backend  | [github.com/yuncof](https://github.com/yuncof)       |
 
 ## 🔍 시스템 아키텍처
 
@@ -40,17 +40,35 @@
 
 ## 🛠️ 기술 스택
 
-| 구분                 | 기술                                                                                                                                                                                                                                                                                                             | 설명                          |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| 🧠 **언어**          | ![Java](https://img.shields.io/badge/Java%2017-007396?style=flat&logo=java&logoColor=white)<br>![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)                                                                                                          | 백엔드 및 프론트엔드 언어     |
-| 💻 **프론트엔드**    | ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)                                                                                                                                                                                                                        | SPA 구조, 사용자 인터페이스   |
-| ⚙️ **프레임워크**    | ![Spring Boot](https://img.shields.io/badge/SpringBoot-6DB33F?style=flat&logo=springboot&logoColor=white)                                                                                                                                                                                                        | REST API, WebSocket, OAuth 등 |
-| 🗄️ **데이터베이스**  | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)<br>![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)                                                                                                                           | 메인 DB 및 세션 캐싱          |
-| 🔐 **보안 및 인증**  | ![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)<br>![Google OAuth2](https://img.shields.io/badge/Google%20OAuth2-4285F4?style=flat&logo=google&logoColor=white) <br>![Naver OAuth2](https://img.shields.io/badge/Naver%20OAuth2-03C75A?style=flat&logoColor=white) | 인증/인가 처리                |
-| 🔔 **알림/메시징**   | ![WebSocket](https://img.shields.io/badge/WebSocket-000000?style=flat) <br> ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)<br>![CoolSMS](https://img.shields.io/badge/CoolSMS-00B2FF?style=flat&logoColor=white)                                             | 실시간 채팅, 알림, 문자 인증  |
-| ☁️ **배포 & 인프라** | ![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat&logo=amazonaws&logoColor=white)<br>![NGINX](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)<br>![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)                           | EC2, RDS, S3, 환경 구성       |
-| 🔧 **협업 도구**     | ![GitLab](https://img.shields.io/badge/GitLab-FC6D26?style=flat&logo=gitlab&logoColor=white)<br>![Jira](https://img.shields.io/badge/Jira-0052CC?style=flat&logoColor=white)                                                                                                                                     | 형상 및 이슈 관리             |
-| 📘 **문서화**        | ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=black)                                                                                                                                                                                                                  | API 명세 자동화               |
+### 💻 프론트엔드
+
+| 분류            | 기술                                                                                                                                                                                                  | 설명                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 언어/프레임워크 | ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)<br>![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black) | 타입 안정성과 컴포넌트 기반 UI   |
+| 상태 관리       | ![Zustand](https://img.shields.io/badge/Zustand-000000?style=flat&logo=zustand&logoColor=white)                                                                                                       | 전역 상태 관리                   |
+| 서버 상태       | ![TanStack Query](https://img.shields.io/badge/TanStack%20Query-FF4154?style=flat&logo=reactquery&logoColor=white)                                                                                    | API 요청/응답 캐싱 및 상태관리   |
+| 스타일링        | ![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)<br>![shadcn/ui](https://img.shields.io/badge/shadcn/ui-000000?style=flat)                | 유틸리티 기반 CSS 및 UI 컴포넌트 |
+
+---
+
+### ⚙️ 백엔드
+
+| 분류            | 기술                                                                                                                                                                                                                                                                                                            | 설명                           |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| 언어/프레임워크 | ![Java](https://img.shields.io/badge/Java%2017-007396?style=flat&logo=java&logoColor=white)<br>![Spring Boot](https://img.shields.io/badge/SpringBoot-6DB33F?style=flat&logo=springboot&logoColor=white)                                                                                                        | 백엔드 REST API 및 웹소켓 처리 |
+| 데이터베이스    | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)<br>![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)                                                                                                                          | 메인 DB 및 세션 캐시           |
+| 보안/인증       | ![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)<br>![Google OAuth2](https://img.shields.io/badge/Google%20OAuth2-4285F4?style=flat&logo=google&logoColor=white)<br>![Naver OAuth2](https://img.shields.io/badge/Naver%20OAuth2-03C75A?style=flat&logoColor=white) | 인증/인가 처리                 |
+
+---
+
+### ☁️ 공통 인프라 및 협업 도구
+
+| 분류          | 기술                                                                                                                                                                                                                                                                                   | 설명                                    |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| 메시징/알림   | ![WebSocket](https://img.shields.io/badge/WebSocket-000000?style=flat)<br>![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)<br>![CoolSMS](https://img.shields.io/badge/CoolSMS-00B2FF?style=flat&logoColor=white)                     | 실시간 채팅, 알림, 문자 인증            |
+| 배포 & 인프라 | ![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat&logo=amazonaws&logoColor=white)<br>![NGINX](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)<br>![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) | EC2, RDS, S3, 리버스 프록시, 컨테이너화 |
+| 협업/관리     | ![GitLab](https://img.shields.io/badge/GitLab-FC6D26?style=flat&logo=gitlab&logoColor=white)<br>![Jira](https://img.shields.io/badge/Jira-0052CC?style=flat&logoColor=white)                                                                                                           | 형상관리 및 이슈 관리                   |
+| 문서화        | ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=black)                                                                                                                                                                                        | API 명세 자동화                         |
 
 ---
 
