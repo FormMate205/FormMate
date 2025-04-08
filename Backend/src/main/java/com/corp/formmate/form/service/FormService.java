@@ -564,6 +564,55 @@ public class FormService {
 	}
 
 	/**
+	 * 사용자가 서명 가능한 유저인지 확인
+	 */
+	@Transactional
+	public boolean isCurrentSigner(Integer formId, Integer userId) {
+		log.info("isCurrentSigner 호출 - formId: {}, userId: {}", formId, userId);
+
+		FormEntity form = formRepository.findById(formId)
+				.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
+		UserEntity user = userService.selectById(userId);
+
+		log.info("폼 상태: {}, terminationProcess: {}, creditorId: {}, debtorId: {}, terminationRequestedId: {}",
+				form.getStatus(), form.getIsTerminationProcess(),
+				form.getCreditor().getId(), form.getDebtor().getId(),
+				form.getTerminationRequestedUser() != null ? form.getTerminationRequestedUser().getId() : null);
+
+		// 파기 서명일 경우
+		if (form.getIsTerminationProcess() != TerminationProcess.NONE) {
+			UserEntity requestedUser = form.getTerminationRequestedUser();
+
+			// 파기 요청자 정보가 없다면 false
+			if (requestedUser == null) return false;
+
+			boolean isRequester = requestedUser.getId().equals(userId);
+
+			if (!isRequester && form.getIsTerminationProcess() == TerminationProcess.REQUESTED) {
+				// 상대방이 먼저 서명 가능
+				return true;
+			} else if (isRequester && form.getIsTerminationProcess() == TerminationProcess.SIGNED) {
+				// 요청자가 마지막 서명 가능 (단, 완료 상태는 제외)
+				return form.getStatus() != FormStatus.COMPLETED;
+			}
+		}
+
+		// 일반 계약 서명
+		boolean isDebtor = form.getDebtor().getId().equals(userId);
+		boolean isCreditor = form.getCreditor().getId().equals(userId);
+
+		if (isDebtor && form.getStatus() == FormStatus.BEFORE_APPROVAL) {
+			// 채무자인데 서명 전
+			return true;
+		} else if (isCreditor && form.getStatus() == FormStatus.AFTER_APPROVAL) {
+			// 채권자인데 서명 전
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * 사용자가 계약의 참여자인지 확인
 	 */
 	private boolean isParticipant(FormEntity form, Integer userId) {
