@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import api from '@/shared/api/instance';
 import { SignatureRequest, TerminationRequest } from '../model/types';
 
@@ -88,14 +89,21 @@ const postConfirmCreditor = async ({
     verificationCode,
     recaptchaToken,
 }: TerminationRequest) => {
-    const response = await api.patch(`/form/confirm/creditor`, {
-        formId,
-        phoneNumber,
-        verificationCode,
-        recaptchaToken,
-    });
+    try {
+        const response = await api.patch(`/form/confirm/creditor`, {
+            formId,
+            phoneNumber,
+            verificationCode,
+            recaptchaToken,
+        });
 
-    return response.data;
+        return response.data;
+    } catch (error) {
+        const err = error as AxiosError;
+        if (err.status === 400) {
+            throw err;
+        }
+    }
 };
 
 export const usePostConfirmCreditor = ({
@@ -105,7 +113,7 @@ export const usePostConfirmCreditor = ({
 }: {
     formId: string;
     onSuccess?: (data: boolean) => void;
-    onError?: (error: Error) => void;
+    onError?: (error: AxiosError) => void;
 }) => {
     const { mutate } = useMutation({
         mutationFn: (req: TerminationRequest) => postConfirmCreditor(req),

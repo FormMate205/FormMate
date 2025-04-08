@@ -41,9 +41,7 @@ const FormMatch = () => {
                     </Suspense>
                 </div>
 
-                <div className='sticky right-0 bottom-0 left-0 bg-white pt-2 pb-4'>
-                    <NewPartnerDrawer />
-                </div>
+                <NewPartnerDrawer />
             </div>
         </>
     );
