@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useGetAccountInfo } from '@/entities/account/api/AccountAPI';
 import { useGetUserDetail } from '@/entities/auth/api/getUserDetail';
 import { useUserStore } from '@/entities/user/model/userStore';
-import SubscriptionToggle from '@/features/myInfo/ui/SubscriptionToggle';
+import SubscriptionToggle from '@/features/myInfo/ui/NotificationToggle';
 import { Footer, Header } from '@/widgets';
 import AddressInfo from '../../features/myInfo/ui/AddressInfo';
 import Logout from '../../features/myInfo/ui/Logout';

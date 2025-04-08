@@ -1,9 +1,9 @@
-// features/notifications/ui/SubscriptionToggle.tsx
 import { Switch } from '@/components/ui/switch';
 import { useNotificationToggle } from '@/features/notifications/model/useNotificationToggle';
 
-const SubscriptionToggle = () => {
-    const { isSubscribed, isMutating, toggle } = useNotificationToggle();
+const NotificationToggle = () => {
+    const { isSubscribed, isMutating, isPermissionDenied, toggle } =
+        useNotificationToggle();
 
     if (isSubscribed === undefined) return null;
 
@@ -15,11 +15,16 @@ const SubscriptionToggle = () => {
                 <Switch
                     checked={!!isSubscribed}
                     onCheckedChange={toggle}
-                    disabled={isMutating}
+                    disabled={isMutating || isPermissionDenied}
                 />
             </div>
+            {isPermissionDenied && (
+                <div className='text-primary-500 text-xs'>
+                    브라우저 알림 권한이 꺼져 있어요. 설정에서 허용해주세요.
+                </div>
+            )}
         </div>
     );
 };
 
-export default SubscriptionToggle;
+export default NotificationToggle;
