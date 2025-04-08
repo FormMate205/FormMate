@@ -48,10 +48,10 @@ const LoginForm = () => {
             className='mx-auto flex max-w-md flex-col gap-6 p-6'
         >
             <h1 className='mt-20 mb-20 text-center text-3xl font-bold'>
-                서비스명
+                FormMate
             </h1>
 
-            <div className='flex flex-col gap-3'>
+            <div className='flex flex-col gap-2'>
                 <input
                     type='email'
                     placeholder='아이디(이메일)를 입력하세요.'
@@ -76,24 +76,27 @@ const LoginForm = () => {
                     </p>
                 )}
 
-                <Button type='submit' variant='primary' disabled={!isValid}>
-                    로그인
-                </Button>
-                <Button
-                    onClick={() => navigate('/login/signup')}
-                    variant='primaryDisabled'
-                >
-                    회원가입
-                </Button>
+                <div className='mt-2'>
+                    <Button
+                        type='submit'
+                        variant='primary'
+                        disabled={!isValid}
+                        className='mb-3'
+                    >
+                        로그인
+                    </Button>
+                    <div className='text-line-700 flex justify-between text-sm'>
+                        <button onClick={() => navigate('/login/signup')}>
+                            회원가입
+                        </button>
+                        <button onClick={() => navigate('/login/findPw')}>
+                            비밀번호 찾기
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div className='text-line-500 mt-3 text-center text-sm'>
-                <a href='/login/findPw' className='underline'>
-                    비밀번호를 잊으셨나요?
-                </a>
-            </div>
-
-            <div className='border-line-200 mt-2 flex justify-center gap-3 border-t pt-8'>
+            <div className='border-line-200 mt-2 flex justify-center gap-3 border-t pt-7'>
                 <img
                     src='/assets/images/google.png'
                     alt='구글'
