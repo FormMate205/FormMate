@@ -14,8 +14,8 @@ import { Icons } from '@/shared';
 interface CommonModalProps {
     triggerChildren: ReactNode;
     children: ReactNode;
-    confirmText: string;
-    onClick: () => void;
+    confirmText?: string;
+    onClick?: () => void;
 }
 
 const CommonModal = ({
@@ -27,7 +27,9 @@ const CommonModal = ({
     const closeButtonRef = useRef<HTMLButtonElement>(null);
 
     const handleConfirm = () => {
-        onClick();
+        if (onClick) {
+            onClick();
+        }
 
         // 모달 닫기
         if (closeButtonRef.current) {
@@ -47,12 +49,14 @@ const CommonModal = ({
                 <DialogDescription></DialogDescription>
                 {children}
                 <DialogFooter className='w-full'>
-                    <Button
-                        variant={'primary'}
-                        children={confirmText}
-                        className='rounded-lg'
-                        onClick={handleConfirm}
-                    />
+                    {confirmText && (
+                        <Button
+                            variant={'primary'}
+                            children={confirmText}
+                            className='rounded-lg'
+                            onClick={handleConfirm}
+                        />
+                    )}
                 </DialogFooter>
             </DialogContent>
         </Dialog>

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import useFormPartnerStore from '@/entities/formPartner/model/formPartnerStore';
-import { maskUserName } from '@/shared/model/maskUserName';
+import { maskUserName } from '@/shared/lib/maskUserName';
 import Header from '@/widgets/layout/header/Header';
 
 const FormCheck = () => {
