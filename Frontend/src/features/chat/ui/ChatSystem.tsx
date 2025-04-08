@@ -12,14 +12,14 @@ interface ChatSystemProps {
     formId: string;
     children: ReactNode;
     type: MessageType;
-    requestedById?: string;
+    targetUserId?: string;
 }
 
 const ChatSystem = ({
     formId,
     children,
     type,
-    requestedById,
+    targetUserId,
 }: ChatSystemProps) => {
     const navigate = useNavigate();
     const { user } = useUserStore();
@@ -40,12 +40,12 @@ const ChatSystem = ({
             // 채무자 차례
             const isDebtorSign =
                 formInfo.formStatus === 'BEFORE_APPROVAL' &&
-                formInfo.debtorId === user.id;
+                targetUserId === user.id;
 
             // 채권자 차례
             const isCreditorSign =
                 formInfo.formStatus === 'AFTER_APPROVAL' &&
-                formInfo.creditorId === user.id;
+                targetUserId === user.id;
 
             return isDebtorSign || isCreditorSign;
         }
@@ -57,14 +57,14 @@ const ChatSystem = ({
                 (formInfo.formStatus === 'IN_PROGRESS' ||
                     formInfo.formStatus === 'OVERDUE') &&
                 formInfo.terminationStatus === 'REQUESTED' &&
-                requestedById !== user.id;
+                targetUserId !== user.id;
 
             // 두번째 차례
             const isSecondSign =
                 (formInfo.formStatus === 'IN_PROGRESS' ||
                     formInfo.formStatus === 'OVERDUE') &&
                 formInfo.terminationStatus === 'SIGNED' &&
-                requestedById === user.id;
+                targetUserId === user.id;
 
             return isFirstSign || isSecondSign;
         }
@@ -76,7 +76,7 @@ const ChatSystem = ({
                 formId,
                 type,
                 creditorId: formInfo.creditorId,
-                requestedById,
+                requestedById: formInfo.terminationRequestedId,
             },
         });
     };

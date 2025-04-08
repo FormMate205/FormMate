@@ -1,16 +1,16 @@
 import { formatCurrency } from '@/shared/lib/formatCurrency';
-import { useGetFormDraftSchedule } from '../api/formDraftScheduleAPI';
+import { usePostFormDraftSchedule } from '../api/formDraftScheduleAPI';
 import { useFormDraftStore } from '../model/formDraftStore';
 import FormDraftScheduleItem from './FormDraftScheduleItem';
 
 interface FormDraftScheduleModalProps {
-    type: string;
+    type: string | boolean;
 }
 
 const FormDraftScheduleModal = ({ type }: FormDraftScheduleModalProps) => {
     const { formDraft } = useFormDraftStore();
     const { schedules, totalRepaymentAmount, lastItemRef } =
-        useGetFormDraftSchedule({
+        usePostFormDraftSchedule({
             pageable: {
                 page: '0',
                 size: '10',
@@ -19,7 +19,7 @@ const FormDraftScheduleModal = ({ type }: FormDraftScheduleModalProps) => {
             maturityDate: formDraft.maturityDate,
             interestRate: formDraft.interestRate,
             repaymentDay: formDraft.repaymentDay,
-            repaymentMethod: formDraft.repaymentMethod,
+            repaymentMethod: type as string,
         });
 
     return (

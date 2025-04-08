@@ -31,7 +31,7 @@ const getFormDraftSchedule = async ({
     return response.data;
 };
 
-export const useGetFormDraftSchedule = ({
+export const usePostFormDraftSchedule = ({
     pageable,
     loanAmount,
     maturityDate,

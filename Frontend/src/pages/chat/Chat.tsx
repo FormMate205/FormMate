@@ -18,7 +18,6 @@ const Chat = () => {
     const {
         messages,
         message,
-        formInfo,
         setMessage,
         sendMessage,
         isConnected,
@@ -49,7 +48,7 @@ const Chat = () => {
                             formId={chat.formId!}
                             children={chat.content}
                             type={chat.messageType}
-                            requestedById={formInfo.terminationRequestedId!}
+                            targetUserId={chat.targetUserId}
                         />
                     ) : (
                         <ChatBox
