@@ -2,9 +2,6 @@ package com.corp.formmate.form.service;
 
 import java.util.List;
 
-import com.corp.formmate.form.dto.*;
-import com.corp.formmate.form.entity.TerminationProcess;
-import com.corp.formmate.user.service.IdentityVerificationService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +29,7 @@ import com.corp.formmate.form.dto.FormTerminationVerifyRequest;
 import com.corp.formmate.form.dto.FormUpdateRequest;
 import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.entity.FormStatus;
+import com.corp.formmate.form.entity.TerminationProcess;
 import com.corp.formmate.form.repository.FormRepository;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
@@ -40,6 +38,7 @@ import com.corp.formmate.specialterm.dto.SpecialTermResponse;
 import com.corp.formmate.specialterm.service.SpecialTermService;
 import com.corp.formmate.transfer.service.TransferService;
 import com.corp.formmate.user.entity.UserEntity;
+import com.corp.formmate.user.service.IdentityVerificationService;
 import com.corp.formmate.user.service.UserService;
 import com.corp.formmate.user.service.VerificationService;
 
@@ -329,6 +328,8 @@ public class FormService {
 		log.info("채권자 서명 & 계약 체결 이벤트 발행: 폼 ID={}", formEntity.getId());
 		eventPublisher.publishEvent(new CreditorSignatureCompletedEvent(formEntity));
 
+		transferService.createInitialTransfer(formEntity);
+
 		return true;
 	}
 
@@ -455,7 +456,8 @@ public class FormService {
 	 * 계약 파기 첫 번째 당사자 인증 확인 및 서명
 	 */
 	@Transactional
-	public boolean confirmFirstSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
+	public boolean confirmFirstSignVerification(Integer formId, Integer userId,
+		FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
@@ -526,7 +528,8 @@ public class FormService {
 	 * 계약 파기 두 번째 당사자 인증 확인 및 서명 (계약 종료)
 	 */
 	@Transactional
-	public boolean confirmSecondSignVerification(Integer formId, Integer userId, FormTerminationVerifyConfirmRequest request) {
+	public boolean confirmSecondSignVerification(Integer formId, Integer userId,
+		FormTerminationVerifyConfirmRequest request) {
 		// 사용자 검증
 		UserEntity user = userService.selectById(userId);
 		if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
