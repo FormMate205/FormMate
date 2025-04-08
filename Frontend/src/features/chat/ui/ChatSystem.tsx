@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { MessageType } from '@/entities/chat/model/types';
-import BlockModal from '@/entities/chat/ui/BlockModal';
 import { useUserStore } from '@/entities/user/model/userStore';
 import FormUpdateModal from '@/features/formDraft/ui/FormUpdateModal';
 import { NavigateToPage } from '@/shared/ui/NavigateToPage';
@@ -89,9 +89,11 @@ const ChatSystem = ({
                         ? '금전 차용 계약서'
                         : '서명 대기'}
                 </p>
-                {type == 'CONTRACT_SHARED' && (
-                    <FormUpdateModal formId={formId} />
-                )}
+                {type == 'CONTRACT_SHARED' &&
+                    (formInfo.formStatus == 'BEFORE_APPROVAL' ||
+                        formInfo.formStatus == 'AFTER_APPROVAL') && (
+                        <FormUpdateModal formId={formId} />
+                    )}
             </div>
 
             {children}
@@ -99,21 +101,23 @@ const ChatSystem = ({
             {isSignatureRequest && (
                 <CommonModal
                     triggerChildren={
-                        <div
-                            className='bg-primary-500 w-full rounded-lg px-4 py-2 font-medium text-white'
-                            aria-label='서명하기 버튼'
-                        >
-                            서명하기
-                        </div>
+                        <Button
+                            variant={'default'}
+                            children='서명하기'
+                            disabled={!canUserSign()}
+                            className={
+                                !canUserSign()
+                                    ? 'bg-line-200 cursor-not-allowed'
+                                    : ''
+                            }
+                        />
                     }
                     children={
-                        canUserSign() ? (
+                        canUserSign() && (
                             <NavigateToPage
                                 title='서명'
                                 handleNavigate={handleNavigateToSign}
                             />
-                        ) : (
-                            <BlockModal />
                         )
                     }
                     confirmText='닫기'
