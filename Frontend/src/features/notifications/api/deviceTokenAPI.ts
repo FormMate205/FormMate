@@ -51,15 +51,15 @@ export const useActivateDeviceToken = () => {
 };
 
 // 알림 비활성화
-const deactivateDeviceToken = async (token: string) => {
-    const response = await api.patch('/fcmtoken/deactivate', { token });
+export const deactivateDeviceToken = async () => {
+    const response = await api.patch('/fcmtoken/deactivate');
     return response.data;
 };
 
 export const useDeactivateDeviceToken = () => {
     return useMutation({
         mutationKey: ['deactivateDeviceToken'],
-        mutationFn: (token: string) => deactivateDeviceToken(token),
+        mutationFn: () => deactivateDeviceToken(),
         onMutate: async () => {
             // 구독 조회 쿼리 취소
             await queryClient.cancelQueries({

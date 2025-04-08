@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MessageType } from '@/entities/chat/model/types';
@@ -22,12 +23,14 @@ interface UseSignatureProps {
     formId: string;
     type: MessageType;
     requestedById?: string;
+    creditorId?: string;
 }
 
 export const useSignature = ({
     formId,
     type,
     requestedById,
+    creditorId,
 }: UseSignatureProps) => {
     const { user } = useUserStore();
 
@@ -66,68 +69,47 @@ export const useSignature = ({
         }
     };
 
+    // 인증 오류 처리 함수 (채권자 잔액 부족)
+    const handleVerificationError = (error: AxiosError) => {
+        setVerificationMessage(error.message);
+        setVerificationSuccess(false);
+    };
+
     // API 호출
     // 채무자 인증 요청 api
-    const { mutate: requestDebtor } = usePostRequestDebtor({
-        formId,
-        userName: form.getValues('name'),
-        phoneNumber: form.getValues('phone'),
-    });
+    const { mutate: requestDebtor } = usePostRequestDebtor(formId);
 
     // 채권자 인증 요청 api
-    const { mutate: requestCreditor } = usePostRequestCreditor({
-        formId,
-        userName: form.getValues('name'),
-        phoneNumber: form.getValues('phone'),
-    });
+    const { mutate: requestCreditor } = usePostRequestCreditor(formId);
 
     // 채무자 인증 확인 api
     const { mutate: confirmDebtor } = usePostConfirmDebtor({
         formId,
-        phoneNumber: form.getValues('phone'),
-        verificationCode: form.getValues('code')!,
-        recaptchaToken: form.getValues('recaptchaToken')!,
         onSuccess: handleVerificationResponse,
     });
 
     // 채권자 인증 확인 api
     const { mutate: confirmCreditor } = usePostConfirmCreditor({
         formId,
-        phoneNumber: form.getValues('phone'),
-        verificationCode: form.getValues('code')!,
-        recaptchaToken: form.getValues('recaptchaToken')!,
         onSuccess: handleVerificationResponse,
+        onError: handleVerificationError,
     });
 
     // 계약파기 첫번째 인증 요청 api
-    const { mutate: requestFirst } = usePostTerminateFirst({
-        formId,
-        userName: form.getValues('name'),
-        phoneNumber: form.getValues('phone'),
-    });
+    const { mutate: requestFirst } = usePostTerminateFirst(formId);
 
     // 계약파기 두번째 인증 요청 api
-    const { mutate: requestSecond } = usePostTerminateSecond({
-        formId,
-        userName: form.getValues('name'),
-        phoneNumber: form.getValues('phone'),
-    });
+    const { mutate: requestSecond } = usePostTerminateSecond(formId);
 
     // 계약파기 첫번째 인증 확인 api
     const { mutate: confirmFirst } = usePostTerminateFirstConfirm({
         formId,
-        phoneNumber: form.getValues('phone'),
-        verificationCode: form.getValues('code')!,
-        recaptchaToken: form.getValues('recaptchaToken')!,
         onSuccess: handleVerificationResponse,
     });
 
     // 계약파기 두번째 인증 확인 api
     const { mutate: confirmSecond } = usePostTerminateSecondConfirm({
         formId,
-        phoneNumber: form.getValues('phone'),
-        verificationCode: form.getValues('code')!,
-        recaptchaToken: form.getValues('recaptchaToken')!,
         onSuccess: handleVerificationResponse,
     });
 
@@ -137,18 +119,34 @@ export const useSignature = ({
 
         if (result) {
             if (type === 'SIGNATURE_REQUEST_CONTRACT') {
-                if (requestedById === user?.id) {
-                    requestCreditor();
+                if (creditorId === user?.id) {
+                    requestCreditor({
+                        formId,
+                        userName: form.getValues('name'),
+                        phoneNumber: form.getValues('phone'),
+                    });
                 } else {
-                    requestDebtor();
+                    requestDebtor({
+                        formId,
+                        userName: form.getValues('name'),
+                        phoneNumber: form.getValues('phone'),
+                    });
                 }
             }
 
             if (type === 'SIGNATURE_REQUEST_TERMINATION') {
                 if (requestedById !== user?.id) {
-                    requestFirst();
+                    requestFirst({
+                        formId,
+                        userName: form.getValues('name'),
+                        phoneNumber: form.getValues('phone'),
+                    });
                 } else {
-                    requestSecond();
+                    requestSecond({
+                        formId,
+                        userName: form.getValues('name'),
+                        phoneNumber: form.getValues('phone'),
+                    });
                 }
             }
 
@@ -169,18 +167,38 @@ export const useSignature = ({
 
         if (isCodeValid && isTokenValid) {
             if (type === 'SIGNATURE_REQUEST_CONTRACT') {
-                if (requestedById === user?.id) {
-                    confirmCreditor();
+                if (creditorId === user?.id) {
+                    confirmCreditor({
+                        formId,
+                        phoneNumber: form.getValues('phone'),
+                        verificationCode: form.getValues('code')!,
+                        recaptchaToken: form.getValues('recaptchaToken')!,
+                    });
                 } else {
-                    confirmDebtor();
+                    confirmDebtor({
+                        formId,
+                        phoneNumber: form.getValues('phone'),
+                        verificationCode: form.getValues('code')!,
+                        recaptchaToken: form.getValues('recaptchaToken')!,
+                    });
                 }
             }
 
             if (type === 'SIGNATURE_REQUEST_TERMINATION') {
                 if (requestedById !== user?.id) {
-                    confirmFirst();
+                    confirmFirst({
+                        formId,
+                        phoneNumber: form.getValues('phone'),
+                        verificationCode: form.getValues('code')!,
+                        recaptchaToken: form.getValues('recaptchaToken')!,
+                    });
                 } else {
-                    confirmSecond();
+                    confirmSecond({
+                        formId,
+                        phoneNumber: form.getValues('phone'),
+                        verificationCode: form.getValues('code')!,
+                        recaptchaToken: form.getValues('recaptchaToken')!,
+                    });
                 }
             }
         }

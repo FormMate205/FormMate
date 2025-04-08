@@ -1,4 +1,4 @@
-import { Question } from '@/features/formDraft/model/types';
+import { Question } from '../model/types';
 
 // 특약 조항
 export const specialTermsInfo = [
@@ -57,7 +57,7 @@ export const formDraftQuestions: Record<string, Question> = {
     },
     maturityDate: {
         id: 'maturityDate',
-        question: '상환 날짜를 선택한 후 확인 버튼을 눌러주세요.',
+        question: '상환 만기 날짜를 선택한 후 확인 버튼을 눌러주세요.',
         type: 'date',
         next: 'interestRate',
     },
@@ -84,13 +84,30 @@ export const formDraftQuestions: Record<string, Question> = {
         condition: [
             '✅ 0~20% 범위 내로 입력해주세요.',
             '✅ 숫자로만 입력해주세요. (소수점 둘째 짜리까지 입력 가능)',
-            '✅ 이자율 + 연체 이자율은 20%를 초과할 수 없습니다.',
+            '✅ 이자율 + 연체 이자율 + 중도상환수수료율은 20%를 초과할 수 없습니다.',
         ],
         validation: {
             regex: '^\\d+(\\.\\d{1,2})?$',
             errorMessage: '0~20% 범위 내의 숫자로만 입력해주세요.',
             min: '0',
             max: '20',
+        },
+        next: 'repaymentDay',
+    },
+    repaymentDay: {
+        id: 'repaymentDay',
+        question: '매달 납부일을 입력해주세요.',
+        type: 'number',
+        condition: [
+            '✅ 숫자로만 입력해주세요.',
+            '✅ 이자가 없는 원금 상환의 경우 0으로 자동 입력됩니다.',
+            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
+        ],
+        validation: {
+            regex: '^\\d+$',
+            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
+            min: '1',
+            max: '31',
         },
         next: 'repayment',
     },
@@ -103,23 +120,7 @@ export const formDraftQuestions: Record<string, Question> = {
             { label: '아니오', value: false },
         ],
         next: (answer) =>
-            answer === '네' ? 'repaymentDay' : 'earlyRepaymentFeeRate',
-    },
-    repaymentDay: {
-        id: 'repaymentDay',
-        question: '분할 납부일을 입력해주세요.',
-        type: 'number',
-        condition: [
-            '✅ 숫자로만 입력해주세요.',
-            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
-        ],
-        validation: {
-            regex: '^\\d+$',
-            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
-            min: '1',
-            max: '31',
-        },
-        next: 'repaymentMethod',
+            answer === '네' ? 'repaymentMethod' : 'earlyRepaymentFeeRate',
     },
     repaymentMethod: {
         id: 'repaymentMethod',
@@ -152,6 +153,7 @@ export const formDraftQuestions: Record<string, Question> = {
         condition: [
             '✅ 1.5% 범위 내로 입력해주세요.',
             '✅ 숫자로만 입력해주세요. (소수점 둘째 짜리까지 입력 가능)',
+            '✅ 이자율 + 연체 이자율 + 중도상환수수료율은 20%를 초과할 수 없습니다.',
         ],
         validation: {
             regex: '^\\d+(\\.\\d{1,2})?$',
