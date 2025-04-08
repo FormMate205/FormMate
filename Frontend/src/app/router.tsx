@@ -6,7 +6,6 @@ import {
     Landing,
     Signup,
     PasswordReset,
-    PhoneVerify,
     ContractDetail,
     AccountRegist,
     AccountVerify,
@@ -44,7 +43,7 @@ export const router = createBrowserRouter([
             { path: '/landing', element: <Landing /> },
             { path: '/landing/signup', element: <Signup /> },
             { path: '/login', element: <Login /> },
-            { path: '/login/findPw', element: <PhoneVerify /> },
+            { path: '/login/findPw', element: <PasswordPhoneVerify /> },
             {
                 path: '/login/findPw/reset',
                 element: <PasswordReset />,
