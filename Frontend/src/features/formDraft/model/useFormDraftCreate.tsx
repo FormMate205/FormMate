@@ -370,7 +370,6 @@ export const useFormDraftCreate = ({
                 navigate(`/chat/${data?.formId}`, {
                     state: {
                         isFin: false,
-                        creditorId: data.creditorId,
                     },
                 });
             }, 100);
