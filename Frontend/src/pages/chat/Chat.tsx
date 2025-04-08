@@ -72,7 +72,6 @@ const Chat = () => {
                             formId={chat.formId!}
                             children={chat.content}
                             type={chat.messageType}
-                            targetUserId={chat.targetUserId}
                         />
                     ) : (
                         <ChatBox
