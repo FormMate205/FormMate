@@ -1,6 +1,6 @@
 import TransferFunnel from '@/features/transfer/ui/funnel/TransferFunnel';
 
-const SelectRecipient = () => {
+const Transfer = () => {
     return (
         <div className='flex h-full flex-col gap-4 px-4 py-2'>
             <section className='flex h-full flex-col gap-4'>
@@ -10,4 +10,4 @@ const SelectRecipient = () => {
     );
 };
 
-export default SelectRecipient;
+export default Transfer;

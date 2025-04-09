@@ -62,7 +62,7 @@ const PasswordStep = ({
                                     });
                                 },
                                 onError: () => {
-                                    alert('송금 중 오류가 발생했습니다.');
+                                    toast.error('송금 중 오류가 발생했습니다.');
                                     navigate('/');
                                 },
                             },

@@ -7,7 +7,6 @@ import {
     AccountPassword,
     UserPasswordUpdate,
     FormDraft,
-    SelectRecipient,
     Login,
     FormMatch,
     Signup,
@@ -15,11 +14,9 @@ import {
     PasswordReset,
     OauthAddInfoPage,
     FormCheck,
-    TransferComplete,
-    EnterPassword,
-    EnterAmount,
     Home,
     ChatRooms,
+    Transfer,
 } from '@/pages';
 import OAuthCallback from '@/pages/login/OAuthCallback';
 import Transaction from '@/pages/transaction/Transaction';
@@ -144,16 +141,7 @@ export const router = createBrowserRouter([
             },
 
             // 송금
-            { path: 'transfer', element: <SelectRecipient /> },
-            {
-                path: '/transfer/complete',
-                element: <TransferComplete />,
-            },
-            {
-                path: '/transfer/password',
-                element: <EnterPassword />,
-            },
-            { path: '/transfer/amount', element: <EnterAmount /> },
+            { path: 'transfer', element: <Transfer /> },
 
             // 내 정보
             {
