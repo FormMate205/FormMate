@@ -90,7 +90,7 @@ public class UserService {
 			return !userRepository.existsByPhoneNumber(phoneNumber);
 		} catch (Exception e) {
 			log.error("Phone number check failed: {}", e.getMessage());
-			throw new UserException(ErrorCode.INTERNAL_SERVER_ERROR);
+			throw new UserException(ErrorCode.PHONE_ALREADY_REGISTERED);
 		}
 	}
 
