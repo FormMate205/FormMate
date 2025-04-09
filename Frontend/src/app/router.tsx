@@ -16,7 +16,6 @@ import {
     FormCheck,
     Home,
     ChatRooms,
-    Transfer,
 } from '@/pages';
 import OAuthCallback from '@/pages/login/OAuthCallback';
 import Transaction from '@/pages/transaction/Transaction';
@@ -32,6 +31,8 @@ const ContractDetail = lazy(() => import('@/pages/contract/ContractDetail'));
 const MyInfo = lazy(() => import('@/pages/myinfo/MyInfo'));
 
 const Notifications = lazy(() => import('@/pages/notification/Notifiactions'));
+
+const Transfer = lazy(() => import('@/pages/transfer/Transfer'));
 
 export const router = createBrowserRouter([
     {
