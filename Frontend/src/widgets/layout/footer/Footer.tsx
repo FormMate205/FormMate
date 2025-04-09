@@ -2,7 +2,11 @@ import { useNavigate } from 'react-router-dom';
 import { Icons } from '@/shared';
 import ChatBotPopover from './ui/ChatBotPopover';
 
-const Footer = () => {
+interface FooterProps {
+    unreadChat?: boolean;
+}
+
+const Footer = ({ unreadChat = false }: FooterProps) => {
     const navigate = useNavigate();
 
     // 홈으로 이동
@@ -59,13 +63,19 @@ const Footer = () => {
                     className='flex flex-col items-center justify-end gap-1'
                     onClick={onNavigateChat}
                 >
-                    <Icons
-                        name='chat-fill'
-                        size={20}
-                        className='fill-line-300'
-                    />
+                    <div className='relative flex items-center justify-center'>
+                        <Icons
+                            name='chat-fill'
+                            size={20}
+                            className='fill-line-300'
+                        />
+                        {unreadChat && (
+                            <span className='animate-pop absolute -top-[3px] -right-[2px] h-[6px] w-[6px] rounded-full bg-red-500'></span>
+                        )}
+                    </div>
                     <p className='text-line-300 font-semibold'>채팅</p>
                 </button>
+
                 <button
                     className='flex flex-col items-center justify-end gap-1'
                     onClick={onNavigateInfo}

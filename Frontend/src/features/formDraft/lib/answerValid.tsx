@@ -58,7 +58,22 @@ export const validateUserAnswer = (
             return {
                 isValid: false,
                 errorMessage:
-                    '이자율 + 연체 이자율은 20%를 초과할 수 없습니다.',
+                    '이자율 + 연체 이자율 + 중도상환수수료율은 20%를 초과할 수 없습니다.',
+            };
+        }
+    }
+
+    if (question.id === 'earlyRepaymentFeeRate') {
+        if (
+            Number(formDraft.interestRate) +
+                Number(formDraft.overdueInterestRate) +
+                Number(answer) >
+            20
+        ) {
+            return {
+                isValid: false,
+                errorMessage:
+                    '이자율 + 연체 이자율 + 중도상환수수료율은 20%를 초과할 수 없습니다.',
             };
         }
     }
