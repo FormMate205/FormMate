@@ -24,7 +24,7 @@ const publicApiPaths = [
 api.interceptors.request.use((config) => {
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken && config.headers) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
+        config.headers.Authorization = accessToken;
     }
     return config;
 });
@@ -43,7 +43,9 @@ api.interceptors.response.use(
         // 현재 요청 경로 확인
         const requestPath = originalRequest.url;
         const isPublicApi = publicApiPaths.some(
-            (path) => requestPath && requestPath.includes(path),
+            (path) =>
+                requestPath &&
+                (requestPath === path || requestPath.endsWith(path)),
         );
 
         // 공개 API에서 401 에러가 발생한 경우 - 토큰 갱신 시도 없이 에러 반환
