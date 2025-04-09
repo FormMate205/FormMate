@@ -21,6 +21,7 @@ const EnterAmountStep = ({
 }: EnterAmountStepProps) => {
     const [inputValue, setInputValue] = useState('');
     const { data: scheduledInfo } = useGetScheduledPaymentInfo(formId);
+    const nextRepaymentAmount = scheduledInfo?.monthlyRemainingPayment ?? 0;
     const earlyRepaymentFeeRate = scheduledInfo?.earlyRepaymentFeeRate ?? 0;
 
     // 넘버패드 클릭
@@ -34,7 +35,7 @@ const EnterAmountStep = ({
     };
 
     const handleRecommendClick = () => {
-        setInputValue(String(repaymentAmount));
+        setInputValue(String(nextRepaymentAmount));
     };
 
     const handleAmountAdd = (amount: number) => {
@@ -56,7 +57,7 @@ const EnterAmountStep = ({
                         {partnerName}님께
                     </span>
                     <span className='text-line-700 font-medium'>
-                        다음 상환액: {repaymentAmount.toLocaleString()}원
+                        다음 상환액: {nextRepaymentAmount.toLocaleString()}원
                     </span>
                 </div>
 
@@ -65,7 +66,7 @@ const EnterAmountStep = ({
                     <div className='flex justify-start'>
                         <AmountDifference
                             inputValue={inputValue}
-                            recommendAmount={repaymentAmount}
+                            recommendAmount={nextRepaymentAmount}
                             onRecommendClick={handleRecommendClick}
                         />
                     </div>

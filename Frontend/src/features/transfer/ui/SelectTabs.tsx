@@ -26,10 +26,10 @@ const SelectTabs = ({ onSelectPerson, onSelectContract }: SelectTabsProps) => {
                 <TabsTrigger value='recipient'>사람</TabsTrigger>
                 <TabsTrigger value='contract'>계약</TabsTrigger>
             </TabsList>
-            <TabsContent value='recipient'>
+            <TabsContent value='recipient' className='px-0'>
                 <SelectPartnerStep onSelect={onSelectPerson} />
             </TabsContent>
-            <TabsContent value='contract'>
+            <TabsContent value='contract' className='px-0'>
                 <SelectContractStep onSelect={onSelectContract} />
             </TabsContent>
         </Tabs>
