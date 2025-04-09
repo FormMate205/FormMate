@@ -7,10 +7,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.corp.formmate.alert.service.AlertService;
@@ -22,6 +27,7 @@ import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
 import com.corp.formmate.contract.dto.MonthlyContractDetail;
+import com.corp.formmate.contract.dto.TransferFormListResponse;
 import com.corp.formmate.contract.entity.ContractEntity;
 import com.corp.formmate.contract.repository.ContractRepository;
 import com.corp.formmate.form.dto.PaymentPreviewRequest;
@@ -821,9 +827,13 @@ public class ContractService {
 		long totalEarlyRepaymentFee = schedules.stream()
 			.mapToLong(PaymentScheduleEntity::getEarlyRepaymentFee)
 			.sum();
+		long totalOverdueAmount = schedules.stream()
+			.filter(s -> !Boolean.TRUE.equals(s.getIsPaid()))
+			.mapToLong(PaymentScheduleEntity::getOverdueAmount)
+			.sum();
 
 		contract.setRemainingPrincipal(remainingPrincipal);
-		contract.setRemainingPrincipalMinusOverdue(Math.max(0, remainingPrincipal - contract.getOverdueAmount()));
+		contract.setRemainingPrincipalMinusOverdue(Math.max(0, remainingPrincipal - totalOverdueAmount));
 		contract.setInterestAmount(totalPaidInterest);
 		contract.setOverdueInterestAmount(totalPaidOverdueInterest);
 		contract.setTotalEarlyRepaymentFee(totalEarlyRepaymentFee);
@@ -988,6 +998,7 @@ public class ContractService {
 		return 0L;
 	}
 
+	@Transactional
 	public List<ContractTransferResponse> selectContractTransfers(Integer userId, String name) {
 		UserEntity userEntity = getUser(userId);
 		String trimmedName = name != null ? name.trim() : null;
@@ -1021,6 +1032,64 @@ public class ContractService {
 
 			// 리스트로 수집
 			.collect(Collectors.toList());
+	}
+
+	@Transactional
+	public Page<TransferFormListResponse> selectFormTransfers(Integer formId, String status, Pageable pageable) {
+		FormEntity form = getForm(formId);
+		ContractEntity contract = getContract(form);
+
+		List<TransferEntity> transfers = transferRepository.findByForm(form).orElse(List.of());
+		Map<Integer, List<TransferEntity>> transfersByRound = transfers.stream()
+			.collect(Collectors.groupingBy(TransferEntity::getCurrentRound));
+
+		List<PaymentScheduleEntity> schedules = paymentScheduleService.selectByContract(contract);
+
+		List<TransferFormListResponse> responses = new ArrayList<>();
+
+		// 1. Transfer 기반 내역 생성
+		for (TransferEntity t : transfers) {
+			responses.add(TransferFormListResponse.builder()
+				.status(t.getStatus().getKorName())
+				.currentRound(t.getCurrentRound())
+				.amount(t.getAmount())
+				.paymentDifference(t.getPaymentDifference())
+				.transactionDate(t.getTransactionDate())
+				.build());
+		}
+
+		// 2. 스케줄 기반 중도상환 내역 추가
+		Set<Integer> transferredRounds = transfersByRound.keySet();
+
+		for (PaymentScheduleEntity s : schedules) {
+			Integer round = s.getPaymentRound();
+
+			if (s.getIsPaid() && s.getActualPaidAmount() != null && s.getActualPaidAmount() == 0L
+				&& !transferredRounds.contains(round)) {
+				responses.add(TransferFormListResponse.builder()
+					.status("중도상환")
+					.currentRound(round)
+					.amount(0L)
+					.paymentDifference(0L)
+					.transactionDate(s.getScheduledPaymentDate()) // or s.getActualPaidDate()
+					.build());
+			}
+		}
+
+		// 3. 상태 필터링
+		Stream<TransferFormListResponse> stream = responses.stream();
+		if (!"전체".equals(status)) {
+			stream = stream.filter(r -> r.getStatus().equals(status));
+		}
+
+		List<TransferFormListResponse> filtered = stream.toList();
+
+		// 4. 페이징 처리
+		int start = (int)pageable.getOffset();
+		int end = Math.min(start + pageable.getPageSize(), filtered.size());
+		List<TransferFormListResponse> pageContent = filtered.subList(start, end);
+
+		return new PageImpl<>(pageContent, pageable, filtered.size());
 	}
 
 	//	public void notifyRepaymentDueContracts() {
