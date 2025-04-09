@@ -13,7 +13,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "contracts")
@@ -87,4 +91,12 @@ public class ContractEntity implements Serializable {
 	@Column(name = "current_payment_round", nullable = false)
 	@Builder.Default
 	private Integer currentPaymentRound = 1;
+
+	public void addToTotalEarlyRepaymentFee(long fee) {
+		if (this.totalEarlyRepaymentFee == null) {
+			this.totalEarlyRepaymentFee = 0L;
+		}
+		this.totalEarlyRepaymentFee += fee;
+	}
+
 }
