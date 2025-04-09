@@ -35,7 +35,7 @@ const PaymentHistoryTab = ({ formId }: { formId: string }) => {
                 onValueChange={(value: PaymentStatus) => setSelected(value)}
             >
                 <div className='flex justify-end'>
-                    <SelectTrigger className='w-20'>
+                    <SelectTrigger className='w-25'>
                         <SelectValue placeholder='전체' />
                     </SelectTrigger>
                 </div>

@@ -115,7 +115,7 @@ const ContractDocument = ({
 
                 <div className={styles.contractValue}>
                     <span className={styles.label}>원금</span>
-                    <span>{formatCurrency(loanAmount)}원</span>
+                    <span>{formatCurrency(loanAmount)}</span>
                 </div>
 
                 <div className={styles.contractValue}>
