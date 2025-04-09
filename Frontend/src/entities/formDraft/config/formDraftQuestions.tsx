@@ -88,7 +88,18 @@ export const formDraftQuestions: Record<string, Question> = {
             min: '0',
             max: '20',
         },
-        next: 'repaymentDay',
+        next: 'repayment',
+    },
+    repayment: {
+        id: 'repayment',
+        question: '분할 납부를 희망하십니까?',
+        type: 'boolean',
+        options: [
+            { label: '네', value: true },
+            { label: '아니오', value: false },
+        ],
+        next: (answer) =>
+            answer === '네' ? 'repaymentDay' : 'earlyRepaymentFeeRate',
     },
     repaymentDay: {
         id: 'repaymentDay',
@@ -105,23 +116,11 @@ export const formDraftQuestions: Record<string, Question> = {
             min: '1',
             max: '31',
         },
-        next: 'repayment',
-    },
-    repayment: {
-        id: 'repayment',
-        question: '분할 납부를 희망하십니까?',
-        type: 'boolean',
-        options: [
-            { label: '네', value: true },
-            { label: '아니오', value: false },
-        ],
-        next: (answer) =>
-            answer === '네' ? 'repaymentMethod' : 'earlyRepaymentFeeRate',
+        next: 'repaymentMethod',
     },
     repaymentMethod: {
         id: 'repaymentMethod',
-        question:
-            '분할 납부를 희망한다면 아래의 두가지 상환 방법 중 하나를 선택해주세요.',
+        question: '아래의 두가지 분할 상환 방법 중 하나를 선택해주세요.',
         type: 'method',
         options: [
             {
