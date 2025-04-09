@@ -21,7 +21,7 @@ const ChatBotPopover = ({
             triggerChildren={
                 <div className='relative flex flex-col items-center justify-end gap-1'>
                     <img
-                        src='/assets/images/chatbot.png'
+                        src='/assets/images/formform.png'
                         alt='전송하기'
                         className='absolute -top-7 left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full'
                         width={50}
@@ -33,7 +33,7 @@ const ChatBotPopover = ({
                 <div className='top-auto bottom-32 flex translate-y-0 flex-col items-center gap-4 shadow-xs'>
                     <div className='flex flex-col items-center gap-2'>
                         <img
-                            src='/assets/images/chatbot.png'
+                            src='/assets/images/formform.png'
                             alt='챗봇 이미지'
                             width={100}
                         />
