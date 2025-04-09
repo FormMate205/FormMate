@@ -2,10 +2,11 @@ import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
 import { useIntersection } from '@/shared/model/useIntersection';
 import {
-    FormDrafScheduleRequest,
+    FormDraftScheduleRequest,
     FormDraftScheduleResponse,
 } from '../model/types';
 
+// 예상 납부 스케줄 API
 const getFormDraftSchedule = async ({
     pageable,
     loanAmount,
@@ -13,7 +14,7 @@ const getFormDraftSchedule = async ({
     interestRate,
     repaymentDay,
     repaymentMethod,
-}: FormDrafScheduleRequest): Promise<FormDraftScheduleResponse> => {
+}: FormDraftScheduleRequest): Promise<FormDraftScheduleResponse> => {
     const response = await api.post(
         '/form/plan',
         {
@@ -38,7 +39,7 @@ export const usePostFormDraftSchedule = ({
     interestRate,
     repaymentDay,
     repaymentMethod,
-}: FormDrafScheduleRequest) => {
+}: FormDraftScheduleRequest) => {
     const { data, fetchNextPage, hasNextPage, refetch } =
         useSuspenseInfiniteQuery({
             queryKey: ['formDraftSchedule'],

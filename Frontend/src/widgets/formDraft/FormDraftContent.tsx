@@ -125,6 +125,7 @@ const FormDraftContent = ({ user, partner }: FormDraftContentProps) => {
                 value={inputValue}
                 onChange={onChange}
                 onClick={onClick}
+                onSend={onClick}
             />
 
             <NavigationGuardModal

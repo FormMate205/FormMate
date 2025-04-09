@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { useGetScheduledPaymentInfo } from '@/entities/transfer/api/TransferAPI';
+import useTransferStore from '@/features/transfer/model/TransferStore';
+import AmountConfirmModal from '@/features/transfer/ui/amount/AmountConfirmModal';
 import AmountDifference from '@/features/transfer/ui/amount/AmountDifference';
 import AmountInput from '@/features/transfer/ui/amount/AmountInput';
 import AmountShortcuts from '@/features/transfer/ui/amount/AmountShortcuts';
@@ -10,9 +12,20 @@ import { Header } from '@/widgets';
 const EnterAmount = () => {
     const navigate = useNavigate();
     const [inputValue, setInputValue] = useState('');
-    const recommendAmount = 200000;
+    const { partnerName, formId, updateTransferInfo } = useTransferStore();
+    const { data: scheduledInfo } = useGetScheduledPaymentInfo(formId);
+    const recommendAmount = scheduledInfo?.monthlyRemainingPayment ?? 0;
+    useEffect(() => {
+        if (scheduledInfo) {
+            updateTransferInfo({
+                earlyRepaymentFeeRate: scheduledInfo.earlyRepaymentFeeRate,
+            });
+        }
+    }, [scheduledInfo, updateTransferInfo]);
 
+    // 넘버패드 클릭 관련
     const handleNumberClick = (num: string) => {
+        if (!/^\d+$/.test(num)) return;
         setInputValue((prev) => prev + num);
     };
 
@@ -21,7 +34,7 @@ const EnterAmount = () => {
     };
 
     const handleRecommendClick = () => {
-        setInputValue('20000');
+        setInputValue(String(recommendAmount));
     };
 
     const handleAmountAdd = (amount: number) => {
@@ -33,11 +46,13 @@ const EnterAmount = () => {
     return (
         <div className='relative flex h-screen flex-col justify-between px-4 py-2'>
             <Header title='송금 금액 입력' />
-            <section className='flex flex-col gap-12 px-2'>
+            <section className='flex flex-col gap-6 px-2'>
                 <div className='flex flex-col'>
-                    <span className='text-2xl font-semibold'>강지은님께</span>
+                    <span className='text-2xl font-semibold'>
+                        {partnerName}님께
+                    </span>
                     <span className='text-line-700 text-lg font-medium'>
-                        상환 예정액: {recommendAmount.toLocaleString()}원
+                        다음 상환액: {recommendAmount.toLocaleString()}원
                     </span>
                 </div>
                 <div className='flex flex-col gap-4'>
@@ -59,12 +74,18 @@ const EnterAmount = () => {
                     onNumberClick={handleNumberClick}
                     onDelete={handleDelete}
                 />
-                <Button
-                    variant='primary'
-                    onClick={() => navigate('/transfer/password')}
-                >
-                    확인
-                </Button>
+                <AmountConfirmModal
+                    inputValue={parseInt(inputValue || '0', 10)}
+                    recommendAmount={recommendAmount}
+                    partnerName={partnerName}
+                    earlyRepaymentFeeRate={scheduledInfo?.earlyRepaymentFeeRate}
+                    onConfirm={() => {
+                        updateTransferInfo({
+                            amount: parseInt(inputValue || '0', 10),
+                        });
+                        navigate('/transfer/password');
+                    }}
+                />
             </div>
         </div>
     );

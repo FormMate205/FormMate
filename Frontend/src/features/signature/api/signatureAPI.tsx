@@ -233,3 +233,9 @@ export const usePostTerminateSecondConfirm = ({
 
     return { mutate };
 };
+
+// 서명 차례 확인
+export const getCurrentSigner = async (formId: string): Promise<boolean> => {
+    const response = await api.get(`/form/${formId}/is-current-signer`);
+    return response.data;
+};
