@@ -105,11 +105,22 @@ public class FormService {
 		if (userId != formEntity.getCreator().getId()) {
 			throw new FormException(ErrorCode.INVALID_CREATOR_ID);
 		}
+
+		// 기본 정보 검증
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
+
+		// 계약 정보 업데이트
 		formEntity.update(request);
+
+		// 서명 상태 초기화
+		formEntity.updateStatus(FormStatus.BEFORE_APPROVAL);
+
 		formRepository.save(formEntity);
-		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(formEntity,
-			request.getSpecialTermIndexes());
+
+		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(
+				formEntity,
+				request.getSpecialTermIndexes()
+		);
 
 		// 채팅 발송 위한 이벤트 발행
 		log.info("계약서 수정 이벤트 발행: 폼 ID={}", formEntity.getId());
@@ -317,12 +328,23 @@ public class FormService {
 		identityVerificationService.verifyIdentity(userEntity.getUserName(), phoneNumber, verificationCode,
 			request.getRecaptchaToken());
 
+		log.info("1. verifyIdentity 종료");
+
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
 
+		log.info("2. checkAccount 종료");
+
 		formEntity.updateStatus(FormStatus.IN_PROGRESS);
+
+		log.info("3. formEntity.updateStatus 종료");
+
 		formRepository.save(formEntity);
 
+		log.info("4. formRepository.save 종료");
+
 		contractService.createContract(formEntity);
+
+		log.info("5. createContract 종료");
 
 		// 채팅 발송 위한 이벤트 발행
 		log.info("채권자 서명 & 계약 체결 이벤트 발행: 폼 ID={}", formEntity.getId());

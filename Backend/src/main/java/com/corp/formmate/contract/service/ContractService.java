@@ -695,13 +695,18 @@ public class ContractService {
 			.maturityDate(form.getMaturityDate())
 			.build();
 
-		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(previewRequest,
-			Pageable.unpaged());
+		log.info("5-1. previewRequest 종료");
+
+		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(previewRequest, PageRequest.of(0,10000));
+
+		log.info("5-2. preview 종료");
 
 		LocalDate firstScheduleDate = preview.getSchedulePage().getContent().stream()
 			.findFirst()
 			.map(s -> s.getPaymentDate().toLocalDate())
 			.orElseThrow(() -> new ContractException(ErrorCode.PAYMENT_SCHEDULE_NOT_FOUND));
+
+		log.info("5-3. firstScheduleDate 종료");
 
 		ContractEntity contract = ContractEntity.builder()
 			.form(form)
@@ -723,14 +728,22 @@ public class ContractService {
 		long maturityInterest = preview.getSchedulePage().getContent().stream()
 			.mapToLong(s -> s.getInterest()).sum();
 
+		log.info("5-4. 만기 원금/이자 설정 종료");
+
 		contract.setExpectedMaturityPayment(maturityPrincipal);
 		contract.setExpectedInterestAmountAtMaturity(maturityInterest);
+
+		log.info("5-5. set 종료");
 
 		// 계약 저장
 		contractRepository.save(contract);
 
+		log.info("5-6. 계약 저장 종료");
+
 		// 스케줄 저장
 		paymentScheduleService.createSchedules(form, contract, preview);
+
+		log.info("5-7. 스케줄 저장 종료");
 	}
 
 	public ContractEntity selectTransferByForm(FormEntity form) {
