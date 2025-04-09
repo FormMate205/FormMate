@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { useGetScheduledPaymentInfo } from '@/entities/transfer/api/TransferAPI';
 import useTransferStore from '@/features/transfer/model/TransferStore';
+import AmountConfirmModal from '@/features/transfer/ui/amount/AmountConfirmModal';
 import AmountDifference from '@/features/transfer/ui/amount/AmountDifference';
 import AmountInput from '@/features/transfer/ui/amount/AmountInput';
 import AmountShortcuts from '@/features/transfer/ui/amount/AmountShortcuts';
@@ -23,6 +23,7 @@ const EnterAmount = () => {
         }
     }, [scheduledInfo, updateTransferInfo]);
 
+    // 넘버패드 클릭 관련
     const handleNumberClick = (num: string) => {
         if (!/^\d+$/.test(num)) return;
         setInputValue((prev) => prev + num);
@@ -73,18 +74,18 @@ const EnterAmount = () => {
                     onNumberClick={handleNumberClick}
                     onDelete={handleDelete}
                 />
-                <Button
-                    variant='primary'
-                    disabled={!inputValue}
-                    onClick={() => {
+                <AmountConfirmModal
+                    inputValue={parseInt(inputValue || '0', 10)}
+                    recommendAmount={recommendAmount}
+                    partnerName={partnerName}
+                    earlyRepaymentFeeRate={scheduledInfo?.earlyRepaymentFeeRate}
+                    onConfirm={() => {
                         updateTransferInfo({
                             amount: parseInt(inputValue || '0', 10),
                         });
                         navigate('/transfer/password');
                     }}
-                >
-                    확인
-                </Button>
+                />
             </div>
         </div>
     );

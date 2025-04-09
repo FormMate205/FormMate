@@ -26,7 +26,7 @@ const AmountDifference = ({
 
     if (difference === 0) {
         return (
-            <span className='text-base font-medium text-gray-700'>
+            <span className='text-primary-500 text-base font-medium'>
                 정확한 상환액입니다
             </span>
         );
