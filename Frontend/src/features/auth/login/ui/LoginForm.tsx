@@ -23,7 +23,6 @@ const LoginForm = () => {
 
             // 유저 정보 쿼리 갱신
             await queryClient.invalidateQueries({ queryKey: ['user'] });
-
             // 홈으로 이동
             navigate('/');
         } catch (err) {
