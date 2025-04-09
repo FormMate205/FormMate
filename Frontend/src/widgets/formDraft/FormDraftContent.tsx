@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useRef } from 'react';
 import { BOT_ID } from '@/entities/formDraft/config/constant';
 import { FormPartner } from '@/entities/formDraft/model/types';
 import { User } from '@/entities/user/model/types';
-import showName from '@/features/chat/model/showName';
+import showName from '@/features/chat/lib/showName';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
 import FormSelector from '@/features/formDraft/ui/FormSelector';
@@ -61,7 +61,7 @@ const FormDraftContent = ({ user, partner }: FormDraftContentProps) => {
     }, [chatHistory]);
 
     // 연속채팅 중 첫 채팅만 프로필 표시
-    const displayProfile = showName(chatHistory);
+    const displayProfile = showName(chatHistory, true);
 
     const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setInputValue(e.target.value);

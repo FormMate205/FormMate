@@ -107,7 +107,6 @@ export const formDraftQuestions: Record<string, Question> = {
         type: 'number',
         condition: [
             '✅ 숫자로만 입력해주세요.',
-            '✅ 이자가 없는 원금 상환의 경우 0으로 자동 입력됩니다.',
             '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
         ],
         validation: {

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { useGetChatRooms } from '@/features/chat/api/chatAPI';
-import { convertTime } from '@/features/chat/model/convertTime';
+import { convertTime } from '@/features/chat/lib/convertTime';
 import ChatRoomItem from '@/features/chat/ui/ChatRoomItem';
 import { ChatRoom } from '../model/types';
 
@@ -18,7 +18,9 @@ const ChatRoomList = () => {
 
     const onClick = (room: ChatRoom) => {
         navigate(`/chat/${room.formId}`, {
-            state: { isFin: room.isCompleted },
+            state: {
+                isFin: room.isCompleted,
+            },
         });
     };
 
