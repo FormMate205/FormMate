@@ -35,6 +35,7 @@ import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.paymentschedule.entity.PaymentScheduleEntity;
 import com.corp.formmate.paymentschedule.service.PaymentScheduleService;
+import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
@@ -791,90 +792,58 @@ public class ContractService {
 	/**
 	 * 송금 생성 시 계약 상태 업데이트 (정상 납부 / 중도상환 / 연체 등) 처리
 	 */
-	//	@Transactional
-	//	public void updateContract(TransferCreateRequest request) {
-	//		FormEntity form = formRepository.findById(request.getFormId())
-	//			.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
-	//		ContractEntity contract = contractRepository.findByForm(form)
-	//			.orElseThrow(() -> new ContractException(ErrorCode.CONTRACT_NOT_FOUND));
-	//
-	//		long leftover = request.getAmount(); // 이번 송금된 총액
-	//		log.info("===== updateContract: leftover(송금액) = {}", leftover);
-	//
-	//		// 0) 먼저 연체액(overdueAmount)와 연체이자 등을 처리(연체라면 우선 해소)
-	//		leftover = clearOverdueIfAny(form, contract, leftover);
-	//
-	//		// 1) "여러 회차"를 반복하며 leftover를 상환
-	//		//    (한 회차를 이자→원금 순으로 상환 후 leftover가 남으면 다음 회차로 이동)
-	//		while (leftover > 0) {
-	//			// 현재 회차 스케줄 정보 가져오기
-	//			EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService
-	//				.calculateEnhancedPaymentPreview(form, contract);
-	//
-	//			Optional<EnhancedPaymentScheduleResponse> scheduleOpt = preview.getScheduleList().stream()
-	//				.filter(s -> s.getInstallmentNumber() == contract.getCurrentPaymentRound())
-	//				.findFirst();
-	//
-	//			if (scheduleOpt.isEmpty()) {
-	//				// 더 이상 회차가 없으면 -> 만기
-	//				log.info("모든 회차 상환 완료로 만기 처리.");
-	//				form.updateStatus(FormStatus.COMPLETED);
-	//				contractRepository.save(contract);
-	//				formRepository.save(form);
-	//				return; // 종료
-	//			}
-	//
-	//			EnhancedPaymentScheduleResponse schedule = scheduleOpt.get();
-	//			long roundInterest = schedule.getInterest();   // 이번 회차 이자
-	//			long roundPrincipal = schedule.getPrincipal(); // 이번 회차 원금
-	//			long roundTotal = schedule.getPaymentAmount(); // (이자 + 원금)
-	//
-	//			log.info("현재회차={}, 이자={}, 원금={}, 회차필요={}",
-	//				contract.getCurrentPaymentRound(), roundInterest, roundPrincipal, roundTotal);
-	//
-	//			// 1-1) 이번 회차 이자를 우선 충족
-	//			long usedForInterest = Math.min(leftover, roundInterest);
-	//			leftover -= usedForInterest;
-	//			// Contract에 누적 이자 증가
-	//			contract.setInterestAmount(contract.getInterestAmount() + usedForInterest);
-	//
-	//			// 1-2) 남은 돈으로 이번 회차 원금을 충족
-	//			long usedForPrincipal = 0;
-	//			if (leftover > 0) {
-	//				usedForPrincipal = Math.min(leftover, roundPrincipal);
-	//				leftover -= usedForPrincipal;
-	//
-	//				// 원금 차감
-	//				long newRemPrincipal = contract.getRemainingPrincipal() - usedForPrincipal;
-	//				contract.setRemainingPrincipal(newRemPrincipal);
-	//			}
-	//
-	//			long totalUsedThisRound = usedForInterest + usedForPrincipal;
-	//			log.info("이 회차에 사용된 금액(이자+원금)={}, leftover={}", totalUsedThisRound, leftover);
-	//
-	//			// 1-3) 회차 완납 여부 판단
-	//			if (totalUsedThisRound >= roundTotal) {
-	//				// 이번 회차 완납 -> 다음 회차로 이동
-	//				moveToNextRound(form, contract);
-	//			} else {
-	//				// 이번 회차를 전부 충족 못함 -> 미납(연체) 처리
-	//				long notPaid = roundTotal - totalUsedThisRound;
-	//				log.info("회차 완납 실패, notPaid={}", notPaid);
-	//
-	//				contract.setOverdueAmount(notPaid);
-	//				form.updateStatus(FormStatus.OVERDUE);
-	//				contractRepository.save(contract);
-	//				formRepository.save(form);
-	//				break; // leftover가 0이거나 더이상 진행 불가
-	//			}
-	//		}
+	@Transactional
+	public void updateContract(TransferCreateRequest request) {
+		FormEntity form = getForm(request.getFormId());
+		ContractEntity contract = getContract(form);
 
-	// leftover가 남았지만, 모든 회차가 이미 완납된 경우 -> 위 moveToNextRound에서 COMPLETED 처리 가능
-	// 혹은 leftover > 0이면 환불할지, 추가 회차가 있는지, 정책에 따라 결정
+		long leftover = request.getAmount();
+		log.info("===== updateContract: leftover(송금액) = {}", leftover);
 
-	//		contractRepository.save(contract);
-	//		formRepository.save(form);
-	//	}
+		// 스케줄 처리 + 계약 필드 동기화까지 포함
+		List<PaymentScheduleEntity> schedules = paymentScheduleService
+			.updateSchedulesForRepaymentAndReturnUpdated(contract, form, leftover);
+
+		// 계약 정보 갱신 (스케줄 기반)
+		long remainingPrincipal = schedules.stream()
+			.filter(s -> !Boolean.TRUE.equals(s.getIsPaid()))
+			.mapToLong(PaymentScheduleEntity::getScheduledPrincipal)
+			.sum();
+		long totalPaidInterest = schedules.stream()
+			.filter(PaymentScheduleEntity::getIsPaid)
+			.mapToLong(PaymentScheduleEntity::getScheduledInterest)
+			.sum();
+		long totalPaidOverdueInterest = schedules.stream()
+			.filter(PaymentScheduleEntity::getIsPaid)
+			.mapToLong(PaymentScheduleEntity::getOverdueAmount)
+			.sum();
+		long totalEarlyRepaymentFee = schedules.stream()
+			.mapToLong(PaymentScheduleEntity::getEarlyRepaymentFee)
+			.sum();
+
+		contract.setRemainingPrincipal(remainingPrincipal);
+		contract.setRemainingPrincipalMinusOverdue(Math.max(0, remainingPrincipal - contract.getOverdueAmount()));
+		contract.setInterestAmount(totalPaidInterest);
+		contract.setOverdueInterestAmount(totalPaidOverdueInterest);
+		contract.setTotalEarlyRepaymentFee(totalEarlyRepaymentFee);
+
+		// 모든 회차 납부 완료 시 상태 변경
+		boolean allPaid = schedules.stream().allMatch(PaymentScheduleEntity::getIsPaid);
+		if (allPaid) {
+			form.updateStatus(FormStatus.COMPLETED);
+		} else {
+			// ✅ 연체 회차가 모두 납부되었으면 상태 복구
+			boolean hasOverdueRemaining = schedules.stream()
+				.anyMatch(s -> !Boolean.TRUE.equals(s.getIsPaid()) && Boolean.TRUE.equals(s.getIsOverdue()));
+
+			if (!hasOverdueRemaining && form.getStatus() == FormStatus.OVERDUE) {
+				form.updateStatus(FormStatus.IN_PROGRESS);
+			}
+		}
+
+		contractRepository.save(contract);
+		formRepository.save(form);
+	}
 
 	/**
 	 * 과거 달(ym)에 해당하는 모든 Transfer 내역을 찾아,
