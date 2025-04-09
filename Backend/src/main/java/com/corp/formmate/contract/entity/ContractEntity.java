@@ -99,4 +99,9 @@ public class ContractEntity implements Serializable {
 		this.totalEarlyRepaymentFee += fee;
 	}
 
+	public void updateSchedule(Integer paymentRound, LocalDate paymentDate) {
+		this.currentPaymentRound = paymentRound;
+		this.nextRepaymentDate = paymentDate;
+	}
+
 }
