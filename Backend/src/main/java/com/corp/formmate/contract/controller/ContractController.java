@@ -3,6 +3,8 @@ package com.corp.formmate.contract.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,7 @@ import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
 import com.corp.formmate.contract.dto.MonthlyContractDetail;
+import com.corp.formmate.contract.dto.TransferFormListResponse;
 import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.global.annotation.CurrentUser;
@@ -26,6 +29,7 @@ import com.corp.formmate.global.error.dto.ErrorResponse;
 import com.corp.formmate.user.dto.AuthUser;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -264,6 +268,81 @@ public class ContractController {
 	) {
 		Integer userId = authUser.getId();
 		List<ContractTransferResponse> responses = contractService.selectContractTransfers(userId, name);
+		return ResponseEntity.status(HttpStatus.OK).body(responses);
+	}
+
+	@Operation(summary = "차용증 거래내역 조회", description = "특정 차용증의 거래내역을 상태별로 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "차용증 거래내역 조회 성공",
+			content = @Content(
+				mediaType = "application/json",
+				examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+					value = """
+						{
+						  "content": [
+						    {
+						      "status": "납부",
+						      "currentRound": 1,
+						      "amount": 100000,
+						      "paymentDifference": 0,
+						      "transactionDate": "2025-03-21 14:30:00"
+						    },
+						    {
+						      "status": "연체",
+						      "currentRound": 2,
+						      "amount": 90000,
+						      "paymentDifference": -10000,
+						      "transactionDate": "2025-04-21 16:45:00"
+						    }
+						  ],
+						  "totalElements": 12,
+						  "totalPages": 2,
+						  "pageable": {
+						    "page": 0,
+						    "size": 10,
+						    "sort": {
+						      "sorted": true,
+						      "direction": "DESC"
+						    }
+						  }
+						}
+						"""
+				)
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 요청 형식",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "차용증을 찾을 수 없음",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@GetMapping("/transfer/{formId}")
+	public ResponseEntity<Page<TransferFormListResponse>> selectFormTransfers(
+		@Parameter(description = "차용증 ID", required = true, example = "1")
+		@PathVariable Integer formId,
+
+		@Parameter(description = "거래 유형 (전체, 연체, 납부, 중도상환)")
+		@RequestParam(value = "status", defaultValue = "전체") String status,
+
+		@Parameter(description = "페이징 정보")
+		Pageable pageable
+	) {
+
+		Page<TransferFormListResponse> responses = contractService.selectFormTransfers(formId,
+			status, pageable);
 		return ResponseEntity.status(HttpStatus.OK).body(responses);
 	}
 }
