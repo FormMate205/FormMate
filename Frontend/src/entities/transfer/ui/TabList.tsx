@@ -5,7 +5,7 @@ interface TabListProps {
     title: string;
     items: TabListItem[];
     onClickItem?: (item: TabListItem) => void;
-    lastItemRef: (node: HTMLDivElement | null) => void;
+    lastItemRef?: (node: HTMLDivElement | null) => void;
 }
 
 const TabList = ({ title, items, onClickItem, lastItemRef }: TabListProps) => {

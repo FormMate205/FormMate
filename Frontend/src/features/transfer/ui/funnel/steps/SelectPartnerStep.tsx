@@ -1,6 +1,5 @@
 import { debounce } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import {
     useGetContractByPartnerList,
@@ -11,12 +10,14 @@ import {
     TabListItem,
 } from '@/entities/transfer/model/types';
 import TabList from '@/entities/transfer/ui/TabList';
-import useTransferStore from '../model/TransferStore';
-import ContractDrawer from './ContractDrawer';
+import ContractDrawer from '../../ContractDrawer';
+import { SelectDispatchPayload } from '../../SelectTabs';
 
-const PartnerTab = () => {
-    const navigate = useNavigate();
-    const { setTransferInfo } = useTransferStore();
+type Props = {
+    onSelect: (payload: SelectDispatchPayload) => void;
+};
+
+const SelectPartnerStep = ({ onSelect }: Props) => {
     const [searchValue, setSearchValue] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -31,23 +32,21 @@ const PartnerTab = () => {
             size: '10',
         },
     });
-    const selectedPartnerId = selectedPartner?.id;
 
+    const selectedPartnerId = selectedPartner?.id;
     const { data: contracts } = useGetContractByPartnerList(
         selectedPartnerId || '',
     );
-
+    // Debounce 검색
     const debounceSearch = useMemo(() => {
         return debounce((value: string) => {
             setDebouncedSearch(value);
         }, 300);
-    }, [setDebouncedSearch]);
+    }, []);
 
     useEffect(() => {
         debounceSearch(searchValue);
-        return () => {
-            debounceSearch.cancel();
-        };
+        return () => debounceSearch.cancel();
     }, [searchValue, debounceSearch]);
 
     const tabItems: TabListItem[] = partners.map((partner) => ({
@@ -63,15 +62,13 @@ const PartnerTab = () => {
 
     const handleSelectContract = (contract: ContractByPartnerItem) => {
         if (!selectedPartner) return;
-
-        setTransferInfo({
+        // useFunnel
+        onSelect({
             partnerId: selectedPartner.id,
             partnerName: selectedPartner.title,
             formId: contract.formId,
             repaymentAmount: contract.nextRepaymentAmount,
-            amount: 0,
         });
-        navigate('amount');
     };
 
     return (
@@ -109,4 +106,4 @@ const PartnerTab = () => {
     );
 };
 
-export default PartnerTab;
+export default SelectPartnerStep;
