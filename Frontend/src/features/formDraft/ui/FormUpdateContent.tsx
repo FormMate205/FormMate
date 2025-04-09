@@ -182,6 +182,12 @@ const FormUpdateContent = ({
     // 상환 날짜 선택 관리
     const [selectedDate, setSelectedDate] = useState<Date>();
 
+    useEffect(() => {
+        if (editableContract?.maturityDate) {
+            setSelectedDate(new Date(editableContract.maturityDate));
+        }
+    }, [editableContract?.maturityDate]);
+
     const handleDateSelect = (date: Date | undefined) => {
         setSelectedDate(date);
     };
