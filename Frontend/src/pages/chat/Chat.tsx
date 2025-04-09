@@ -72,7 +72,6 @@ const Chat = () => {
                             formId={chat.formId!}
                             children={chat.content}
                             type={chat.messageType}
-                            targetUserId={chat.targetUserId}
                         />
                     ) : (
                         <ChatBox
@@ -96,6 +95,7 @@ const Chat = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onClick={sendMessage}
+                onSend={sendMessage}
             />
         </div>
     );

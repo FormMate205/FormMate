@@ -16,8 +16,8 @@ export const NavigateToPage = ({
     }, []);
 
     return (
-        <div className='pb-10 text-lg font-semibold'>
-            {title} 페이지로 이동합니다.
+        <div className='pb-5 text-lg font-semibold'>
+            잠시후 {title} 페이지로 이동합니다.
         </div>
     );
 };
