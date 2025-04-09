@@ -3,6 +3,7 @@ package com.corp.formmate.contract.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.corp.formmate.contract.dto.AmountResponse;
 import com.corp.formmate.contract.dto.ContractDetailResponse;
 import com.corp.formmate.contract.dto.ContractPreviewResponse;
+import com.corp.formmate.contract.dto.ContractTransferResponse;
 import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
@@ -233,4 +235,35 @@ public class ContractController {
 		return ResponseEntity.ok(details);
 	}
 
+	@Operation(
+		summary = "계약 상대방 목록 조회",
+		description = "현재 유저가 채무자인 계약 중, 다음 납부 예정일이 존재하는 계약 상대방 목록을 반환"
+	)
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "계약 상대방 목록 조회 성공",
+			content = @Content(
+				mediaType = "application/json",
+				array = @ArraySchema(schema = @Schema(implementation = ContractTransferResponse.class))
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 요청 파라미터",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@GetMapping("/forms")
+	public ResponseEntity<List<ContractTransferResponse>> selectContractTransfers(
+		@CurrentUser AuthUser authUser,
+		@RequestParam String name
+	) {
+		Integer userId = authUser.getId();
+		List<ContractTransferResponse> responses = contractService.selectContractTransfers(userId, name);
+		return ResponseEntity.status(HttpStatus.OK).body(responses);
+	}
 }
