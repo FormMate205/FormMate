@@ -264,7 +264,7 @@ public class ContractController {
 	@GetMapping("/forms")
 	public ResponseEntity<List<ContractTransferResponse>> selectContractTransfers(
 		@CurrentUser AuthUser authUser,
-		@RequestParam String name
+		@RequestParam(required = false) String name
 	) {
 		Integer userId = authUser.getId();
 		List<ContractTransferResponse> responses = contractService.selectContractTransfers(userId, name);
