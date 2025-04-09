@@ -46,6 +46,8 @@ public class PaymentScheduleService {
 						.build()
 				).toList();
 
+		log.info("5-7. 스케줄 저장 직전");
+
 		paymentScheduleRepository.saveAll(schedules);
 	}
 

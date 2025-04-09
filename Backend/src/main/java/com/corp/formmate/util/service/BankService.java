@@ -63,11 +63,15 @@ public class BankService {
 
 		String code = response.getHeader().getResponseCode();
 
-		return switch (code) {
-			case "H0000" -> response;
-			case "A1003" -> throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
-			default -> throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
-		};
+		if ("H0000".equals(code)) {
+			return response;
+		} else if ("A1003".equals(code)) {
+			throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
+		} else if ("A1014".equals(code)) {
+			throw new TransferException(ErrorCode.INSUFFICIENT_BALANCE);
+		} else {
+			throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
+		}
 	}
 
 	/**
@@ -90,12 +94,15 @@ public class BankService {
 
 		String code = response.getHeader().getResponseCode();
 
-		return switch (code) {
-			case "H0000" -> true;
-			case "A1003" -> throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
-			case "A1014" -> throw new TransferException(ErrorCode.INSUFFICIENT_BALANCE);
-			default -> throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
-		};
+		if ("H0000".equals(code)) {
+			return true;
+		} else if ("A1003".equals(code)) {
+			throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
+		} else if ("A1014".equals(code)) {
+			throw new TransferException(ErrorCode.INSUFFICIENT_BALANCE);
+		} else {
+			throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
+		}
 	}
 
 	/**
@@ -137,12 +144,14 @@ public class BankService {
 
 		String code = response.getHeader().getResponseCode();
 
-		switch (code) {
-			case "H0000" -> {
-				return selectAccountAuthCode(accountNumber, response.getRec().getTransactionUniqueNo());
-			}
-			case "A1003" -> throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
-			default -> throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
+		if ("H0000".equals(code)) {
+			return selectAccountAuthCode(accountNumber, response.getRec().getTransactionUniqueNo());
+		} else if ("A1003".equals(code)) {
+			throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
+		} else if ("A1014".equals(code)) {
+			throw new TransferException(ErrorCode.INSUFFICIENT_BALANCE);
+		} else {
+			throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
 		}
 	}
 
@@ -181,16 +190,19 @@ public class BankService {
 
 		String code = response.getHeader().getResponseCode();
 
-		switch (code) {
-			case "H0000" -> {
-				String status = response.getRec().getStatus();
-				return status.equals("SUCCESS");
-			}
-			case "A1003" -> throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
-			case "A1086" -> throw new TransferException(ErrorCode.VERIFY_NOT_FOUND);
-			case "A1087" -> throw new TransferException(ErrorCode.EXPIRED_VERIFY_TIME);
-			case "A1088" -> throw new TransferException(ErrorCode.VERIFY_NOT_MATCHED);
-			default -> throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
+		if ("H0000".equals(code)) {
+			String status = response.getRec().getStatus();
+			return "SUCCESS".equals(status);
+		} else if ("A1003".equals(code)) {
+			throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
+		} else if ("A1086".equals(code)) {
+			throw new TransferException(ErrorCode.VERIFY_NOT_FOUND);
+		} else if ("A1087".equals(code)) {
+			throw new TransferException(ErrorCode.EXPIRED_VERIFY_TIME);
+		} else if ("A1088".equals(code)) {
+			throw new TransferException(ErrorCode.VERIFY_NOT_MATCHED);
+		} else {
+			throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
 		}
 	}
 
@@ -302,14 +314,20 @@ public class BankService {
 				if (code.isEmpty()) {
 					code = root.path("responseCode").asText();
 				}
-				switch (code) {
-					case "A1003" -> throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
-					case "A1014" -> throw new TransferException(ErrorCode.INSUFFICIENT_BALANCE);
-					case "A1086" -> throw new TransferException(ErrorCode.VERIFY_NOT_FOUND);
-					case "A1087" -> throw new TransferException(ErrorCode.EXPIRED_VERIFY_TIME);
-					case "A1088" -> throw new TransferException(ErrorCode.VERIFY_NOT_MATCHED);
-					default -> throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
+				if ("A1003".equals(code)) {
+					throw new TransferException(ErrorCode.INVALID_ACCOUNT_NUMBER);
+				} else if ("A1014".equals(code)) {
+					throw new TransferException(ErrorCode.INSUFFICIENT_BALANCE);
+				} else if ("A1086".equals(code)) {
+					throw new TransferException(ErrorCode.VERIFY_NOT_FOUND);
+				} else if ("A1087".equals(code)) {
+					throw new TransferException(ErrorCode.EXPIRED_VERIFY_TIME);
+				} else if ("A1088".equals(code)) {
+					throw new TransferException(ErrorCode.VERIFY_NOT_MATCHED);
+				} else {
+					throw new TransferException(ErrorCode.EXTERNAL_API_ERROR);
 				}
+
 			} catch (TransferException te) {
 				throw te;
 			} catch (Exception parsingException) {
