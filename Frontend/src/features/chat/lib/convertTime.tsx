@@ -1,4 +1,4 @@
-import { now } from 'lodash';
+import now from 'lodash/now';
 
 export const convertTime = (lastMessageTime: string[]) => {
     const current = new Date(now());

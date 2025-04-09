@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -8,14 +9,13 @@ export default defineConfig({
     plugins: [
         react(),
         tailwindcss(),
+        visualizer({
+            open: true, // Automatically opens the visualizer in your browser
+        }),
         VitePWA({
             registerType: 'prompt',
             injectRegister: false,
-
-            pwaAssets: {
-                disabled: false,
-                config: true,
-            },
+            includeAssets: ['formmate-192x192.png', 'formmate-512x512.png'],
             manifest: {
                 name: 'FormMate',
                 short_name: 'FormMate',
@@ -46,7 +46,6 @@ export default defineConfig({
                 cleanupOutdatedCaches: true,
                 clientsClaim: true,
             },
-
             devOptions: {
                 enabled: false,
                 navigateFallback: 'index.html',
@@ -62,5 +61,16 @@ export default defineConfig({
     },
     define: {
         global: 'window',
+    },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+                    'jspdf-vendor': ['jspdf'],
+                    'html2canvas-vendor': ['html2canvas'],
+                },
+            },
+        },
     },
 });
