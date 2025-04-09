@@ -11,7 +11,7 @@ import { Question } from '@/entities/formDraft/model/types';
 import { formatCurrency } from '@/shared/lib/formatCurrency';
 import { formatDate } from '@/shared/lib/formatDate';
 import { usePostFormDraft } from '../api/formDraftAPI';
-import { validateUserAnswer } from './answerValid';
+import { validateUserAnswer } from '../lib/answerValid';
 
 interface UseFormDraftCreateProps {
     userId: string;
