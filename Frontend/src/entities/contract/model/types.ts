@@ -104,27 +104,7 @@ export type ContractDetailOverview = {
     remainingPrincipal: number;
 };
 
-// 계약서 상세
-export type ContractDocs = Pick<
-    Contract,
-    | 'status'
-    | 'creditorName'
-    | 'creditorPhone'
-    | 'debtorName'
-    | 'debtorPhone'
-    | 'creditorBank'
-    | 'creditorAccount'
-    | 'contractDate'
-    | 'maturityDate'
-    | 'repaymentMethod'
-    | 'repaymentDay'
-    | 'loanAmount'
-    | 'interestRate'
-    | 'earlyRepaymentFeeRate'
-    | 'specialTerms'
->;
-
-export type GetContractDetailResponse = ContractDocs;
+export type GetContractDetailResponse = Contract;
 
 // 납부 요약
 export type ContractOverview = {
