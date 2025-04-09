@@ -28,7 +28,7 @@ export const DatePicker = ({ selectedDate, onSelect }: DatePickerProps) => {
                 <CalendarButton
                     variant={'outline'}
                     className={cn(
-                        'w-[240px] justify-start bg-white text-left font-normal',
+                        'w-fit justify-start bg-white text-left font-normal',
                         !selectedDate && 'text-muted-foreground',
                     )}
                 >

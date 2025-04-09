@@ -14,8 +14,8 @@ const FormDraftLanding = () => {
             <div className='aria-hidden absolute top-0 left-0 z-0 h-full w-full overflow-hidden'>
                 <div className='absolute top-3/4 left-7/8 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white opacity-60'></div>
                 <div className='bg-primary-100 absolute top-3/4 left-7/8 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full'></div>
-                <div className='bg-primary-500 absolute top-3/5 left-7/8 h-[30px] w-[30px] -translate-x-1/2 -translate-y-1/2 rounded-full'></div>
-                <div className='bg-primary-100 absolute top-3/5 left-7/8 h-[12px] w-[12px] -translate-x-1/2 -translate-y-1/2 rounded-full'></div>
+                <div className='bg-primary-500 animate-float absolute top-3/5 left-7/8 h-[30px] w-[30px] -translate-x-1/2 -translate-y-1/2 rounded-full'></div>
+                <div className='bg-primary-100 animate-float absolute top-3/5 left-7/8 h-[12px] w-[12px] -translate-x-1/2 -translate-y-1/2 rounded-full'></div>
             </div>
 
             <div className='z-10 flex w-full flex-col justify-start gap-2'>

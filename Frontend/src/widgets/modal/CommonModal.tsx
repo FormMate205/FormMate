@@ -38,7 +38,7 @@ const CommonModal = ({
     };
     return (
         <Dialog>
-            <DialogTrigger>{triggerChildren}</DialogTrigger>
+            <DialogTrigger asChild>{triggerChildren}</DialogTrigger>
             <DialogContent className='flex flex-col items-center bg-white'>
                 <div className='flex w-full justify-end'>
                     <DialogClose ref={closeButtonRef}>

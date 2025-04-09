@@ -3,28 +3,24 @@ import { Question } from '../model/types';
 // 특약 조항
 export const specialTermsInfo = [
     {
-        id: '1',
-        title: '법적 조치 조항',
-        content:
-            '채무자가 계약을 위반할 경우, 채권자는 본 계약을 근거로 법적 조치를 취할 수 있습니다. 이는 대여금 반환 소송 등을 의미합니다.',
+        specialTermIndex: '1',
+        specialTermDetail:
+            '채무자가 계약을 위반할 경우, 채권자는 본 계약을 근거로 법적 조치를 취할 수 있습니다.',
     },
     {
-        id: '2',
-        title: '대여금 사용 용도 제한 조항',
-        content:
-            '빌려간 돈을 생활비 등 특정 용도로 사용해야 하며, 도박 등 부적절한 용도로 사용할 수 없습니다.',
+        specialTermIndex: '2',
+        specialTermDetail:
+            '빌려간 돈을 특정 용도로 사용해야 하며, 도박 등 부적절한 용도로 사용할 수 없습니다.',
     },
     {
-        id: '3',
-        title: '분쟁 해결 조항',
-        content:
-            '계약과 관련한 분쟁이 발생할 경우 대한민국 법률을 따르며, 관할 법원은 채권자 또는 채무자의 주소지를 고려하여 결정할 수 있습니다.',
+        specialTermIndex: '3',
+        specialTermDetail:
+            '계약과 관련한 분쟁이 발생할 경우 대한민국 법률을 따릅니다.',
     },
     {
-        id: '4',
-        title: '불이행 시 조치 조항',
-        content:
-            '채무자가 계약을 지키지 않을 경우, 발생하는 법적 비용(소송 비용 등)은 채무자가 부담해야 합니다.',
+        specialTermIndex: '4',
+        specialTermDetail:
+            '채무자가 계약을 지키지 않을 경우, 발생하는 법적 비용은 채무자가 부담해야 합니다.',
     },
 ];
 
@@ -92,23 +88,6 @@ export const formDraftQuestions: Record<string, Question> = {
             min: '0',
             max: '20',
         },
-        next: 'repaymentDay',
-    },
-    repaymentDay: {
-        id: 'repaymentDay',
-        question: '매달 납부일을 입력해주세요.',
-        type: 'number',
-        condition: [
-            '✅ 숫자로만 입력해주세요.',
-            '✅ 이자가 없는 원금 상환의 경우 0으로 자동 입력됩니다.',
-            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
-        ],
-        validation: {
-            regex: '^\\d+$',
-            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
-            min: '1',
-            max: '31',
-        },
         next: 'repayment',
     },
     repayment: {
@@ -120,12 +99,27 @@ export const formDraftQuestions: Record<string, Question> = {
             { label: '아니오', value: false },
         ],
         next: (answer) =>
-            answer === '네' ? 'repaymentMethod' : 'earlyRepaymentFeeRate',
+            answer === '네' ? 'repaymentDay' : 'earlyRepaymentFeeRate',
+    },
+    repaymentDay: {
+        id: 'repaymentDay',
+        question: '매달 납부일을 입력해주세요.',
+        type: 'number',
+        condition: [
+            '✅ 숫자로만 입력해주세요.',
+            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
+        ],
+        validation: {
+            regex: '^\\d+$',
+            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
+            min: '1',
+            max: '31',
+        },
+        next: 'repaymentMethod',
     },
     repaymentMethod: {
         id: 'repaymentMethod',
-        question:
-            '분할 납부를 희망한다면 아래의 두가지 상환 방법 중 하나를 선택해주세요.',
+        question: '아래의 두가지 분할 상환 방법 중 하나를 선택해주세요.',
         type: 'method',
         options: [
             {

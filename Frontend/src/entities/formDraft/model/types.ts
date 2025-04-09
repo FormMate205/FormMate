@@ -56,8 +56,8 @@ export type FormDraftRequest = Pick<
     | 'overdueLimit'
 > & { specialTermIndexes: string[] };
 
-// 예상 납부 스케줄 requset
-export type FormDrafScheduleRequest = Pick<
+// 예상 납부 스케줄 request
+export type FormDraftScheduleRequest = Pick<
     Contract,
     | 'loanAmount'
     | 'maturityDate'
@@ -81,3 +81,28 @@ export type FormDraftScheduleResponse = {
         }[];
     };
 } & Pagenation;
+
+// 계약서 수정 Request
+export type FormUpdateRequest = Pick<
+    Contract,
+    | 'creditorName'
+    | 'creditorAddress'
+    | 'creditorPhone'
+    | 'creditorBank'
+    | 'creditorAccount'
+    | 'debtorName'
+    | 'debtorAddress'
+    | 'debtorPhone'
+    | 'debtorBank'
+    | 'debtorAccount'
+    | 'contractDate'
+    | 'maturityDate'
+    | 'loanAmount'
+    | 'repaymentMethod'
+    | 'repaymentDay'
+    | 'interestRate'
+    | 'earlyRepaymentFeeRate'
+    | 'overdueInterestRate'
+    | 'overdueLimit'
+    | 'specialTerms'
+>;

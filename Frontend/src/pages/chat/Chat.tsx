@@ -2,7 +2,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useGetContractDetail } from '@/entities/contract/api/ContractAPI';
 import ContractDocument from '@/entities/contract/ui/ContractDocument';
 import { useUserStore } from '@/entities/user/model/userStore';
-import showName from '@/features/chat/model/showName';
+import showName from '@/features/chat/lib/showName';
 import { useConnectWs } from '@/features/chat/model/useConnectWs';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import ChatSystem from '@/features/chat/ui/ChatSystem';
@@ -72,7 +72,6 @@ const Chat = () => {
                             formId={chat.formId!}
                             children={chat.content}
                             type={chat.messageType}
-                            targetUserId={chat.targetUserId}
                         />
                     ) : (
                         <ChatBox
@@ -96,6 +95,7 @@ const Chat = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onClick={sendMessage}
+                onSend={sendMessage}
             />
         </div>
     );
