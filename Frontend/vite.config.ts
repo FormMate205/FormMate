@@ -9,38 +9,49 @@ export default defineConfig({
         react(),
         tailwindcss(),
         VitePWA({
-            registerType: 'autoUpdate',
-            devOptions: {
-                enabled: true,
+            registerType: 'prompt',
+            injectRegister: false,
+
+            pwaAssets: {
+                disabled: false,
+                config: true,
             },
-            includeAssets: [
-                'favicon.ico',
-                'apple-touch-icon.png',
-                'masked-icon.svg',
-            ],
             manifest: {
-                name: '내 앱 이름',
-                short_name: '앱 이름',
-                description: '앱 설명',
+                name: 'FormMate',
+                short_name: 'FormMate',
+                description:
+                    '지인 간 금전 거래에서 신뢰는 유지하고, 번거로움은 줄이는 스마트한 계약 & 중개 플랫폼',
                 theme_color: '#ffffff',
+                background_color: '#ffffff',
+                start_url: '/',
+                display: 'standalone',
+                orientation: 'portrait',
+                scope: '/',
+                prefer_related_applications: false,
                 icons: [
                     {
-                        src: 'pwa-192x192.png',
+                        src: 'formmate-192x192.png',
                         sizes: '192x192',
                         type: 'image/png',
                     },
                     {
-                        src: 'pwa-512x512.png',
+                        src: 'formmate-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
-                    },
-                    {
-                        src: 'pwa-512x512.png',
-                        sizes: '512x512',
-                        type: 'image/png',
-                        purpose: 'any maskable',
                     },
                 ],
+            },
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+                cleanupOutdatedCaches: true,
+                clientsClaim: true,
+            },
+
+            devOptions: {
+                enabled: false,
+                navigateFallback: 'index.html',
+                suppressWarnings: true,
+                type: 'module',
             },
         }),
     ],
