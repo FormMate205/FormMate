@@ -135,7 +135,7 @@ public class JwtTokenService {
             }
 
             // 쿠키 삭제
-            Cookie cookie = new Cookie("refresh_token", null);
+            Cookie cookie = new Cookie("refreshToken", null);
             cookie.setHttpOnly(true);
             cookie.setSecure(true); // HTTPS 사용시
             cookie.setPath("/");
