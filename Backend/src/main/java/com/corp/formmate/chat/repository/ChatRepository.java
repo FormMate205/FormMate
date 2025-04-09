@@ -1,6 +1,7 @@
 package com.corp.formmate.chat.repository;
 
 import com.corp.formmate.chat.entity.ChatEntity;
+import com.corp.formmate.chat.entity.MessageType;
 import com.corp.formmate.form.entity.FormEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -34,4 +35,12 @@ public interface ChatRepository extends JpaRepository<ChatEntity, Integer> {
     // 사용자가 채권자 또는 채무자인 모든 폼 목록을 조회
     @Query("SELECT c.form FROM ChatEntity c WHERE c.form.creditor.id = :userId OR c.form.debtor.id = :userId GROUP BY c.form.id")
     List<FormEntity> findFormsByUserParticipation(@Param("userId") Integer userId);
+
+    // 계약서 수정 시 계약 체결 서명 관련 시스템 메세지 삭제
+    @Modifying
+    @Query("UPDATE ChatEntity c SET c.isDeleted = true " +
+            "WHERE c.form.id = :formId AND c.messageType = :messageType")
+    void softDeleteSignatureRequestChats(@Param("formId") Integer formId,
+                                         @Param("messageType") MessageType messageType);
+
 }
