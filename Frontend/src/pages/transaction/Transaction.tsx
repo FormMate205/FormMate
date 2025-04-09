@@ -58,10 +58,17 @@ const Transaction = () => {
                                 FallbackComponent={ErrorFallBack}
                             >
                                 <Suspense fallback={<ListLoading />}>
-                                    <TransactionList
-                                        transactions={transactions}
-                                        lastItemRef={lastItemRef}
-                                    />
+                                    {transactions.length === 0 ? (
+                                        <p className='text-line-700 mt-16 text-center'>
+                                            선택하신 조건에 해당하는 거래 내역이
+                                            없습니다.
+                                        </p>
+                                    ) : (
+                                        <TransactionList
+                                            transactions={transactions}
+                                            lastItemRef={lastItemRef}
+                                        />
+                                    )}
                                 </Suspense>
                             </ErrorBoundary>
                         )}

@@ -5,6 +5,7 @@ import {
     GetContractsByPartnerResponse,
     GetPartnerListRequest,
     GetPartnerListResponse,
+    GetScheduledPaymentInfoResponse,
 } from '../model/types';
 
 // 나와 계약을 맺은 상대 조회
@@ -81,5 +82,21 @@ export const useGetContractByPartnerList = (userId: string) => {
         queryKey: ['contractByPartnerList', userId],
         queryFn: () => getContractByPartnerList(userId),
         enabled: !!userId,
+    });
+};
+
+// 납부 예정 금액 조회
+const getScheduledPaymentInfo = async (
+    formId: string,
+): Promise<GetScheduledPaymentInfoResponse> => {
+    const response = await api.get(`contract/${formId}/cost`);
+    return response.data;
+};
+
+export const useGetScheduledPaymentInfo = (formId: string) => {
+    return useQuery({
+        queryKey: ['scheduledPaymentInfo', formId],
+        queryFn: () => getScheduledPaymentInfo(formId),
+        enabled: !!formId,
     });
 };
