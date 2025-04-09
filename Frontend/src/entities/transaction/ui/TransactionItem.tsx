@@ -9,6 +9,8 @@ const TransactionItem = ({
     amount,
 }: TransactionItemProps) => {
     const sign = type === '출금' ? '-' : '+';
+    const signColor = type === '출금' ? 'text-subPink-600' : 'text-primary-500';
+
     return (
         <div className='border-line-100 flex justify-between border-b pb-2'>
             <div className='flex items-center text-lg font-medium'>
@@ -16,7 +18,7 @@ const TransactionItem = ({
             </div>
             <div className='flex flex-col items-end'>
                 <span className='text-line-700 font-medium'>{type}</span>
-                <span className='text-primary-500 font-semibold'>
+                <span className={`${signColor} font-semibold`}>
                     {sign}
                     {formatCurrency(amount)}
                 </span>
