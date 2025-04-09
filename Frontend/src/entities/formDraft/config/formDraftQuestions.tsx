@@ -88,23 +88,6 @@ export const formDraftQuestions: Record<string, Question> = {
             min: '0',
             max: '20',
         },
-        next: 'repaymentDay',
-    },
-    repaymentDay: {
-        id: 'repaymentDay',
-        question: '매달 납부일을 입력해주세요.',
-        type: 'number',
-        condition: [
-            '✅ 숫자로만 입력해주세요.',
-            '✅ 이자가 없는 원금 상환의 경우 0으로 자동 입력됩니다.',
-            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
-        ],
-        validation: {
-            regex: '^\\d+$',
-            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
-            min: '1',
-            max: '31',
-        },
         next: 'repayment',
     },
     repayment: {
@@ -116,12 +99,27 @@ export const formDraftQuestions: Record<string, Question> = {
             { label: '아니오', value: false },
         ],
         next: (answer) =>
-            answer === '네' ? 'repaymentMethod' : 'earlyRepaymentFeeRate',
+            answer === '네' ? 'repaymentDay' : 'earlyRepaymentFeeRate',
+    },
+    repaymentDay: {
+        id: 'repaymentDay',
+        question: '매달 납부일을 입력해주세요.',
+        type: 'number',
+        condition: [
+            '✅ 숫자로만 입력해주세요.',
+            '✅ 29~31일 적용 시 해당 날짜가 없는 달은 말일로 적용됩니다.',
+        ],
+        validation: {
+            regex: '^\\d+$',
+            errorMessage: '유효한 날짜를 숫자로만 입력해주세요.',
+            min: '1',
+            max: '31',
+        },
+        next: 'repaymentMethod',
     },
     repaymentMethod: {
         id: 'repaymentMethod',
-        question:
-            '분할 납부를 희망한다면 아래의 두가지 상환 방법 중 하나를 선택해주세요.',
+        question: '아래의 두가지 분할 상환 방법 중 하나를 선택해주세요.',
         type: 'method',
         options: [
             {
