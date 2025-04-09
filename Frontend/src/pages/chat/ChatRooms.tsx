@@ -1,9 +1,10 @@
-import { Suspense } from 'react';
-import ChatRoomList from '@/features/chat/ui/ChatRoomList';
+import { lazy, Suspense } from 'react';
 import ListLoading from '@/shared/ui/ListLoading';
 import { Footer, Header } from '@/widgets';
 
 const ChatRooms = () => {
+    const ChatRoomList = lazy(() => import('@/features/chat/ui/ChatRoomList'));
+
     return (
         <div className='flex h-screen w-full flex-col'>
             <div className='flex h-screen w-full flex-col overflow-hidden px-4 py-2'>
