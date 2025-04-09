@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.FormException;
+import com.corp.formmate.specialterm.dto.SpecialTermResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -169,16 +170,10 @@ public class FormUpdateRequest {
 	private Integer overdueLimit;
 
 	@Schema(
-		description = """
-			특약 조항의 index들이 담길 리스트입니다.
-			1번 인덱스 : 채무자가 계약을 위반할 경우, 채권자는 본 계약을 근거로 법적 조치를 취할 수 있습니다. 이는 대여금 반환 소송 등을 의미합니다.
-			2번 인덱스 : 빌려간 돈을 생활비 등 특정 용도로 사용해야 하며, 도박 등 부적절한 용도로 사용할 수 없습니다.
-			3번 인덱스 : 계약과 관련한 분쟁이 발생할 경우 대한민국 법률을 따르며, 관할 법원은 채권자 또는 채무자의 주소지를 고려하여 결정할 수 있습니다.
-			4번 인덱스 : 채무자가 계약을 지키지 않을 경우, 발생하는 법적 비용(소송 비용 등)은 채무자가 부담해야 합니다.
-			""",
-		example = "[1, 2, 3]"
+		description = "특약 목록 - 채무 계약에 적용되는 특별 조건들로, 법적 조치, 사용 제한, 분쟁 해결, 비용 부담 등의 항목이 포함될 수 있습니다. 없는 경우 빈 배열로 반환됩니다.",
+		example = "[{\"specialTermIndex\": 1, \"specialTermDetail\": \"채무자가 계약을 위반할 경우, 채권자는 본 계약을 근거로 법적 조치를 취할 수 있습니다.\"}, {\"specialTermIndex\": 3, \"specialTermDetail\": \"계약과 관련한 분쟁이 발생할 경우 대한민국 법률을 따릅니다.\"}]"
 	)
-	private List<Integer> specialTermIndexes;
+	private List<SpecialTermResponse> specialTerms;
 
 	public void validate() {
 		// 이자율 검증 (최대 20%)
