@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/lib/formatCurrency';
+
 interface Props {
     inputValue: string;
     placeholder?: string;
@@ -14,7 +16,7 @@ const AmountInput = ({
             <input
                 type='text'
                 readOnly
-                value={inputValue}
+                value={formatCurrency(inputValue)}
                 placeholder={placeholder}
                 className='border-line-300 placeholder:text-line-300 w-full border-b-2 py-3 text-2xl font-semibold outline-none'
             />
