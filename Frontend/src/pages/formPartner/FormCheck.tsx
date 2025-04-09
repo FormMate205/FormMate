@@ -11,13 +11,12 @@ const FormCheck = () => {
     // 계약 상대 미지정 시 돌아가기
     if (!partner) {
         navigate(-1);
-        return null;
+        return;
     }
 
     const name = maskUserName(partner.userName);
 
     const onClick = () => {
-        console.log('계약서 생성');
         navigate('/draft/landing');
     };
 
