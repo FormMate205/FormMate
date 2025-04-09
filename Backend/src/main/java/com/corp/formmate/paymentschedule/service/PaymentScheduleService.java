@@ -69,7 +69,7 @@ public class PaymentScheduleService {
 	@Transactional(readOnly = true)
 	public PaymentScheduleEntity selectNextScheduleByContract(ContractEntity contractEntity) {
 		return paymentScheduleRepository.findFirstByContractAndIsPaidOrderByPaymentRoundAsc(contractEntity, false)
-			.orElse(null);
+			.orElseThrow(() -> new PaymentScheduleException(ErrorCode.PAYMENT_SCHEDULE_NOT_FOUND));
 	}
 
 	@Transactional(readOnly = true)
