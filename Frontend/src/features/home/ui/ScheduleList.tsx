@@ -1,7 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import type { ScheduleListProps } from '@/entities/home/model/types';
 
 export const ScheduleList = ({ contracts }: ScheduleListProps) => {
+    const navigate = useNavigate();
+
     if (contracts.length === 0) {
         return (
             <p className='text-line-400 my-4 text-center text-sm'>
@@ -36,7 +39,12 @@ export const ScheduleList = ({ contracts }: ScheduleListProps) => {
                         </div>
                     </div>
                     {!item.userIsCreditor && (
-                        <Button variant='choiceFill'>이체하기</Button>
+                        <Button
+                            variant='choiceFill'
+                            onClick={() => navigate('/transfer')}
+                        >
+                            이체하기
+                        </Button>
                     )}
                 </div>
             ))}
