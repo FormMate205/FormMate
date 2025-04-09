@@ -2,6 +2,8 @@ package com.corp.formmate.form.service;
 
 import java.util.List;
 
+import com.corp.formmate.chat.entity.MessageType;
+import com.corp.formmate.chat.repository.ChatRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,6 +64,7 @@ public class FormService {
 	private final ApplicationEventPublisher eventPublisher;
 
 	private final ContractService contractService;
+	private final ChatRepository chatRepository;
 
 	// 계약서 생성
 	@Transactional
@@ -107,7 +110,10 @@ public class FormService {
 		}
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
 		formEntity.update(request);
-		formRepository.save(formEntity);
+		
+		// 기존 서명 요청 메세지 삭제
+		chatRepository.softDeleteSignatureRequestChats(formId, MessageType.SIGNATURE_REQUEST_CONTRACT);
+
 		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(formEntity,
 			request.getSpecialTerms());
 
