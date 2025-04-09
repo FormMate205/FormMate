@@ -20,7 +20,7 @@ export type GetPaymentHistoryListResponse = {
 
 export type GetPaymentHistoryListRequest = {
     formId: string;
-    transferStatus: PaymentStatus;
+    status: PaymentStatus;
 } & PagenationRequest;
 
 // 납부요약

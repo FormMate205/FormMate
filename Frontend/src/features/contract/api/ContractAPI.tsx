@@ -48,7 +48,7 @@ export const useGetPaymentSummary = (formId: string) => {
 // 납부 내역 조회
 const getPaymentHistoryList = async ({
     formId,
-    transferStatus,
+    status,
     pageable,
 }: GetPaymentHistoryListRequest): Promise<GetPaymentHistoryListResponse> => {
     const response = await api.get<GetPaymentHistoryListResponse>(
@@ -57,7 +57,7 @@ const getPaymentHistoryList = async ({
             params: {
                 page: pageable.page,
                 size: pageable.size,
-                transferStatus,
+                status,
             },
         },
     );
@@ -66,16 +66,16 @@ const getPaymentHistoryList = async ({
 
 export const useGetPaymentHistoryList = ({
     formId,
-    transferStatus,
+    status,
     pageable,
 }: GetPaymentHistoryListRequest) => {
     const { data, fetchNextPage, hasNextPage, refetch, isFetchingNextPage } =
         useSuspenseInfiniteQuery({
-            queryKey: ['paymentHistoryList', formId, transferStatus],
+            queryKey: ['paymentHistoryList', formId, status],
             queryFn: async ({ pageParam }) => {
                 return getPaymentHistoryList({
                     formId,
-                    transferStatus,
+                    status,
                     pageable: {
                         ...pageable,
                         page: pageParam.toString(),

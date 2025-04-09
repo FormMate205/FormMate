@@ -21,7 +21,7 @@ const PaymentHistoryTab = ({ formId }: { formId: string }) => {
 
     const { paymentHistoryList, lastItemRef } = useGetPaymentHistoryList({
         formId,
-        transferStatus: selected,
+        status: selected,
         pageable: {
             page: '0',
             size: '10',

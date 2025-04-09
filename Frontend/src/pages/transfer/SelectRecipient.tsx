@@ -1,4 +1,4 @@
-import SelectTabs from '@/features/transfer/ui/SelectTabs';
+import TransferFunnel from '@/features/transfer/ui/funnel/TransferFunnel';
 import { Header } from '@/widgets';
 
 const SelectRecipient = () => {
@@ -9,7 +9,7 @@ const SelectRecipient = () => {
                 <div className='text-2xl font-semibold'>
                     어디로 돈을 보낼까요?
                 </div>
-                <SelectTabs />
+                <TransferFunnel />
             </section>
         </div>
     );
