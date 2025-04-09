@@ -648,7 +648,7 @@ const FormUpdateContent = ({
                                     (term, index) => (
                                         <div
                                             key={term.specialTermIndex}
-                                            className='border-line-300 border-b pb-4'
+                                            className='border-line-300 border-b py-2'
                                         >
                                             <p>
                                                 {index + 1}.{' '}
@@ -660,7 +660,7 @@ const FormUpdateContent = ({
                                 {(!editableContract.specialTerms ||
                                     editableContract.specialTerms.length ===
                                         0) && (
-                                    <p className='text-gray-500 italic'>
+                                    <p className='text-line-500'>
                                         특약사항이 없습니다.
                                     </p>
                                 )}

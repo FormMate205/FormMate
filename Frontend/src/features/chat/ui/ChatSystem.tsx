@@ -51,8 +51,6 @@ const ChatSystem = ({ formId, children, type }: ChatSystemProps) => {
             return false;
         }
 
-        console.log('isCurrentSigner:', isCurrentSigner);
-
         return isCurrentSigner;
     };
 
