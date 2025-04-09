@@ -2,14 +2,13 @@ package com.corp.formmate.form.service;
 
 import java.util.List;
 
-import com.corp.formmate.chat.entity.MessageType;
-import com.corp.formmate.chat.repository.ChatRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.chat.entity.MessageType;
 import com.corp.formmate.chat.event.CreditorSignatureCompletedEvent;
 import com.corp.formmate.chat.event.DebtorSignatureCompletedEvent;
 import com.corp.formmate.chat.event.FirstPartyTerminationSignedEvent;
@@ -18,6 +17,7 @@ import com.corp.formmate.chat.event.FormTerminationCancelledEvent;
 import com.corp.formmate.chat.event.FormTerminationCompletedEvent;
 import com.corp.formmate.chat.event.FormTerminationRequestedEvent;
 import com.corp.formmate.chat.event.FormUpdatedEvent;
+import com.corp.formmate.chat.repository.ChatRepository;
 import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.dto.FormConfirmRequest;
 import com.corp.formmate.form.dto.FormConfirmVerifyRequest;
@@ -108,14 +108,9 @@ public class FormService {
 		if (userId != formEntity.getCreator().getId()) {
 			throw new FormException(ErrorCode.INVALID_CREATOR_ID);
 		}
-
-		// 기본 정보 검증
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
-
-		// 계약 정보 업데이트
 		formEntity.update(request);
 
-		// 서명 상태 초기화
 		formEntity.updateStatus(FormStatus.BEFORE_APPROVAL);
 
 		formRepository.save(formEntity);
@@ -123,10 +118,8 @@ public class FormService {
 		// 기존 서명 요청 메세지 삭제
 		chatRepository.softDeleteSignatureRequestChats(formId, MessageType.SIGNATURE_REQUEST_CONTRACT);
 
-		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(
-				formEntity,
-				request.getSpecialTermIndexes()
-		);
+		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(formEntity,
+			request.getSpecialTerms());
 
 		// 채팅 발송 위한 이벤트 발행
 		log.info("계약서 수정 이벤트 발행: 폼 ID={}", formEntity.getId());
@@ -334,23 +327,12 @@ public class FormService {
 		identityVerificationService.verifyIdentity(userEntity.getUserName(), phoneNumber, verificationCode,
 			request.getRecaptchaToken());
 
-		log.info("1. verifyIdentity 종료");
-
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
 
-		log.info("2. checkAccount 종료");
-
 		formEntity.updateStatus(FormStatus.IN_PROGRESS);
-
-		log.info("3. formEntity.updateStatus 종료");
-
 		formRepository.save(formEntity);
 
-		log.info("4. formRepository.save 종료");
-
 		contractService.createContract(formEntity);
-
-		log.info("5. createContract 종료");
 
 		// 채팅 발송 위한 이벤트 발행
 		log.info("채권자 서명 & 계약 체결 이벤트 발행: 폼 ID={}", formEntity.getId());
@@ -599,20 +581,21 @@ public class FormService {
 		log.info("isCurrentSigner 호출 - formId: {}, userId: {}", formId, userId);
 
 		FormEntity form = formRepository.findById(formId)
-				.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
+			.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
 		UserEntity user = userService.selectById(userId);
 
 		log.info("폼 상태: {}, terminationProcess: {}, creditorId: {}, debtorId: {}, terminationRequestedId: {}",
-				form.getStatus(), form.getIsTerminationProcess(),
-				form.getCreditor().getId(), form.getDebtor().getId(),
-				form.getTerminationRequestedUser() != null ? form.getTerminationRequestedUser().getId() : null);
+			form.getStatus(), form.getIsTerminationProcess(),
+			form.getCreditor().getId(), form.getDebtor().getId(),
+			form.getTerminationRequestedUser() != null ? form.getTerminationRequestedUser().getId() : null);
 
 		// 파기 서명일 경우
 		if (form.getIsTerminationProcess() != TerminationProcess.NONE) {
 			UserEntity requestedUser = form.getTerminationRequestedUser();
 
 			// 파기 요청자 정보가 없다면 false
-			if (requestedUser == null) return false;
+			if (requestedUser == null)
+				return false;
 
 			boolean isRequester = requestedUser.getId().equals(userId);
 
