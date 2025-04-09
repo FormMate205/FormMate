@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import api from '@/shared/api/instance';
 import { SignatureRequest, TerminationRequest } from '../model/types';
 
@@ -16,13 +17,9 @@ const postRequestDebtor = async ({
     return response.data;
 };
 
-export const usePostRequestDebtor = ({
-    formId,
-    userName,
-    phoneNumber,
-}: SignatureRequest) => {
+export const usePostRequestDebtor = (formId: string) => {
     const { mutate } = useMutation({
-        mutationFn: () => postRequestDebtor({ formId, userName, phoneNumber }),
+        mutationFn: (req: SignatureRequest) => postRequestDebtor(req),
         mutationKey: ['requestDebtor', formId],
     });
 
@@ -43,14 +40,9 @@ const postRequestCreditor = async ({
     return response.data;
 };
 
-export const usePostRequestCreditor = ({
-    formId,
-    userName,
-    phoneNumber,
-}: SignatureRequest) => {
+export const usePostRequestCreditor = (formId: string) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postRequestCreditor({ formId, userName, phoneNumber }),
+        mutationFn: (req: SignatureRequest) => postRequestCreditor(req),
         mutationKey: ['requestCreditor', formId],
     });
 
@@ -76,19 +68,13 @@ const postConfirmDebtor = async ({
 
 export const usePostConfirmDebtor = ({
     formId,
-    phoneNumber,
-    verificationCode,
-    recaptchaToken,
     onSuccess,
-}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+}) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postConfirmDebtor({
-                formId,
-                phoneNumber,
-                verificationCode,
-                recaptchaToken,
-            }),
+        mutationFn: (req: TerminationRequest) => postConfirmDebtor(req),
         mutationKey: ['confirmDebtor', formId],
         onSuccess: onSuccess,
     });
@@ -103,33 +89,37 @@ const postConfirmCreditor = async ({
     verificationCode,
     recaptchaToken,
 }: TerminationRequest) => {
-    const response = await api.patch(`/form/confirm/creditor`, {
-        formId,
-        phoneNumber,
-        verificationCode,
-        recaptchaToken,
-    });
+    try {
+        const response = await api.patch(`/form/confirm/creditor`, {
+            formId,
+            phoneNumber,
+            verificationCode,
+            recaptchaToken,
+        });
 
-    return response.data;
+        return response.data;
+    } catch (error) {
+        const err = error as AxiosError;
+        if (err.status === 400) {
+            throw err;
+        }
+    }
 };
 
 export const usePostConfirmCreditor = ({
     formId,
-    phoneNumber,
-    verificationCode,
-    recaptchaToken,
     onSuccess,
-}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
+    onError,
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+    onError?: (error: AxiosError) => void;
+}) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postConfirmCreditor({
-                formId,
-                phoneNumber,
-                verificationCode,
-                recaptchaToken,
-            }),
+        mutationFn: (req: TerminationRequest) => postConfirmCreditor(req),
         mutationKey: ['confirmCreditor', formId],
         onSuccess: onSuccess,
+        onError: onError,
     });
 
     return { mutate };
@@ -149,13 +139,9 @@ const postTerminateFirst = async ({
     return response.data;
 };
 
-export const usePostTerminateFirst = ({
-    formId,
-    userName,
-    phoneNumber,
-}: SignatureRequest) => {
+export const usePostTerminateFirst = (formId: string) => {
     const { mutate } = useMutation({
-        mutationFn: () => postTerminateFirst({ formId, userName, phoneNumber }),
+        mutationFn: (req: SignatureRequest) => postTerminateFirst(req),
         mutationKey: ['terminateFirst', formId],
     });
 
@@ -176,14 +162,9 @@ const postTerminateSecond = async ({
     return response.data;
 };
 
-export const usePostTerminateSecond = ({
-    formId,
-    userName,
-    phoneNumber,
-}: SignatureRequest) => {
+export const usePostTerminateSecond = (formId: string) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postTerminateSecond({ formId, userName, phoneNumber }),
+        mutationFn: (req: SignatureRequest) => postTerminateSecond(req),
         mutationKey: ['terminateSecond', formId],
     });
 
@@ -207,19 +188,13 @@ const postTerminateFirstConfirm = async ({
 
 export const usePostTerminateFirstConfirm = ({
     formId,
-    phoneNumber,
-    verificationCode,
-    recaptchaToken,
     onSuccess,
-}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+}) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postTerminateFirstConfirm({
-                formId,
-                phoneNumber,
-                verificationCode,
-                recaptchaToken,
-            }),
+        mutationFn: (req: TerminationRequest) => postTerminateFirstConfirm(req),
         mutationKey: ['terminateFirstConfirm', formId],
         onSuccess: onSuccess,
     });
@@ -244,22 +219,23 @@ const postTerminateSecondConfirm = async ({
 
 export const usePostTerminateSecondConfirm = ({
     formId,
-    phoneNumber,
-    verificationCode,
-    recaptchaToken,
     onSuccess,
-}: TerminationRequest & { onSuccess?: (data: boolean) => void }) => {
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+}) => {
     const { mutate } = useMutation({
-        mutationFn: () =>
-            postTerminateSecondConfirm({
-                formId,
-                phoneNumber,
-                verificationCode,
-                recaptchaToken,
-            }),
+        mutationFn: (req: TerminationRequest) =>
+            postTerminateSecondConfirm(req),
         mutationKey: ['terminateSecondConfirm', formId],
         onSuccess: onSuccess,
     });
 
     return { mutate };
+};
+
+// 서명 차례 확인
+export const getCurrentSigner = async (formId: string): Promise<boolean> => {
+    const response = await api.get(`/form/${formId}/is-current-signer`);
+    return response.data;
 };

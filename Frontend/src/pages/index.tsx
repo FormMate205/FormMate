@@ -8,7 +8,6 @@ export { default as Chat } from './chat/Chat';
 export { default as ChatRooms } from './chat/ChatRooms';
 export { default as Home } from './home/Home';
 export { default as Login } from './login/Login';
-export { default as Landing } from './login/LandingPage';
 export { default as Signup } from './signup/Signup';
 export { default as OauthAddInfoPage } from './signup/OauthAddInfo';
 export { default as PasswordReset } from './password/PasswordReset';
@@ -26,3 +25,5 @@ export { default as SelectRecipient } from './transfer/SelectRecipient';
 export { default as TransferComplete } from './transfer/TransferComplete';
 export { default as EnterAmount } from './transfer/EnterAmount';
 export { default as EnterPassword } from './transfer/EnterPassword';
+// Signature
+export { default as Signature } from './signature/Signature';

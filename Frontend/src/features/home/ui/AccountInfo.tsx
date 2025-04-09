@@ -4,7 +4,7 @@ import { useGetAccountInfo } from '@/entities/account/api/AccountAPI';
 import { isTokenValid } from '@/entities/auth/model/authService';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { Icons } from '@/shared';
-import { formatCurrency } from '@/shared/model/formatCurrency';
+import { formatCurrency } from '@/shared/lib/formatCurrency';
 
 const AccountInfo = () => {
     const navigate = useNavigate();

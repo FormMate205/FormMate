@@ -11,10 +11,11 @@ export interface ContractItem {
     userIsCreditor: boolean;
     contracteeName: string;
     repaymentAmount: number;
+    scheduledPaymentDate: [number, number, number];
 }
 
-export interface ScheduleMapResponse {
-    [dateKey: string]: {
+export interface ScheduleMap {
+    [day: string]: {
         contracts: ContractItem[];
     };
 }

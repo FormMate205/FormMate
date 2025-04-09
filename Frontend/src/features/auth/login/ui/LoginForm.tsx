@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { refreshToken } from '@/lib/refreshToken';
 import { login } from '../../../../entities/auth/api/login';
 import { LoginFormSchema } from '../model/types';
 import { useLoginForm } from '../model/useLoginForm';
@@ -18,6 +19,7 @@ const LoginForm = () => {
     const onSubmit = async (data: LoginFormSchema) => {
         try {
             await login(data);
+            await refreshToken(); // FCM 토큰 갱신
 
             // 유저 정보 쿼리 갱신
             await queryClient.invalidateQueries({ queryKey: ['user'] });
@@ -46,10 +48,10 @@ const LoginForm = () => {
             className='mx-auto flex max-w-md flex-col gap-6 p-6'
         >
             <h1 className='mt-20 mb-20 text-center text-3xl font-bold'>
-                서비스명
+                FormMate
             </h1>
 
-            <div className='flex flex-col gap-3'>
+            <div className='flex flex-col gap-2'>
                 <input
                     type='email'
                     placeholder='아이디(이메일)를 입력하세요.'
@@ -74,18 +76,27 @@ const LoginForm = () => {
                     </p>
                 )}
 
-                <Button type='submit' variant='primary' disabled={!isValid}>
-                    로그인
-                </Button>
+                <div className='mt-2'>
+                    <Button
+                        type='submit'
+                        variant='primary'
+                        disabled={!isValid}
+                        className='mb-3'
+                    >
+                        로그인
+                    </Button>
+                    <div className='text-line-700 flex justify-between text-sm'>
+                        <button onClick={() => navigate('/login/signup')}>
+                            회원가입
+                        </button>
+                        <button onClick={() => navigate('/login/findPw')}>
+                            비밀번호 찾기
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div className='text-line-500 text-center text-sm'>
-                <a href='/login/findPw' className='underline'>
-                    비밀번호를 잊으셨나요?
-                </a>
-            </div>
-
-            <div className='border-line-200 flex justify-center gap-3 border-t pt-6'>
+            <div className='border-line-200 mt-2 flex justify-center gap-3 border-t pt-7'>
                 <img
                     src='/assets/images/google.png'
                     alt='구글'
@@ -99,11 +110,10 @@ const LoginForm = () => {
                     src='/assets/images/naver.png'
                     alt='네이버'
                     className='h-10 w-10 cursor-pointer'
-                />
-                <img
-                    src='/assets/images/kakao.png'
-                    alt='카카오'
-                    className='h-10 w-10 cursor-pointer'
+                    onClick={() => {
+                        window.location.href =
+                            'https://j12a205.p.ssafy.io/oauth2/authorization/naver';
+                    }}
                 />
             </div>
         </form>

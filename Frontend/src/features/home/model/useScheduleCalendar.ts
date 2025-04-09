@@ -1,47 +1,22 @@
-import { addMonths, endOfMonth, format, subMonths } from 'date-fns';
-import { useMemo, useState } from 'react';
-import { useScheduleMap } from '@/entities/home/model/useScheduleMap';
+import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
+import { fetchScheduleMap } from '@/entities/home/api/fetchScheduleMap';
+import { ScheduleMap } from '@/entities/home/model/types';
 
-export const useScheduleCalendar = () => {
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+export const useScheduleCalendar = (currentMonth: Date) => {
+    const [selectedDate, setSelectedDate] = useState<ScheduleMap>({});
 
-    const getViewDate = (date: Date) => format(endOfMonth(date), 'yyyy-MM-dd');
-
-    const prevMonthDate = getViewDate(subMonths(currentMonth, 1));
-    const currMonthDate = getViewDate(currentMonth);
-    const nextMonthDate = getViewDate(addMonths(currentMonth, 1));
-
-    const { data: prevData } = useScheduleMap(prevMonthDate);
-    const { data: currData } = useScheduleMap(currMonthDate);
-    const { data: nextData } = useScheduleMap(nextMonthDate);
-    const { isLoading } = useScheduleMap(currMonthDate);
-
-    const mergedData = useMemo(
-        () => ({ ...prevData, ...currData, ...nextData }),
-        [prevData, currData, nextData],
-    );
-
-    const modifiers = useMemo(() => {
-        return {
-            hasSettlement: (date: Date) => {
-                const dayKey = String(date.getDate());
-                const contracts = mergedData?.[dayKey]?.contracts ?? [];
-                return contracts.some(
-                    (c) =>
-                        c.repaymentAmount !== null && c.repaymentAmount !== 0,
-                );
-            },
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            const viewDate = format(currentMonth, 'yyyy-MM-dd');
+            const result = await fetchScheduleMap(viewDate);
+            setSelectedDate(result);
         };
-    }, [mergedData]);
+
+        fetchSchedule();
+    }, [currentMonth]);
 
     return {
         selectedDate,
-        setSelectedDate,
-        currentMonth,
-        setCurrentMonth,
-        mergedData,
-        modifiers,
-        isLoading,
     };
 };

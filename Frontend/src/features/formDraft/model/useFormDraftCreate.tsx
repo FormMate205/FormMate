@@ -6,12 +6,12 @@ import {
     formDraftQuestions,
     specialTermsInfo,
 } from '@/entities/formDraft/config/formDraftQuestions';
-import { FormDraftRequest } from '@/entities/formDraft/model/types';
-import { formatCurrency } from '@/shared/model/formatCurrency';
-import { formatDate } from '@/shared/model/formatDate';
+import { useFormDraftStore } from '@/entities/formDraft/model/formDraftStore';
+import { Question } from '@/entities/formDraft/model/types';
+import { formatCurrency } from '@/shared/lib/formatCurrency';
+import { formatDate } from '@/shared/lib/formatDate';
 import { usePostFormDraft } from '../api/formDraftAPI';
-import { validateUserAnswer } from './answerValid';
-import { Question } from './types';
+import { validateUserAnswer } from '../lib/answerValid';
 
 interface UseFormDraftCreateProps {
     userId: string;
@@ -47,23 +47,13 @@ export const useFormDraftCreate = ({
     const [selectedTerms, setSelectedTerms] = useState<string[]>([]);
     const [isLastTermProcessed, setIsLastTermProcessed] = useState(false);
 
-    // FormDraftRequest 상태 관리
-    const [formDraft, setFormDraft] = useState<FormDraftRequest>({
-        receiverId: initialReceiverId,
-        creditorId: '',
-        debtorId: '',
-        maturityDate: '',
-        loanAmount: '',
-        repaymentMethod: '원금상환',
-        repaymentDay: '0',
-        interestRate: '',
-        earlyRepaymentFeeRate: '',
-        overdueInterestRate: '',
-        overdueLimit: '',
-        specialTermIndexes: [],
-    });
+    const { formDraft, updateFormDraft, resetFormDraft } = useFormDraftStore();
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        resetFormDraft(initialReceiverId);
+    }, [initialReceiverId, resetFormDraft]);
 
     // 현재 질문 업데이트
     useEffect(() => {
@@ -91,7 +81,7 @@ export const useFormDraftCreate = ({
                             const conditionMessage: ChatMessage = {
                                 id: messageIdCounterRef.current.toString(),
                                 writerId: BOT_ID,
-                                writerName: '페이봇',
+                                writerName: '관리폼',
                                 content: question.condition!.join('\n'),
                             };
                             setChatHistory((prev) => [
@@ -120,10 +110,9 @@ export const useFormDraftCreate = ({
     useEffect(() => {
         // 모든 특약 처리가 완료된 후
         if (isLastTermProcessed) {
-            setFormDraft((prev) => ({
-                ...prev,
+            updateFormDraft({
                 specialTermIndexes: selectedTerms,
-            }));
+            });
 
             // 마지막 질문으로 이동
             setTimeout(() => {
@@ -138,7 +127,7 @@ export const useFormDraftCreate = ({
             // 플래그 초기화
             setIsLastTermProcessed(false);
         }
-    }, [selectedTerms, isLastTermProcessed, currentQuestion]);
+    }, [selectedTerms, isLastTermProcessed, currentQuestion, updateFormDraft]);
 
     // 메시지 전송 함수
     const sendMessage = (content: string) => {
@@ -148,7 +137,7 @@ export const useFormDraftCreate = ({
             const newMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content: '값을 입력해주세요.',
             };
 
@@ -168,7 +157,7 @@ export const useFormDraftCreate = ({
             const newMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content: errorMessage || '다시 입력해주세요.',
             };
 
@@ -201,7 +190,7 @@ export const useFormDraftCreate = ({
 
         // 현재 질문에 대한 응답 처리
         if (currentQuestion) {
-            updateFormDraft(currentQuestion.id, content);
+            updateFormDraftField(currentQuestion.id, content);
 
             // 마지막 질문이라면
             if (currentQuestion.id === 'complete') {
@@ -212,7 +201,7 @@ export const useFormDraftCreate = ({
                     const finalMessage: ChatMessage = {
                         id: messageIdCounterRef.current.toString(),
                         writerId: BOT_ID,
-                        writerName: '페이봇',
+                        writerName: '관리폼',
                         content: '계약서 생성을 취소했습니다.',
                     };
                     setChatHistory((prev) => [...prev, finalMessage]);
@@ -233,60 +222,64 @@ export const useFormDraftCreate = ({
         }
     };
 
-    // FormDraft 업데이트 함수
-    const updateFormDraft = (questionId: string, answer: string) => {
-        setFormDraft((prev) => {
-            const updated = { ...prev };
+    // FormDraft 업데이트
+    const updateFormDraftField = (questionId: string, answer: string) => {
+        switch (questionId) {
+            case 'role':
+                if (answer === '채권자') {
+                    updateFormDraft({
+                        creditorId: userId,
+                        debtorId: formDraft.receiverId,
+                    });
+                } else {
+                    updateFormDraft({
+                        debtorId: userId,
+                        creditorId: formDraft.receiverId,
+                    });
+                }
+                break;
 
-            switch (questionId) {
-                case 'role':
-                    if (answer === '채권자') {
-                        updated.creditorId = userId;
-                        updated.debtorId = updated.receiverId;
-                    } else {
-                        updated.debtorId = userId;
-                        updated.creditorId = updated.receiverId;
-                    }
-                    break;
+            case 'loanAmount':
+                updateFormDraft({ loanAmount: answer });
+                break;
 
-                case 'loanAmount':
-                    updated.loanAmount = answer;
-                    break;
+            case 'maturityDate':
+                updateFormDraft({ maturityDate: formatDate(answer)! });
+                break;
 
-                case 'maturityDate':
-                    updated.maturityDate = formatDate(answer)!;
-                    break;
+            case 'interestRate':
+                updateFormDraft({ interestRate: answer });
+                break;
 
-                case 'interestRate':
-                    updated.interestRate = answer;
-                    break;
+            case 'overdueInterestRate':
+                updateFormDraft({ overdueInterestRate: answer });
+                break;
 
-                case 'overdueInterestRate':
-                    updated.overdueInterestRate = answer;
-                    break;
+            case 'repayment':
+                if (answer !== '네') {
+                    updateFormDraft({
+                        repaymentMethod: '원금상환',
+                        repaymentDay: '0',
+                    });
+                }
+                break;
 
-                case 'repayment':
-                    if (answer !== '네') {
-                        updated.repaymentMethod = '원금상환';
-                        updated.repaymentDay = '0';
-                    }
-                    break;
+            case 'repaymentDay':
+                if (formDraft.interestRate === '0') {
+                    updateFormDraft({ repaymentDay: '0' });
+                } else {
+                    updateFormDraft({ repaymentDay: answer });
+                }
+                break;
 
-                case 'repaymentDay':
-                    updated.repaymentDay = answer;
-                    break;
+            case 'earlyRepaymentFeeRate':
+                updateFormDraft({ earlyRepaymentFeeRate: answer });
+                break;
 
-                case 'earlyRepaymentFeeRate':
-                    updated.earlyRepaymentFeeRate = answer;
-                    break;
-
-                case 'overdueLimit':
-                    updated.overdueLimit = answer;
-                    break;
-            }
-
-            return updated;
-        });
+            case 'overdueLimit':
+                updateFormDraft({ overdueLimit: answer });
+                break;
+        }
     };
 
     // 역할 선택 처리
@@ -299,11 +292,10 @@ export const useFormDraftCreate = ({
     const handleRepaymentMethodSelect = (method: string) => {
         sendMessage(method);
 
-        setFormDraft((prev) => ({
-            ...prev,
+        updateFormDraft({
             repaymentMethod:
                 method === '원리금균등상환' ? '원리금균등상환' : '원금균등상환',
-        }));
+        });
     };
 
     // 특약사항 선택 처리
@@ -337,10 +329,7 @@ export const useFormDraftCreate = ({
 
     // receiverId 설정 함수
     const setReceiverId = (receiverId: string) => {
-        setFormDraft((prev) => ({
-            ...prev,
-            receiverId,
-        }));
+        updateFormDraft({ receiverId });
     };
 
     // 계약서 생성 처리
@@ -350,7 +339,7 @@ export const useFormDraftCreate = ({
             const completeMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content: '계약서가 성공적으로 생성되었습니다!',
             };
 
@@ -366,7 +355,6 @@ export const useFormDraftCreate = ({
                 navigate(`/chat/${data?.formId}`, {
                     state: {
                         isFin: false,
-                        creditorId: data.creditorId,
                     },
                 });
             }, 100);
@@ -381,7 +369,7 @@ export const useFormDraftCreate = ({
             const loadingMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content: '계약서를 생성하고 있습니다. 잠시만 기다려주세요.',
             };
 
@@ -396,7 +384,7 @@ export const useFormDraftCreate = ({
             const errorMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content:
                     '계약서 생성 중 오류가 발생했습니다. 다시 시도해주세요.',
             };
@@ -412,7 +400,6 @@ export const useFormDraftCreate = ({
         currentQuestion,
         inputEnabled,
         inputValue,
-        formDraft,
         currentTermIndex,
         isContractCreated,
 

@@ -15,12 +15,14 @@ export const useUserService = () => {
                 setUser(data);
                 setLoggedIn(true);
             } else {
-                // navigate('/login'); // 로그인 페이지로 리다이렉트
-                if (location.pathname !== '/login/oauthInfo') {
+                if (
+                    !location.pathname.startsWith('/login') &&
+                    location.pathname !== '/oauth/callback'
+                ) {
                     navigate('/login');
                 }
                 clearUser();
             }
         }
-    }, [data, isLoading, setUser, setLoggedIn, clearUser, navigate]);
+    }, [data, isLoading, setUser, setLoggedIn, clearUser, navigate, location]);
 };

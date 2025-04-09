@@ -90,6 +90,9 @@ export const useGetMessages = ({ formId, page, size }: ChatHistoryRequest) => {
     // 모든 페이지의 데이터를 하나로 합침
     const messages = data ? data.pages.flatMap((page) => page.content) : [];
 
+    // 계약 정보
+    const formInfo = data.pages[0].formInformation;
+
     // intersection observer로 뷰포트 확인
     const lastItemRef = useIntersection(
         { threshold: 0.1, rootMargin: '0px' },
@@ -100,5 +103,5 @@ export const useGetMessages = ({ formId, page, size }: ChatHistoryRequest) => {
         },
     );
 
-    return { messages, fetchNextPage, lastItemRef, refetch };
+    return { messages, formInfo, fetchNextPage, lastItemRef, refetch };
 };

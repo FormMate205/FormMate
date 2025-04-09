@@ -6,8 +6,7 @@ import { Footer, Header } from '@/widgets';
 const ChatRooms = () => {
     return (
         <div className='flex h-screen w-full flex-col'>
-            {' '}
-            <div className='flex h-screen w-full flex-col px-4 py-2'>
+            <div className='flex h-screen w-full flex-col overflow-hidden px-4 py-2'>
                 <div className='flex-none'>
                     <Header title='채팅 목록' />
                 </div>

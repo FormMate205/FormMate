@@ -2,11 +2,11 @@ import { format } from 'date-fns';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CalendarButton } from '@/components/ui/calendarButton';
+import { Question } from '@/entities/formDraft/model/types';
 import RepaymentMethodSelector from '@/entities/formDraft/ui/RepaymentMethodSelector';
 import RoleSelector from '@/entities/formDraft/ui/RoleSelector';
 import SpecialTermsSelector from '@/entities/formDraft/ui/SpecialTermSelector';
 import { DatePicker } from '@/shared/ui/DatePicker';
-import { Question } from '../model/types';
 
 interface FormSelectorProps {
     currentQuestion: Question | null;
@@ -78,9 +78,8 @@ const FormSelector = ({
                     <CalendarButton
                         variant={`${selectedDate ? 'default' : 'secondary'}`}
                         onClick={() => handleConfirmDate(selectedDate)}
-                    >
-                        확인
-                    </CalendarButton>
+                        children='확인'
+                    />
                 </div>
             );
         }

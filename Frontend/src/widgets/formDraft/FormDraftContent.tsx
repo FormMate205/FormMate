@@ -2,11 +2,11 @@ import { ChangeEvent, useEffect, useRef } from 'react';
 import { BOT_ID } from '@/entities/formDraft/config/constant';
 import { FormPartner } from '@/entities/formDraft/model/types';
 import { User } from '@/entities/user/model/types';
-import showName from '@/features/chat/model/showName';
+import showName from '@/features/chat/lib/showName';
 import ChatBox from '@/features/chat/ui/ChatBox';
 import { useFormDraftCreate } from '@/features/formDraft/model/useFormDraftCreate';
 import FormSelector from '@/features/formDraft/ui/FormSelector';
-import { maskUserName } from '@/shared/model/maskUserName';
+import { maskUserName } from '@/shared/lib/maskUserName';
 import useNavigationGuard from '@/shared/model/useNavigationGuard';
 import { Header } from '@/widgets';
 import ChatInput from '../../entities/chat/ui/ChatInput';
@@ -61,7 +61,7 @@ const FormDraftContent = ({ user, partner }: FormDraftContentProps) => {
     }, [chatHistory]);
 
     // 연속채팅 중 첫 채팅만 프로필 표시
-    const displayProfile = showName(chatHistory);
+    const displayProfile = showName(chatHistory, true);
 
     const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setInputValue(e.target.value);
@@ -76,14 +76,14 @@ const FormDraftContent = ({ user, partner }: FormDraftContentProps) => {
         useNavigationGuard({ shouldBlock: !isContractCreated });
 
     return (
-        <div className='z-10 flex flex-col items-center justify-between w-full px-4 py-2'>
+        <div className='z-10 flex w-full flex-col items-center justify-between px-4 py-2'>
             <Header title='계약 생성' />
 
             <NotiContainer name={maskUserName(receiverName)} />
 
             {/* 채팅 내용 */}
             <div
-                className='flex flex-col flex-1 w-full gap-2 my-1 overflow-y-auto scrollbar-none'
+                className='scrollbar-none my-1 flex w-full flex-1 flex-col gap-2 overflow-y-auto'
                 ref={chatContainerRef}
             >
                 {chatHistory.length > 0 &&
@@ -125,6 +125,7 @@ const FormDraftContent = ({ user, partner }: FormDraftContentProps) => {
                 value={inputValue}
                 onChange={onChange}
                 onClick={onClick}
+                onSend={onClick}
             />
 
             <NavigationGuardModal
