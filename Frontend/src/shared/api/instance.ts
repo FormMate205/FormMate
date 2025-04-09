@@ -43,9 +43,7 @@ api.interceptors.response.use(
         // 현재 요청 경로 확인
         const requestPath = originalRequest.url;
         const isPublicApi = publicApiPaths.some(
-            (path) =>
-                requestPath &&
-                (requestPath === path || requestPath.endsWith(path)),
+            (path) => requestPath && requestPath.includes(path),
         );
 
         // 공개 API에서 401 에러가 발생한 경우 - 토큰 갱신 시도 없이 에러 반환
