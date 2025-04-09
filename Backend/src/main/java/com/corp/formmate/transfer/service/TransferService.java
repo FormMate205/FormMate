@@ -24,7 +24,6 @@ import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.TransferException;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.dto.TransferCreateResponse;
-import com.corp.formmate.transfer.dto.TransferFormListResponse;
 import com.corp.formmate.transfer.dto.TransferListResponse;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
@@ -120,24 +119,6 @@ public class TransferService {
 				user, startDate, endDate, pageableWithSort);
 		}
 		return transfers.map(transfer -> TransferListResponse.fromEntity(transfer, user));
-	}
-
-	@Transactional(readOnly = true)
-	public Page<TransferFormListResponse> selectFormTransfers(Integer formId, String transferStatus,
-		Pageable pageable) {
-
-		Page<TransferEntity> transfers;
-		FormEntity formEntity = getFormEntity(formId);
-
-		if ("전체".equals(transferStatus)) {
-			transfers = transferRepository.findByFormAndCurrentRoundGreaterThan(formEntity, 0, pageable);
-		} else {
-			TransferStatus status = TransferStatus.fromKorName(transferStatus);
-			transfers = transferRepository.findByFormAndStatusAndCurrentRoundGreaterThan(formEntity, status, 0,
-				pageable);
-		}
-
-		return transfers.map(TransferFormListResponse::fromEntity);
 	}
 
 	@Transactional

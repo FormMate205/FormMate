@@ -96,15 +96,15 @@ public class PaymentScheduleService {
 			if (Boolean.TRUE.equals(s.getIsPaid()))
 				continue;
 
-			long scheduled = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount();
+			long scheduledTotal = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount();
 
 			if (isFirst) {
 				isFirst = false;
-				if (leftover >= scheduled) {
-					s.markAsPaid(scheduled, now);
-					leftover -= scheduled;
+				if (leftover >= scheduledTotal) {
+					s.markAsPaid(scheduledTotal, now);
+					leftover -= scheduledTotal;
 
-					// 수수료 부과 (중도상환 발생 시)
+					// 수수료 부과
 					if (leftover > 0 && form.getEarlyRepaymentFeeRate() != null) {
 						BigDecimal feeRate = form.getEarlyRepaymentFeeRate();
 						BigDecimal leftoverDecimal = BigDecimal.valueOf(leftover);
@@ -121,12 +121,19 @@ public class PaymentScheduleService {
 					paymentScheduleRepository.saveAll(schedules);
 					return schedules;
 				}
-			} else if (leftover >= s.getScheduledPrincipal()) {
-				s.applyEarlyRepayment();
-				leftover -= s.getScheduledPrincipal();
-				contract.setRemainingPrincipal(contract.getRemainingPrincipal() - s.getScheduledPrincipal());
 			} else {
-				break;
+				long principal = s.getScheduledPrincipal();
+				if (leftover >= principal) {
+					s.applyEarlyRepayment();
+					leftover -= principal;
+					contract.setRemainingPrincipal(contract.getRemainingPrincipal() - principal);
+				} else {
+					// 일부만 소진 가능한 회차 → 납부 처리 + 이후 회차 재계산
+					s.markAsPartialPaid(leftover, now);
+					contract.setRemainingPrincipal(contract.getRemainingPrincipal() - leftover);
+					leftover = 0;
+					break;
+				}
 			}
 		}
 
