@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.corp.formmate.alert.service.AlertService;
@@ -325,37 +323,75 @@ public class ContractService {
 	 */
 	@Transactional
 	public List<MonthlyContractDetail> selectMonthlyContracts(Integer userId, LocalDate viewDate) {
-		// (viewDate -1month), (viewDate), (viewDate +1month) 총 3개의 YearMonth
+		// 3개월 범위 계산
 		YearMonth prevMonth = YearMonth.from(viewDate).minusMonths(1);
 		YearMonth currMonth = YearMonth.from(viewDate);
 		YearMonth nextMonth = YearMonth.from(viewDate).plusMonths(1);
+		List<YearMonth> targetMonths = List.of(prevMonth, currMonth, nextMonth);
 
-		List<YearMonth> targetMonths = Arrays.asList(prevMonth, currMonth, nextMonth);
-
-		// 최종 반환할 전체 Detail 목록
 		List<MonthlyContractDetail> allDetails = new ArrayList<>();
-
-		// 필요한 데이터 조회
 		UserEntity userEntity = getUser(userId);
-		List<FormStatus> statuses = List.of(FormStatus.IN_PROGRESS, FormStatus.OVERDUE);
-		List<FormEntity> allForms = formRepository.findAllByStatuses(userId, statuses);
+		LocalDate today = LocalDate.now();
 
-		LocalDate now = LocalDate.now();
-		YearMonth nowYm = YearMonth.from(now);
+		// 진행중, 연체 중인 계약만
+		List<FormEntity> allForms = formRepository.findAllByStatuses(userId,
+			List.of(FormStatus.IN_PROGRESS, FormStatus.OVERDUE));
 
-		// 3개월을 순회
-		for (YearMonth ym : targetMonths) {
-			for (FormEntity form : allForms) {
-				ContractEntity contract = getContract(form);
-				boolean isCreditor = form.getCreditorName().equals(userEntity.getUserName());
-				String contracteeName = isCreditor ? form.getDebtorName() : form.getCreditorName();
+		for (FormEntity form : allForms) {
+			ContractEntity contract = getContract(form);
+			List<PaymentScheduleEntity> schedules = paymentScheduleService.selectByContract(contract);
 
-				if (ym.isBefore(nowYm)) {
-					// 과거 달: 실제 송금 내역 기반
-					allDetails.addAll(findTransferDetailsForMonth(form, ym, isCreditor, contracteeName));
+			boolean isCreditor = form.getCreditor().equals(userEntity);
+			String contracteeName = isCreditor ? form.getDebtorName() : form.getCreditorName();
+
+			for (PaymentScheduleEntity s : schedules) {
+				LocalDate paymentDate = s.getScheduledPaymentDate().toLocalDate();
+				YearMonth ym = YearMonth.from(paymentDate);
+				if (!targetMonths.contains(ym))
+					continue;
+
+				long scheduled = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount();
+				long actual = s.getActualPaidAmount() != null ? s.getActualPaidAmount() : 0L;
+				long unpaid = Math.max(0, scheduled - actual);
+
+				if (paymentDate.isBefore(today)) {
+					// 과거: 실제 납부 내역
+					if (actual > 0) {
+						allDetails.add(MonthlyContractDetail.builder()
+							.userIsCreditor(isCreditor)
+							.contracteeName(contracteeName)
+							.repaymentAmount(actual)
+							.scheduledPaymentDate(paymentDate)
+							.build());
+					}
+				} else if (paymentDate.isAfter(today)) {
+					// 미래: 예정 납부 내역
+					if (!Boolean.TRUE.equals(s.getIsPaid()) && unpaid > 0) {
+						allDetails.add(MonthlyContractDetail.builder()
+							.userIsCreditor(isCreditor)
+							.contracteeName(contracteeName)
+							.repaymentAmount(unpaid)
+							.scheduledPaymentDate(paymentDate)
+							.build());
+					}
 				} else {
-					// 현재 / 미래 달: 예측 스케줄 기반
-					//					allDetails.addAll(computeDetailsFromPreview(form, contract, ym, isCreditor, contracteeName));
+					// ✅ 오늘 날짜: 과거 + 미래 둘 다
+					if (actual > 0) {
+						allDetails.add(MonthlyContractDetail.builder()
+							.userIsCreditor(isCreditor)
+							.contracteeName(contracteeName)
+							.repaymentAmount(actual)
+							.scheduledPaymentDate(paymentDate)
+							.build());
+					}
+					if (!Boolean.TRUE.equals(s.getIsPaid()) && unpaid > 0) {
+						allDetails.add(MonthlyContractDetail.builder()
+							.userIsCreditor(isCreditor)
+							.contracteeName(contracteeName)
+							.repaymentAmount(unpaid)
+							.scheduledPaymentDate(paymentDate)
+							.build());
+					}
 				}
 			}
 		}
@@ -697,7 +733,8 @@ public class ContractService {
 
 		log.info("5-1. previewRequest 종료");
 
-		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(previewRequest, PageRequest.of(0,10000));
+		PaymentPreviewResponse preview = paymentPreviewService.calculatePaymentPreview(previewRequest,
+			PageRequest.of(0, 10000));
 
 		log.info("5-2. preview 종료");
 
