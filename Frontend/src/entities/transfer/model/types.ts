@@ -31,3 +31,12 @@ export type GetScheduledPaymentInfoResponse = {
     monthlyRemainingPayment: number;
     earlyRepaymentFeeRate: number;
 };
+
+export interface repaymentContract {
+    formId: string;
+    partnerId: string;
+    partnerName: string;
+    nextRepaymentDate: string | number[];
+}
+
+export type GetRepaymentContractListResponse = repaymentContract[];
