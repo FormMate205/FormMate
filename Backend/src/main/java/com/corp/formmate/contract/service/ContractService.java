@@ -17,6 +17,7 @@ import com.corp.formmate.alert.service.AlertService;
 import com.corp.formmate.contract.dto.AmountResponse;
 import com.corp.formmate.contract.dto.ContractDetailResponse;
 import com.corp.formmate.contract.dto.ContractPreviewResponse;
+import com.corp.formmate.contract.dto.ContractTransferResponse;
 import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
@@ -985,6 +986,41 @@ public class ContractService {
 		}
 
 		return 0L;
+	}
+
+	public List<ContractTransferResponse> selectContractTransfers(Integer userId, String name) {
+		UserEntity userEntity = getUser(userId);
+		String trimmedName = name != null ? name.trim() : null;
+
+		return formRepository.findAllByStatuses(userId,
+				List.of(FormStatus.IN_PROGRESS, FormStatus.OVERDUE)).stream()
+
+			// 본인이 채무자인 경우에만 동작
+			.filter(form -> form.getDebtor().equals(userEntity))
+
+			// 이름 필터 조건 추가 (name이 있을 경우만)
+			.filter(form -> {
+				if (trimmedName == null || trimmedName.isBlank())
+					return true;
+				String partnerName = form.getCreditorName();
+				return partnerName != null && partnerName.contains(trimmedName);
+			})
+
+			// 매핑
+			.map(form -> {
+				ContractEntity contract = getContract(form);
+				PaymentScheduleEntity paymentSchedule = paymentScheduleService.selectNextScheduleByContract(contract);
+
+				return ContractTransferResponse.builder()
+					.formId(form.getId())
+					.partnerId(form.getCreditor().getId())
+					.partnerName(form.getCreditorName())
+					.nextRepaymentDate(paymentSchedule.getScheduledPaymentDate().toLocalDate())
+					.build();
+			})
+
+			// 리스트로 수집
+			.collect(Collectors.toList());
 	}
 
 	//	public void notifyRepaymentDueContracts() {
