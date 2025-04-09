@@ -5,6 +5,7 @@ import {
     GetContractsByPartnerResponse,
     GetPartnerListRequest,
     GetPartnerListResponse,
+    GetRepaymentContractListResponse,
     GetScheduledPaymentInfoResponse,
 } from '../model/types';
 
@@ -98,5 +99,24 @@ export const useGetScheduledPaymentInfo = (formId: string) => {
         queryKey: ['scheduledPaymentInfo', formId],
         queryFn: () => getScheduledPaymentInfo(formId),
         enabled: !!formId,
+    });
+};
+
+// 나의 체결한 계약 목록 조회(송금화면에서 사용)
+const getRepaymentContractList = async (
+    partnerName?: string,
+): Promise<GetRepaymentContractListResponse> => {
+    const response = await api.get('contract/forms', {
+        params: {
+            partnerName,
+        },
+    });
+    return response.data;
+};
+
+export const useGetRepaymentContractList = (partnerName?: string) => {
+    return useQuery({
+        queryKey: ['repaymentContractList', partnerName],
+        queryFn: () => getRepaymentContractList(partnerName),
     });
 };

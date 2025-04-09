@@ -12,3 +12,7 @@ export type PostTransferResponse = {
     amount: number;
     status: string;
 };
+
+export type VerifyPasswordRequest = {
+    accountPassword: string;
+};
