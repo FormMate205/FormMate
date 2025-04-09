@@ -1,5 +1,9 @@
 import { cn } from '@/lib/utils';
-import { getDday } from '@/shared/lib/date';
+import {
+    formatContractDuration,
+    formatDateString,
+    getDday,
+} from '@/shared/lib/date';
 import { ContractByPartnerItem } from '../model/types';
 
 interface Props {
@@ -19,7 +23,7 @@ const ContractDrawerItem = ({ contract, onClick }: Props) => {
             <div className='flex items-center gap-6'>
                 <div
                     className={cn(
-                        'text-lg font-medium',
+                        'text-lg font-medium whitespace-nowrap',
                         isOverdue ? 'text-subPink-600' : 'text-primary-500',
                     )}
                 >
@@ -31,8 +35,14 @@ const ContractDrawerItem = ({ contract, onClick }: Props) => {
                         {contract.nextRepaymentAmount.toLocaleString()}원
                     </div>
                     <div className='text-line-700 flex flex-col'>
-                        <span>다음 상환일: {contract.nextRepaymentDate}</span>
-                        <span>계약 기간: {contract.contractDuration}</span>
+                        <span>
+                            다음 상환일:{' '}
+                            {formatDateString(contract.nextRepaymentDate)}
+                        </span>
+                        <span>
+                            계약 기간:{' '}
+                            {formatContractDuration(contract.contractDuration)}
+                        </span>
                     </div>
                 </div>
             </div>
