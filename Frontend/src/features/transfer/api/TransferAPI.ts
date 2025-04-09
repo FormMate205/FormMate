@@ -25,7 +25,7 @@ export const usePostTransfer = () => {
 
 // 계좌 비밀번호 확인
 const postVerifyPassword = async (data: VerifyPasswordRequest) => {
-    const response = await api.post('/account/check-password', data);
+    const response = await api.post('users/account/check-password', data);
     return response.data;
 };
 
