@@ -35,9 +35,9 @@ const EnterPasswordStep = ({ onConfirm, onReset }: EnterPasswordStepProps) => {
     }, [onReset]);
 
     return (
-        <div className='relative flex h-full flex-col justify-between px-4 py-2'>
+        <div className='relative flex h-full flex-col justify-between py-2'>
             <div className='flex flex-col justify-center p-6'>
-                <div className='mb-4 flex items-center'>
+                <div className='my-4 flex items-center'>
                     <span className='flex-1 text-center text-xl font-semibold'>
                         결제 비밀번호를 입력하세요
                     </span>

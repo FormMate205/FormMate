@@ -7,7 +7,7 @@ interface FunnelHeaderProps {
 
 const FunnelHeader = ({ title, onBack }: FunnelHeaderProps) => {
     return (
-        <div className='flex w-full items-center justify-between px-4 py-4'>
+        <div className='flex w-full items-center justify-between py-4'>
             <div className='flex items-center gap-3'>
                 {onBack && (
                     <button aria-label='뒤로가기' onClick={onBack}>

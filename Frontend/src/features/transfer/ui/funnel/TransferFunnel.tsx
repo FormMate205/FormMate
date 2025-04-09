@@ -2,7 +2,7 @@ import { useFunnel } from '@use-funnel/react-router-dom';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { usePostVerifyPassword } from '../../api/TransferAPI';
+import { usePostVerifyPassword, usePostTransfer } from '../../api/TransferAPI';
 import { transferSteps, TransferState } from '../../model/transferFunnelSteps';
 import SelectTabs, { SelectDispatchPayload } from '../SelectTabs';
 import EnterAmountStep from './steps/EnterAmountStep';
@@ -36,19 +36,37 @@ const PasswordStep = ({
     dispatch: (event: PasswordEvent) => void;
     onBack: () => void;
 }) => {
-    const { mutate } = usePostVerifyPassword();
+    const navigate = useNavigate();
+    const { mutate: verifyPassword } = usePostVerifyPassword();
+    const { mutate: transfer } = usePostTransfer();
     const [shouldReset, setShouldReset] = useState(false);
 
     const handleConfirm = (password: string) => {
-        mutate(
+        verifyPassword(
             { accountPassword: password },
             {
                 onSuccess: (isValid) => {
                     if (isValid) {
-                        dispatch({
-                            type: '비밀번호검증성공',
-                            payload: context,
-                        });
+                        transfer(
+                            {
+                                partnerId: context.partnerId,
+                                formId: context.formId,
+                                repaymentAmount: context.repaymentAmount,
+                                amount: context.amount ?? 0,
+                            },
+                            {
+                                onSuccess: () => {
+                                    dispatch({
+                                        type: '비밀번호검증성공',
+                                        payload: context,
+                                    });
+                                },
+                                onError: () => {
+                                    alert('송금 중 오류가 발생했습니다.');
+                                    navigate('/');
+                                },
+                            },
+                        );
                     } else {
                         setShouldReset(true);
                         dispatch({
