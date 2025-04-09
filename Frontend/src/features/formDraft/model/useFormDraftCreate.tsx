@@ -81,7 +81,7 @@ export const useFormDraftCreate = ({
                             const conditionMessage: ChatMessage = {
                                 id: messageIdCounterRef.current.toString(),
                                 writerId: BOT_ID,
-                                writerName: '페이봇',
+                                writerName: '관리폼',
                                 content: question.condition!.join('\n'),
                             };
                             setChatHistory((prev) => [
@@ -137,7 +137,7 @@ export const useFormDraftCreate = ({
             const newMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content: '값을 입력해주세요.',
             };
 
@@ -157,7 +157,7 @@ export const useFormDraftCreate = ({
             const newMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content: errorMessage || '다시 입력해주세요.',
             };
 
@@ -201,7 +201,7 @@ export const useFormDraftCreate = ({
                     const finalMessage: ChatMessage = {
                         id: messageIdCounterRef.current.toString(),
                         writerId: BOT_ID,
-                        writerName: '페이봇',
+                        writerName: '관리폼',
                         content: '계약서 생성을 취소했습니다.',
                     };
                     setChatHistory((prev) => [...prev, finalMessage]);
@@ -339,7 +339,7 @@ export const useFormDraftCreate = ({
             const completeMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content: '계약서가 성공적으로 생성되었습니다!',
             };
 
@@ -369,7 +369,7 @@ export const useFormDraftCreate = ({
             const loadingMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content: '계약서를 생성하고 있습니다. 잠시만 기다려주세요.',
             };
 
@@ -384,7 +384,7 @@ export const useFormDraftCreate = ({
             const errorMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),
                 writerId: BOT_ID,
-                writerName: '페이봇',
+                writerName: '관리폼',
                 content:
                     '계약서 생성 중 오류가 발생했습니다. 다시 시도해주세요.',
             };
