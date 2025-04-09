@@ -2,14 +2,13 @@ package com.corp.formmate.form.service;
 
 import java.util.List;
 
-import com.corp.formmate.chat.entity.MessageType;
-import com.corp.formmate.chat.repository.ChatRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.corp.formmate.chat.entity.MessageType;
 import com.corp.formmate.chat.event.CreditorSignatureCompletedEvent;
 import com.corp.formmate.chat.event.DebtorSignatureCompletedEvent;
 import com.corp.formmate.chat.event.FirstPartyTerminationSignedEvent;
@@ -18,6 +17,7 @@ import com.corp.formmate.chat.event.FormTerminationCancelledEvent;
 import com.corp.formmate.chat.event.FormTerminationCompletedEvent;
 import com.corp.formmate.chat.event.FormTerminationRequestedEvent;
 import com.corp.formmate.chat.event.FormUpdatedEvent;
+import com.corp.formmate.chat.repository.ChatRepository;
 import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.dto.FormConfirmRequest;
 import com.corp.formmate.form.dto.FormConfirmVerifyRequest;
@@ -110,7 +110,11 @@ public class FormService {
 		}
 		checkAccount(formEntity.getCreditor().getAccountNumber(), formEntity.getDebtor().getAccountNumber());
 		formEntity.update(request);
-		
+
+		formEntity.updateStatus(FormStatus.BEFORE_APPROVAL);
+
+		formRepository.save(formEntity);
+
 		// 기존 서명 요청 메세지 삭제
 		chatRepository.softDeleteSignatureRequestChats(formId, MessageType.SIGNATURE_REQUEST_CONTRACT);
 
