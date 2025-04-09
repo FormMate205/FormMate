@@ -266,8 +266,41 @@ public class MyAccountController {
 		return ResponseEntity.status(HttpStatus.OK).body("계좌가 삭제되었습니다.");
 	}
 
+	@Operation(summary = "계좌 비밀번호 확인", description = "입력한 계좌 비밀번호가 일치하는지 확인합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "비밀번호 확인 성공",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(type = "boolean"),
+				examples = @ExampleObject(value = "true")
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "입력값 오류",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "비밀번호가 설정되지 않음",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
 	@PostMapping("/check-password")
 	public ResponseEntity<Boolean> checkAccountPassword(@CurrentUser AuthUser authUser,
+		@io.swagger.v3.oas.annotations.parameters.RequestBody(
+			description = "계좌 비밀번호 확인 요청",
+			required = true,
+			content = @Content(schema = @Schema(implementation = CheckAccountPasswordRequest.class))
+		)
 		@RequestBody CheckAccountPasswordRequest request) {
 		Integer userId = authUser.getId();
 		Boolean response = myAccountService.checkAccountPassword(userId, request);
