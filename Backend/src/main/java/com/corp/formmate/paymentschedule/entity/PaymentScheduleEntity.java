@@ -66,4 +66,41 @@ public class PaymentScheduleEntity {
 
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt; // 마지막 수정 시각
+
+	public void markAsPaid(long amount, LocalDateTime paidDate) {
+		this.actualPaidAmount = amount;
+		this.actualPaidDate = paidDate;
+		this.isPaid = true;
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void markAsPartialPaid(long amount, LocalDateTime paidDate) {
+		this.actualPaidAmount = amount;
+		this.actualPaidDate = paidDate;
+		this.isPaid = false;
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void applyEarlyRepayment() {
+		this.scheduledInterest = 0L;
+		this.overdueAmount = 0L;
+		this.actualPaidAmount = 0L;
+		this.isPaid = true;
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void updateSchedule(long principal, long interest) {
+		this.scheduledPrincipal = principal;
+		this.scheduledInterest = interest;
+		this.earlyRepaymentFee = 0L;
+		this.actualPaidAmount = 0L;
+		this.isPaid = false;
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void applyEarlyRepaymentFee(long fee) {
+		this.earlyRepaymentFee = fee;
+		this.updatedAt = LocalDateTime.now();
+	}
+
 }
