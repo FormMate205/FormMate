@@ -9,3 +9,10 @@ export const getDday = (targetDate: string): string => {
     if (diffDays === 0) return 'D-Day';
     return `D+${Math.abs(diffDays)}`;
 };
+
+// utils/date.ts
+export const formatContractDuration = (duration: string): string => {
+    const [start, end] = duration.split(' ~ ');
+    const formatDate = (dateStr: string) => dateStr.split('T')[0];
+    return `${formatDate(start)} ~ ${formatDate(end)}`;
+};
