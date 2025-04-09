@@ -78,9 +78,8 @@ const FormSelector = ({
                     <CalendarButton
                         variant={`${selectedDate ? 'default' : 'secondary'}`}
                         onClick={() => handleConfirmDate(selectedDate)}
-                    >
-                        확인
-                    </CalendarButton>
+                        children='확인'
+                    />
                 </div>
             );
         }
