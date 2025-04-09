@@ -1,6 +1,7 @@
 package com.corp.formmate.contract.service;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1049,6 +1051,9 @@ public class ContractService {
 
 		// 1. Transfer 기반 내역 생성
 		for (TransferEntity t : transfers) {
+			if (t.getCurrentRound() == 0) {
+				continue;
+			}
 			responses.add(TransferFormListResponse.builder()
 				.status(t.getStatus().getKorName())
 				.currentRound(t.getCurrentRound())
@@ -1092,31 +1097,85 @@ public class ContractService {
 		return new PageImpl<>(pageContent, pageable, filtered.size());
 	}
 
-	//	public void notifyRepaymentDueContracts() {
-	//		List<ContractEntity> dueContracts = contractRepository.findByNextRepaymentDate(LocalDate.now());
-	//		for (ContractEntity contract : dueContracts) {
-	//			FormEntity form = contract.getForm();
-	//			String senderName = form.getDebtorName();
-	//			String receiverName = form.getCreditorName();
-	//			Long amount = enhancedPaymentPreviewService.getCurrentRoundAmount(form, contract);
-	//			NumberFormat formatter = NumberFormat.getNumberInstance();
-	//			String formattedAmount = formatter.format(amount);
-	//
-	//			// 알림 - 보낼 사람 (채무자)
-	//			alertService.createAlert(
-	//				form.getDebtor(),
-	//				"상환일",
-	//				"오늘은 상환일입니다!",
-	//				receiverName + "님께 " + formattedAmount + "원을 상환하세요"
-	//			);
-	//
-	//			// 알림 - 받는 사람 (채권자)
-	//			alertService.createAlert(
-	//				form.getCreditor(),
-	//				"상환일",
-	//				"오늘은 상환일입니다!",
-	//				senderName + "님께서 " + formattedAmount + "원을 상환할 예정입니다"
-	//			);
-	//		}
-	//	}
+	@Transactional
+	public void notifyRepaymentDueContracts() {
+		List<FormEntity> forms = formRepository.findByStatusIn(List.of(FormStatus.IN_PROGRESS, FormStatus.OVERDUE));
+
+		for (FormEntity form : forms) {
+			ContractEntity contract = contractRepository.findByForm(form).orElse(null);
+			if (contract == null) {
+				continue;
+			}
+
+			int currentRound = contract.getCurrentPaymentRound();
+			Optional<PaymentScheduleEntity> optSchedule = paymentScheduleService
+				.selectByContractAndRound(contract, currentRound);
+
+			if (optSchedule.isEmpty()) {
+				continue;
+			}
+			PaymentScheduleEntity schedule = optSchedule.get();
+
+			if (!Boolean.TRUE.equals(schedule.getIsPaid())
+				&& schedule.getScheduledPaymentDate().toLocalDate().isEqual(LocalDate.now())) {
+
+				long scheduledTotal = schedule.getScheduledPrincipal() + schedule.getScheduledInterest();
+				long actualPaid = schedule.getActualPaidAmount() != null ? schedule.getActualPaidAmount() : 0L;
+				long amount = Math.max(0, scheduledTotal - actualPaid);
+
+				String senderName = form.getDebtorName();
+				String receiverName = form.getCreditorName();
+				String formattedAmount = NumberFormat.getNumberInstance().format(amount);
+
+				// 채무자 알림
+				alertService.createAlert(
+					form.getDebtor(),
+					"상환일",
+					"오늘은 상환일입니다!",
+					receiverName + "님께 " + formattedAmount + "원을 상환하세요"
+				);
+
+				// 채권자 알림
+				alertService.createAlert(
+					form.getCreditor(),
+					"상환일",
+					"오늘은 상환일입니다!",
+					senderName + "님께서 " + formattedAmount + "원을 상환할 예정입니다"
+				);
+			}
+		}
+	}
+
+	/* TODO
+	 * 1. contract 의 회차, 다음 상환일 갱신시켜주는 스케줄러 updateContractsNextRepayment
+	 * 2. contract 의 연체 판단하는 스케줄러(연체처리, 알림 발송)
+	 * 3. 연체중인 놈 가져와서 연체 이자 누적시켜버리는 스케줄러
+	 */
+
+	@Transactional
+	public void updateContractsNextRepayment() {
+		LocalDate today = LocalDate.now();
+		List<FormEntity> forms = formRepository.findByStatusIn(List.of(FormStatus.IN_PROGRESS, FormStatus.OVERDUE));
+
+		for (FormEntity form : forms) {
+			ContractEntity contract = contractRepository.findByForm(form).orElse(null);
+			if (contract == null) {
+				continue;
+			}
+
+			LocalDate nextRepaymentDate = contract.getNextRepaymentDate();
+			if (nextRepaymentDate == null || !nextRepaymentDate.plusDays(1).isEqual(today)) {
+				continue;
+			}
+
+			PaymentScheduleEntity paymentSchedule = paymentScheduleService.selectByContractAndRound(contract,
+				contract.getCurrentPaymentRound() + 1).orElse(null);
+
+			if (paymentSchedule != null) {
+				contract.updateSchedule(paymentSchedule.getPaymentRound(),
+					paymentSchedule.getScheduledPaymentDate().toLocalDate());
+				contractRepository.save(contract);
+			}
+		}
+	}
 }
