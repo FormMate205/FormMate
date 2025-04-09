@@ -7,7 +7,6 @@ import {
     AccountPassword,
     UserPasswordUpdate,
     FormDraft,
-    SelectRecipient,
     Login,
     FormMatch,
     Signup,
@@ -15,9 +14,6 @@ import {
     PasswordReset,
     OauthAddInfoPage,
     FormCheck,
-    TransferComplete,
-    EnterPassword,
-    EnterAmount,
     Home,
     ChatRooms,
 } from '@/pages';
@@ -35,6 +31,8 @@ const ContractDetail = lazy(() => import('@/pages/contract/ContractDetail'));
 const MyInfo = lazy(() => import('@/pages/myinfo/MyInfo'));
 
 const Notifications = lazy(() => import('@/pages/notification/Notifiactions'));
+
+const Transfer = lazy(() => import('@/pages/transfer/Transfer'));
 
 export const router = createBrowserRouter([
     {
@@ -144,16 +142,7 @@ export const router = createBrowserRouter([
             },
 
             // 송금
-            { path: 'transfer', element: <SelectRecipient /> },
-            {
-                path: '/transfer/complete',
-                element: <TransferComplete />,
-            },
-            {
-                path: '/transfer/password',
-                element: <EnterPassword />,
-            },
-            { path: '/transfer/amount', element: <EnterAmount /> },
+            { path: 'transfer', element: <Transfer /> },
 
             // 내 정보
             {
