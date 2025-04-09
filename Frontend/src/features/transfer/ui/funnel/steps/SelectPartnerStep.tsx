@@ -11,17 +11,13 @@ import {
 } from '@/entities/transfer/model/types';
 import TabList from '@/entities/transfer/ui/TabList';
 import ContractDrawer from '../../ContractDrawer';
+import { SelectDispatchPayload } from '../../SelectTabs';
 
-type SelectPartnerProps = {
-    dispatch: (payload: {
-        partnerId: string;
-        partnerName: string;
-        formId: string;
-        repaymentAmount: number;
-    }) => void;
+type Props = {
+    onSelect: (payload: SelectDispatchPayload) => void;
 };
 
-const SelectPartnerStep = ({ dispatch }: SelectPartnerProps) => {
+const SelectPartnerStep = ({ onSelect }: Props) => {
     const [searchValue, setSearchValue] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -67,7 +63,7 @@ const SelectPartnerStep = ({ dispatch }: SelectPartnerProps) => {
     const handleSelectContract = (contract: ContractByPartnerItem) => {
         if (!selectedPartner) return;
         // useFunnel
-        dispatch({
+        onSelect({
             partnerId: selectedPartner.id,
             partnerName: selectedPartner.title,
             formId: contract.formId,

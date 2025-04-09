@@ -1,6 +1,7 @@
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { transferSteps, TransferState } from '../../model/transferFunnelSteps';
-import SelectTabs, { SelectDispatchType } from '../SelectTabs';
+import SelectTabs, { SelectDispatchPayload } from '../SelectTabs';
+import EnterAmountStep from './steps/EnterAmountStep';
 import PlaceholderStep from './steps/PlaceHolderStep';
 
 const TransferFunnel = () => {
@@ -27,25 +28,53 @@ const TransferFunnel = () => {
         <funnel.Render
             selectTarget={funnel.Render.with({
                 events: {
-                    사람선택완료: (payload, { history }) => {
+                    사람선택완료: (
+                        payload: SelectDispatchPayload,
+                        { history },
+                    ) => {
                         history.push('enterAmount', payload);
                     },
-                    계약선택완료: (payload, { history }) => {
+                    계약선택완료: (
+                        payload: SelectDispatchPayload,
+                        { history },
+                    ) => {
                         history.push('enterAmount', payload);
                     },
                 },
-                render: ({ dispatch }) => (
-                    <SelectTabs dispatch={dispatch as SelectDispatchType} />
-                ),
-            })}
-            enterAmount={funnel.Render.with({
-                events: {
-                    금액입력완료: (payload, { history }) => {
-                        history.push('password', payload);
-                    },
+                render({ dispatch }) {
+                    const handleSelectPerson = (
+                        payload: SelectDispatchPayload,
+                    ) => {
+                        dispatch('사람선택완료', payload);
+                    };
+                    const handleSelectContract = (
+                        payload: SelectDispatchPayload,
+                    ) => {
+                        dispatch('계약선택완료', payload);
+                    };
+
+                    return (
+                        <SelectTabs
+                            onSelectPerson={handleSelectPerson}
+                            onSelectContract={handleSelectContract}
+                        />
+                    );
                 },
-                render: () => <PlaceholderStep name='enterAmount' />,
             })}
+            enterAmount={({ context, history }) => {
+                const handleConfirm = (amount: number) => {
+                    history.push('password', { ...context, amount });
+                };
+
+                return (
+                    <EnterAmountStep
+                        partnerName={context.partnerName}
+                        formId={context.formId}
+                        repaymentAmount={context.repaymentAmount}
+                        onConfirm={handleConfirm}
+                    />
+                );
+            }}
             password={() => <PlaceholderStep name='password' />}
             done={() => <PlaceholderStep name='done' />}
         />

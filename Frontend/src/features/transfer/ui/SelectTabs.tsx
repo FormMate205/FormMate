@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SelectContractStep from './funnel/steps/SelectContractStep';
 import SelectPartnerStep from './funnel/steps/SelectPartnerStep';
 
 export type SelectDispatchPayload = {
@@ -8,37 +9,28 @@ export type SelectDispatchPayload = {
     repaymentAmount: number;
 };
 
-export type SelectTargetEvent = {
-    사람선택완료: SelectDispatchPayload;
-    계약선택완료: SelectDispatchPayload;
-};
-
 export type SelectDispatchType = (
     type: '사람선택완료' | '계약선택완료',
-    payload?: SelectDispatchPayload,
+    payload: SelectDispatchPayload,
 ) => void;
 
-type Props = {
-    dispatch: SelectDispatchType;
+type SelectTabsProps = {
+    onSelectPerson: (payload: SelectDispatchPayload) => void;
+    onSelectContract: (payload: SelectDispatchPayload) => void;
 };
 
-const SelectTabs = ({ dispatch }: Props) => {
+const SelectTabs = ({ onSelectPerson, onSelectContract }: SelectTabsProps) => {
     return (
         <Tabs defaultValue='recipient'>
             <TabsList>
                 <TabsTrigger value='recipient'>사람</TabsTrigger>
                 <TabsTrigger value='contract'>계약</TabsTrigger>
             </TabsList>
-
             <TabsContent value='recipient'>
-                <SelectPartnerStep
-                    dispatch={(payload) => dispatch('사람선택완료', payload)}
-                />
+                <SelectPartnerStep onSelect={onSelectPerson} />
             </TabsContent>
             <TabsContent value='contract'>
-                <SelectPartnerStep
-                    dispatch={(payload) => dispatch('계약선택완료', payload)}
-                />
+                <SelectContractStep onSelect={onSelectContract} />
             </TabsContent>
         </Tabs>
     );

@@ -5,25 +5,19 @@ import AmountDifference from '@/features/transfer/ui/amount/AmountDifference';
 import AmountInput from '@/features/transfer/ui/amount/AmountInput';
 import AmountShortcuts from '@/features/transfer/ui/amount/AmountShortcuts';
 import NumberPad from '@/shared/ui/NumberPad';
-import { Header } from '@/widgets';
 
 type EnterAmountStepProps = {
     partnerName: string;
     formId: string;
     repaymentAmount: number;
-    dispatch: (
-        event: '금액입력완료',
-        payload: {
-            amount: number;
-        },
-    ) => void;
+    onConfirm: (amount: number) => void;
 };
 
 const EnterAmountStep = ({
     partnerName,
     formId,
     repaymentAmount,
-    dispatch,
+    onConfirm,
 }: EnterAmountStepProps) => {
     const [inputValue, setInputValue] = useState('');
     const { data: scheduledInfo } = useGetScheduledPaymentInfo(formId);
@@ -51,19 +45,17 @@ const EnterAmountStep = ({
 
     const handleConfirm = () => {
         const parsedAmount = parseInt(inputValue || '0', 10);
-        dispatch('금액입력완료', { amount: parsedAmount });
+        onConfirm(parsedAmount);
     };
 
     return (
-        <div className='relative flex h-screen flex-col justify-between px-4 py-2'>
-            <Header title='송금 금액 입력' />
-
-            <section className='flex flex-col gap-6 px-2'>
+        <div className='relative flex h-full flex-col justify-between'>
+            <section className='flex flex-col gap-6'>
                 <div className='flex flex-col'>
-                    <span className='text-2xl font-semibold'>
+                    <span className='text-xl font-semibold'>
                         {partnerName}님께
                     </span>
-                    <span className='text-line-700 text-lg font-medium'>
+                    <span className='text-line-700 font-medium'>
                         다음 상환액: {repaymentAmount.toLocaleString()}원
                     </span>
                 </div>

@@ -52,7 +52,7 @@ const getPaymentHistoryList = async ({
     pageable,
 }: GetPaymentHistoryListRequest): Promise<GetPaymentHistoryListResponse> => {
     const response = await api.get<GetPaymentHistoryListResponse>(
-        `/transfer/${formId}`,
+        `contract/transfer/${formId}`,
         {
             params: {
                 page: pageable.page,
