@@ -1,4 +1,4 @@
-package com.corp.formmate.transfer.dto;
+package com.corp.formmate.contract.dto;
 
 import java.time.LocalDateTime;
 
