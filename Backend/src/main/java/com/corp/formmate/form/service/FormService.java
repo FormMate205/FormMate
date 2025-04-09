@@ -109,7 +109,7 @@ public class FormService {
 		formEntity.update(request);
 		formRepository.save(formEntity);
 		List<SpecialTermResponse> specialTermResponses = specialTermService.updateSpecialTerms(formEntity,
-			request.getSpecialTermIndexes());
+			request.getSpecialTerms());
 
 		// 채팅 발송 위한 이벤트 발행
 		log.info("계약서 수정 이벤트 발행: 폼 ID={}", formEntity.getId());
@@ -571,20 +571,21 @@ public class FormService {
 		log.info("isCurrentSigner 호출 - formId: {}, userId: {}", formId, userId);
 
 		FormEntity form = formRepository.findById(formId)
-				.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
+			.orElseThrow(() -> new FormException(ErrorCode.FORM_NOT_FOUND));
 		UserEntity user = userService.selectById(userId);
 
 		log.info("폼 상태: {}, terminationProcess: {}, creditorId: {}, debtorId: {}, terminationRequestedId: {}",
-				form.getStatus(), form.getIsTerminationProcess(),
-				form.getCreditor().getId(), form.getDebtor().getId(),
-				form.getTerminationRequestedUser() != null ? form.getTerminationRequestedUser().getId() : null);
+			form.getStatus(), form.getIsTerminationProcess(),
+			form.getCreditor().getId(), form.getDebtor().getId(),
+			form.getTerminationRequestedUser() != null ? form.getTerminationRequestedUser().getId() : null);
 
 		// 파기 서명일 경우
 		if (form.getIsTerminationProcess() != TerminationProcess.NONE) {
 			UserEntity requestedUser = form.getTerminationRequestedUser();
 
 			// 파기 요청자 정보가 없다면 false
-			if (requestedUser == null) return false;
+			if (requestedUser == null)
+				return false;
 
 			boolean isRequester = requestedUser.getId().equals(userId);
 

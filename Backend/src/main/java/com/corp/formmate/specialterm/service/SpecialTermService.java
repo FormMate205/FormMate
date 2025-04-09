@@ -1,7 +1,6 @@
 package com.corp.formmate.specialterm.service;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -80,7 +79,7 @@ public class SpecialTermService {
 
 	// 특약 수정
 	@Transactional
-	public List<SpecialTermResponse> updateSpecialTerms(FormEntity formEntity, List<Integer> specialTermIndexes) {
+	public List<SpecialTermResponse> updateSpecialTerms(FormEntity formEntity, List<SpecialTermResponse> specialTerms) {
 		// 기존 특약 목록 조회
 		List<SpecialTermEntity> existingTerms = specialTermRepository.findByFormIdOrderBySpecialTermIndexAsc(
 			formEntity.getId());
@@ -91,8 +90,9 @@ public class SpecialTermService {
 			.collect(Collectors.toSet());
 
 		// 새로 요청된 인덱스 목록을 Set으로 변환
-		Set<Integer> newIndexes = new HashSet<>(
-			specialTermIndexes != null ? specialTermIndexes : Collections.emptyList());
+		Set<Integer> newIndexes = specialTerms.stream()
+			.map(SpecialTermResponse::getSpecialTermIndex)
+			.collect(Collectors.toSet());
 
 		// 추가할 인덱스 (새 인덱스 - 기존 인덱스)
 		Set<Integer> indexesToAdd = new HashSet<>(newIndexes);
