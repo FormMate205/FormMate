@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useScheduleCalendar } from '../model/useScheduleCalendar';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { ScheduleList } from './ScheduleList';
@@ -6,31 +6,44 @@ import { ScheduleList } from './ScheduleList';
 const Schedule = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-    const { selectedDate: scheduleData } = useScheduleCalendar(currentMonth);
+    const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
+    const { selectedDate: scheduleData } = useScheduleCalendar(displayMonth);
 
-    const hasSettlementDates: Date[] = [];
-
-    Object.values(scheduleData).forEach(({ contracts }) => {
-        contracts.forEach((contract) => {
-            const [year, month, day] = contract.scheduledPaymentDate;
-            hasSettlementDates.push(new Date(year, month - 1, day));
+    const hasSettlementDates = useMemo(() => {
+        const dates: Date[] = [];
+        Object.values(scheduleData).forEach(({ contracts }) => {
+            contracts.forEach((contract) => {
+                const [year, month, day] = contract.scheduledPaymentDate;
+                dates.push(new Date(year, month - 1, day));
+            });
         });
-    });
+        return dates;
+    }, [scheduleData]);
 
-    const modifiers = {
+    const modifiers = useMemo(() => ({
         hasSettlement: hasSettlementDates,
-    };
+    }), [hasSettlementDates]);
 
-    const contracts = Object.values(scheduleData)
-        .flatMap(({ contracts }) => contracts)
-        .filter((contract) => {
-            const [y, m, d] = contract.scheduledPaymentDate;
-            return (
-                selectedDate.getFullYear() === y &&
-                selectedDate.getMonth() === m - 1 &&
-                selectedDate.getDate() === d
-            );
-        });
+    const contracts = useMemo(() => 
+        Object.values(scheduleData)
+            .flatMap(({ contracts }) => contracts)
+            .filter((contract) => {
+                const [y, m, d] = contract.scheduledPaymentDate;
+                return (
+                    selectedDate.getFullYear() === y &&
+                    selectedDate.getMonth() === m - 1 &&
+                    selectedDate.getDate() === d
+                );
+            }),
+        [scheduleData, selectedDate]
+    );
+
+    const handleMonthChange = (newMonth: Date) => {
+        setCurrentMonth(newMonth);
+        setTimeout(() => {
+            setDisplayMonth(newMonth);
+        }, 300);
+    };
 
     return (
         <section className='mb-12'>
@@ -40,7 +53,7 @@ const Schedule = () => {
                         selectedDate={selectedDate}
                         setSelectedDate={setSelectedDate}
                         currentMonth={currentMonth}
-                        setCurrentMonth={setCurrentMonth}
+                        setCurrentMonth={handleMonthChange}
                         modifiers={modifiers}
                     />
                 </div>
