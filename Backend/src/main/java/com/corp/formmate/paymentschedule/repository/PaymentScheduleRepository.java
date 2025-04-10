@@ -23,7 +23,9 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
 	);
 
 	List<PaymentScheduleEntity> findByContractOrderByPaymentRoundAsc(ContractEntity contract);
-	
+
 	Optional<PaymentScheduleEntity> findByContractAndPaymentRound(ContractEntity contract, Integer paymentRound);
+
+	Optional<PaymentScheduleEntity> findFirstByContractAndIsPaidFalseOrderByPaymentRoundAsc(ContractEntity contract);
 
 }

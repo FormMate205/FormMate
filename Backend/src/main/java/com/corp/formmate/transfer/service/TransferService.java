@@ -22,6 +22,8 @@ import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.repository.FormRepository;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.TransferException;
+import com.corp.formmate.paymentschedule.entity.PaymentScheduleEntity;
+import com.corp.formmate.paymentschedule.service.PaymentScheduleService;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.dto.TransferCreateResponse;
 import com.corp.formmate.transfer.dto.TransferListResponse;
@@ -54,6 +56,8 @@ public class TransferService {
 	private final BankService bankService;
 
 	private final AlertService alertService;
+
+	private final PaymentScheduleService paymentScheduleService;
 
 	@Transactional(readOnly = true)
 	public Page<TransferListResponse> selectTransfers(Integer userId, String period, String transferType,
@@ -146,12 +150,23 @@ public class TransferService {
 
 		contractService.updateContract(transferCreateRequest); // contract(계약관리) 관련 처리 로직
 
-		if (paymentDifference > 0) { // 중도 상환
+		PaymentScheduleEntity paymentSchedule = paymentScheduleService.selectNonPaidByContract(contractEntity);
+
+		int paymentRoundGap = paymentSchedule.getPaymentRound() - currentRound;
+
+		if (paymentRoundGap > 0) { // 중도 상환
 			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
 				TransferStatus.EARLY_REPAYMENT);
-		} else if (paymentDifference == 0) { // 납부
-			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
-				TransferStatus.PAID);
+		} else if (paymentRoundGap == 0) { // 납부
+			if (paymentDifference > 0) {
+				transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound,
+					paymentDifference,
+					TransferStatus.EARLY_REPAYMENT);
+			} else {
+				transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound,
+					paymentDifference,
+					TransferStatus.PAID);
+			}
 		} else { // 연체
 			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
 				TransferStatus.OVERDUE);
