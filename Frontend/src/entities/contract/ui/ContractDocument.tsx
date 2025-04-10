@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/accordion';
 import { formatCurrency } from '@/shared/lib/formatCurrency';
 import { getSignatureStatus } from '../model/getSignatureStatus';
-import { ContractDocs } from '../model/types';
+import { Contract } from '../model/types';
 
 const styles = {
     container: 'flex flex-col gap-4 pt-4 p-6 bg-white text-black w-full',
@@ -22,7 +22,7 @@ const styles = {
 };
 
 interface ContractDocumentProps {
-    contract: ContractDocs;
+    contract: Contract;
     isPdfMode?: boolean;
 }
 
@@ -32,8 +32,10 @@ const ContractDocument = ({
 }: ContractDocumentProps) => {
     const {
         status,
-        creditorName,
+        creditorName, // 채권자
         creditorPhone,
+        creditorAddress,
+        debtorAddress,
         debtorName,
         debtorPhone,
         creditorBank,
@@ -46,6 +48,8 @@ const ContractDocument = ({
         interestRate,
         earlyRepaymentFeeRate,
         specialTerms,
+        overdueLimit,
+        overdueInterestRate,
     } = contract;
 
     const [accordionValue, setAccordionValue] = useState<string | undefined>(
@@ -63,15 +67,21 @@ const ContractDocument = ({
             <article className='text-md flex flex-col gap-1'>
                 <div className={styles.contractValue}>
                     <span className={styles.label}>채권자</span>
-                    <div>
-                        {creditorName} / {creditorPhone}
+                    <div className='flex flex-col items-end'>
+                        <div>
+                            {creditorName} / {creditorPhone}
+                        </div>
+                        <div className={styles.subtext}>{creditorAddress}</div>
                     </div>
                 </div>
 
                 <div className={styles.contractValue}>
                     <span className={styles.label}>채무자</span>
-                    <div>
-                        {debtorName} / {debtorPhone}
+                    <div className='flex flex-col items-end'>
+                        <div>
+                            {debtorName} / {debtorPhone}
+                        </div>
+                        <div className={styles.subtext}>{debtorAddress}</div>
                     </div>
                 </div>
 
@@ -89,29 +99,50 @@ const ContractDocument = ({
 
                 <div className={styles.contractValue}>
                     <span className={styles.label}>계약 체결</span>
-                    <span>{format(new Date(contractDate), 'yyyy.MM.dd')}</span>
+                    <span>
+                        {format(new Date(contractDate), 'yyyy년 MM월 dd일')}
+                    </span>
                 </div>
 
                 <div className={styles.contractValue}>
                     <span className={styles.label}>계약 만기</span>
-                    <span>{format(new Date(maturityDate), 'yyyy.MM.dd')}</span>
+                    <span>
+                        {format(new Date(maturityDate), 'yyyy년 MM월 dd일')}
+                    </span>
                 </div>
 
                 <hr className={styles.divider} />
 
                 <div className={styles.contractValue}>
-                    <span className={styles.label}>상환 방식</span>
+                    <span className={styles.label}>원금</span>
+                    <span>{formatCurrency(loanAmount)}</span>
+                </div>
+
+                <div className={styles.contractValue}>
+                    <span className={styles.label}>상환방식</span>
                     <div className={styles.groupedValues}>
                         <span>{repaymentMethod}</span>
-                        <span>
-                            매달 {repaymentDay}일 / {formatCurrency(loanAmount)}
+                        <span className={styles.subtext}>
+                            매월 {repaymentDay}일 상환
                         </span>
                     </div>
                 </div>
 
+                <hr className={styles.divider} />
+
                 <div className={styles.contractValue}>
                     <span className={styles.label}>이자율</span>
-                    <span>{interestRate}%</span>
+                    <span>{interestRate}% (연)</span>
+                </div>
+
+                <div className={styles.contractValue}>
+                    <span className={styles.label}>연체 이자율</span>
+                    <span>{overdueInterestRate}% (연)</span>
+                </div>
+
+                <div className={styles.contractValue}>
+                    <span className={styles.label}>연체 한도</span>
+                    <span>{overdueLimit}일</span>
                 </div>
 
                 <div className={styles.contractValue}>
@@ -148,7 +179,7 @@ const ContractDocument = ({
                 )}
 
                 <div className='flex justify-center p-4 text-lg font-medium'>
-                    {format(new Date(), 'yyyy.MM.dd')}
+                    {format(new Date(), 'yyyy년 MM월 dd일')}
                 </div>
 
                 <div className='flex flex-col items-end text-right font-medium'>

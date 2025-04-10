@@ -8,9 +8,30 @@ const formatDate = (dateArr: number[]): string => {
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 };
 
+const OverviewErrorFallback = () => {
+    return (
+        <section className='flex min-h-[200px] items-center justify-center'>
+            <div className='text-line-900 text-center'>
+                <p className='text-lg font-medium'>
+                    데이터를 불러오는데 실패했습니다.
+                </p>
+                <p className='mt-1 text-sm'>잠시 후 다시 시도해주세요.</p>
+            </div>
+        </section>
+    );
+};
+
 const ContractDetailOverview = ({ formId }: { formId: string }) => {
-    const { data } = useGetContractDetailOverview(formId);
-    if (!data) return null;
+    const { data, isError } = useGetContractDetailOverview(formId);
+
+    if (isError) {
+        return <OverviewErrorFallback />;
+    }
+
+    if (!data) {
+        return null;
+    }
+
     const {
         userIsCreditor,
         contracteeName,

@@ -1,34 +1,38 @@
-import { Signature } from 'lucide-react';
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-import {
-    AccountRegist,
-    AccountVerify,
-    AccountPassword,
-    UserPasswordUpdate,
-    FormDraft,
-    Login,
-    FormMatch,
-    Signup,
-    PasswordPhoneVerify,
-    PasswordReset,
-    OauthAddInfoPage,
-    FormCheck,
-    Home,
-    ChatRooms,
-} from '@/pages';
+import { Login, Home, ChatRooms } from '@/pages';
 import OAuthCallback from '@/pages/login/OAuthCallback';
 import Transaction from '@/pages/transaction/Transaction';
 import { ErrorFallBack } from '@/shared/ui/ErrorFallBack';
-import FormDraftLanding from '@/widgets/landing/FormDraftLanding';
 import LayoutProvider from './provider/LayoutProvider';
 
+const Signup = lazy(() => import('@/pages/signup/Signup'));
+const PasswordPhoneVerify = lazy(() => import('@/pages/password/PhoneVerify'));
+const PasswordReset = lazy(() => import('@/pages/password/PasswordReset'));
+const OauthAddInfoPage = lazy(() => import('@/pages/signup/OauthAddInfo'));
+
+const FormMatch = lazy(() => import('@/pages/formPartner/FormMatch'));
+const FormCheck = lazy(() => import('@/pages/formPartner/FormCheck'));
+
+const FormDraftLanding = lazy(
+    () => import('@/widgets/landing/FormDraftLanding'),
+);
+const FormDraft = lazy(() => import('@/pages/formDraft/FormDraft'));
+
 const Chat = lazy(() => import('@/pages/chat/Chat'));
+const Signature = lazy(() => import('@/pages/signature/Signature'));
 
 const Contracts = lazy(() => import('@/pages/contract/Contracts'));
 const ContractDetail = lazy(() => import('@/pages/contract/ContractDetail'));
 
+const AccountRegist = lazy(() => import('@/pages/account/AccountRegist'));
+const AccountVerify = lazy(() => import('@/pages/account/AccountVerify'));
+const AccountPassword = lazy(() => import('@/pages/account/AccountPassword'));
+
 const MyInfo = lazy(() => import('@/pages/myinfo/MyInfo'));
+const UserPasswordUpdate = lazy(
+    () => import('@/pages/myinfo/UserPasswordUpdate'),
+);
 
 const Notifications = lazy(() => import('@/pages/notification/Notifiactions'));
 
