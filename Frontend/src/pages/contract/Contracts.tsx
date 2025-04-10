@@ -19,15 +19,15 @@ const Contracts = () => {
 
     return (
         <div className='bg-line-50 flex min-h-screen flex-col'>
-            <div className='flex h-full flex-col gap-2 px-4 py-2'>
+            <div className='flex flex-1 flex-col gap-2 px-4 py-2'>
                 <Header title='계약 관리' />
-                <div className='flex flex-col gap-8'>
+                <div className='flex flex-1 flex-col gap-8'>
                     <ContractStatusSummary />
                     <ContractChart />
 
-                    <div className='flex flex-col gap-2'>
+                    <div className='flex flex-1 flex-col gap-2'>
                         <div className='text-lg font-medium'>계약 내역</div>
-                        <section className='flex flex-col gap-4 rounded-lg bg-white px-4 py-3'>
+                        <section className='flex flex-1 flex-col gap-4 rounded-lg bg-white px-4 py-3'>
                             <div className='border-line-200 flex items-center justify-between border-b p-2'>
                                 <div className='text-lg font-medium'>
                                     {isLoading
