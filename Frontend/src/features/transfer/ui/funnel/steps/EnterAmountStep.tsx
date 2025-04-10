@@ -64,25 +64,26 @@ const EnterAmountStep = ({
     };
 
     return (
-        <div className='relative flex h-full flex-col justify-between'>
+        <div className='relative mx-auto flex h-full w-full max-w-[390px] flex-col justify-between'>
             <section className='flex flex-col'>
-                <span className='text-xl font-semibold'>{partnerName}님께</span>
-                <span className='text-line-700 font-medium'>
-                    다음 상환액: {nextRepaymentAmount.toLocaleString()}원
-                </span>
+                <div className='flex flex-col'>
+                    <span className='text-xl font-semibold'>
+                        {partnerName}님께
+                    </span>
+                    <span className='text-line-700 font-medium'>
+                        다음 상환액: {nextRepaymentAmount.toLocaleString()}원
+                    </span>
+                </div>
+                <div className='min-h-[24px]'>
+                    {isOverBalance && (
+                        <span className='text-sm text-red-500'>
+                            계좌 잔액이 부족합니다. 다른 금액을 입력해주세요.
+                        </span>
+                    )}
+                </div>
 
-                <div className='flex flex-col gap-4'>
-                    <div>
-                        <div className='min-h-[20px]'>
-                            {isOverBalance && (
-                                <span className='text-sm text-red-500'>
-                                    계좌 잔액이 부족합니다. 다른 금액을
-                                    입력해주세요.
-                                </span>
-                            )}
-                        </div>
-                        <AmountInput inputValue={inputValue} />
-                    </div>
+                <div className='flex flex-col gap-3'>
+                    <AmountInput inputValue={inputValue} />
                     <div className='flex justify-start'>
                         <AmountDifference
                             inputValue={inputValue}
@@ -93,7 +94,7 @@ const EnterAmountStep = ({
                 </div>
             </section>
 
-            <div className='sticky bottom-0 left-0 mx-auto flex w-full max-w-[640px] flex-col gap-6 pb-6'>
+            <div className='sticky bottom-0 left-0 flex w-full flex-col gap-4 pb-4'>
                 <AmountShortcuts onClick={handleAmountAdd} />
                 <NumberPad
                     onNumberClick={handleNumberClick}
