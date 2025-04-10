@@ -8,7 +8,7 @@ import {
 } from '@/features/notifications/api/NotificationAPI';
 import { getMinAlertId } from '@/features/notifications/model/getMinAlertId';
 import ListLoading from '@/shared/ui/ListLoading';
-import { Footer, Header } from '@/widgets';
+import { Header } from '@/widgets';
 
 const Notifications = () => {
     // 읽지 않은 알림 호출
@@ -61,8 +61,6 @@ const Notifications = () => {
                     </Suspense>
                 </div>
             </section>
-
-            <Footer />
         </div>
     );
 };
