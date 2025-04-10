@@ -236,22 +236,14 @@ public class ContractService {
 	}
 
 	/**
-	 * 특정 사용자와 상대방 간의 계약을 반환 (채권자/채무자 구분 포함)
+	 * 특정 사용자와 상대방 간의 계약을 반환 (채무자 계약만)
 	 */
 	@Transactional
 	public List<ContractWithPartnerResponse> selectContractWithPartner(Integer userId, Integer partnerId) {
-		List<FormEntity> creditorForms = formRepository.findUserIsCreditorSideForms(
-			userId, partnerId, PageRequest.of(0, 1000)).getContent();
 		List<FormEntity> debtorForms = formRepository.findUserIsDebtorSideForms(
 			userId, partnerId, PageRequest.of(0, 1000)).getContent();
 
 		List<ContractWithPartnerResponse> responses = new ArrayList<>();
-
-		// 상태가 IN_PROGRESS or OVERDUE인 Form만 처리
-		creditorForms.stream()
-			.filter(f -> f.getStatus() == FormStatus.IN_PROGRESS || f.getStatus() == FormStatus.OVERDUE)
-			.map(f -> buildPartnerResponse(f, true))
-			.forEach(responses::add);
 
 		debtorForms.stream()
 			.filter(f -> f.getStatus() == FormStatus.IN_PROGRESS || f.getStatus() == FormStatus.OVERDUE)
