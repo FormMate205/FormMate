@@ -33,7 +33,11 @@ const ContractDetail = () => {
                         <div className='flex w-full justify-center gap-4'>
                             <Button
                                 variant={'choiceEmpty'}
-                                onClick={() => navigate(`/chat/${formId}`)}
+                                onClick={() =>
+                                    navigate(`/chat/${formId}`, {
+                                        state: { isFin: false },
+                                    })
+                                }
                             >
                                 채팅하기
                             </Button>
