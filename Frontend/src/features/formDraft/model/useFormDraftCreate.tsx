@@ -350,7 +350,6 @@ export const useFormDraftCreate = ({
             setInputEnabled(false);
             setIsContractCreated(true);
 
-            console.log('계약서 생성 완료', data);
             const timer = setTimeout(() => {
                 navigate(`/chat/${data?.formId}`, {
                     state: {
@@ -378,8 +377,6 @@ export const useFormDraftCreate = ({
             // API 호출
             mutate(formDraft);
         } catch (error) {
-            console.error('계약서 생성 오류:', error);
-
             messageIdCounterRef.current += 1;
             const errorMessage: ChatMessage = {
                 id: messageIdCounterRef.current.toString(),

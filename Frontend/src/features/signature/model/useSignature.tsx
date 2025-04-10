@@ -75,7 +75,6 @@ export const useSignature = ({
     // 인증 요청 실패 함수
     const handleRequestError = (error: AxiosError<ErrorResponse>) => {
         const message = error.response?.data.message;
-        console.log(error);
         setRequestMessage(message!);
         setRequestSuccess(false);
     };
