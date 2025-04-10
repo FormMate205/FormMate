@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import api from '@/shared/api/instance';
 import { GetAccountInfoResponse } from '../model/types';
 
@@ -8,7 +8,7 @@ const getAccountInfo = async (): Promise<GetAccountInfoResponse> => {
 };
 
 export const useGetAccountInfo = () => {
-    return useQuery({
+    return useSuspenseQuery({
         queryKey: ['accountInfo'],
         queryFn: getAccountInfo,
     });

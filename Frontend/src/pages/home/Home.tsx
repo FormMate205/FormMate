@@ -1,22 +1,26 @@
-import { Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { useContractAmount } from '@/entities/home/model/useContractAmount';
 import { useUserStore } from '@/entities/user/model/userStore';
+import AccountInfoSkeleton from '@/features/home/ui/AccountInfoSkeleton';
+import ScheduleSkeleton from '@/features/home/ui/ScheduleSkeleton';
+import TodaySettlementSkeleton from '@/features/home/ui/TodaySettlementSkeleton';
 import { useUnreadNotificationCount } from '@/features/notifications/api/NotificationAPI';
-import ListLoading from '@/shared/ui/ListLoading';
 import { Footer, Header } from '@/widgets';
-import AccountInfo from '../../features/home/ui/AccountInfo';
-import Schedule from '../../features/home/ui/Schedule';
-import TodaySettlement from '../../features/home/ui/TodaySettlement';
 
 interface HomeProps {
     userName: string;
 }
 
+const AccountInfo = lazy(() => import('@/features/home/ui/AccountInfo'));
+const Schedule = lazy(() => import('@/features/home/ui/Schedule'));
+const TodaySettlement = lazy(
+    () => import('@/features/home/ui/TodaySettlement'),
+);
+
 const Home = ({ userName }: HomeProps) => {
     userName = useUserStore((state) => state.user?.userName ?? '사용자');
     const { data: unreadAlert } = useUnreadNotificationCount();
     const { data: accountInfo } = useContractAmount();
-    console.log('accountInfo:', accountInfo);
 
     return (
         <div className='flex h-screen flex-col overflow-hidden'>
@@ -40,11 +44,17 @@ const Home = ({ userName }: HomeProps) => {
                         />
                     </div>
 
-                    <AccountInfo />
-                    <Suspense fallback={<ListLoading />}>
+                    <Suspense fallback={<AccountInfoSkeleton />}>
+                        <AccountInfo />
+                    </Suspense>
+
+                    <Suspense fallback={<TodaySettlementSkeleton />}>
                         {accountInfo && <TodaySettlement data={accountInfo} />}
                     </Suspense>
-                    <Schedule />
+
+                    <Suspense fallback={<ScheduleSkeleton />}>
+                        <Schedule />
+                    </Suspense>
                 </div>
             </div>
             <Footer />
