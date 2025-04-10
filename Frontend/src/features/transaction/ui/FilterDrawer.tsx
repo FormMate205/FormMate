@@ -1,3 +1,4 @@
+import { format, subMonths } from 'date-fns';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +19,26 @@ const sortDirections = ['최신순', '과거순'] as const;
 
 type PeriodOption = (typeof periods)[number];
 
-// 날짜를 yyyyMMdd 형식으로 포맷
+// 날짜를 yyyy.MM.dd 형식으로 포맷
+const formatDateToReadable = (dateStr: string) => {
+    if (dateStr.includes('~')) {
+        const [start, end] = dateStr.split('~');
+        const startDate = new Date(
+            parseInt(start.substring(0, 4)),
+            parseInt(start.substring(4, 6)) - 1,
+            parseInt(start.substring(6, 8)),
+        );
+        const endDate = new Date(
+            parseInt(end.substring(0, 4)),
+            parseInt(end.substring(4, 6)) - 1,
+            parseInt(end.substring(6, 8)),
+        );
+        return `${format(startDate, 'yyyy.MM.dd')} ~ ${format(endDate, 'yyyy.MM.dd')}`;
+    }
+    return dateStr;
+};
+
+// 날짜를 yyyyMMdd 형식으로 포맷 (API 요청용)
 const formatDateToYMD = (date: Date) => {
     const yyyy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -48,10 +68,15 @@ const FilterDrawer = ({ defaultValues, onConfirm }: FilterDrawerProps) => {
     );
 
     const handleConfirm = () => {
-        const appliedPeriod =
-            period === '직접 설정' && startDate && endDate
-                ? `${formatDateToYMD(startDate)}~${formatDateToYMD(endDate)}`
-                : period;
+        let appliedPeriod: string = period;
+
+        if (period === '직접 설정') {
+            const today = new Date();
+            const defaultStartDate = startDate || subMonths(today, 1); // 시작 날짜가 없으면 1개월 전
+            const defaultEndDate = endDate || today; // 종료 날짜가 없으면 오늘
+
+            appliedPeriod = `${formatDateToYMD(defaultStartDate)}~${formatDateToYMD(defaultEndDate)}`;
+        }
 
         onConfirm({
             period: appliedPeriod,
@@ -65,8 +90,8 @@ const FilterDrawer = ({ defaultValues, onConfirm }: FilterDrawerProps) => {
         <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger className='flex w-full items-center justify-end gap-1'>
                 <span className='text-line-950'>
-                    {defaultValues.period}•{defaultValues.transferType}•
-                    {defaultValues.sortDirection}
+                    {formatDateToReadable(defaultValues.period)} •{' '}
+                    {defaultValues.transferType} • {defaultValues.sortDirection}
                 </span>
                 <Icons name='chev-down' size={14} className='fill-line-950' />
             </DrawerTrigger>
