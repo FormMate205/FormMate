@@ -1,6 +1,7 @@
 package com.corp.formmate.contract.controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -169,20 +170,23 @@ public class ContractController {
 		)
 	})
 	@GetMapping
-	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam String status,
+	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam List<String> status,
 		@CurrentUser AuthUser authUser) {
 		Integer userId = authUser.getId();
-		FormStatus formStatus = null;
-		if (!status.equals("ALL")) {
-			for (FormStatus s : FormStatus.values()) {
-				if (s.name().equals(status)) {
-					formStatus = s;
-					break;
-				}
+		List<FormStatus> formStatuses = new ArrayList<>();
+		for(String st : status) {
+			if(st.equals("ALL")) {
+				formStatuses.add(FormStatus.BEFORE_APPROVAL);
+				formStatuses.add(FormStatus.AFTER_APPROVAL);
+				formStatuses.add(FormStatus.IN_PROGRESS);
+				formStatuses.add(FormStatus.OVERDUE);
+				formStatuses.add(FormStatus.COMPLETED);
+			} else {
+				formStatuses.add(FormStatus.valueOf(st));
 			}
 		}
 
-		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatus, userId));
+		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatuses, userId));
 	}
 
 	@Operation(summary = "보낸 금액/받을 금액", description = "계약관리-목록 화면")

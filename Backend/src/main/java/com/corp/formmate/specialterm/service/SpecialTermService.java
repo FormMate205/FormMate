@@ -1,11 +1,6 @@
 package com.corp.formmate.specialterm.service;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -80,63 +75,43 @@ public class SpecialTermService {
 	// 특약 수정
 	@Transactional
 	public List<SpecialTermResponse> updateSpecialTerms(FormEntity formEntity, List<SpecialTermResponse> specialTerms) {
-		// 기존 특약 목록 조회
-		List<SpecialTermEntity> existingTerms = specialTermRepository.findByFormIdOrderBySpecialTermIndexAsc(
-			formEntity.getId());
+		Integer formId = formEntity.getId();
 
-		// 기존 특약의 인덱스 추출
-		Set<Integer> existingIndexes = existingTerms.stream()
-			.map(SpecialTermEntity::getSpecialTermIndex)
-			.collect(Collectors.toSet());
-
-		// 새로 요청된 인덱스 목록을 Set으로 변환
 		Set<Integer> newIndexes = specialTerms.stream()
-			.map(SpecialTermResponse::getSpecialTermIndex)
-			.collect(Collectors.toSet());
+				.map(SpecialTermResponse::getSpecialTermIndex)
+				.collect(Collectors.toSet());
 
-		// 추가할 인덱스 (새 인덱스 - 기존 인덱스)
-		Set<Integer> indexesToAdd = new HashSet<>(newIndexes);
-		indexesToAdd.removeAll(existingIndexes);
+		List<SpecialTermEntity> existingTerms = specialTermRepository.findByFormIdOrderBySpecialTermIndexAsc(formId);
+		Set<Integer> existingIndexes = existingTerms.stream()
+				.map(SpecialTermEntity::getSpecialTermIndex)
+				.collect(Collectors.toSet());
 
-		// 삭제할 인덱스 (기존 인덱스 - 새 인덱스)
-		Set<Integer> indexesToRemove = new HashSet<>(existingIndexes);
-		indexesToRemove.removeAll(newIndexes);
+		Set<Integer> toDelete = new HashSet<>(existingIndexes);
+		toDelete.removeAll(newIndexes);
 
-		// 삭제할 항목 처리
-		if (!indexesToRemove.isEmpty()) {
-			existingTerms.removeIf(term -> indexesToRemove.contains(term.getSpecialTermIndex()));
-			specialTermRepository.deleteByFormIdAndSpecialTermIndexIn(formEntity.getId(), indexesToRemove);
+		Set<Integer> toAdd = new HashSet<>(newIndexes);
+		toAdd.removeAll(existingIndexes);
+
+		if (!toDelete.isEmpty()) {
+			specialTermRepository.deleteByFormIdAndSpecialTermIndexIn(formId, toDelete);
 		}
 
-		// 추가할 항목 처리
-		List<SpecialTermEntity> newEntities = indexesToAdd.stream()
-			.map(index -> {
-				for (SpecialTerm term : SpecialTerm.values()) {
-					if (term.getSpecialTermIndex() == index) {
-						return SpecialTermEntity.builder()
-							.form(formEntity)
-							.specialTermIndex(index)
-							.specialTermDetail(term.getSpecialTermDetail())
-							.build();
-					}
-				}
-				return null;
-			})
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList());
+		List<SpecialTermEntity> newEntities = SpecialTerm.getByIndexes(new ArrayList<>(toAdd)).stream()
+				.map(term -> SpecialTermEntity.builder()
+						.form(formEntity)
+						.specialTermIndex(term.getSpecialTermIndex())
+						.specialTermDetail(term.getSpecialTermDetail())
+						.build())
+				.collect(Collectors.toList());
 
 		if (!newEntities.isEmpty()) {
 			specialTermRepository.saveAll(newEntities);
-			existingTerms.addAll(newEntities);
 		}
 
-		// 응답 생성 (최종 결과가 정렬되도록)
-		return existingTerms.stream()
-			.sorted(Comparator.comparing(SpecialTermEntity::getSpecialTermIndex))
-			.map(entity -> new SpecialTermResponse(
-				entity.getSpecialTermIndex(),
-				entity.getSpecialTermDetail()
-			))
-			.collect(Collectors.toList());
+		return specialTermRepository.findByFormIdOrderBySpecialTermIndexAsc(formId).stream()
+				.map(e -> new SpecialTermResponse(e.getSpecialTermIndex(), e.getSpecialTermDetail()))
+				.collect(Collectors.toList());
 	}
+
+
 }
