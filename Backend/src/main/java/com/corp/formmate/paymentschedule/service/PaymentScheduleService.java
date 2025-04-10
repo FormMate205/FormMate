@@ -86,6 +86,11 @@ public class PaymentScheduleService {
 		return paymentScheduleRepository.findByContractOrderByPaymentRoundAsc(contract);
 	}
 
+	public PaymentScheduleEntity selectNonPaidByContract(ContractEntity contractEntity) {
+		return paymentScheduleRepository.findFirstByContractAndIsPaidFalseOrderByPaymentRoundAsc(contractEntity)
+			.orElseThrow(() -> new PaymentScheduleException(ErrorCode.PAYMENT_SCHEDULE_NOT_FOUND));
+	}
+
 	@Transactional
 	public List<PaymentScheduleEntity> updateSchedulesForRepaymentAndReturnUpdated(ContractEntity contract,
 		FormEntity form, long leftover) {
