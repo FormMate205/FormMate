@@ -8,8 +8,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { checkAccount } from '@/entities/account/api/checkAccount';
+import { usePostCheckAccount } from '@/entities/account/api/checkAccount';
 import { Header } from '@/widgets';
+import { ErrorResponse } from '@/widgets/modal/types';
 
 const AccountRegist = () => {
     const [accountNum, setAccountNum] = useState('');
@@ -27,6 +28,21 @@ const AccountRegist = () => {
         '신한은행',
         '카카오뱅크',
     ];
+
+    // 계좌 정보가 없을 시 계좌 등록 페이지로 이동
+    const handleNotRegisterAccount = (error: AxiosError<ErrorResponse>) => {
+        const message = error.response?.data.message;
+
+        if (message == '계좌 정보를 찾을 수 없습니다.') {
+            navigate('/account');
+            return;
+        }
+    };
+
+    // 계좌 조회 API
+    const { mutate: checkAccount } = usePostCheckAccount(
+        handleNotRegisterAccount,
+    );
 
     const handleSubmit = async () => {
         setError('');
@@ -48,8 +64,8 @@ const AccountRegist = () => {
     };
 
     return (
-        <div className='flex h-screen flex-col overflow-hidden'>
-            <div className='scrollbar-none relative flex h-full flex-col gap-2 overflow-y-auto px-4 py-2'>
+        <div className='flex flex-col h-screen overflow-hidden'>
+            <div className='relative flex flex-col h-full gap-2 px-4 py-2 overflow-y-auto scrollbar-none'>
                 <Header title='계좌 등록' />
                 <div className='flex flex-col p-2'>
                     <h2 className='my-8 text-xl font-semibold'>
@@ -114,7 +130,7 @@ const AccountRegist = () => {
                     </div>
 
                     {error && (
-                        <p className='text-destructive mt-4 text-sm'>{error}</p>
+                        <p className='mt-4 text-sm text-destructive'>{error}</p>
                     )}
 
                     {accountNum && bank && (
