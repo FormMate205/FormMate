@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useContractAmount } from '@/entities/home/model/useContractAmount';
 import { useUserStore } from '@/entities/user/model/userStore';
 import AccountInfoSkeleton from '@/features/home/ui/AccountInfoSkeleton';
@@ -43,9 +44,9 @@ const Home = ({ userName }: HomeProps) => {
                         />
                     </div>
 
-                    <Suspense fallback={<AccountInfoSkeleton />}>
+                    <ErrorBoundary fallback={<AccountInfoSkeleton />}>
                         <AccountInfo />
-                    </Suspense>
+                    </ErrorBoundary>
 
                     <Suspense fallback={<TodaySettlementSkeleton />}>
                         {accountInfo && <TodaySettlement data={accountInfo} />}

@@ -28,11 +28,11 @@ const MyInfo = () => {
     }, [accountInfo, isError, isLoading, user, setUser]);
 
     return (
-        <div className='flex h-screen flex-col'>
-            <div className='bg-line-50 scrollbar-none w-full flex-1 overflow-y-auto px-4 py-2'>
+        <div className='flex flex-col h-screen'>
+            <div className='flex-1 w-full px-4 py-2 overflow-y-auto bg-line-50 scrollbar-none'>
                 {' '}
                 <Header title='내 정보' />
-                <div className='scrollbar-none flex h-full flex-col gap-6 overflow-y-auto'>
+                <div className='flex flex-col h-full gap-6 overflow-y-auto scrollbar-none'>
                     <MyAccount />
                     <SubscriptionToggle />
                     <div className='mt-4'>

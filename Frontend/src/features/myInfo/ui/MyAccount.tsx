@@ -72,8 +72,8 @@ const MyAccount = () => {
 
     if (!accountInfo) {
         return (
-            <div className='relative rounded-lg bg-white p-4 shadow-sm'>
-                <div className='absolute right-5 my-auto cursor-pointer'>
+            <div className='relative p-4 bg-white rounded-lg shadow-sm'>
+                <div className='absolute my-auto cursor-pointer right-5'>
                     <Button
                         variant='primary'
                         className='px-4'
@@ -92,8 +92,8 @@ const MyAccount = () => {
         );
     } else {
         return (
-            <div className='relative rounded-lg bg-white p-4 shadow-sm'>
-                <div className='absolute top-4 right-5 cursor-pointer'>
+            <div className='relative p-4 bg-white rounded-lg shadow-sm'>
+                <div className='absolute cursor-pointer top-4 right-5'>
                     <Icons name='trash' size={15} onClick={handleDelete} />
                 </div>
 
