@@ -70,7 +70,7 @@ const EnterAmountStep = ({
                     <span className='text-xl font-semibold'>
                         {partnerName}님께
                     </span>
-                    <span className='text-line-700 font-medium'>
+                    <span className='font-medium text-line-700'>
                         다음 상환액: {nextRepaymentAmount.toLocaleString()}원
                     </span>
                 </div>
@@ -94,7 +94,7 @@ const EnterAmountStep = ({
                 </div>
             </section>
 
-            <div className='sticky bottom-0 left-0 flex w-full flex-col gap-4 pb-4'>
+            <div className='sticky bottom-0 left-0 flex flex-col w-full gap-4 pb-4'>
                 <AmountShortcuts onClick={handleAmountAdd} />
                 <NumberPad
                     onNumberClick={handleNumberClick}
