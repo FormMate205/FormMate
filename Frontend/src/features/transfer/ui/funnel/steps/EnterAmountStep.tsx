@@ -26,10 +26,11 @@ const EnterAmountStep = ({
     const nextRepaymentAmount = scheduledInfo?.monthlyRemainingPayment ?? 0;
     const earlyRepaymentFeeRate = scheduledInfo?.earlyRepaymentFeeRate ?? 0;
 
-    const parsedAmount = useMemo(
-        () => parseInt(inputValue || '0', 10),
-        [inputValue],
-    );
+    const parsedAmount = useMemo(() => {
+        const value = parseInt(inputValue || '0', 10);
+        return value === 0 ? 0 : value;
+    }, [inputValue]);
+
     const isOverBalance = useMemo(
         () => parsedAmount > (accountInfo?.accountBalance ?? 0),
         [parsedAmount, accountInfo?.accountBalance],
@@ -38,6 +39,8 @@ const EnterAmountStep = ({
     // 넘버패드 클릭
     const handleNumberClick = (num: string) => {
         if (!/^\d+$/.test(num)) return;
+        // 첫 번째 입력이 0인 경우 무시
+        if (inputValue === '' && num === '0') return;
         setInputValue((prev) => prev + num);
     };
 
