@@ -85,6 +85,7 @@ public class ContractService {
 
 		// 현재까지 납부한 총액 (모든 송금 금액 합)
 		long repaymentAmount = transfers.stream()
+			.filter(t -> t.getCurrentRound() != 0)
 			.mapToLong(TransferEntity::getAmount)
 			.sum();
 
@@ -167,7 +168,9 @@ public class ContractService {
 				paidOverdueInterest += overdueAmount;
 				totalEarlyRepaymentFee += schedule.getEarlyRepaymentFee();
 			} else {
-				unpaidAmount += Math.max(0, scheduledTotal - paid);
+				if (schedule.getPaymentRound().equals(contract.getCurrentPaymentRound())) {
+					unpaidAmount = Math.max(0, scheduledTotal - paid);
+				}
 				remainingPrincipal += scheduledPrincipal;
 				remainingInterest += scheduledInterest;
 			}
@@ -304,13 +307,16 @@ public class ContractService {
 				long actual = s.getActualPaidAmount() != null ? s.getActualPaidAmount() : 0L;
 				long unpaid = Math.max(0, scheduled - actual);
 
-				if (Boolean.TRUE.equals(s.getIsPaid())) {
-					// 납부된 금액은 상태 상관없이 집계
+				// 💰 실제 납부 금액이 존재하면 납부 금액으로 누적
+				if (actual > 0) {
 					if (isCreditor)
 						received += actual;
 					else
 						paid += actual;
-				} else {
+				}
+
+				// 🔜 아직 미납된 금액도 누적
+				if (Boolean.FALSE.equals(s.getIsPaid())) {
 					if (isCreditor)
 						expectedReceive += unpaid;
 					else
