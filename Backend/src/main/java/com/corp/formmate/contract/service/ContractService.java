@@ -236,22 +236,14 @@ public class ContractService {
 	}
 
 	/**
-	 * 특정 사용자와 상대방 간의 계약을 반환 (채권자/채무자 구분 포함)
+	 * 특정 사용자와 상대방 간의 계약을 반환 (채무자 계약만)
 	 */
 	@Transactional
 	public List<ContractWithPartnerResponse> selectContractWithPartner(Integer userId, Integer partnerId) {
-		List<FormEntity> creditorForms = formRepository.findUserIsCreditorSideForms(
-			userId, partnerId, PageRequest.of(0, 1000)).getContent();
 		List<FormEntity> debtorForms = formRepository.findUserIsDebtorSideForms(
 			userId, partnerId, PageRequest.of(0, 1000)).getContent();
 
 		List<ContractWithPartnerResponse> responses = new ArrayList<>();
-
-		// 상태가 IN_PROGRESS or OVERDUE인 Form만 처리
-		creditorForms.stream()
-			.filter(f -> f.getStatus() == FormStatus.IN_PROGRESS || f.getStatus() == FormStatus.OVERDUE)
-			.map(f -> buildPartnerResponse(f, true))
-			.forEach(responses::add);
 
 		debtorForms.stream()
 			.filter(f -> f.getStatus() == FormStatus.IN_PROGRESS || f.getStatus() == FormStatus.OVERDUE)
@@ -265,11 +257,9 @@ public class ContractService {
 	 * 특정 상태의 전체 계약(사용자 기준) 조회 → 요약 정보 반환
 	 */
 	@Transactional
-	public List<ContractPreviewResponse> selectAllContractByStatus(FormStatus formStatus, Integer userId) {
-		Page<FormEntity> allForms = formRepository.findAllWithFilters(
-			userId, formStatus, null, PageRequest.of(0, 1000));
+	public List<ContractPreviewResponse> selectAllContractByStatus(List<FormStatus> statuses, Integer userId) {
 		UserEntity user = getUser(userId);
-
+		List<FormEntity> allForms = formRepository.findAllByStatuses(userId, statuses);
 		return allForms.stream()
 			.map(form -> {
 				boolean isCreditor = form.getCreditor().equals(user);
@@ -297,7 +287,8 @@ public class ContractService {
 					totalRemaining = schedules.stream()
 						.filter(s -> !Boolean.TRUE.equals(s.getIsPaid()))
 						.mapToLong(s -> {
-							long total = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount();
+							long total = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount()
+								+ s.getEarlyRepaymentFee();
 							long paid = s.getActualPaidAmount() != null ? s.getActualPaidAmount() : 0L;
 							return Math.max(0, total - paid);
 						})
@@ -305,7 +296,7 @@ public class ContractService {
 
 					// 진행 중, 연체만 납부할 회차 추출
 					if (form.getStatus() == FormStatus.IN_PROGRESS || form.getStatus() == FormStatus.OVERDUE) {
-						nextAmount = calculateNextRepaymentAmount(contract, schedules);
+						nextAmount = calculateCurrentRepaymentAmount(contract, schedules);
 					}
 				}
 
@@ -771,50 +762,29 @@ public class ContractService {
 		formRepository.save(form);
 	}
 
-	private long calculateNextRepaymentAmount(ContractEntity contract, List<PaymentScheduleEntity> schedules) {
+	private long calculateCurrentRepaymentAmount(ContractEntity contract, List<PaymentScheduleEntity> schedules) {
 		Integer currentRound = contract.getCurrentPaymentRound();
+		long currentRepaymentAmount = 0L;
 
-		List<PaymentScheduleEntity> unpaid = schedules.stream()
-			.filter(s -> !Boolean.TRUE.equals(s.getIsPaid()))
-			.toList();
+		for(PaymentScheduleEntity schedule : schedules) {
+			if(schedule.getPaymentRound() > currentRound) {
+				continue;
+			}
 
-		List<PaymentScheduleEntity> overdue = unpaid.stream()
-			.filter(PaymentScheduleEntity::getIsOverdue)
-			.toList();
+			if(Boolean.TRUE.equals(schedule.getIsPaid())) {
+				continue;
+			}
 
-		if (!overdue.isEmpty()) {
-			return overdue.stream()
-				.mapToLong(s -> {
-					long total = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount();
-					long paid = s.getActualPaidAmount() != null ? s.getActualPaidAmount() : 0L;
-					return Math.max(0, total - paid);
-				})
-				.sum();
+			long principal = schedule.getScheduledPrincipal();
+			long interest = schedule.getScheduledInterest();
+			long overdueAmount = schedule.getOverdueAmount();
+			long paid = schedule.getActualPaidAmount();
+
+			long total = Math.max(0, principal + interest + overdueAmount - paid);
+
+			currentRepaymentAmount += total;
 		}
-
-		PaymentScheduleEntity current = unpaid.stream()
-			.filter(s -> s.getPaymentRound().equals(currentRound))
-			.findFirst()
-			.orElse(null);
-
-		if (current != null) {
-			long total = current.getScheduledPrincipal() + current.getScheduledInterest() + current.getOverdueAmount();
-			long paid = current.getActualPaidAmount() != null ? current.getActualPaidAmount() : 0L;
-			return Math.max(0, total - paid);
-		}
-
-		PaymentScheduleEntity next = unpaid.stream()
-			.filter(s -> s.getPaymentRound() > currentRound)
-			.min(Comparator.comparingInt(PaymentScheduleEntity::getPaymentRound))
-			.orElse(null);
-
-		if (next != null) {
-			long total = next.getScheduledPrincipal() + next.getScheduledInterest() + next.getOverdueAmount();
-			long paid = next.getActualPaidAmount() != null ? next.getActualPaidAmount() : 0L;
-			return Math.max(0, total - paid);
-		}
-
-		return 0L;
+		return currentRepaymentAmount;
 	}
 
 	@Transactional
