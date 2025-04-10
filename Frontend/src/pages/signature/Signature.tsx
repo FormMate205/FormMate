@@ -32,13 +32,13 @@ const Signature = () => {
         handleRecaptchaExpired,
     } = useSignature({ formId, type, creditorId, requestedById });
 
-    const onSuccess = () => {
-        handleVerifyCode();
+    const onSuccess = async () => {
+        await handleVerifyCode();
 
         if (verificationSuccess) {
             setTimeout(() => {
                 navigate(`/chat/${formId}`, { state: { isFin: false } });
-            }, 500);
+            }, 300);
         }
     };
 
