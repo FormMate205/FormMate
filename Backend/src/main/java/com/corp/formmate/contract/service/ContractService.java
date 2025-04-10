@@ -297,7 +297,8 @@ public class ContractService {
 					totalRemaining = schedules.stream()
 						.filter(s -> !Boolean.TRUE.equals(s.getIsPaid()))
 						.mapToLong(s -> {
-							long total = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount();
+							long total = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount()
+								+ s.getEarlyRepaymentFee();
 							long paid = s.getActualPaidAmount() != null ? s.getActualPaidAmount() : 0L;
 							return Math.max(0, total - paid);
 						})

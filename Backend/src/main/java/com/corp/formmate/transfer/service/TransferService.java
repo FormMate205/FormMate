@@ -170,7 +170,7 @@ public class TransferService {
 		} else { // 연체
 			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
 				TransferStatus.OVERDUE);
-		} // 해당 구문 빠져나오기 전 contract 관련한 처리 로직 필요
+		}
 
 		transferRepository.save(transferEntity);
 
