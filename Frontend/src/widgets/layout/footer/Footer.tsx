@@ -35,7 +35,7 @@ const Footer = ({ unreadChat = false }: FooterProps) => {
     };
 
     return (
-        <div className='sticky right-0 bottom-0 left-0 w-full bg-white shadow-sm'>
+        <div className='fixed bottom-0 w-full max-w-[640px] bg-white shadow-sm'>
             <div className='flex justify-between px-6 py-2'>
                 <button
                     className='flex flex-col items-center justify-end gap-1'
