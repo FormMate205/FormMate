@@ -46,6 +46,7 @@ const RangeDatePicker = ({
                     selected={date ?? undefined}
                     onSelect={onChange}
                     initialFocus
+                    disabled={(date) => date > new Date()}
                 />
             </PopoverContent>
         </Popover>
