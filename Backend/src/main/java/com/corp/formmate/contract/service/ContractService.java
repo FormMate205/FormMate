@@ -1,6 +1,7 @@
 package com.corp.formmate.contract.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -43,6 +44,7 @@ import com.corp.formmate.global.error.exception.ContractException;
 import com.corp.formmate.global.error.exception.FormException;
 import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.paymentschedule.entity.PaymentScheduleEntity;
+import com.corp.formmate.paymentschedule.repository.PaymentScheduleRepository;
 import com.corp.formmate.paymentschedule.service.PaymentScheduleService;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
@@ -67,6 +69,7 @@ public class ContractService {
 	private final AlertService alertService;
 	private final PaymentScheduleService paymentScheduleService;
 	private final PaymentPreviewService paymentPreviewService;
+	private final PaymentScheduleRepository paymentScheduleRepository;
 
 	/**
 	 * 계약 상세 정보를 조회하는 메서드
@@ -415,83 +418,6 @@ public class ContractService {
 		return allDetails;
 	}
 
-	//	@Transactional
-	//	public void dailyContractUpdateJob() {
-	//		LocalDate today = LocalDate.now();
-	//
-	//		// 1) 진행중(IN_PROGRESS) 또는 연체(OVERDUE) 상태인 Form 조회
-	//		List<FormEntity> targetForms = formRepository.findByStatusIn(
-	//			Arrays.asList(FormStatus.IN_PROGRESS, FormStatus.OVERDUE)
-	//		);
-	//
-	//		for (FormEntity form : targetForms) {
-	//			// 해당 Form에 연결된 Contract 조회
-	//			ContractEntity contract = contractRepository.findByForm(form)
-	//				.orElse(null);
-	//			if (contract == null) {
-	//				continue;
-	//			}
-	//
-	//			LocalDate nextDueDate = contract.getNextRepaymentDate();
-	//			if (nextDueDate == null) {
-	//				// nextRepaymentDate가 없다면 스킵 (또는 완납/만기 등)
-	//				continue;
-	//			}
-	//
-	//			// 2) nextRepaymentDate가 지났다면(어제 날짜보다 이전)
-	//			if (nextDueDate.isBefore(today)) {
-	//				// 이번 회차 납부가 완납되었는지 체크
-	//				boolean fullyPaid = checkIfFullyPaid(form, contract);
-	//				if (!fullyPaid) {
-	//					// => 연체 처리
-	//					handleOverdue(form, contract);
-	//				} else {
-	//					// => 완납이면 다음 회차로 이동
-	//					moveToNextRound(form, contract);
-	//				}
-	//			}
-	//
-	//			// 3) 만약 이미 OVERDUE 상태인데 납부 완료로 연체 해소되었다면 → 다시 IN_PROGRESS
-	//			//   (혹은 overdueAmount=0이 되었는지 체크)
-	//			if (form.getStatus() == FormStatus.OVERDUE) {
-	//				boolean isOverdueCleared = checkIfOverdueCleared(form, contract);
-	//				if (isOverdueCleared) {
-	//					form.updateStatus(FormStatus.IN_PROGRESS);
-	//					// 필요하다면 overdueAmount=0 등 리셋
-	//					contract.setOverdueAmount(0L);
-	//					contractRepository.save(contract);
-	//					formRepository.save(form);
-	//				}
-	//			}
-	//		}
-	//	}
-
-	/**
-	 * 이번 회차(Contract.currentPaymentRound)에 대해
-	 * 실제 납부(Transfer) 합계가 스케줄상의 납부액보다 큰지 검사
-	 */
-	//	private boolean checkIfFullyPaid(FormEntity form, ContractEntity contract) {
-	//		int round = contract.getCurrentPaymentRound();
-	//
-	//		// 1) 스케줄에서 이번 회차 납부 예정액 가져오기
-	//		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService.calculateEnhancedPaymentPreview(form,
-	//			contract);
-	//		long scheduledAmount = preview.getScheduleList().stream()
-	//			.filter(s -> s.getInstallmentNumber() == round)
-	//			.findFirst()
-	//			.map(EnhancedPaymentScheduleResponse::getPaymentAmount)
-	//			.orElse(0L);
-	//
-	//		// 2) 실제 납부액(Transfer) 합
-	//		List<TransferEntity> transfers = transferRepository.findByForm(form).orElse(Collections.emptyList());
-	//		long paid = transfers.stream()
-	//			.filter(t -> t.getCurrentRound() == round)
-	//			.mapToLong(TransferEntity::getAmount)
-	//			.sum();
-	//
-	//		return (paid >= scheduledAmount);
-	//	}
-
 	/**
 	 * 연체 처리
 	 * - Form 상태를 OVERDUE로
@@ -551,66 +477,6 @@ public class ContractService {
 	//		contractRepository.save(contract);
 	//		formRepository.save(form);
 	//	}
-
-	/**
-	 * 다음 회차로 이동
-	 * - currentPaymentRound++
-	 * - nextRepaymentDate = 다음 회차의 paymentDate(없으면 만기 처리)
-	 * - 만약 이전에 연체였다면 해소
-	 */
-	//	private void moveToNextRound(FormEntity form, ContractEntity contract) {
-	//		int round = contract.getCurrentPaymentRound();
-	//		contract.setCurrentPaymentRound(round + 1);
-	//
-	//		// 다음 회차 스케줄
-	//		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService
-	//			.calculateEnhancedPaymentPreview(form, contract);
-	//
-	//		Optional<EnhancedPaymentScheduleResponse> nextScheduleOpt = preview.getScheduleList().stream()
-	//			.filter(s -> s.getInstallmentNumber() == (round + 1))
-	//			.findFirst();
-	//
-	//		if (nextScheduleOpt.isPresent()) {
-	//			// 다음 회차 납부일
-	//			LocalDateTime nextPayDate = nextScheduleOpt.get().getPaymentDate();
-	//			contract.setNextRepaymentDate(nextPayDate.toLocalDate());
-	//		} else {
-	//			// 더 이상 회차가 없다면 => 만기
-	//			form.updateStatus(FormStatus.COMPLETED);
-	//			log.info("moveToNextRound: 모든 회차 완료 -> COMPLETED");
-	//		}
-	//
-	//		// 만약 이전에 연체였는데 이번 회차 완납으로 해소됐을 수 있으므로
-	//		// overdueAmount=0
-	//		contract.setOverdueAmount(0L);
-	//		if (form.getStatus() == FormStatus.OVERDUE) {
-	//			form.updateStatus(FormStatus.IN_PROGRESS);
-	//		}
-	//
-	//		contractRepository.save(contract);
-	//		formRepository.save(form);
-	//	}
-
-	/**
-	 * 연체가 해소됐는지 체크
-	 * - overdueAmount=0인가?
-	 * - 혹은 이번 회차 납부분도 충분?
-	 */
-	private boolean checkIfOverdueCleared(FormEntity form, ContractEntity contract) {
-		if (contract.getOverdueAmount() > 0) {
-			return false;
-		}
-		// 2) 만약 여러 회차에 걸쳐 연체될 가능성이 있다면?
-		//    "모든 과거 회차가 납부 완료"인지 검사하는 식의 로직도 가능
-
-		// 3) 연체 이자를 별도로 추적한다면 "연체 이자도 모두 납부되었는지" 확인
-		// if (contract.getOverdueInterestAmount() > someThreshold) {
-		//     return false;
-		// }
-
-		// 여기서는 간단히 "overdueAmount == 0이면 해소"로 가정
-		return true;
-	}
 
 	/**
 	 * 파트너와의 계약 응답 DTO 구성
@@ -864,102 +730,6 @@ public class ContractService {
 		formRepository.save(form);
 	}
 
-	/**
-	 * 과거 달(ym)에 해당하는 모든 Transfer 내역을 찾아,
-	 * "송금 일자"를 scheduledPaymentDate로, 송금 금액을 repaymentAmount로 하는
-	 * 여러 MonthlyContractDetail을 생성
-	 */
-	private List<MonthlyContractDetail> findTransferDetailsForMonth(
-		FormEntity form, YearMonth ym,
-		boolean isCreditor, String contracteeName
-	) {
-		List<MonthlyContractDetail> details = new ArrayList<>();
-
-		List<TransferEntity> transfers = transferRepository.findByForm(form)
-			.orElse(Collections.emptyList());
-
-		// 이 달(ym)에 해당하는 모든 Transfer를 찾아서
-		// 각각 detail로 매핑
-		transfers.stream()
-			.filter(t -> {
-				LocalDate txDate = t.getTransactionDate().toLocalDate();
-				return YearMonth.from(txDate).equals(ym);
-			})
-			.forEach(t -> {
-				MonthlyContractDetail detail = MonthlyContractDetail.builder()
-					.userIsCreditor(isCreditor)
-					.contracteeName(contracteeName)
-					.repaymentAmount(t.getAmount()) // 실제 송금액
-					.scheduledPaymentDate(t.getTransactionDate().toLocalDate()) // 실제 송금일
-					.build();
-
-				details.add(detail);
-			});
-
-		return details;
-	}
-
-	/**
-	 * 현재나 미래 달(ym)에 대해서, EnhancedPaymentPreviewService 스케줄에서
-	 * "paymentDate가 ym에 속하는 모든 회차"를 찾아
-	 * Detail을 여러 개 생성
-	 */
-	//	private List<MonthlyContractDetail> computeDetailsFromPreview(
-	//		FormEntity form, ContractEntity contract, YearMonth ym,
-	//		boolean isCreditor, String contracteeName
-	//	) {
-	//		List<MonthlyContractDetail> details = new ArrayList<>();
-	//
-	//		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService
-	//			.calculateEnhancedPaymentPreview(form, contract);
-	//
-	//		// 스케줄 중에서 "paymentDate의 YearMonth가 ym"인 회차들을 추출
-	//		preview.getScheduleList().stream()
-	//			.filter(s -> YearMonth.from(s.getPaymentDate().toLocalDate()).equals(ym))
-	//			.forEach(s -> {
-	//				// 회차별 날짜(s.getPaymentDate()) 를 scheduledPaymentDate로
-	//				// 납부 예정액(s.getPaymentAmount())를 repaymentAmount로
-	//				MonthlyContractDetail detail = MonthlyContractDetail.builder()
-	//					.userIsCreditor(isCreditor)
-	//					.contracteeName(contracteeName)
-	//					.repaymentAmount(s.getPaymentAmount())
-	//					.scheduledPaymentDate(s.getPaymentDate().toLocalDate())
-	//					.build();
-	//
-	//				details.add(detail);
-	//			});
-	//
-	//		return details;
-	//	}
-	private long clearOverdueIfAny(FormEntity form, ContractEntity contract, long leftover) {
-		long result = leftover;
-
-		long odAmount = contract.getOverdueAmount();
-		if (odAmount > 0) {
-			// 여기서는 overdueAmount에 "원금+연체이자"가 섞여있다고 가정
-			// 더 정교하게 "overdueInterestAmount"를 별도 필드로 관리하려면, 이자→원금 순으로 더 세밀히 처리
-
-			if (result >= odAmount) {
-				// 연체액 전부 해소
-				result -= odAmount;
-				contract.setOverdueAmount(0L);
-
-				// 상태를 IN_PROGRESS 복귀
-				form.updateStatus(FormStatus.IN_PROGRESS);
-			} else {
-				// 부분 해소
-				long remain = odAmount - result;
-				contract.setOverdueAmount(remain);
-				result = 0;
-				// 아직 연체 중
-				form.updateStatus(FormStatus.OVERDUE);
-			}
-		}
-
-		// result = "연체 차감 후 남은 돈"
-		return result;
-	}
-
 	private long calculateNextRepaymentAmount(ContractEntity contract, List<PaymentScheduleEntity> schedules) {
 		Integer currentRound = contract.getCurrentPaymentRound();
 
@@ -1169,19 +939,114 @@ public class ContractService {
 				continue;
 			}
 
+			boolean updated = false;
+
 			LocalDate nextRepaymentDate = contract.getNextRepaymentDate();
-			if (nextRepaymentDate == null || !nextRepaymentDate.plusDays(1).isEqual(today)) {
+			if (nextRepaymentDate == null || !nextRepaymentDate.plusDays(1).isEqual(today))
 				continue;
+
+			int currentRound = contract.getCurrentPaymentRound();
+			PaymentScheduleEntity currentSchedule =
+				paymentScheduleService.selectByContractAndRound(contract, currentRound).orElse(null);
+
+			// ✅ 현재 회차가 아직 납부되지 않았다면 → 연체 처리
+			if (currentSchedule != null && Boolean.FALSE.equals(currentSchedule.getIsPaid())) {
+				currentSchedule.markAsOverdue();
+				form.updateStatus(FormStatus.OVERDUE);
+				contract.updateOverdue();
+
+				// ✅ 납부해야 할 전체 금액 계산 (예상 납부 금액 로직 재활용)
+				ExpectedPaymentAmountResponse expected = selectExpectedPaymentAmount(form.getId());
+				long notPaid = expected.getMonthlyRemainingPayment();
+				String formattedAmount = NumberFormat.getNumberInstance().format(notPaid);
+
+				alertService.createAlert(
+					form.getDebtor(),
+					"연체",
+					"연체가 발생했습니다!",
+					form.getCreditorName() + "님께 " + formattedAmount + "원을 이체해주세요."
+				);
+
+				alertService.createAlert(
+					form.getCreditor(),
+					"연체",
+					"연체가 발생했습니다!",
+					form.getDebtorName() + "님께서 아직 " + formattedAmount + "원을 송금하지 않았어요."
+				);
+
+				paymentScheduleRepository.save(currentSchedule);
+				formRepository.save(form);
+				updated = true;
 			}
 
-			PaymentScheduleEntity paymentSchedule = paymentScheduleService.selectByContractAndRound(contract,
+			PaymentScheduleEntity nextSchedule = paymentScheduleService.selectByContractAndRound(contract,
 				contract.getCurrentPaymentRound() + 1).orElse(null);
 
-			if (paymentSchedule != null) {
-				contract.updateSchedule(paymentSchedule.getPaymentRound(),
-					paymentSchedule.getScheduledPaymentDate().toLocalDate());
+			if (nextSchedule != null) {
+				contract.updateSchedule(nextSchedule.getPaymentRound(),
+					nextSchedule.getScheduledPaymentDate().toLocalDate());
+				updated = true;
+			}
+
+			if (updated) {
 				contractRepository.save(contract);
 			}
 		}
 	}
+
+	@Transactional
+	public void accumulateOverdueInterestDaily() {
+		List<FormEntity> overdueForms = formRepository.findByStatus(FormStatus.OVERDUE);
+
+		for (FormEntity form : overdueForms) {
+			ContractEntity contract = contractRepository.findByForm(form).orElse(null);
+			if (contract == null)
+				continue;
+
+			List<PaymentScheduleEntity> overdueSchedules = paymentScheduleService
+				.selectOverdueUnpaidSchedules(contract); // isOverdue = true && isPaid = false
+
+			BigDecimal interestRate = form.getInterestRate();
+			BigDecimal overdueRate = form.getOverdueInterestRate();
+
+			if (interestRate == null)
+				interestRate = BigDecimal.ZERO;
+			if (overdueRate == null)
+				overdueRate = BigDecimal.ZERO;
+
+			BigDecimal totalRate = interestRate.add(overdueRate); // 연체 이자율 + 일반 이자율
+			BigDecimal dailyRate = totalRate
+				.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP) // 퍼센트 처리
+				.divide(BigDecimal.valueOf(365), 10, RoundingMode.HALF_UP); // 하루치 이율
+
+			long totalAccumulated = 0L;
+			long totalOverdueAmount = 0L;
+
+			for (PaymentScheduleEntity schedule : overdueSchedules) {
+				long principal = schedule.getScheduledPrincipal();
+				long interestOriginal = schedule.getScheduledInterest();
+				long paid = schedule.getActualPaidAmount() != null ? schedule.getActualPaidAmount() : 0L;
+
+				long unpaidPrincipal = Math.max(0, principal - paid);
+
+				long interest = BigDecimal.valueOf(unpaidPrincipal)
+					.multiply(dailyRate)
+					.setScale(0, RoundingMode.HALF_UP)
+					.longValue();
+
+				schedule.accumulateOverdue(interest);
+				totalAccumulated += interest;
+
+				long scheduledTotal = principal + interestOriginal + schedule.getOverdueAmount();
+				totalOverdueAmount += Math.max(0, scheduledTotal - paid);
+			}
+
+			contract.addOverdueInterest(totalAccumulated);
+			contract.setOverdueAmount(totalOverdueAmount);
+
+			paymentScheduleRepository.saveAll(overdueSchedules);
+			contractRepository.save(contract);
+		}
+	}
+
 }
