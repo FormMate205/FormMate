@@ -54,7 +54,7 @@ public class IdentityVerificationService {
     private String recaptchaSecretKey;
 
     // 본인인증 토큰 유효기간 (30분)
-    private static final long IDENTITY_VERIFICATION_EXPIRATION = 30 * 60;
+    private static final long IDENTITY_VERIFICATION_EXPIRATION = 10 * 60;
 
     // Redis에 저장될 키 접두사
     private static final String IDENTITY_VERIFICATION_PREFIX = "identity:verified:";
