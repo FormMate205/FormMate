@@ -48,7 +48,6 @@ const ContractCardItem = ({ contract }: ContractCardItemProps) => {
 
     const label = statusToLabel(status);
     const { color, description } = statusInfo;
-    const isSender = userIsCreditor;
     const isPending =
         status === 'BEFORE_APPROVAL' || status === 'AFTER_APPROVAL';
 
@@ -82,18 +81,18 @@ const ContractCardItem = ({ contract }: ContractCardItemProps) => {
                                     이번달{' '}
                                     <span
                                         className={
-                                            isSender
+                                            !userIsCreditor
                                                 ? 'text-subPink-600'
                                                 : 'text-primary-500'
                                         }
                                     >
-                                        {userIsCreditor ? '보낼 ' : '받을 '}
+                                        {!userIsCreditor ? '보낼 ' : '받을 '}
                                     </span>
                                     금액
                                 </div>
                                 <span
                                     className={`${
-                                        isSender
+                                        !userIsCreditor
                                             ? 'text-subPink-600'
                                             : 'text-primary-500'
                                     } font-medium`}
@@ -110,7 +109,7 @@ const ContractCardItem = ({ contract }: ContractCardItemProps) => {
                         <div className='text-line-700 flex flex-col gap-1 text-sm'>
                             <Progress
                                 value={progressPercent}
-                                color={!isSender ? 'blue' : undefined}
+                                color={userIsCreditor ? 'blue' : undefined}
                             />
                             <div className='flex justify-between'>
                                 <span>
