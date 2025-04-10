@@ -166,8 +166,8 @@ const ContractDocument = ({
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className='flex flex-col gap-2 text-base'>
-                                    {specialTerms.map((term) => (
-                                        <span key={term.specialTermIndex}>
+                                    {specialTerms.map((term, index) => (
+                                        <span key={`special-term-${index}`}>
                                             {term.specialTermIndex}.{' '}
                                             {term.specialTermDetail}
                                         </span>

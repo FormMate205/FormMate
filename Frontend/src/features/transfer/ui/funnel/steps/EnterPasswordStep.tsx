@@ -13,11 +13,7 @@ const EnterPasswordStep = ({ onConfirm, onReset }: EnterPasswordStepProps) => {
 
     const handleNumberClick = (num: string) => {
         if (inputValue.length >= 6) return;
-        const newValue = inputValue + num;
-        setInputValue(newValue);
-        if (newValue.length === 6) {
-            onConfirm(newValue);
-        }
+        setInputValue((prev) => prev + num);
     };
 
     const handleDelete = () => {

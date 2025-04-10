@@ -48,7 +48,6 @@ const ContractCardItem = ({ contract }: ContractCardItemProps) => {
 
     const label = statusToLabel(status);
     const { color, description } = statusInfo;
-    const isSender = userIsCreditor;
     const isPending =
         status === 'BEFORE_APPROVAL' || status === 'AFTER_APPROVAL';
 
@@ -57,8 +56,8 @@ const ContractCardItem = ({ contract }: ContractCardItemProps) => {
         : 0;
 
     return (
-        <Link to={`/contracts/${formId}`} className='block cursor-pointer'>
-            <div className='border-line-200 flex h-42 flex-col gap-3 rounded-xl border p-4 shadow-sm'>
+        <div className='block'>
+            <div className='border-line-200 flex h-42 min-h-[168px] flex-col gap-3 rounded-xl border p-4 shadow-sm'>
                 <div className='flex items-center gap-2'>
                     <span className='text-lg font-medium'>
                         {contracteeName}
@@ -75,54 +74,65 @@ const ContractCardItem = ({ contract }: ContractCardItemProps) => {
                         </div>
                     </div>
                 ) : (
-                    <>
-                        <div className='text-line-900 flex flex-col'>
-                            <div className='flex justify-between'>
-                                <div>
-                                    이번달{' '}
+                    <Link
+                        to={`/contracts/${formId}`}
+                        className='block cursor-pointer'
+                    >
+                        <>
+                            <div className='text-line-900 flex flex-col'>
+                                <div className='flex justify-between'>
+                                    <div>
+                                        이번달{' '}
+                                        <span
+                                            className={
+                                                !userIsCreditor
+                                                    ? 'text-subPink-600'
+                                                    : 'text-primary-500'
+                                            }
+                                        >
+                                            {!userIsCreditor
+                                                ? '보낼 '
+                                                : '받을 '}
+                                        </span>
+                                        금액
+                                    </div>
                                     <span
-                                        className={
-                                            isSender
+                                        className={`${
+                                            !userIsCreditor
                                                 ? 'text-subPink-600'
                                                 : 'text-primary-500'
-                                        }
+                                        } font-medium`}
                                     >
-                                        {userIsCreditor ? '보낼 ' : '받을 '}
+                                        {nextRepaymentAmount.toLocaleString()}{' '}
+                                        원
                                     </span>
-                                    금액
                                 </div>
-                                <span
-                                    className={`${
-                                        isSender
-                                            ? 'text-subPink-600'
-                                            : 'text-primary-500'
-                                    } font-medium`}
-                                >
-                                    {nextRepaymentAmount.toLocaleString()} 원
-                                </span>
+                                <div className='flex justify-between'>
+                                    <span>계약 만기</span>
+                                    <span>{`${maturityDate[0]}.${maturityDate[1]}.${maturityDate[2]}`}</span>
+                                </div>
                             </div>
-                            <div className='flex justify-between'>
-                                <span>계약 만기</span>
-                                <span>{`${maturityDate[0]}.${maturityDate[1]}.${maturityDate[2]}`}</span>
-                            </div>
-                        </div>
 
-                        <div className='text-line-700 flex flex-col gap-1 text-sm'>
-                            <Progress
-                                value={progressPercent}
-                                color={!isSender ? 'blue' : undefined}
-                            />
-                            <div className='flex justify-between'>
-                                <span>
-                                    {totalRepaymentAmount.toLocaleString()}원
-                                </span>
-                                <span>{totalAmountDue.toLocaleString()}원</span>
+                            <div className='text-line-700 flex flex-col gap-1 text-sm'>
+                                <Progress
+                                    value={progressPercent}
+                                    color={userIsCreditor ? 'blue' : undefined}
+                                />
+                                <div className='flex justify-between'>
+                                    <span>
+                                        {totalRepaymentAmount.toLocaleString()}
+                                        원
+                                    </span>
+                                    <span>
+                                        {totalAmountDue.toLocaleString()}원
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    </>
+                        </>
+                    </Link>
                 )}
             </div>
-        </Link>
+        </div>
     );
 };
 

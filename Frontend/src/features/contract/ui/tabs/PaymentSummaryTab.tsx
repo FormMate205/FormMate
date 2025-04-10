@@ -29,8 +29,9 @@ const PaymentSummaryTab = ({ formId }: { formId: string }) => {
         paidInterestAmount +
         paidOverdueInterestAmount +
         totalEarlyRepaymentFee;
-
+    // 이자
     const totalInterestPaid = paidInterestAmount + paidOverdueInterestAmount;
+    // 만기일 예상 납부
 
     return (
         <div className='flex flex-col gap-6 rounded-sm bg-white px-6 py-8 shadow-sm'>
