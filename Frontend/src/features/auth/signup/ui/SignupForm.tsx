@@ -117,8 +117,7 @@ const SignupForm = () => {
             if (!isAvailable) {
                 setEmailError('이미 사용 중인 이메일입니다.');
             }
-        } catch (error) {
-            console.error('이메일 확인 오류:', error);
+        } catch {
             setEmailError('이메일 확인 중 오류가 발생했습니다.');
         } finally {
             setIsLoading((prev) => ({ ...prev, email: false }));

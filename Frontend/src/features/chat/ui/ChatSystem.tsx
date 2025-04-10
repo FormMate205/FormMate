@@ -29,8 +29,7 @@ const ChatSystem = ({ formId, children, type }: ChatSystemProps) => {
                 setIsLoading(true);
                 const result = await getCurrentSigner(formId);
                 setIsCurrentSigner(result);
-            } catch (error) {
-                console.error('Failed to check current signer:', error);
+            } catch {
                 setIsCurrentSigner(false);
             } finally {
                 setIsLoading(false);
