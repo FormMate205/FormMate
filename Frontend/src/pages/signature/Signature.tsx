@@ -35,13 +35,6 @@ const Signature = () => {
         navigate('/');
     };
 
-    // 서명 페이지 닫기
-    const handleClose = () => {
-        navigate(`/chat/${formId}`, {
-            state: { isFin: false },
-        });
-    };
-
     return (
         <div className='flex h-screen w-full flex-col px-4 py-2'>
             <div className='h-full py-4'>
@@ -102,10 +95,6 @@ const Signature = () => {
                                                     입력하신 전화번호로
                                                     인증번호가 전송되었습니다.
                                                 </p>
-                                                <p className='text-primary-500 pl-1'>
-                                                    '로봇이 아닙니다' 체크 후
-                                                    인증번호를 입력하세요.
-                                                </p>
                                                 <FormField
                                                     control={form.control}
                                                     name='code'
@@ -118,15 +107,6 @@ const Signature = () => {
                                                                     {...field}
                                                                 />
                                                             </FormControl>
-                                                            <Button
-                                                                type='button'
-                                                                variant='default'
-                                                                children='확인'
-                                                                className='whitespace-nowrap'
-                                                                onClick={
-                                                                    handleVerifyCode
-                                                                }
-                                                            />
                                                         </FormItem>
                                                     )}
                                                 />
@@ -170,7 +150,13 @@ const Signature = () => {
                     </form>
                 </Form>
             </div>
-            <Button variant={'primary'} children='닫기' onClick={handleClose} />
+            <Button
+                type='button'
+                variant='primary'
+                children='확인'
+                className='whitespace-nowrap'
+                onClick={handleVerifyCode}
+            />
         </div>
     );
 };
