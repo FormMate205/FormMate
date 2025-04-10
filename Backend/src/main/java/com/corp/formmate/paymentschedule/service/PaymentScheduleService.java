@@ -95,71 +95,39 @@ public class PaymentScheduleService {
 	public List<PaymentScheduleEntity> updateSchedulesForRepaymentAndReturnUpdated(ContractEntity contract,
 		FormEntity form, long leftover) {
 		List<PaymentScheduleEntity> schedules = selectByContractOrderByPaymentRoundAsc(contract);
-		LocalDateTime now = LocalDateTime.now();
-		boolean isFirst = true;
-		boolean earlyRepaymentOccurred = false;
+		Integer currentPaymentRound = contract.getCurrentPaymentRound();
 
 		for (PaymentScheduleEntity s : schedules) {
-			if (Boolean.TRUE.equals(s.getIsPaid()))
+			if (Boolean.TRUE.equals(s.getIsPaid())) {
 				continue;
-
-			long scheduledTotal = s.getScheduledPrincipal() + s.getScheduledInterest() + s.getOverdueAmount();
-
-			if (isFirst) {
-				isFirst = false;
-				if (leftover >= scheduledTotal) {
-					s.markAsPaid(scheduledTotal, now);
-					leftover -= scheduledTotal;
-
-					// 수수료 부과
-					if (leftover > 0 && form.getEarlyRepaymentFeeRate() != null) {
-						BigDecimal feeRate = form.getEarlyRepaymentFeeRate();
-						BigDecimal leftoverDecimal = BigDecimal.valueOf(leftover);
-						long fee = leftoverDecimal.multiply(feeRate).longValue();
-
-						s.applyEarlyRepaymentFee(fee);
-						leftover -= fee;
-						contract.addToTotalEarlyRepaymentFee(fee);
-						earlyRepaymentOccurred = true;
-					}
-				} else {
-					s.markAsPartialPaid(leftover, now);
-					contract.setRemainingPrincipal(
-						contract.getRemainingPrincipal() - Math.min(leftover, s.getScheduledPrincipal()));
-					paymentScheduleRepository.saveAll(schedules);
-					return schedules;
-				}
-			} else {
-				long principal = s.getScheduledPrincipal();
-				if (leftover >= principal) {
-					s.applyEarlyRepayment();
-					leftover -= principal;
-					contract.setRemainingPrincipal(contract.getRemainingPrincipal() - principal);
-				} else {
-					// 일부만 소진 가능한 회차 → 납부 처리 + 이후 회차 재계산
-					s.markAsPartialPaid(leftover, now);
-					contract.setRemainingPrincipal(contract.getRemainingPrincipal() - leftover);
-					leftover = 0;
-					break;
-				}
 			}
-		}
 
-		// 남은 회차 재계산 (회차/납부일 고정)
-		List<PaymentScheduleEntity> remaining = schedules.stream()
-			.filter(s -> !Boolean.TRUE.equals(s.getIsPaid()))
-			.toList();
+			if(leftover <= 0) {
+				break;
+			}
+			Integer paymentRound = s.getPaymentRound();
+			long overdueAmount = s.getOverdueAmount();
+			long interest = s.getScheduledInterest();
+			long principal = s.getScheduledPrincipal();
+			long paid = s.getActualPaidAmount();
 
-		long remainingPrincipal = contract.getRemainingPrincipal();
-		long equalPrincipal = remainingPrincipal / Math.max(1, remaining.size());
-
-		for (PaymentScheduleEntity s : remaining) {
-			long interest = estimateInterest(equalPrincipal, contract);
-			s.updateSchedule(equalPrincipal, interest);
-		}
-
-		if (earlyRepaymentOccurred) {
-			contract.increaseEarlyRepaymentCount(); // ✅ 딱 한 번만 증가
+			if(paymentRound <= currentPaymentRound) {
+				long requiredPay = overdueAmount + interest + principal - paid;
+				if(leftover >= requiredPay) {
+					s.markAsPaid(requiredPay + paid, LocalDateTime.now());
+				} else {
+					s.markAsPartialPaid(leftover + paid, LocalDateTime.now());
+				}
+				leftover -= requiredPay;
+			} else { // 중도상환
+				long requiredPay = principal - paid;
+				if(leftover >= requiredPay) {
+					s.applyEarlyRepayment(requiredPay + paid, LocalDateTime.now());
+				} else {
+					s.markAsPartialPaid(leftover + paid, LocalDateTime.now());
+				}
+				leftover -= requiredPay;
+			}
 		}
 
 		paymentScheduleRepository.saveAll(schedules);
@@ -187,20 +155,28 @@ public class PaymentScheduleService {
 	}
 
 	// 중도상환으로 이 돈 입금 하면 계약 종료된다! 하는 메서드
-//	@Transactional(readOnly = true)
-//	public long calculateFinalRepaymentAmount(ContractEntity contract) {
-//		List<PaymentScheduleEntity> schedules = selectOverdueUnpaidSchedules(contract);
-//		long amounts = 0L;
-//		int currentPaymentRound = contract.getCurrentPaymentRound();
-//		for (PaymentScheduleEntity schedule : schedules) {
-//			if (schedule.getIsPaid()) {
-//				continue;
-//			}
-//			long overdueAmount = schedule.getOverdueAmount();
-//			long interest = schedule.getScheduledInterest();
-//			long principal = schedule.getScheduledPrincipal();
-//			long paymentRound = schedule.getPaymentRound();
-//		}
-//	}
+	@Transactional(readOnly = true)
+	public long calculateFinalRepaymentAmount(ContractEntity contract) {
+		List<PaymentScheduleEntity> schedules = selectOverdueUnpaidSchedules(contract);
+		long amounts = 0L;
+		int currentPaymentRound = contract.getCurrentPaymentRound();
+		for (PaymentScheduleEntity schedule : schedules) {
+			if (schedule.getIsPaid()) {
+				continue;
+			}
+			long overdueAmount = schedule.getOverdueAmount();
+			long interest = schedule.getScheduledInterest();
+			long principal = schedule.getScheduledPrincipal();
+			long paid = schedule.getActualPaidAmount();
+			long paymentRound = schedule.getPaymentRound();
+
+			if(currentPaymentRound < paymentRound) { // 중도상환
+				long tmp = principal - paid;
+			} else {
+				amounts += overdueAmount + interest + principal - paid;
+			}
+		}
+		return amounts;
+	}
 }
 
