@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import api from '@/shared/api/instance';
+import { ErrorResponse } from '@/widgets/modal/types';
 import { SignatureRequest, TerminationRequest } from '../model/types';
 
 // 채무자 서명 요청
@@ -17,10 +18,20 @@ const postRequestDebtor = async ({
     return response.data;
 };
 
-export const usePostRequestDebtor = (formId: string) => {
+export const usePostRequestDebtor = ({
+    formId,
+    onSuccess,
+    onError,
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+    onError?: (error: AxiosError<ErrorResponse>) => void;
+}) => {
     const { mutate } = useMutation({
         mutationFn: (req: SignatureRequest) => postRequestDebtor(req),
         mutationKey: ['requestDebtor', formId],
+        onSuccess: onSuccess,
+        onError: onError,
     });
 
     return { mutate };
@@ -40,10 +51,20 @@ const postRequestCreditor = async ({
     return response.data;
 };
 
-export const usePostRequestCreditor = (formId: string) => {
+export const usePostRequestCreditor = ({
+    formId,
+    onSuccess,
+    onError,
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+    onError?: (error: AxiosError<ErrorResponse>) => void;
+}) => {
     const { mutate } = useMutation({
         mutationFn: (req: SignatureRequest) => postRequestCreditor(req),
         mutationKey: ['requestCreditor', formId],
+        onSuccess: onSuccess,
+        onError: onError,
     });
 
     return { mutate };
@@ -69,14 +90,17 @@ const postConfirmDebtor = async ({
 export const usePostConfirmDebtor = ({
     formId,
     onSuccess,
+    onError,
 }: {
     formId: string;
     onSuccess?: (data: boolean) => void;
+    onError?: (error: AxiosError<ErrorResponse>) => void;
 }) => {
     const { mutate } = useMutation({
         mutationFn: (req: TerminationRequest) => postConfirmDebtor(req),
         mutationKey: ['confirmDebtor', formId],
         onSuccess: onSuccess,
+        onError: onError,
     });
 
     return { mutate };
@@ -99,7 +123,7 @@ const postConfirmCreditor = async ({
 
         return response.data;
     } catch (error) {
-        const err = error as AxiosError;
+        const err = error as AxiosError<ErrorResponse>;
         if (err.status === 400) {
             throw err;
         }
@@ -113,7 +137,7 @@ export const usePostConfirmCreditor = ({
 }: {
     formId: string;
     onSuccess?: (data: boolean) => void;
-    onError?: (error: AxiosError) => void;
+    onError?: (error: AxiosError<ErrorResponse>) => void;
 }) => {
     const { mutate } = useMutation({
         mutationFn: (req: TerminationRequest) => postConfirmCreditor(req),
@@ -139,10 +163,20 @@ const postTerminateFirst = async ({
     return response.data;
 };
 
-export const usePostTerminateFirst = (formId: string) => {
+export const usePostTerminateFirst = ({
+    formId,
+    onSuccess,
+    onError,
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+    onError?: (error: AxiosError<ErrorResponse>) => void;
+}) => {
     const { mutate } = useMutation({
         mutationFn: (req: SignatureRequest) => postTerminateFirst(req),
         mutationKey: ['terminateFirst', formId],
+        onSuccess: onSuccess,
+        onError: onError,
     });
 
     return { mutate };
@@ -162,10 +196,20 @@ const postTerminateSecond = async ({
     return response.data;
 };
 
-export const usePostTerminateSecond = (formId: string) => {
+export const usePostTerminateSecond = ({
+    formId,
+    onSuccess,
+    onError,
+}: {
+    formId: string;
+    onSuccess?: (data: boolean) => void;
+    onError?: (error: AxiosError<ErrorResponse>) => void;
+}) => {
     const { mutate } = useMutation({
         mutationFn: (req: SignatureRequest) => postTerminateSecond(req),
         mutationKey: ['terminateSecond', formId],
+        onSuccess: onSuccess,
+        onError: onError,
     });
 
     return { mutate };
@@ -189,14 +233,17 @@ const postTerminateFirstConfirm = async ({
 export const usePostTerminateFirstConfirm = ({
     formId,
     onSuccess,
+    onError,
 }: {
     formId: string;
     onSuccess?: (data: boolean) => void;
+    onError?: (error: AxiosError<ErrorResponse>) => void;
 }) => {
     const { mutate } = useMutation({
         mutationFn: (req: TerminationRequest) => postTerminateFirstConfirm(req),
         mutationKey: ['terminateFirstConfirm', formId],
         onSuccess: onSuccess,
+        onError: onError,
     });
 
     return { mutate };
@@ -220,15 +267,18 @@ const postTerminateSecondConfirm = async ({
 export const usePostTerminateSecondConfirm = ({
     formId,
     onSuccess,
+    onError,
 }: {
     formId: string;
     onSuccess?: (data: boolean) => void;
+    onError?: (error: AxiosError<ErrorResponse>) => void;
 }) => {
     const { mutate } = useMutation({
         mutationFn: (req: TerminationRequest) =>
             postTerminateSecondConfirm(req),
         mutationKey: ['terminateSecondConfirm', formId],
         onSuccess: onSuccess,
+        onError: onError,
     });
 
     return { mutate };
