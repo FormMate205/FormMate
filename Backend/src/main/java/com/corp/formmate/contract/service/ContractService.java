@@ -451,66 +451,6 @@ public class ContractService {
 	}
 
 	/**
-	 * 연체 처리
-	 * - Form 상태를 OVERDUE로
-	 * - 연체 횟수(overdueCount) 증가
-	 * - overdueAmount = "미납액"
-	 */
-	//	private void handleOverdue(FormEntity form, ContractEntity contract) {
-	//		form.updateStatus(FormStatus.OVERDUE);
-	//
-	//		// overdueCount++
-	//		contract.setOverdueCount(contract.getOverdueCount() + 1);
-	//
-	//		// 이번 회차 스케줄액 - 실제 납부액 = overdueAmount
-	//		int round = contract.getCurrentPaymentRound();
-	//		EnhancedPaymentPreviewResponse preview = enhancedPaymentPreviewService.calculateEnhancedPaymentPreview(form,
-	//			contract);
-	//		long scheduledAmount = preview.getScheduleList().stream()
-	//			.filter(s -> s.getInstallmentNumber() == round)
-	//			.findFirst()
-	//			.map(EnhancedPaymentScheduleResponse::getPaymentAmount)
-	//			.orElse(0L);
-	//
-	//		List<TransferEntity> transfers = transferRepository.findByForm(form).orElse(Collections.emptyList());
-	//		long paid = transfers.stream()
-	//			.filter(t -> t.getCurrentRound() == round)
-	//			.mapToLong(TransferEntity::getAmount)
-	//			.sum();
-	//
-	//		long notPaid = Math.max(0, scheduledAmount - paid);
-	//		contract.setOverdueAmount(notPaid);
-	//
-	//		NumberFormat formatter = NumberFormat.getNumberInstance();
-	//		String formattedNotPaid = formatter.format(notPaid);
-	//
-	//		// 연체 이자(누적) 등 추가 계산이 있으면 여기서 수행
-	//		// ex) contract.setOverdueInterestAmount( contract.getOverdueInterestAmount() + something );
-	//
-	//		String creditorName = form.getCreditorName();
-	//		String debtorName = form.getDebtorName();
-	//
-	//		alertService.createAlert(
-	//			form.getDebtor(),
-	//			"연체",
-	//			"연체가 발생했습니다!",
-	//			creditorName + "님께 " + formattedNotPaid + "원을 이체하세요"
-	//		);
-	//
-	//		// 받을 사람 (채권자)
-	//		alertService.createAlert(
-	//			form.getCreator(),
-	//			"연체",
-	//			"연체가 발생했습니다!",
-	//			debtorName + "님께서 " + formattedNotPaid + "원을 아직 송금하지 않았어요"
-	//		);
-	//
-	//		// DB 저장
-	//		contractRepository.save(contract);
-	//		formRepository.save(form);
-	//	}
-
-	/**
 	 * 파트너와의 계약 응답 DTO 구성
 	 */
 	private ContractWithPartnerResponse buildPartnerResponse(FormEntity form, boolean isCreditor) {
@@ -597,14 +537,6 @@ public class ContractService {
 			.nextRepaymentDate(null)
 			.contractDuration(form.getContractDate() + " ~ " + form.getMaturityDate())
 			.build();
-	}
-
-	/**
-	 * 중도상환 수수료 계산
-	 */
-	private long calculateEarlyRepaymentFee(long paymentDifference, FormEntity form) {
-		BigDecimal safeDiff = BigDecimal.valueOf(Math.max(0, paymentDifference));
-		return safeDiff.multiply(form.getEarlyRepaymentFeeRate()).longValue();
 	}
 
 	// ──────────────── 레포지토리 조회 유틸 메서드 ────────────────
