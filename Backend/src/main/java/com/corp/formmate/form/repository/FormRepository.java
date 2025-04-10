@@ -56,22 +56,22 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 		Pageable pageable);
 
 	@Query("SELECT f " +
-			"FROM FormEntity f " +
-			"WHERE f.creditor.id = :userId " +
-			"  AND f.debtor.id = :partnerId " +
-			"ORDER BY f.contractDate")
+		"FROM FormEntity f " +
+		"WHERE f.creditor.id = :userId " +
+		"  AND f.debtor.id = :partnerId " +
+		"ORDER BY f.contractDate")
 	Page<FormEntity> findUserIsCreditorSideForms(@Param("userId") Integer userId,
-												 @Param("partnerId") Integer partnerId,
-												 Pageable pageable);
+		@Param("partnerId") Integer partnerId,
+		Pageable pageable);
 
 	@Query("SELECT f " +
-			"FROM FormEntity f " +
-			"WHERE f.creditor.id = :partnerId " +
-			"  AND f.debtor.id = :userId " +
-			"ORDER BY f.contractDate")
+		"FROM FormEntity f " +
+		"WHERE f.creditor.id = :partnerId " +
+		"  AND f.debtor.id = :userId " +
+		"ORDER BY f.contractDate")
 	Page<FormEntity> findUserIsDebtorSideForms(@Param("userId") Integer userId,
-											   @Param("partnerId") Integer partnerId,
-											   Pageable pageable);
+		@Param("partnerId") Integer partnerId,
+		Pageable pageable);
 
 	List<FormEntity> findAllByCreditorIdOrDebtorId(Integer creditorId, Integer debtorId);
 
@@ -85,6 +85,8 @@ public interface FormRepository extends JpaRepository<FormEntity, Integer> {
 		Pageable pageable);
 
 	List<FormEntity> findByStatusIn(Collection<FormStatus> statuses);
+
+	List<FormEntity> findByStatus(FormStatus status);
 
 	@Query("SELECT f FROM FormEntity f WHERE (f.creditor.id = :userId OR f.debtor.id = :userId) " +
 		"AND f.status IN :statuses")
