@@ -18,8 +18,8 @@ const Contracts = () => {
     } = useContractFilters();
 
     return (
-        <div className='bg-line-50 flex h-screen flex-col overflow-hidden'>
-            <div className='scrollbar-none flex h-full flex-col gap-2 overflow-y-auto px-4 py-2'>
+        <div className='bg-line-50 flex min-h-screen flex-col'>
+            <div className='flex h-full flex-col gap-2 px-4 py-2'>
                 <Header title='계약 관리' />
                 <div className='flex flex-col gap-8'>
                     <ContractStatusSummary />
