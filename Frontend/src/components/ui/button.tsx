@@ -4,7 +4,7 @@ import * as React from 'react';
 import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(
-    'rounded-lg text-center transition-colors duration-200',
+    'rounded-lg text-center transition-colors duration-200 whitespace-nowrap',
     {
         variants: {
             variant: {
