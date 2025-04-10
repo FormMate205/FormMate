@@ -86,7 +86,9 @@ public class PaymentScheduleService {
 		return paymentScheduleRepository.findByContractOrderByPaymentRoundAsc(contract);
 	}
 
+	@Transactional(readOnly = true)
 	public PaymentScheduleEntity selectNonPaidByContract(ContractEntity contractEntity) {
+		log.info("selectNonPaidByContract 찾기");
 		return paymentScheduleRepository.findFirstByContractAndIsPaidFalseOrderByPaymentRoundAsc(contractEntity)
 			.orElseThrow(() -> new PaymentScheduleException(ErrorCode.PAYMENT_SCHEDULE_NOT_FOUND));
 	}
