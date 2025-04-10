@@ -1,15 +1,13 @@
-import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { queryClient } from '@/app/provider/queryClient';
 import { Button } from '@/components/ui/button';
-import { usePutRegisterAccount } from '@/entities/account/api/registerAccount';
+import { registerAccount } from '@/entities/account/api/registerAccount';
 import { useAccountStore } from '@/entities/account/model/accountStore';
 import { useUserStore } from '@/entities/user/model/userStore';
 import NumberPad from '@/shared/ui/NumberPad';
 import PasswordDots from '@/shared/ui/PasswordDots';
 import { Header, NoticeModal, ToastModal } from '@/widgets';
-import { ErrorResponse } from '@/widgets/modal/types';
 
 const AccountPasswordForm = () => {
     const navigate = useNavigate();
@@ -18,21 +16,6 @@ const AccountPasswordForm = () => {
     const setAccountInfo = useAccountStore((state) => state.setAccountInfo);
 
     const { verificationCode, bankName, accountNumber } = location.state || {};
-
-    // 계좌 정보가 없을 시 계좌 등록 페이지로 이동
-    const handleNotRegisterAccount = (error: AxiosError<ErrorResponse>) => {
-        const message = error.response?.data.message;
-
-        if (message == '계좌 정보를 찾을 수 없습니다.') {
-            navigate('/account');
-            return;
-        }
-    };
-
-    // 계좌 등록 API
-    const { mutate: registerAccount } = usePutRegisterAccount(
-        handleNotRegisterAccount,
-    );
 
     const [step, setStep] = useState<'input' | 'confirm'>('input');
     const [password, setPassword] = useState('');
@@ -59,7 +42,7 @@ const AccountPasswordForm = () => {
         } else if (step === 'confirm') {
             if (inputValue === password) {
                 try {
-                    registerAccount({
+                    await registerAccount({
                         verificationCode,
                         bankName,
                         accountNumber,

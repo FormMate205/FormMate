@@ -32,10 +32,10 @@ const AccountInfo = () => {
     // 토큰이 유효하지 않으면 계좌 등록 UI 표시
     if (!isValid) {
         return (
-            <div className='bg-primary-500 flex items-center justify-between rounded-lg p-2 shadow-sm'>
-                <div className='flex w-full items-center justify-between p-3'>
+            <div className='flex items-center justify-between p-2 rounded-lg shadow-sm bg-primary-500'>
+                <div className='flex items-center justify-between w-full p-3'>
                     <div>
-                        <p className='text-line-100 text-sm'>
+                        <p className='text-sm text-line-100'>
                             등록된 계좌가 없어요
                         </p>
                         <p className='text-2xl font-semibold text-white'>
@@ -54,10 +54,10 @@ const AccountInfo = () => {
 
     if (isError || !accountInfo) {
         return (
-            <div className='bg-primary-500 flex items-center justify-between rounded-lg p-2 shadow-sm'>
-                <div className='flex w-full items-center justify-between p-3'>
+            <div className='flex items-center justify-between p-2 rounded-lg shadow-sm bg-primary-500'>
+                <div className='flex items-center justify-between w-full p-3'>
                     <div>
-                        <p className='text-line-100 text-sm'>
+                        <p className='text-sm text-line-100'>
                             등록된 계좌가 없어요
                         </p>
                         <p className='text-2xl font-semibold text-white'>
@@ -74,10 +74,10 @@ const AccountInfo = () => {
         );
     }
     return (
-        <div className='bg-primary-500 flex items-center justify-between rounded-lg p-2 shadow-sm'>
-            <div className='flex w-full items-center justify-between p-3'>
+        <div className='flex items-center justify-between p-2 rounded-lg shadow-sm bg-primary-500'>
+            <div className='flex items-center justify-between w-full p-3'>
                 <div>
-                    <p className='text-line-100 text-sm'>
+                    <p className='text-sm text-line-100'>
                         {accountInfo.bankName} {accountInfo.accountNumber}
                     </p>
                     <p className='text-3xl font-semibold text-white'>
