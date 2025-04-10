@@ -21,18 +21,20 @@ import { FormUpdateRequest } from '../../../entities/formDraft/model/types';
 
 const styles = {
     container:
-        'flex flex-col gap-4 bg-white text-black w-full overflow-y-auto scrollbar-none',
-    section: 'flex w-full flex-col gap-3',
-    title: 'text-primary-500 text-lg font-semibold',
-    label: 'font-medium',
-    divider: 'border-t border-line-300 my-2',
-    subtext: 'text-line-700 ml-2',
-    contractValue: 'flex justify-between items-center',
-    groupedValues: 'flex flex-col items-end text-right',
-    dateButton: 'flex items-center gap-2 border p-2 rounded-md',
-    readOnlyField: 'text-gray-600 flex justify-end items-center gap-2',
-    specialTermCard: 'border border-line-300 shadow-sm',
-    termHeader: 'flex w-full justify-between items-center',
+        'flex flex-col gap-4 bg-white text-black w-full overflow-y-auto scrollbar-none whitespace-nowrap',
+    section: 'flex w-full flex-col gap-3 whitespace-nowrap',
+    title: 'text-primary-500 text-lg font-semibold whitespace-nowrap',
+    label: 'font-medium whitespace-nowrap',
+    divider: 'border-t border-line-300 my-2 whitespace-nowrap',
+    subtext: 'text-line-700 ml-2 whitespace-nowrap',
+    contractValue: 'flex justify-between items-center whitespace-nowrap',
+    groupedValues: 'flex flex-col items-end text-right whitespace-nowrap',
+    dateButton:
+        'flex items-center gap-2 border p-2 rounded-md whitespace-nowrap',
+    readOnlyField:
+        'text-gray-600 flex justify-end items-center gap-2 whitespace-nowrap',
+    specialTermCard: 'border border-line-300 shadow-sm whitespace-nowrap',
+    termHeader: 'flex w-full justify-between items-center whitespace-nowrap',
 };
 
 interface EditableContractDocumentProps {
