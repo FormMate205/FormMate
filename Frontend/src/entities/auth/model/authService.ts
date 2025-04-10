@@ -18,8 +18,7 @@ export const isTokenValid = (): boolean => {
         const jwtToken = tokenParts.length > 1 ? tokenParts[1] : tokenParts[0];
         const payload = JSON.parse(atob(jwtToken.split('.')[1]));
         return payload.exp * 1000 > Date.now();
-    } catch (error) {
-        console.error('Token validation error:', error);
+    } catch {
         return false;
     }
 };

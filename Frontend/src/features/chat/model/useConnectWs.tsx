@@ -82,58 +82,45 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
     // 웹소켓 연결
     const connect = () => {
         if (!roomId) {
-            console.log('유효한 채팅방이 없습니다.');
             return;
         }
 
-        try {
-            stompClient.current = createStompClient();
+        stompClient.current = createStompClient();
 
-            stompClient.current.connect(
-                {
-                    Authorization: localStorage.getItem('accessToken'), // 헤더에 토큰 포함
-                },
-                () => {
-                    setIsConnected(true);
+        stompClient.current.connect(
+            {
+                Authorization: localStorage.getItem('accessToken'),
+            },
+            () => {
+                setIsConnected(true);
 
-                    stompClient.current?.subscribe(
-                        `/topic/chat${roomId}`,
-                        () => {
-                            refetch();
-                        },
-                    );
-                },
-            );
-        } catch (error) {
-            console.error('웹소켓 연결을 실패했습니다.', error);
-        }
+                stompClient.current?.subscribe(`/topic/chat${roomId}`, () => {
+                    refetch();
+                });
+            },
+        );
     };
 
     // 메시지 전송
     const sendMessage = () => {
         if (!stompClient.current || !message.trim()) {
-            console.log('메시지 전송 실패');
             return;
         }
 
-        try {
-            const newMessage = {
-                formId: roomId,
-                content: message.trim(),
-                messageType: 'CHAT',
-            };
+        const newMessage = {
+            formId: roomId,
+            content: message.trim(),
+            messageType: 'CHAT',
+        };
 
-            stompClient.current.send(
-                '/app/chat.sendMessage',
-                { 'Content-Type': 'application/json' },
-                JSON.stringify(newMessage),
-            );
+        stompClient.current.send(
+            '/app/chat.sendMessage',
+            { 'Content-Type': 'application/json' },
+            JSON.stringify(newMessage),
+        );
 
-            refetch();
-            setMessage('');
-        } catch (error) {
-            console.error('메시지를 전송하지 못했습니다.', error);
-        }
+        refetch();
+        setMessage('');
     };
 
     // 컴포넌트 마운트 시 연결, 언마운트 시 연결 해제
