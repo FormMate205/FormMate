@@ -14,7 +14,7 @@ const FormDraftScheduleItem = ({
     paymentAmount,
 }: FormDraftScheduleItemProps) => {
     return (
-        <div className='border-line-100 grid w-full grid-cols-4 border-b px-4 py-2 text-center'>
+        <div className='grid w-full grid-cols-4 px-4 py-2 text-center border-b border-line-100 whitespace-nowrap'>
             <p>{idx + 1}회차</p>
             <p>{formatCurrency(principal)}</p>
             <p>{formatCurrency(interest)}</p>
