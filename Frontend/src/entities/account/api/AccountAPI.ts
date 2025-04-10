@@ -1,5 +1,7 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import api from '@/shared/api/instance';
+import { ErrorResponse } from '@/widgets/modal/types';
 import { GetAccountInfoResponse } from '../model/types';
 
 const getAccountInfo = async (): Promise<GetAccountInfoResponse> => {
@@ -11,5 +13,12 @@ export const useGetAccountInfo = () => {
     return useSuspenseQuery({
         queryKey: ['accountInfo'],
         queryFn: getAccountInfo,
+        retry: (failureCount, error: AxiosError<ErrorResponse>) => {
+            const message = error.response?.data.message;
+            if (message === '계좌 정보를 찾을 수 없습니다.') {
+                return false;
+            }
+            return failureCount < 2;
+        },
     });
 };

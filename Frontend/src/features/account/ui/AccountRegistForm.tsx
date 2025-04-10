@@ -8,9 +8,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { usePostCheckAccount } from '@/entities/account/api/checkAccount';
+import { checkAccount } from '@/entities/account/api/checkAccount';
 import { Header } from '@/widgets';
-import { ErrorResponse } from '@/widgets/modal/types';
 
 const AccountRegist = () => {
     const [accountNum, setAccountNum] = useState('');
@@ -28,21 +27,6 @@ const AccountRegist = () => {
         '신한은행',
         '카카오뱅크',
     ];
-
-    // 계좌 정보가 없을 시 계좌 등록 페이지로 이동
-    const handleNotRegisterAccount = (error: AxiosError<ErrorResponse>) => {
-        const message = error.response?.data.message;
-
-        if (message == '계좌 정보를 찾을 수 없습니다.') {
-            navigate('/account');
-            return;
-        }
-    };
-
-    // 계좌 조회 API
-    const { mutate: checkAccount } = usePostCheckAccount(
-        handleNotRegisterAccount,
-    );
 
     const handleSubmit = async () => {
         setError('');
