@@ -5,6 +5,7 @@ import { isTokenValid } from '@/entities/auth/model/authService';
 import { useUserStore } from '@/entities/user/model/userStore';
 import { Icons } from '@/shared';
 import { formatCurrency } from '@/shared/lib/formatCurrency';
+import AccountInfoSkeleton from './AccountInfoSkeleton';
 
 const AccountInfo = () => {
     const navigate = useNavigate();
@@ -28,6 +29,11 @@ const AccountInfo = () => {
             }
         }
     }, [accountInfo, isError, isLoading, user, setUser]);
+
+    // 로딩 스켈레톤 표시
+    if (isLoading) {
+        return <AccountInfoSkeleton />;
+    }
 
     // 토큰이 유효하지 않으면 계좌 등록 UI 표시
     if (!isValid) {
