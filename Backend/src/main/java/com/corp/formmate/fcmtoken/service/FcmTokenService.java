@@ -31,24 +31,21 @@ public class FcmTokenService {
 
 	@Transactional(readOnly = true)
 	public void sendMessageTo(UserEntity userEntity, String title, String body) {
-		FcmTokenEntity fcmTokenEntity = checkTokenByUser(userEntity);
-
-		if (fcmTokenEntity == null) {
+		FcmTokenEntity fcmTokenEntity = selectByUser(userEntity.getId());
+		if(!fcmTokenEntity.isActive()) {
 			return;
 		}
-
 		Message message = Message.builder()
 			.setToken(fcmTokenEntity.getToken())
 			.setNotification(Notification.builder()
 				.setTitle(title)
 				.setBody(body)
-				.setImage("https://github.com/user-attachments/assets/28da961d-3ab9-4650-b214-7a89125c4478")
 				.build())
 			.build();
 
 		try {
 			String response = FirebaseMessaging.getInstance().send(message);
-			System.out.println("✅ 푸시 전송 성공: " + response);
+            log.info("✅ 푸시 전송 성공: {}", response);
 		} catch (FirebaseMessagingException e) {
 			System.err.println("❌ 푸시 전송 실패: " + e.getMessage());
 		}

@@ -81,10 +81,10 @@ public class PaymentScheduleEntity {
 		this.updatedAt = LocalDateTime.now();
 	}
 
-	public void applyEarlyRepayment() {
+	public void applyEarlyRepayment(long amount, LocalDateTime paidDate) {
 		this.scheduledInterest = 0L;
-		this.overdueAmount = 0L;
-		this.actualPaidAmount = 0L;
+		this.actualPaidAmount = amount;
+		this.actualPaidDate = paidDate;
 		this.isPaid = true;
 		this.updatedAt = LocalDateTime.now();
 	}
