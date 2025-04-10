@@ -29,7 +29,9 @@ self.addEventListener('message', function (event) {
                 const { title, body, image } = payload.notification;
                 self.registration.showNotification(title, {
                     body,
-                    icon: image,
+                    icon: '/favicon.ico',
+                    badge: '/favicon.ico',
+                    image: image,
                 });
             });
         }
@@ -43,7 +45,9 @@ self.addEventListener('push', function (event) {
         const { title, body, image } = payload.notification;
         self.registration.showNotification(title, {
             body,
-            icon: image,
+            icon: '/favicon.ico',
+            badge: '/favicon.ico',
+            image: image,
         });
     }
 });

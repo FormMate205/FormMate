@@ -36,7 +36,7 @@ const ContractDrawer = ({
                 <div className='flex flex-col gap-4 pt-2 pb-4'>
                     {contracts.length === 0 ? (
                         <p className='text-sm text-gray-500'>
-                            계약이 없습니다.
+                            보내야 할 계약이 현재 없습니다.
                         </p>
                     ) : (
                         contracts.map((contract, idx) => (
