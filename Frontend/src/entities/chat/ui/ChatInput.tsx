@@ -61,7 +61,7 @@ const ChatInput = ({
     };
 
     return (
-        <div className='flex w-full items-end gap-2 py-2'>
+        <div className='flex items-end w-full gap-2 py-1'>
             <div className='flex w-full rounded-[24px] bg-white px-4 py-2 shadow-sm'>
                 <textarea
                     ref={textareaRef}
@@ -69,7 +69,7 @@ const ChatInput = ({
                     value={value}
                     onChange={onChange}
                     onKeyDown={handleKeyDown}
-                    className='max-h-32 w-full resize-none overflow-y-auto leading-normal focus:outline-none'
+                    className='w-full overflow-y-auto leading-normal resize-none max-h-32 focus:outline-none'
                     placeholder='메시지를 입력하세요.'
                     rows={1}
                     style={{ minHeight: '24px' }}
