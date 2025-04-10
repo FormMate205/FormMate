@@ -20,11 +20,17 @@ const Schedule = () => {
     const modifiers = {
         hasSettlement: hasSettlementDates,
     };
-    const selectedDayKey = String(selectedDate.getDate());
-    const contracts =
-        scheduleData[selectedDayKey]?.contracts?.filter(
-            (c) => c.repaymentAmount !== null && c.repaymentAmount !== 0,
-        ) ?? [];
+
+    const contracts = Object.values(scheduleData)
+        .flatMap(({ contracts }) => contracts)
+        .filter((contract) => {
+            const [y, m, d] = contract.scheduledPaymentDate;
+            return (
+                selectedDate.getFullYear() === y &&
+                selectedDate.getMonth() === m - 1 &&
+                selectedDate.getDate() === d
+            );
+        });
 
     return (
         <section className='mb-12'>

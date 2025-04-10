@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MessageType } from '@/entities/chat/model/types';
 import { useUserStore } from '@/entities/user/model/userStore';
+import { ErrorResponse } from '@/widgets/modal/types';
 import {
     usePostConfirmCreditor,
     usePostConfirmDebtor,
@@ -46,9 +47,11 @@ export const useSignature = ({
     });
 
     // 인증 관련 상태
-    const [isSent, setIsSent] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
     const [tokenIsEmpty, setTokenIsEmpty] = useState(false);
+
+    const [requestMessage, setRequestMessage] = useState<string | null>(null);
+    const [requestSuccess, setRequestSuccess] = useState<boolean | null>(null);
     const [verificationMessage, setVerificationMessage] = useState<
         string | null
     >(null);
@@ -56,7 +59,28 @@ export const useSignature = ({
         boolean | null
     >(null);
 
-    // 인증 응답 처리 함수
+    // 인증 요청 성공 함수
+    const handleRequestResponse = (response: boolean) => {
+        if (response) {
+            setRequestSuccess(true);
+            setRequestMessage('인증번호가 전송되었습니다.');
+        } else {
+            setRequestSuccess(false);
+            setRequestMessage(
+                '인증번호 전송에 실패했습니다. 다시 시도해주세요.',
+            );
+        }
+    };
+
+    // 인증 요청 실패 함수
+    const handleRequestError = (error: AxiosError<ErrorResponse>) => {
+        const message = error.response?.data.message;
+        console.log(error);
+        setRequestMessage(message!);
+        setRequestSuccess(false);
+    };
+
+    // 인증 응답 성공 함수
     const handleVerificationResponse = (response: boolean) => {
         if (response) {
             setVerificationSuccess(true);
@@ -69,23 +93,33 @@ export const useSignature = ({
         }
     };
 
-    // 인증 오류 처리 함수 (채권자 잔액 부족)
-    const handleVerificationError = (error: AxiosError) => {
-        setVerificationMessage(error.message);
+    // 인증 응답 실패 함수
+    const handleVerificationError = (error: AxiosError<ErrorResponse>) => {
+        const message = error.response?.data.message;
+        setVerificationMessage(message!);
         setVerificationSuccess(false);
     };
 
     // API 호출
     // 채무자 인증 요청 api
-    const { mutate: requestDebtor } = usePostRequestDebtor(formId);
+    const { mutate: requestDebtor } = usePostRequestDebtor({
+        formId,
+        onSuccess: handleRequestResponse,
+        onError: handleRequestError,
+    });
 
     // 채권자 인증 요청 api
-    const { mutate: requestCreditor } = usePostRequestCreditor(formId);
+    const { mutate: requestCreditor } = usePostRequestCreditor({
+        formId,
+        onSuccess: handleRequestResponse,
+        onError: handleRequestError,
+    });
 
     // 채무자 인증 확인 api
     const { mutate: confirmDebtor } = usePostConfirmDebtor({
         formId,
         onSuccess: handleVerificationResponse,
+        onError: handleVerificationError,
     });
 
     // 채권자 인증 확인 api
@@ -96,21 +130,31 @@ export const useSignature = ({
     });
 
     // 계약파기 첫번째 인증 요청 api
-    const { mutate: requestFirst } = usePostTerminateFirst(formId);
+    const { mutate: requestFirst } = usePostTerminateFirst({
+        formId,
+        onSuccess: handleRequestResponse,
+        onError: handleRequestError,
+    });
 
     // 계약파기 두번째 인증 요청 api
-    const { mutate: requestSecond } = usePostTerminateSecond(formId);
+    const { mutate: requestSecond } = usePostTerminateSecond({
+        formId,
+        onSuccess: handleRequestResponse,
+        onError: handleRequestError,
+    });
 
     // 계약파기 첫번째 인증 확인 api
     const { mutate: confirmFirst } = usePostTerminateFirstConfirm({
         formId,
         onSuccess: handleVerificationResponse,
+        onError: handleVerificationError,
     });
 
     // 계약파기 두번째 인증 확인 api
     const { mutate: confirmSecond } = usePostTerminateSecondConfirm({
         formId,
         onSuccess: handleVerificationResponse,
+        onError: handleVerificationError,
     });
 
     // 인증번호 요청
@@ -150,7 +194,6 @@ export const useSignature = ({
                 }
             }
 
-            setIsSent(true);
             // 새로운 인증 요청 시 기존 메시지 초기화
             setVerificationMessage(null);
             setVerificationSuccess(null);
@@ -224,11 +267,12 @@ export const useSignature = ({
 
     return {
         form,
-        isSent,
         isVerified,
         tokenIsEmpty,
         verificationMessage,
         verificationSuccess,
+        requestMessage,
+        requestSuccess,
         handleRequestVerification,
         handleVerifyCode,
         handleRecaptchaChange,
