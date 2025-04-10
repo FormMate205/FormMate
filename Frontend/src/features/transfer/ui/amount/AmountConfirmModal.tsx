@@ -18,6 +18,7 @@ interface AmountConfirmModalProps {
     partnerName: string;
     earlyRepaymentFeeRate?: number;
     onConfirm: () => void;
+    disabled?: boolean;
 }
 
 const AmountConfirmModal = ({
@@ -26,6 +27,7 @@ const AmountConfirmModal = ({
     partnerName,
     earlyRepaymentFeeRate = 0,
     onConfirm,
+    disabled = false,
 }: AmountConfirmModalProps) => {
     const diff = inputValue - recommendAmount;
 
@@ -73,7 +75,10 @@ const AmountConfirmModal = ({
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button variant='primary' disabled={!inputValue}>
+                <Button
+                    variant={disabled ? 'primaryDisabled' : 'primary'}
+                    disabled={!inputValue || disabled}
+                >
                     확인
                 </Button>
             </AlertDialogTrigger>

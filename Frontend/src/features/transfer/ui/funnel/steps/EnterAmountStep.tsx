@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useGetAccountInfo } from '@/entities/account/api/AccountAPI';
 import { useGetScheduledPaymentInfo } from '@/entities/transfer/api/TransferAPI';
 import AmountConfirmModal from '@/features/transfer/ui/amount/AmountConfirmModal';
 import AmountDifference from '@/features/transfer/ui/amount/AmountDifference';
@@ -21,8 +22,18 @@ const EnterAmountStep = ({
 }: EnterAmountStepProps) => {
     const [inputValue, setInputValue] = useState('');
     const { data: scheduledInfo } = useGetScheduledPaymentInfo(formId);
+    const { data: accountInfo } = useGetAccountInfo();
     const nextRepaymentAmount = scheduledInfo?.monthlyRemainingPayment ?? 0;
     const earlyRepaymentFeeRate = scheduledInfo?.earlyRepaymentFeeRate ?? 0;
+
+    const parsedAmount = useMemo(
+        () => parseInt(inputValue || '0', 10),
+        [inputValue],
+    );
+    const isOverBalance = useMemo(
+        () => parsedAmount > (accountInfo?.accountBalance ?? 0),
+        [parsedAmount, accountInfo?.accountBalance],
+    );
 
     // 넘버패드 클릭
     const handleNumberClick = (num: string) => {
@@ -45,7 +56,7 @@ const EnterAmountStep = ({
     };
 
     const handleConfirm = () => {
-        const parsedAmount = parseInt(inputValue || '0', 10);
+        if (isOverBalance) return;
         onConfirm(parsedAmount);
     };
 
@@ -63,6 +74,11 @@ const EnterAmountStep = ({
 
                 <div className='flex flex-col gap-4'>
                     <AmountInput inputValue={inputValue} />
+                    {isOverBalance && (
+                        <span className='text-sm text-red-500'>
+                            계좌 잔액이 부족합니다. 다른 금액을 입력해주세요.
+                        </span>
+                    )}
                     <div className='flex justify-start'>
                         <AmountDifference
                             inputValue={inputValue}
@@ -80,11 +96,12 @@ const EnterAmountStep = ({
                     onDelete={handleDelete}
                 />
                 <AmountConfirmModal
-                    inputValue={parseInt(inputValue || '0', 10)}
+                    inputValue={parsedAmount}
                     recommendAmount={repaymentAmount}
                     partnerName={partnerName}
                     earlyRepaymentFeeRate={earlyRepaymentFeeRate}
                     onConfirm={handleConfirm}
+                    disabled={isOverBalance}
                 />
             </div>
         </div>
