@@ -187,20 +187,20 @@ public class PaymentScheduleService {
 	}
 
 	// 중도상환으로 이 돈 입금 하면 계약 종료된다! 하는 메서드
-	@Transactional(readOnly = true)
-	public long calculateFinalRepaymentAmount(ContractEntity contract) {
-		List<PaymentScheduleEntity> schedules = selectOverdueUnpaidSchedules(contract);
-		long amounts = 0L;
-		int currentPaymentRound = contract.getCurrentPaymentRound();
-		for (PaymentScheduleEntity schedule : schedules) {
-			if (schedule.getIsPaid()) {
-				continue;
-			}
-			long overdueAmount = schedule.getOverdueAmount();
-			long interest = schedule.getScheduledInterest();
-			long principal = schedule.getScheduledPrincipal();
-			long paymentRound = schedule.getPaymentRound();
-		}
-	}
+//	@Transactional(readOnly = true)
+//	public long calculateFinalRepaymentAmount(ContractEntity contract) {
+//		List<PaymentScheduleEntity> schedules = selectOverdueUnpaidSchedules(contract);
+//		long amounts = 0L;
+//		int currentPaymentRound = contract.getCurrentPaymentRound();
+//		for (PaymentScheduleEntity schedule : schedules) {
+//			if (schedule.getIsPaid()) {
+//				continue;
+//			}
+//			long overdueAmount = schedule.getOverdueAmount();
+//			long interest = schedule.getScheduledInterest();
+//			long principal = schedule.getScheduledPrincipal();
+//			long paymentRound = schedule.getPaymentRound();
+//		}
+//	}
 }
 
