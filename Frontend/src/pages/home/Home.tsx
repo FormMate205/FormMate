@@ -2,10 +2,10 @@ import { lazy, Suspense } from 'react';
 import { useContractAmount } from '@/entities/home/model/useContractAmount';
 import { useUserStore } from '@/entities/user/model/userStore';
 import AccountInfoSkeleton from '@/features/home/ui/AccountInfoSkeleton';
+import Schedule from '@/features/home/ui/Schedule';
 import TodaySettlementSkeleton from '@/features/home/ui/TodaySettlementSkeleton';
 import { useUnreadNotificationCount } from '@/features/notifications/api/NotificationAPI';
 import { Footer, Header } from '@/widgets';
-import Schedule from '@/features/home/ui/Schedule';
 
 interface HomeProps {
     userName: string;

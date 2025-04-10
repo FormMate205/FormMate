@@ -1,4 +1,4 @@
-import { ReactNode, useRef } from 'react';
+import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -24,24 +24,12 @@ const CommonModal = ({
     confirmText,
     onClick,
 }: CommonModalProps) => {
-    const closeButtonRef = useRef<HTMLButtonElement>(null);
-
-    const handleConfirm = () => {
-        if (onClick) {
-            onClick();
-        }
-
-        // 모달 닫기
-        if (closeButtonRef.current) {
-            closeButtonRef.current.click();
-        }
-    };
     return (
         <Dialog>
             <DialogTrigger asChild>{triggerChildren}</DialogTrigger>
             <DialogContent className='scrollbar-none flex max-h-[80vh] flex-col items-center overflow-y-auto bg-white'>
                 <div className='flex justify-end w-full'>
-                    <DialogClose ref={closeButtonRef}>
+                    <DialogClose>
                         <Icons name='close' />
                     </DialogClose>
                 </div>
@@ -54,7 +42,7 @@ const CommonModal = ({
                             variant={'primary'}
                             children={confirmText}
                             className='rounded-lg'
-                            onClick={handleConfirm}
+                            onClick={onClick}
                         />
                     )}
                 </DialogFooter>
