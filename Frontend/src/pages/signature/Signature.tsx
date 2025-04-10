@@ -31,11 +31,6 @@ const Signature = () => {
         handleRecaptchaExpired,
     } = useSignature({ formId, type, creditorId, requestedById });
 
-    // 송금 페이지 이동
-    const navigateToTransfer = () => {
-        navigate('/');
-    };
-
     return (
         <div className='flex flex-col w-full h-screen px-4 py-2'>
             <div className='h-full py-4'>
@@ -121,13 +116,19 @@ const Signature = () => {
                                                 {verificationMessage ===
                                                     '잔액이 부족합니다.' && (
                                                     <ConfirmModal
-                                                        description='잔액이 부족하여 계약 체결이 불가능합니다. 충전 후 재시도 해주세요.'
-                                                        title='잔액을 충전하시겠습니까?'
+                                                        description='잔액이 부족하여 계약 체결이 불가능합니다.'
+                                                        title='잔액 충전 후 재서명 해주세요.'
                                                         open={true}
                                                         onConfirm={() =>
-                                                            navigateToTransfer()
+                                                            navigate(
+                                                                `/chat/${formId}`,
+                                                                {
+                                                                    state: {
+                                                                        isFin: false,
+                                                                    },
+                                                                },
+                                                            )
                                                         }
-                                                        onClose={() => {}}
                                                     />
                                                 )}
                                             </div>
@@ -149,13 +150,24 @@ const Signature = () => {
                     </form>
                 </Form>
             </div>
-            <Button
-                type='button'
-                variant='primary'
-                children='확인'
-                className='whitespace-nowrap'
-                onClick={handleVerifyCode}
-            />
+            <div className='flex gap-2'>
+                <Button
+                    type='button'
+                    variant='choiceEmpty'
+                    children='닫기'
+                    className='w-full'
+                    onClick={() =>
+                        navigate(`/chat/${formId}`, { state: { isFin: false } })
+                    }
+                />
+                <Button
+                    type='button'
+                    variant='choiceFill'
+                    children='확인'
+                    className='w-full'
+                    onClick={handleVerifyCode}
+                />
+            </div>
         </div>
     );
 };
