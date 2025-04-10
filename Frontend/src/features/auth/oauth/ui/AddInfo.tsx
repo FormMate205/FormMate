@@ -55,24 +55,10 @@ const AddInfo = () => {
                 !localStorage.getItem('accessToken') ||
                 localStorage.getItem('accessToken') === 'null'
             ) {
-                try {
-                    console.log('추가 정보 페이지에서 토큰 교환 시도...');
-                    const response = await exchangeCodeForToken(code);
-                    const accessToken = response.headers['authorization'];
-                    console.log('accessToken:', accessToken);
-                    if (accessToken) {
-                        localStorage.setItem('accessToken', accessToken);
-                        console.log('액세스 토큰 저장 완료:', accessToken);
-                    } else {
-                        console.error(
-                            '토큰 교환 응답에 authorization 헤더가 없습니다.',
-                        );
-                    }
-                } catch (error) {
-                    console.error(
-                        '추가 정보 페이지에서 토큰 교환 중 오류:',
-                        error,
-                    );
+                const response = await exchangeCodeForToken(code);
+                const accessToken = response.headers['authorization'];
+                if (accessToken) {
+                    localStorage.setItem('accessToken', accessToken);
                 }
             }
         };
@@ -200,13 +186,9 @@ const AddInfo = () => {
         };
 
         try {
-            console.log('token:', token);
             await addProfile(payload, token as string);
             sessionStorage.removeItem('oauthAuthCode');
             navigate('/');
-        } catch (e) {
-            console.error(e);
-            setError('추가 정보 등록 중 오류가 발생했습니다.');
         } finally {
             setIsLoading(false);
         }

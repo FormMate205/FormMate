@@ -5,8 +5,6 @@ import { useUserStore } from '../../user/model/userStore';
 export const logout = async () => {
     try {
         await api.post('/auth/logout');
-    } catch (e) {
-        console.warn('로그아웃 실패', e);
     } finally {
         localStorage.removeItem('accessToken');
         const store = useUserStore.getState();

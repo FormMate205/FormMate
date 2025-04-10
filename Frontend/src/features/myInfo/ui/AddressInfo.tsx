@@ -20,8 +20,7 @@ const AddressInfo = ({ address }: AddressInfoProps) => {
                     setCurrentAddress(fullAddress);
                     setShowToast(true);
                     setTimeout(() => setShowToast(false), 2000);
-                } catch (err) {
-                    console.error('주소 업데이트 실패:', err);
+                } catch {
                     alert('주소 저장에 실패했습니다. 다시 시도해주세요.');
                 }
             },

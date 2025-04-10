@@ -33,15 +33,13 @@ const MyAccount = () => {
     const { mutate: handleDeleteAccount } = useMutation({
         mutationFn: deleteAccount,
         onSuccess: () => {
-            console.log('삭제 성공!');
             setHasAccount(false);
             setOpenAlert(false);
             clearAccount();
             queryClient.invalidateQueries({ queryKey: ['accountInfo'] });
             window.location.href = '/myinfo';
         },
-        onError: (err) => {
-            console.error('계좌 삭제 실패:', err);
+        onError: () => {
             alert('계좌 삭제에 실패했습니다. 다시 시도해주세요.');
         },
     });
@@ -51,7 +49,6 @@ const MyAccount = () => {
     };
 
     const handleConfirmDelete = () => {
-        console.log('삭제 확인 클릭함');
         handleDeleteAccount();
     };
 
