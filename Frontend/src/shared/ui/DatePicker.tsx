@@ -41,16 +41,20 @@ export const DatePicker = ({ selectedDate, onSelect }: DatePickerProps) => {
                 </CalendarButton>
             </PopoverTrigger>
             <PopoverContent
-                className='border-primary-200 w-auto border bg-white p-0'
+                className='w-auto p-0 bg-white border border-primary-200'
                 align='start'
+                style={{ height: '300px', overflow: 'hidden' }}
             >
-                <Calendar
-                    mode='single'
-                    disabled={(day) => day < new Date()}
-                    selected={selectedDate}
-                    onSelect={handleSelect}
-                    initialFocus
-                />
+                <div className='flex flex-col h-full'>
+                    <Calendar
+                        mode='single'
+                        disabled={(day) => day < new Date()}
+                        selected={selectedDate}
+                        onSelect={handleSelect}
+                        initialFocus
+                        className='flex-shrink-0'
+                    />
+                </div>
             </PopoverContent>
         </Popover>
     );

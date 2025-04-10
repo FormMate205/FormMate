@@ -68,7 +68,7 @@ export const useFormDraftCreate = ({
                     const newMessage: ChatMessage = {
                         id: messageIdCounterRef.current.toString(),
                         writerId: BOT_ID,
-                        writerName: '페이봇',
+                        writerName: '관리폼',
                         content: question.question,
                     };
 
