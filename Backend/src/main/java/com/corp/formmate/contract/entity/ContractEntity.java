@@ -104,4 +104,16 @@ public class ContractEntity implements Serializable {
 		this.nextRepaymentDate = paymentDate;
 	}
 
+	public void updateOverdue() {
+		this.overdueCount++;
+	}
+
+	public void addOverdueInterest(long amount) {
+		this.overdueInterestAmount += amount;
+	}
+
+	public void increaseEarlyRepaymentCount() {
+		this.earlyRepaymentCount++;
+	}
+
 }

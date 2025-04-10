@@ -103,4 +103,13 @@ public class PaymentScheduleEntity {
 		this.updatedAt = LocalDateTime.now();
 	}
 
+	public void markAsOverdue() {
+		this.isOverdue = true;
+	}
+
+	public void accumulateOverdue(long amount) {
+		this.overdueAmount += amount;
+		this.updatedAt = LocalDateTime.now();
+	}
+
 }

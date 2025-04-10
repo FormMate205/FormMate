@@ -97,6 +97,7 @@ public class PaymentScheduleService {
 		List<PaymentScheduleEntity> schedules = selectByContractOrderByPaymentRoundAsc(contract);
 		LocalDateTime now = LocalDateTime.now();
 		boolean isFirst = true;
+		boolean earlyRepaymentOccurred = false;
 
 		for (PaymentScheduleEntity s : schedules) {
 			if (Boolean.TRUE.equals(s.getIsPaid()))
@@ -119,6 +120,7 @@ public class PaymentScheduleService {
 						s.applyEarlyRepaymentFee(fee);
 						leftover -= fee;
 						contract.addToTotalEarlyRepaymentFee(fee);
+						earlyRepaymentOccurred = true;
 					}
 				} else {
 					s.markAsPartialPaid(leftover, now);
@@ -155,6 +157,10 @@ public class PaymentScheduleService {
 			long interest = estimateInterest(equalPrincipal, contract);
 			s.updateSchedule(equalPrincipal, interest);
 		}
+		
+		if (earlyRepaymentOccurred) {
+			contract.increaseEarlyRepaymentCount(); // ✅ 딱 한 번만 증가
+		}
 
 		paymentScheduleRepository.saveAll(schedules);
 		return schedules;
@@ -173,6 +179,11 @@ public class PaymentScheduleService {
 	@Transactional(readOnly = true)
 	public Optional<PaymentScheduleEntity> selectByContractAndRound(ContractEntity contract, Integer round) {
 		return paymentScheduleRepository.findByContractAndPaymentRound(contract, round);
+	}
+
+	@Transactional(readOnly = true)
+	public List<PaymentScheduleEntity> selectOverdueUnpaidSchedules(ContractEntity contract) {
+		return paymentScheduleRepository.findByContractAndIsPaidFalseAndIsOverdueTrue(contract);
 	}
 }
 
