@@ -48,7 +48,6 @@ import com.corp.formmate.paymentschedule.repository.PaymentScheduleRepository;
 import com.corp.formmate.paymentschedule.service.PaymentScheduleService;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
-import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
@@ -82,6 +81,7 @@ public class ContractService {
 		ContractEntity contract = getContract(form);
 		UserEntity userEntity = getUser(userId);
 		List<TransferEntity> transfers = getTransfers(form);
+		List<PaymentScheduleEntity> schedules = paymentScheduleService.selectByContract(contract);
 
 		boolean userIsCreditor = form.getCreditor().equals(userEntity);
 		String contracteeName = userIsCreditor ? form.getDebtorName() : form.getCreditorName();
@@ -93,9 +93,16 @@ public class ContractService {
 			.sum();
 
 		// 중도상환 상태인 송금 중, 수수료 대상인(paymentDifference > 0) 건들의 총 수수료
-		long totalEarlyRepaymentCharge = transfers.stream()
-			.filter(t -> t.getStatus() == TransferStatus.EARLY_REPAYMENT && t.getPaymentDifference() > 0)
-			.mapToLong(t -> calculateEarlyRepaymentFee(t.getPaymentDifference(), form))
+		long totalEarlyRepaymentCharge = schedules.stream()
+			.mapToLong(PaymentScheduleEntity::getEarlyRepaymentFee)
+			.sum();
+
+		// 총 납부해야하는 금액
+		long requiredPay = schedules.stream()
+			.mapToLong(s -> s.getScheduledPrincipal()
+				+ s.getScheduledInterest()
+				+ s.getOverdueAmount()
+				+ s.getEarlyRepaymentFee())
 			.sum();
 
 		return ContractDetailResponse.builder()
@@ -108,7 +115,7 @@ public class ContractService {
 			.earlyRepaymentCount(contract.getEarlyRepaymentCount())
 			.totalEarlyRepaymentCharge(totalEarlyRepaymentCharge)
 			.repaymentAmount(repaymentAmount)
-			.remainingPrincipal(contract.getRemainingPrincipal())
+			.remainingPrincipal(requiredPay - repaymentAmount)
 			.build();
 	}
 
@@ -153,44 +160,78 @@ public class ContractService {
 		long paidInterest = 0L;
 		long paidOverdueInterest = 0L;
 		long totalEarlyRepaymentFee = 0L;
-		long unpaidAmount = 0L;
 
-		long remainingPrincipal = 0L;
-		long remainingInterest = 0L;
+		long totalPrincipal = 0L;
+		long totalInterest = 0L;
+		long totalOverdueInterest = 0L;
+
+		long totalRequiredPay = 0L;
+		long totalPay = 0L;
+
+		int currentPaymentRound = contract.getCurrentPaymentRound();
 
 		for (PaymentScheduleEntity schedule : schedules) {
 			long scheduledPrincipal = schedule.getScheduledPrincipal();
 			long scheduledInterest = schedule.getScheduledInterest();
 			long overdueAmount = schedule.getOverdueAmount();
 			long paid = schedule.getActualPaidAmount() != null ? schedule.getActualPaidAmount() : 0L;
-			long scheduledTotal = scheduledPrincipal + scheduledInterest + overdueAmount;
+			long earlyRepaymentFee = schedule.getEarlyRepaymentFee();
+
+			if (schedule.getPaymentRound() <= currentPaymentRound) {
+				totalRequiredPay += scheduledPrincipal + scheduledInterest + overdueAmount + earlyRepaymentFee;
+				totalPay += paid;
+			}
+			// 전체 원금, 이자 총합 (만기 기준)
+			totalPrincipal += scheduledPrincipal;
+			totalInterest += scheduledInterest;
+			totalEarlyRepaymentFee += earlyRepaymentFee;
+			totalOverdueInterest += overdueAmount;
 
 			if (Boolean.TRUE.equals(schedule.getIsPaid())) {
 				paidPrincipal += scheduledPrincipal;
 				paidInterest += scheduledInterest;
 				paidOverdueInterest += overdueAmount;
-				totalEarlyRepaymentFee += schedule.getEarlyRepaymentFee();
-			} else {
-				if (schedule.getPaymentRound().equals(contract.getCurrentPaymentRound())) {
-					unpaidAmount = Math.max(0, scheduledTotal - paid);
+			} else { // paid가 안되었다면
+				if (paid > 0) {
+					if (Boolean.TRUE.equals(schedule.getIsOverdue())) {
+						long currentPaid = paid - overdueAmount;
+						if (currentPaid >= 0) {
+							long currentPaidPrincipal = currentPaid - scheduledInterest;
+							if (currentPaidPrincipal >= 0) {
+								paidOverdueInterest += overdueAmount;
+								paidInterest += scheduledInterest;
+								paidPrincipal += currentPaidPrincipal;
+							} else {
+								paidOverdueInterest += overdueAmount;
+								paidInterest += currentPaid;
+							}
+						} else {
+							paidOverdueInterest += overdueAmount;
+						}
+
+					} else {
+						long currentPaidPrincipal = paid - scheduledInterest; // 실제 낸 돈에서 이자를 뺀 돈 즉 원금에서 깎일 돈
+						if (currentPaidPrincipal >= 0) { // 그니까 원금에서 깎일 돈이 0 이상이면
+							paidPrincipal += currentPaidPrincipal;
+							paidInterest += scheduledInterest;
+						} else {
+							paidInterest += paid;
+						}
+					}
 				}
-				remainingPrincipal += scheduledPrincipal;
-				remainingInterest += scheduledInterest;
 			}
 		}
-
-		long maturityPayment = paidPrincipal + paidInterest + paidOverdueInterest
-			+ unpaidAmount; // 전체 실제 납부 + 앞으로 납부해야 할 것
 
 		return InterestResponse.builder()
 			.paidPrincipalAmount(paidPrincipal)
 			.paidInterestAmount(paidInterest)
 			.paidOverdueInterestAmount(paidOverdueInterest)
 			.totalEarlyRepaymentFee(totalEarlyRepaymentFee)
-			.unpaidAmount(unpaidAmount)
-			.expectedPaymentAmountAtMaturity(maturityPayment)
-			.expectedPrincipalAmountAtMaturity(remainingPrincipal)
-			.expectedInterestAmountAtMaturity(remainingInterest)
+			.unpaidAmount(Math.max(0, totalRequiredPay - totalPay))
+			.expectedPaymentAmountAtMaturity(
+				totalPrincipal + totalInterest + totalEarlyRepaymentFee + totalOverdueInterest)
+			.expectedPrincipalAmountAtMaturity(totalPrincipal)
+			.expectedInterestAmountAtMaturity(totalInterest + totalOverdueInterest)
 			.build();
 	}
 
