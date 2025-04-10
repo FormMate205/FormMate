@@ -28,7 +28,7 @@ const MyInfo = () => {
     }, [accountInfo, isError, isLoading, user, setUser]);
 
     return (
-        <div className='flex h-screen flex-col overflow-hidden'>
+        <div className='flex h-screen flex-col'>
             <div className='bg-line-50 scrollbar-none w-full flex-1 overflow-y-auto px-4 py-2'>
                 {' '}
                 <Header title='내 정보' />

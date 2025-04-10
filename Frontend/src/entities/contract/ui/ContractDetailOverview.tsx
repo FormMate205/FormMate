@@ -90,7 +90,11 @@ const ContractDetailOverview = ({ formId }: { formId: string }) => {
                         />
                     ))}
                 </div>
-                <ProgressBar amount={repaymentAmount} goal={loanAmount} />
+                <ProgressBar
+                    amount={repaymentAmount}
+                    goal={loanAmount}
+                    color={userIsCreditor ? 'primary' : 'subPink'}
+                />
             </div>
         </section>
     );
