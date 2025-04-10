@@ -157,7 +157,7 @@ public class PaymentScheduleService {
 			long interest = estimateInterest(equalPrincipal, contract);
 			s.updateSchedule(equalPrincipal, interest);
 		}
-		
+
 		if (earlyRepaymentOccurred) {
 			contract.increaseEarlyRepaymentCount(); // ✅ 딱 한 번만 증가
 		}
@@ -185,5 +185,22 @@ public class PaymentScheduleService {
 	public List<PaymentScheduleEntity> selectOverdueUnpaidSchedules(ContractEntity contract) {
 		return paymentScheduleRepository.findByContractAndIsPaidFalseAndIsOverdueTrue(contract);
 	}
+
+	// 중도상환으로 이 돈 입금 하면 계약 종료된다! 하는 메서드
+//	@Transactional(readOnly = true)
+//	public long calculateFinalRepaymentAmount(ContractEntity contract) {
+//		List<PaymentScheduleEntity> schedules = selectOverdueUnpaidSchedules(contract);
+//		long amounts = 0L;
+//		int currentPaymentRound = contract.getCurrentPaymentRound();
+//		for (PaymentScheduleEntity schedule : schedules) {
+//			if (schedule.getIsPaid()) {
+//				continue;
+//			}
+//			long overdueAmount = schedule.getOverdueAmount();
+//			long interest = schedule.getScheduledInterest();
+//			long principal = schedule.getScheduledPrincipal();
+//			long paymentRound = schedule.getPaymentRound();
+//		}
+//	}
 }
 
