@@ -2,17 +2,16 @@ import { lazy, Suspense } from 'react';
 import { useContractAmount } from '@/entities/home/model/useContractAmount';
 import { useUserStore } from '@/entities/user/model/userStore';
 import AccountInfoSkeleton from '@/features/home/ui/AccountInfoSkeleton';
-import ScheduleSkeleton from '@/features/home/ui/ScheduleSkeleton';
 import TodaySettlementSkeleton from '@/features/home/ui/TodaySettlementSkeleton';
 import { useUnreadNotificationCount } from '@/features/notifications/api/NotificationAPI';
 import { Footer, Header } from '@/widgets';
+import Schedule from '@/features/home/ui/Schedule';
 
 interface HomeProps {
     userName: string;
 }
 
 const AccountInfo = lazy(() => import('@/features/home/ui/AccountInfo'));
-const Schedule = lazy(() => import('@/features/home/ui/Schedule'));
 const TodaySettlement = lazy(
     () => import('@/features/home/ui/TodaySettlement'),
 );
@@ -52,9 +51,7 @@ const Home = ({ userName }: HomeProps) => {
                         {accountInfo && <TodaySettlement data={accountInfo} />}
                     </Suspense>
 
-                    <Suspense fallback={<ScheduleSkeleton />}>
-                        <Schedule />
-                    </Suspense>
+                    <Schedule />
                 </div>
             </div>
             <Footer />
