@@ -52,10 +52,6 @@ const AccountInfo = () => {
         );
     }
 
-    if (isLoading) {
-        return <div className='text-sm'>계좌 정보를 불러오는 중...</div>;
-    }
-
     if (isError || !accountInfo) {
         return (
             <div className='bg-primary-500 flex items-center justify-between rounded-lg p-2 shadow-sm'>
