@@ -148,9 +148,9 @@ public class TransferService {
 
 		TransferEntity transferEntity;
 
-		contractService.updateContract(transferCreateRequest); // contract(계약관리) 관련 처리 로직
-
 		PaymentScheduleEntity paymentSchedule = paymentScheduleService.selectNonPaidByContract(contractEntity);
+
+		contractService.updateContract(transferCreateRequest); // contract(계약관리) 관련 처리 로직
 
 		int paymentRoundGap = paymentSchedule.getPaymentRound() - currentRound;
 
