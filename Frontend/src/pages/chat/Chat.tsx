@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useGetContractDetail } from '@/entities/contract/api/ContractAPI';
 import ContractDocument from '@/entities/contract/ui/ContractDocument';
 import { useUserStore } from '@/entities/user/model/userStore';
@@ -14,7 +13,6 @@ import ChatInput from '../../entities/chat/ui/ChatInput';
 
 const Chat = () => {
     const location = useLocation();
-    const navigate = useNavigate();
     const { isFin } = location.state;
 
     const { user } = useUserStore();
@@ -35,27 +33,16 @@ const Chat = () => {
     const { data } = useGetContractDetail(roomId!);
     const { exportContract } = useContractPdfExport();
 
-    useEffect(() => {
-        const handlePopState = () => {
-            navigate('/chat');
-        };
-
-        window.addEventListener('popstate', handlePopState);
-        return () => {
-            window.removeEventListener('popstate', handlePopState);
-        };
-    }, [navigate]);
-
     return (
-        <div className='bg-line-50 flex h-screen w-full flex-col items-center justify-between px-4 py-2'>
+        <div className='flex flex-col items-center justify-between w-full h-screen px-4 py-2 bg-line-50'>
             <Header title='채팅' />
 
             {/* 계약서 팝업 */}
-            <div className='flex w-full justify-end'>
+            <div className='flex justify-end w-full'>
                 <CommonModal
                     triggerChildren={
                         <div
-                            className='flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xs'
+                            className='flex items-center justify-center bg-white rounded-full shadow-xs h-9 w-9'
                             aria-label='계약서 보기'
                         >
                             <Icons
@@ -74,7 +61,7 @@ const Chat = () => {
             {/* 채팅 내용 */}
             <div
                 ref={scrollRef}
-                className='scrollbar-none my-1 flex w-full flex-1 flex-col-reverse gap-2 overflow-y-auto'
+                className='flex flex-col-reverse flex-1 w-full gap-2 my-1 overflow-y-auto scrollbar-none'
             >
                 {messages.map((chat, index) => {
                     return chat.messageType == 'CONTRACT_SHARED' ||
