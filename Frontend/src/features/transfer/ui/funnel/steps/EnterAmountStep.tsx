@@ -62,23 +62,24 @@ const EnterAmountStep = ({
 
     return (
         <div className='relative flex h-full flex-col justify-between'>
-            <section className='flex flex-col gap-6'>
-                <div className='flex flex-col'>
-                    <span className='text-xl font-semibold'>
-                        {partnerName}님께
-                    </span>
-                    <span className='text-line-700 font-medium'>
-                        다음 상환액: {nextRepaymentAmount.toLocaleString()}원
-                    </span>
-                </div>
+            <section className='flex flex-col'>
+                <span className='text-xl font-semibold'>{partnerName}님께</span>
+                <span className='text-line-700 font-medium'>
+                    다음 상환액: {nextRepaymentAmount.toLocaleString()}원
+                </span>
 
                 <div className='flex flex-col gap-4'>
-                    <AmountInput inputValue={inputValue} />
-                    {isOverBalance && (
-                        <span className='text-sm text-red-500'>
-                            계좌 잔액이 부족합니다. 다른 금액을 입력해주세요.
-                        </span>
-                    )}
+                    <div>
+                        <div className='min-h-[20px]'>
+                            {isOverBalance && (
+                                <span className='text-sm text-red-500'>
+                                    계좌 잔액이 부족합니다. 다른 금액을
+                                    입력해주세요.
+                                </span>
+                            )}
+                        </div>
+                        <AmountInput inputValue={inputValue} />
+                    </div>
                     <div className='flex justify-start'>
                         <AmountDifference
                             inputValue={inputValue}
