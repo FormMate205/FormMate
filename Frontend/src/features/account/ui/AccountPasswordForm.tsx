@@ -60,8 +60,7 @@ const AccountPasswordForm = () => {
                         setShowSuccess(false);
                         navigate('/');
                     }, 1500);
-                } catch (err) {
-                    console.error('계좌 등록 실패:', err);
+                } catch {
                     setShowFailModal(true);
                     setInputValue('');
                 }
@@ -73,15 +72,15 @@ const AccountPasswordForm = () => {
     };
 
     return (
-        <div className='flex flex-col h-screen overflow-hidden'>
-            <div className='flex flex-col flex-1 gap-2 px-4 py-2 pb-64 overflow-y-auto scrollbar-none'>
+        <div className='flex h-screen flex-col overflow-hidden'>
+            <div className='scrollbar-none flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-2 pb-64'>
                 <Header title='결제 비밀번호 등록' />
 
                 <div className='flex flex-col justify-center p-6'>
-                    <h2 className='text-xl font-semibold text-center'>
+                    <h2 className='text-center text-xl font-semibold'>
                         {step === 'input' ? '결제 비밀번호' : '비밀번호 확인'}
                     </h2>
-                    <p className='text-center text-line-500'>
+                    <p className='text-line-500 text-center'>
                         {step === 'input'
                             ? '결제 비밀번호를 입력하세요'
                             : '확인을 위해 한 번 더 입력해주세요'}
@@ -102,8 +101,8 @@ const AccountPasswordForm = () => {
                 </div>
             </div>
 
-            <div className='bottom-0 left-0 w-full p-6 bg-white'>
-                <div className='flex flex-col w-full gap-6 mx-auto'>
+            <div className='bottom-0 left-0 w-full bg-white p-6'>
+                <div className='mx-auto flex w-full flex-col gap-6'>
                     <NumberPad
                         onDelete={handleDelete}
                         onNumberClick={handleNumberClick}

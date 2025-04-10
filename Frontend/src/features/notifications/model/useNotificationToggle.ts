@@ -76,9 +76,8 @@ export const useNotificationToggle = () => {
                 await activate(token);
                 toast.message('🔔 이제 알림을 받아볼 수 있어요!');
             }
-        } catch (error) {
+        } catch {
             toast.error('알림 설정 중 오류가 발생했어요.');
-            console.error(error);
         }
     };
 
