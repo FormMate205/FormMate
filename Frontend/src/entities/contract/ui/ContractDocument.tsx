@@ -11,14 +11,15 @@ import { getSignatureStatus } from '../model/getSignatureStatus';
 import { Contract } from '../model/types';
 
 const styles = {
-    container: 'flex flex-col gap-4 pt-4 p-6 bg-white text-black w-full',
-    title: 'text-2xl font-medium text-center py-4 border-b border-[#bfc0d1]',
-    label: 'font-semibold text-[#716b8a]',
-    divider: 'border-t border-[#d1d5db] my-2',
-    subtext: 'text-sm text-[#716b8a] ml-2',
-    contractValue: 'flex justify-between',
-    section: 'flex justify-between',
-    groupedValues: 'flex flex-col items-end text-right',
+    container:
+        'flex flex-col gap-4 pt-4 p-6 bg-white text-black w-full whitespace-nowrap',
+    title: 'text-2xl font-medium text-center py-4 border-b border-[#bfc0d1] whitespace-nowrap',
+    label: 'font-semibold text-[#716b8a] whitespace-nowrap',
+    divider: 'border-t border-[#d1d5db] my-2 whitespace-nowrap',
+    subtext: 'text-sm text-[#716b8a] ml-2 whitespace-nowrap',
+    contractValue: 'flex justify-between whitespace-nowrap',
+    section: 'flex justify-between whitespace-nowrap',
+    groupedValues: 'flex flex-col items-end text-right whitespace-nowrap',
 };
 
 interface ContractDocumentProps {
@@ -64,7 +65,7 @@ const ContractDocument = ({
         <div id='contract-document' className={styles.container}>
             <div className={styles.title}>차용증</div>
 
-            <article className='text-md flex flex-col gap-1'>
+            <article className='flex flex-col gap-1 text-md'>
                 <div className={styles.contractValue}>
                     <span className={styles.label}>채권자</span>
                     <div className='flex flex-col items-end'>
@@ -182,7 +183,7 @@ const ContractDocument = ({
                     {format(new Date(), 'yyyy년 MM월 dd일')}
                 </div>
 
-                <div className='flex flex-col items-end text-right font-medium'>
+                <div className='flex flex-col items-end font-medium text-right'>
                     <div>
                         <span>{creditorName}</span>
                         <span className={styles.subtext}>

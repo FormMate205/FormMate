@@ -120,13 +120,9 @@ export const createFormDraftFromAnswers = (
 
     // 특약사항 설정 (문자열 배열을 가정)
     if (answers.specialTerms) {
-        try {
-            const specialTerms = JSON.parse(answers.specialTerms);
-            if (Array.isArray(specialTerms)) {
-                formDraft.specialTermIndexes = specialTerms;
-            }
-        } catch (e) {
-            console.error('특약사항 파싱 오류:', e);
+        const specialTerms = JSON.parse(answers.specialTerms);
+        if (Array.isArray(specialTerms)) {
+            formDraft.specialTermIndexes = specialTerms;
         }
     }
 

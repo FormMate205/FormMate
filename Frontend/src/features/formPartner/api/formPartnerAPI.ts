@@ -73,7 +73,6 @@ export const useGetRecentFormPartner = ({
 // 새로운 계약 상대 검색 API
 const getNewFormPartner = async (phoneNumber: string): Promise<FormPartner> => {
     const response = await api.get(`/users/${phoneNumber}`);
-    console.log(response.data);
     return response.data;
 };
 

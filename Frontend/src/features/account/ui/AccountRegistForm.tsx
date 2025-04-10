@@ -48,8 +48,8 @@ const AccountRegist = () => {
     };
 
     return (
-        <div className='flex h-screen flex-col overflow-hidden'>
-            <div className='scrollbar-none relative flex h-full flex-col gap-2 overflow-y-auto px-4 py-2'>
+        <div className='flex flex-col h-screen overflow-hidden'>
+            <div className='relative flex flex-col h-full gap-2 px-4 py-2 overflow-y-auto scrollbar-none'>
                 <Header title='계좌 등록' />
                 <div className='flex flex-col p-2'>
                     <h2 className='my-8 text-xl font-semibold'>
@@ -114,7 +114,7 @@ const AccountRegist = () => {
                     </div>
 
                     {error && (
-                        <p className='text-destructive mt-4 text-sm'>{error}</p>
+                        <p className='mt-4 text-sm text-destructive'>{error}</p>
                     )}
 
                     {accountNum && bank && (
