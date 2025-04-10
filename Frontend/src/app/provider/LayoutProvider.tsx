@@ -6,8 +6,8 @@ const LayoutProvider = () => {
     useUserService(); // 일반 로그인 상태 확인
 
     return (
-        <div className='flex min-h-screen w-full min-w-[320px] justify-center'>
-            <div className='relative min-h-screen w-full max-w-[640px] min-w-[320px] overflow-auto'>
+        <div className='relative flex min-h-screen w-full min-w-[320px] justify-center'>
+            <div className='min-h-screen w-full max-w-[640px] min-w-[320px] overflow-auto'>
                 <Outlet />
                 <Toaster
                     position='top-right'
