@@ -10,6 +10,7 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import VerificationTimer from '@/entities/signature/ui/VerificationTimer';
 import { useSignature } from '@/features/signature/model/useSignature';
 import ConfirmModal from '@/widgets/modal/ConfirmModal';
 
@@ -30,6 +31,16 @@ const Signature = () => {
         handleRecaptchaChange,
         handleRecaptchaExpired,
     } = useSignature({ formId, type, creditorId, requestedById });
+
+    const onSuccess = () => {
+        handleVerifyCode();
+
+        if (verificationSuccess) {
+            setTimeout(() => {
+                navigate(`/chat/${formId}`, { state: { isFin: false } });
+            }, 500);
+        }
+    };
 
     return (
         <div className='flex flex-col w-full h-screen px-4 py-2'>
@@ -92,21 +103,26 @@ const Signature = () => {
                                                 >
                                                     {requestMessage}
                                                 </p>
-                                                <FormField
-                                                    control={form.control}
-                                                    name='code'
-                                                    render={({ field }) => (
-                                                        <FormItem className='flex w-full gap-2'>
-                                                            <FormControl>
-                                                                <Input
-                                                                    variant='default'
-                                                                    placeholder='인증번호를 입력하세요.'
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                                <div className='flex items-center w-full gap-2'>
+                                                    <FormField
+                                                        control={form.control}
+                                                        name='code'
+                                                        render={({ field }) => (
+                                                            <FormItem className='flex w-full gap-2'>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        variant='default'
+                                                                        placeholder='인증번호를 입력하세요.'
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                    <div className='flex justify-end mt-1 text-sm font-medium text-primary-500'>
+                                                        <VerificationTimer />
+                                                    </div>
+                                                </div>
                                                 <p
                                                     className={`pl-1 ${verificationSuccess ? 'text-primary-500' : 'text-subPink-700'}`}
                                                 >
@@ -165,7 +181,7 @@ const Signature = () => {
                     variant='choiceFill'
                     children='확인'
                     className='w-full'
-                    onClick={handleVerifyCode}
+                    onClick={onSuccess}
                 />
             </div>
         </div>
