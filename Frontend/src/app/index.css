@@ -155,11 +155,11 @@
 .dot-indicator::after {
     content: '';
     position: absolute;
-    bottom: 4px;
+    bottom: 1px;
     left: 50%;
     transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
     border-radius: 9999px;
     background-color: #3b82f6;
 }
