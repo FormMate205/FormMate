@@ -6,13 +6,13 @@ const ChatRooms = () => {
     const ChatRoomList = lazy(() => import('@/features/chat/ui/ChatRoomList'));
 
     return (
-        <div className='flex h-screen w-full flex-col'>
-            <div className='flex h-screen w-full flex-col overflow-hidden px-4 py-2'>
+        <div className='flex flex-col w-full h-screen'>
+            <div className='flex flex-col w-full h-screen px-4 py-2 overflow-hidden'>
                 <div className='flex-none'>
                     <Header title='채팅 목록' />
                 </div>
 
-                <div className='scrollbar-none flex-grow overflow-y-auto py-3'>
+                <div className='flex-grow py-3 overflow-y-auto scrollbar-none'>
                     <Suspense fallback={<ListLoading />}>
                         <ChatRoomList />
                     </Suspense>
