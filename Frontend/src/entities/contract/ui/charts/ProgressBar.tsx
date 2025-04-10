@@ -63,7 +63,7 @@ const ProgressBar = ({ amount, goal }: ProgressBarProps) => {
             </div>
 
             <div className='text-line-500 flex justify-end'>
-                원금 {goal.toLocaleString()}원
+                총 상환 예정액 {goal.toLocaleString()}원
             </div>
         </div>
     );
