@@ -766,7 +766,7 @@ public class ContractService {
 			transferStatus = TransferStatus.EARLY_REPAYMENT;
 		}
 
-		Page<TransferEntity> transfers = transferRepository.findByFormAndStatusAndCurrentRoundGreaterThan(form,
+		Page<TransferEntity> transfers = transferRepository.findByFormAndOptionalStatus(form,
 			transferStatus, 0, pageable);
 
 		return transfers.map(TransferFormListResponse::fromEntity);
