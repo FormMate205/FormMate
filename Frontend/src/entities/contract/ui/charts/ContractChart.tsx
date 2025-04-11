@@ -58,7 +58,7 @@ const ContractChart = () => {
 
     return (
         <div className='flex flex-col gap-2'>
-            <span className='text-lg font-medium'>체결된 계약</span>
+            <span className='text-lg font-medium'>진행 중인 계약 진행률</span>
             <Card className='flex flex-col bg-white'>
                 <CardHeader className='items-center'>
                     <CardTitle />

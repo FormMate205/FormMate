@@ -28,7 +28,7 @@ const CommonModal = ({
         <Dialog>
             <DialogTrigger asChild>{triggerChildren}</DialogTrigger>
             <DialogContent className='scrollbar-none flex max-h-[80vh] flex-col items-center overflow-y-auto bg-white'>
-                <div className='flex justify-end w-full'>
+                <div className='flex w-full justify-end'>
                     <DialogClose>
                         <Icons name='close' />
                     </DialogClose>
