@@ -1,4 +1,4 @@
-import { CompatClient, Message } from '@stomp/stompjs';
+import { CompatClient } from '@stomp/stompjs';
 import { useRef, useState, useEffect } from 'react';
 import { User } from '@/entities/user/model/types';
 import { createStompClient } from '@/features/chat/model/wsService';
@@ -15,10 +15,6 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
     const prevMessagesLengthRef = useRef<number>(0); // 이전 메시지 개수를 저장
     const scrollPositionRef = useRef<number>(0); // 스크롤 위치 저장
     const scrollHeightRef = useRef<number>(0); // 이전 스크롤 높이 저장
-    const reconnectTimeoutRef = useRef<
-        ReturnType<typeof setTimeout> | undefined
-    >(undefined); // 재연결 타이머
-    const lastMessageTimeRef = useRef<number>(0); // 마지막 메시지 시간 저장
 
     const stompClient = useRef<CompatClient | null>(null); // 웹소켓 연결 유지
     const [isConnected, setIsConnected] = useState(false); // 연결 상태
@@ -38,11 +34,12 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
 
         // 새 메시지가 추가된 경우
         if (messages.length > prevMessagesLengthRef.current) {
-            // 스크롤이 하단에 가까운 경우에만 자동 스크롤
-            const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+            // 스크롤이 최하단에 있을 때만 자동 스크롤
+            const isAtBottom =
+                scrollRef.current.scrollHeight - scrollRef.current.scrollTop <=
+                scrollRef.current.clientHeight + 100;
 
-            if (isNearBottom) {
+            if (isAtBottom) {
                 scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
             }
         }
@@ -87,11 +84,10 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
             return;
         }
 
-        if (stompClient.current?.connected) {
-            return;
-        }
-
         stompClient.current = createStompClient();
+
+        // 자동 재연결 설정
+        stompClient.current.reconnect_delay = 500;
 
         stompClient.current.connect(
             {
@@ -99,36 +95,14 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
             },
             () => {
                 setIsConnected(true);
-                console.log('WebSocket Connected');
 
-                stompClient.current?.subscribe(
-                    `/topic/chat${roomId}`,
-                    (message: Message) => {
-                        try {
-                            const currentTime = Date.now();
-                            // 메시지 처리 간격이 100ms 이내면 무시 (중복 방지)
-                            if (
-                                currentTime - lastMessageTimeRef.current <
-                                100
-                            ) {
-                                return;
-                            }
-                            lastMessageTimeRef.current = currentTime;
-
-                            const parsedMessage = JSON.parse(message.body);
-                            console.log('New message received:', parsedMessage);
-                            refetch();
-                        } catch (error: unknown) {
-                            console.error('Error processing message:', error);
-                        }
-                    },
-                );
+                stompClient.current?.subscribe(`/topic/chat${roomId}`, () => {
+                    // 새 메시지가 도착하면 즉시 refetch
+                    refetch();
+                });
             },
-            (error: unknown) => {
-                console.error('WebSocket connection error:', error);
+            () => {
                 setIsConnected(false);
-                // 연결 실패시 3초 후 재시도
-                reconnectTimeoutRef.current = setTimeout(connect, 3000);
             },
         );
     };
@@ -160,25 +134,8 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
             connect();
         }
 
-        // Visibility 변경 감지
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                connect(); // 페이지가 보일 때 재연결
-                refetch(); // 놓친 메시지 동기화
-            }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-
         return () => {
-            document.removeEventListener(
-                'visibilitychange',
-                handleVisibilityChange,
-            );
-            if (reconnectTimeoutRef.current) {
-                clearTimeout(reconnectTimeoutRef.current);
-            }
-            if (stompClient.current?.connected) {
+            if (stompClient.current) {
                 stompClient.current.disconnect();
             }
         };
