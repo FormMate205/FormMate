@@ -1,4 +1,4 @@
-import { CompatClient } from '@stomp/stompjs';
+import { CompatClient, Message } from '@stomp/stompjs';
 import { useRef, useState, useEffect } from 'react';
 import { User } from '@/entities/user/model/types';
 import { createStompClient } from '@/features/chat/model/wsService';
@@ -15,6 +15,9 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
     const prevMessagesLengthRef = useRef<number>(0); // 이전 메시지 개수를 저장
     const scrollPositionRef = useRef<number>(0); // 스크롤 위치 저장
     const scrollHeightRef = useRef<number>(0); // 이전 스크롤 높이 저장
+    const reconnectTimeoutRef = useRef<
+        ReturnType<typeof setTimeout> | undefined
+    >(undefined); // 재연결 타이머
 
     const stompClient = useRef<CompatClient | null>(null); // 웹소켓 연결 유지
     const [isConnected, setIsConnected] = useState(false); // 연결 상태
@@ -85,6 +88,10 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
             return;
         }
 
+        if (stompClient.current?.connected) {
+            return;
+        }
+
         stompClient.current = createStompClient();
 
         stompClient.current.connect(
@@ -93,10 +100,25 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
             },
             () => {
                 setIsConnected(true);
+                console.log('WebSocket Connected');
 
-                stompClient.current?.subscribe(`/topic/chat${roomId}`, () => {
-                    refetch();
-                });
+                stompClient.current?.subscribe(
+                    `/topic/chat${roomId}`,
+                    (message: Message) => {
+                        try {
+                            JSON.parse(message.body); // 메시지 유효성 검증
+                            refetch();
+                        } catch (error: unknown) {
+                            console.error('Error processing message:', error);
+                        }
+                    },
+                );
+            },
+            (error: unknown) => {
+                console.error('WebSocket connection error:', error);
+                setIsConnected(false);
+                // 연결 실패시 5초 후 재시도
+                reconnectTimeoutRef.current = setTimeout(connect, 5000);
             },
         );
     };
@@ -128,6 +150,29 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
         if (roomId) {
             connect();
         }
+
+        // Visibility 변경 감지
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                connect(); // 페이지가 보일 때 재연결
+                refetch(); // 놓친 메시지 동기화
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener(
+                'visibilitychange',
+                handleVisibilityChange,
+            );
+            if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current);
+            }
+            if (stompClient.current?.connected) {
+                stompClient.current.disconnect();
+            }
+        };
     }, [roomId]);
 
     return {
