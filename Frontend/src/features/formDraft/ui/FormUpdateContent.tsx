@@ -21,20 +21,18 @@ import { FormUpdateRequest } from '../../../entities/formDraft/model/types';
 
 const styles = {
     container:
-        'flex flex-col gap-4 bg-white text-black w-full overflow-y-auto scrollbar-none whitespace-nowrap',
-    section: 'flex w-full flex-col gap-3 whitespace-nowrap',
+        'flex flex-col gap-4 bg-white text-black w-full overflow-y-auto scrollbar-none',
+    section: 'flex w-full flex-col gap-3',
     title: 'text-primary-500 text-lg font-semibold whitespace-nowrap',
     label: 'font-medium whitespace-nowrap',
-    divider: 'border-t border-line-300 my-2 whitespace-nowrap',
+    divider: 'border-t border-line-300 my-2',
     subtext: 'text-line-700 ml-2 whitespace-nowrap',
-    contractValue: 'flex justify-between items-center whitespace-nowrap',
-    groupedValues: 'flex flex-col items-end text-right whitespace-nowrap',
-    dateButton:
-        'flex items-center gap-2 border p-2 rounded-md whitespace-nowrap',
-    readOnlyField:
-        'text-gray-600 flex justify-end items-center gap-2 whitespace-nowrap',
-    specialTermCard: 'border border-line-300 shadow-sm whitespace-nowrap',
-    termHeader: 'flex w-full justify-between items-center whitespace-nowrap',
+    contractValue: 'flex justify-between items-center',
+    groupedValues: 'flex flex-col items-end text-right',
+    dateButton: 'flex items-center gap-2 border p-2 rounded-md',
+    readOnlyField: 'text-gray-600 flex justify-end items-center gap-2',
+    specialTermCard: 'border border-line-300 shadow-sm',
+    termHeader: 'flex w-full justify-between items-center',
 };
 
 interface EditableContractDocumentProps {
@@ -206,7 +204,7 @@ const FormUpdateContent = ({
                 <div className={styles.contractValue}>
                     <span className={styles.label}>{label}</span>
                     <div className={styles.readOnlyField}>
-                        <Calendar className='w-4 h-4' />
+                        <Calendar className='h-4 w-4' />
                         <span>{format(new Date(dateValue), 'yyyy.MM.dd')}</span>
                     </div>
                 </div>
@@ -227,7 +225,7 @@ const FormUpdateContent = ({
 
     return (
         <div className='flex max-h-[500px] w-full flex-col py-4'>
-            <div className='flex justify-between w-full py-2'>
+            <div className='flex w-full justify-between py-2'>
                 <p className='text-xl font-bold'>금전 차용 계약서</p>
                 {isEditMode ? (
                     <div className='flex gap-1'>
@@ -259,7 +257,7 @@ const FormUpdateContent = ({
                         <div className={styles.contractValue}>
                             <span className={styles.label}>이름</span>
                             <div className={styles.readOnlyField}>
-                                <User className='w-4 h-4' />
+                                <User className='h-4 w-4' />
                                 <span>{editableContract.creditorName}</span>
                             </div>
                         </div>
@@ -298,7 +296,7 @@ const FormUpdateContent = ({
                         <div className={styles.contractValue}>
                             <span className={styles.label}>이름</span>
                             <div className={styles.readOnlyField}>
-                                <User className='w-4 h-4' />
+                                <User className='h-4 w-4' />
                                 <span>{editableContract.debtorName}</span>
                             </div>
                         </div>
@@ -336,7 +334,7 @@ const FormUpdateContent = ({
                         <p className={styles.title}>입금 계좌</p>
                         {isEditMode ? (
                             <div className='flex flex-col gap-2'>
-                                <div className='flex items-center justify-between w-full'>
+                                <div className='flex w-full items-center justify-between'>
                                     <p className={styles.label}>은행</p>
                                     <div>
                                         <Select
@@ -382,7 +380,7 @@ const FormUpdateContent = ({
                                         </Select>
                                     </div>
                                 </div>
-                                <div className='flex items-center justify-between w-full'>
+                                <div className='flex w-full items-center justify-between'>
                                     <p className={styles.label}>계좌번호</p>
                                     <div>
                                         <Input
@@ -502,7 +500,7 @@ const FormUpdateContent = ({
                         <div className={styles.contractValue}>
                             <span className={styles.label}>이자율</span>
                             {isEditMode ? (
-                                <div className='flex items-center w-1/4'>
+                                <div className='flex w-1/4 items-center'>
                                     <Input
                                         variant='default'
                                         className='px-3 py-2 text-right'
@@ -527,7 +525,7 @@ const FormUpdateContent = ({
                                 중도상환 수수료
                             </span>
                             {isEditMode ? (
-                                <div className='flex items-center w-1/4'>
+                                <div className='flex w-1/4 items-center'>
                                     <Input
                                         variant='default'
                                         className='px-3 py-2 text-right'
@@ -560,7 +558,7 @@ const FormUpdateContent = ({
                                 {/* 선택된 특약 */}
                                 {selectedTerms.length > 0 && (
                                     <div className='flex flex-col gap-2'>
-                                        <p className='font-medium text-line-700'>
+                                        <p className='text-line-700 font-medium'>
                                             선택한 특약
                                         </p>
                                         <div className='space-y-3'>
@@ -572,7 +570,7 @@ const FormUpdateContent = ({
                                                     }
                                                 >
                                                     <CardContent>
-                                                        <p className='px-5 text-line-900'>
+                                                        <p className='text-line-900 px-5'>
                                                             {
                                                                 term.specialTermDetail
                                                             }
@@ -607,7 +605,7 @@ const FormUpdateContent = ({
                                 {/* 선택되지 않은 특약 */}
                                 {unselectedTerms.length > 0 && (
                                     <div className='flex flex-col gap-2'>
-                                        <p className='font-medium text-line-700'>
+                                        <p className='text-line-700 font-medium'>
                                             선택하지 않은 특약
                                         </p>
                                         <div className='space-y-3'>
@@ -619,7 +617,7 @@ const FormUpdateContent = ({
                                                     }
                                                 >
                                                     <CardContent>
-                                                        <p className='px-5 text-line-900'>
+                                                        <p className='text-line-900 px-5'>
                                                             {
                                                                 term.specialTermDetail
                                                             }
@@ -656,7 +654,7 @@ const FormUpdateContent = ({
                                     (term, index) => (
                                         <div
                                             key={term.specialTermIndex}
-                                            className='py-2 border-b border-line-300'
+                                            className='border-line-300 border-b py-2'
                                         >
                                             <p>
                                                 {index + 1}.{' '}
