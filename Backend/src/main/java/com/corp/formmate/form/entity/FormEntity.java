@@ -11,6 +11,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -124,6 +126,10 @@ public class FormEntity implements Serializable {
 	@Builder.Default
 	private TerminationProcess isTerminationProcess = TerminationProcess.NONE;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "termination_requested_id", foreignKey = @ForeignKey(name = "fk_forms_termination_requested_user"))
+	private UserEntity terminationRequestedUser;
+
 	public void update(FormUpdateRequest request) {
 
 		Integer repaymentDay = request.getRepaymentDay();
@@ -171,9 +177,14 @@ public class FormEntity implements Serializable {
 	// 파기 프로세스 취소
 	public void cancelTerminationProcess() {
 		this.isTerminationProcess = TerminationProcess.NONE;
+		this.terminationRequestedUser = null;
 	}
 
 	public void updateStatus(FormStatus status) {
 		this.status = status;
+	}
+
+	public void updateTerminationRequestedUser(UserEntity terminationRequestedUser) {
+		this.terminationRequestedUser = terminationRequestedUser;
 	}
 }

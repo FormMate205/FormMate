@@ -182,10 +182,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	// 권한 검사가 필요없는 URL 확인
 	private boolean isPermitAllUrl(String requestURI) {
-		return requestURI.startsWith("/api/auth") ||
-			requestURI.startsWith("/api/public") ||
-			requestURI.startsWith("/api/swagger-ui") ||
-			requestURI.startsWith("api/api-docs/");
-
+		return (requestURI.startsWith("/api/auth") &&
+				!requestURI.equals("/api/auth/profile/complete")) ||
+				requestURI.startsWith("/api/public") ||
+				requestURI.startsWith("/api/swagger-ui") ||
+				requestURI.startsWith("/api/api-docs/");
 	}
+
 }

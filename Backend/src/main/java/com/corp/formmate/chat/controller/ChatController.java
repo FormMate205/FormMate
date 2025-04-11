@@ -331,13 +331,18 @@ public class ChatController {
         // 메세지 읽음 처리
         chatService.markAsRead(formId, authUser.getId());
 
+        Integer terminationRequestedId = form.getTerminationRequestedUser() != null
+                ? form.getTerminationRequestedUser().getId()
+                : null;
+
         // Slice 객체를 간소화된 응답 객체로 변환
         ChatSliceResponse response = ChatSliceResponse.fromSlice(
                 chatSlice,
                 form.getCreditor().getId(),
                 form.getDebtor().getId(),
                 form.getStatus(),
-                form.getIsTerminationProcess()
+                form.getIsTerminationProcess(),
+                terminationRequestedId
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

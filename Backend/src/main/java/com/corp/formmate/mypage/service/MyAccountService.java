@@ -12,6 +12,7 @@ import com.corp.formmate.global.error.exception.BusinessException;
 import com.corp.formmate.global.error.exception.UserException;
 import com.corp.formmate.mypage.dto.AccountRegisterRequest;
 import com.corp.formmate.mypage.dto.AccountSearchRequest;
+import com.corp.formmate.mypage.dto.CheckAccountPasswordRequest;
 import com.corp.formmate.mypage.dto.SearchMyAccountResponse;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.service.MessageService;
@@ -216,5 +217,22 @@ public class MyAccountService {
 
 		// 중간에 하이픈과 별표 추가하여 반환
 		return prefix + "-***-" + suffix;
+	}
+
+	@Transactional(readOnly = true)
+	public boolean checkAccountPassword(Integer userId, CheckAccountPasswordRequest request) {
+		String password = request.getAccountPassword();
+		if (password == null || password.isEmpty()) {
+			throw new UserException(ErrorCode.INVALID_INPUT_VALUE);
+		}
+		UserEntity user = userService.selectById(userId);
+		String accountPassword = user.getAccountPassword();
+		if (accountPassword == null || accountPassword.isEmpty()) {
+			throw new UserException(ErrorCode.ACCOUNT_PASSWORD_NOT_FOUND);
+		}
+		if (accountPassword.equals(password)) {
+			return true;
+		}
+		return false;
 	}
 }

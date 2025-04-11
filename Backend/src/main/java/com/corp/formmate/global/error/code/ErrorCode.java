@@ -50,6 +50,7 @@ public enum ErrorCode {
 	// 계좌 관련
 	ACCOUNT_NOT_FOUND(404, "계좌 정보를 찾을 수 없습니다."),
 	INVALID_ACCOUNT_NUMBER(400, "유효하지 않은 계좌번호입니다."),
+	ACCOUNT_PASSWORD_NOT_FOUND(404, "등록 된 계좌 비밀번호가 없습니다. 등록된 계좌가 존재하는지 확인 해주세요."),
 	ACCOUNT_PASSWORD_MISMATCH(400, "계좌 비밀번호가 일치하지 않습니다."),
 	INSUFFICIENT_BALANCE(400, "잔액이 부족합니다."),
 	BANK_CONNECTION_ERROR(500, "은행 시스템 연결 중 오류가 발생했습니다."),
@@ -164,7 +165,10 @@ public enum ErrorCode {
 
 	// FcmToken 관련
 	INVALID_FCM_TOKEN(400, "유효하지 않은 FCM Token 입니다."),
-	FCM_TOKEN_NOT_FOUND(404, "유저의 FCM Token 을 찾을 수 없습니다.");
+	FCM_TOKEN_NOT_FOUND(404, "유저의 FCM Token 을 찾을 수 없습니다."),
+
+	// 납부 계획(PaymentSchedule 관련)
+	PAYMENT_SCHEDULE_NOT_FOUND(404, "납부 계획을 찾을 수 없습니다.");
 
 	private final int status;
 	private final String message;
