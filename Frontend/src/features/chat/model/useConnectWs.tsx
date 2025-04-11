@@ -18,6 +18,7 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
     const reconnectTimeoutRef = useRef<
         ReturnType<typeof setTimeout> | undefined
     >(undefined); // 재연결 타이머
+    const lastMessageTimeRef = useRef<number>(0); // 마지막 메시지 시간 저장
 
     const stompClient = useRef<CompatClient | null>(null); // 웹소켓 연결 유지
     const [isConnected, setIsConnected] = useState(false); // 연결 상태
@@ -36,20 +37,18 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
         if (!scrollRef.current) return;
 
         // 새 메시지가 추가된 경우
-        if (messages.length > prevMessagesLengthRef.current && isLoadingMore) {
-            // 메시지 로드 후 스크롤 위치 복원
-            const newScrollHeight = scrollRef.current.scrollHeight;
-            const heightDifference = newScrollHeight - scrollHeightRef.current;
+        if (messages.length > prevMessagesLengthRef.current) {
+            // 스크롤이 하단에 가까운 경우에만 자동 스크롤
+            const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
 
-            if (heightDifference > 0) {
-                // 새로 추가된 컨텐츠만큼 스크롤 위치 조정
-                scrollRef.current.scrollTop =
-                    heightDifference + scrollPositionRef.current;
+            if (isNearBottom) {
+                scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
             }
         }
 
         prevMessagesLengthRef.current = messages.length;
-    }, [messages, isLoadingMore]);
+    }, [messages]);
 
     // 스크롤이 상단에 가까워지면 다음 페이지 로드
     const handleScroll = () => {
@@ -106,7 +105,18 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
                     `/topic/chat${roomId}`,
                     (message: Message) => {
                         try {
-                            JSON.parse(message.body); // 메시지 유효성 검증
+                            const currentTime = Date.now();
+                            // 메시지 처리 간격이 100ms 이내면 무시 (중복 방지)
+                            if (
+                                currentTime - lastMessageTimeRef.current <
+                                100
+                            ) {
+                                return;
+                            }
+                            lastMessageTimeRef.current = currentTime;
+
+                            const parsedMessage = JSON.parse(message.body);
+                            console.log('New message received:', parsedMessage);
                             refetch();
                         } catch (error: unknown) {
                             console.error('Error processing message:', error);
@@ -117,8 +127,8 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
             (error: unknown) => {
                 console.error('WebSocket connection error:', error);
                 setIsConnected(false);
-                // 연결 실패시 5초 후 재시도
-                reconnectTimeoutRef.current = setTimeout(connect, 5000);
+                // 연결 실패시 3초 후 재시도
+                reconnectTimeoutRef.current = setTimeout(connect, 3000);
             },
         );
     };
@@ -141,7 +151,6 @@ export const useConnectWs = ({ roomId }: useConnectWsProps) => {
             JSON.stringify(newMessage),
         );
 
-        refetch();
         setMessage('');
     };
 
