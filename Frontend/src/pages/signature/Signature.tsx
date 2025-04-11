@@ -36,23 +36,21 @@ const Signature = () => {
         await handleVerifyCode();
 
         if (verificationSuccess) {
-            setTimeout(() => {
-                navigate(`/chat/${formId}`, { state: { isFin: false } });
-            }, 300);
+            navigate(`/chat/${formId}`, { state: { isFin: false } });
         }
     };
 
     return (
-        <div className='flex flex-col w-full h-screen px-4 py-2'>
+        <div className='flex h-screen w-full flex-col px-4 py-2'>
             <div className='h-full py-4'>
                 <p className='text-2xl font-semibold'>FormMate 전자 서명</p>
                 <Form {...form}>
-                    <form className='flex flex-col gap-4 mt-10 mb-5'>
+                    <form className='mt-10 mb-5 flex flex-col gap-4'>
                         <FormField
                             control={form.control}
                             name='name'
                             render={({ field }) => (
-                                <FormItem className='flex flex-col w-full gap-1'>
+                                <FormItem className='flex w-full flex-col gap-1'>
                                     <FormLabel className='text-lg'>
                                         성명
                                     </FormLabel>
@@ -72,7 +70,7 @@ const Signature = () => {
                             control={form.control}
                             name='phone'
                             render={({ field }) => (
-                                <FormItem className='flex flex-col w-full gap-1'>
+                                <FormItem className='flex w-full flex-col gap-1'>
                                     <FormLabel className='text-lg'>
                                         전화번호
                                     </FormLabel>
@@ -96,14 +94,14 @@ const Signature = () => {
                                     <FormMessage className='text-subPink-700' />
 
                                     {requestSuccess && (
-                                        <div className='flex flex-col items-center w-full gap-5'>
-                                            <div className='flex flex-col w-full gap-1'>
+                                        <div className='flex w-full flex-col items-center gap-5'>
+                                            <div className='flex w-full flex-col gap-1'>
                                                 <p
                                                     className={`pl-1 ${requestSuccess ? 'text-primary-500' : 'text-subPink-700'}`}
                                                 >
                                                     {requestMessage}
                                                 </p>
-                                                <div className='flex items-center w-full gap-2'>
+                                                <div className='flex w-full items-center gap-2'>
                                                     <FormField
                                                         control={form.control}
                                                         name='code'
@@ -119,7 +117,7 @@ const Signature = () => {
                                                             </FormItem>
                                                         )}
                                                     />
-                                                    <div className='flex justify-end mt-1 text-sm font-medium text-primary-500'>
+                                                    <div className='text-primary-500 mt-1 flex justify-end text-sm font-medium'>
                                                         <VerificationTimer />
                                                     </div>
                                                 </div>
