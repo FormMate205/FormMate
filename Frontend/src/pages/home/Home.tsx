@@ -23,8 +23,8 @@ const Home = ({ userName }: HomeProps) => {
     const { data: accountInfo } = useContractAmount();
 
     return (
-        <div className='flex flex-col h-screen'>
-            <div className='flex-1 w-full px-4 py-2 overflow-y-auto bg-line-50 scrollbar-none'>
+        <div className='flex h-screen flex-col pb-[60px]'>
+            <div className='bg-line-50 scrollbar-none w-full flex-1 overflow-y-auto px-4 py-2'>
                 <Header
                     title='FormMate'
                     isHome={true}
@@ -40,7 +40,7 @@ const Home = ({ userName }: HomeProps) => {
                         <img
                             src='/assets/images/cones.png'
                             alt='축하 이미지'
-                            className='absolute top-0 right-0 w-16 h-16'
+                            className='absolute top-0 right-0 h-16 w-16'
                         />
                     </div>
 
