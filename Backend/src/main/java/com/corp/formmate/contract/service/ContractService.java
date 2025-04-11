@@ -9,14 +9,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,6 +44,7 @@ import com.corp.formmate.paymentschedule.repository.PaymentScheduleRepository;
 import com.corp.formmate.paymentschedule.service.PaymentScheduleService;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.entity.TransferEntity;
+import com.corp.formmate.transfer.entity.TransferStatus;
 import com.corp.formmate.transfer.repository.TransferRepository;
 import com.corp.formmate.user.entity.UserEntity;
 import com.corp.formmate.user.repository.UserRepository;
@@ -698,12 +695,12 @@ public class ContractService {
 		Integer currentRound = contract.getCurrentPaymentRound();
 		long currentRepaymentAmount = 0L;
 
-		for(PaymentScheduleEntity schedule : schedules) {
-			if(schedule.getPaymentRound() > currentRound) {
+		for (PaymentScheduleEntity schedule : schedules) {
+			if (schedule.getPaymentRound() > currentRound) {
 				continue;
 			}
 
-			if(Boolean.TRUE.equals(schedule.getIsPaid())) {
+			if (Boolean.TRUE.equals(schedule.getIsPaid())) {
 				continue;
 			}
 
@@ -759,61 +756,20 @@ public class ContractService {
 	public Page<TransferFormListResponse> selectFormTransfers(Integer formId, String status, Pageable pageable) {
 		FormEntity form = getForm(formId);
 		ContractEntity contract = getContract(form);
+		TransferStatus transferStatus = null;
 
-		List<TransferEntity> transfers = transferRepository.findByForm(form).orElse(List.of());
-		Map<Integer, List<TransferEntity>> transfersByRound = transfers.stream()
-			.collect(Collectors.groupingBy(TransferEntity::getCurrentRound));
-
-		List<PaymentScheduleEntity> schedules = paymentScheduleService.selectByContract(contract);
-
-		List<TransferFormListResponse> responses = new ArrayList<>();
-
-		// 1. Transfer 기반 내역 생성
-		for (TransferEntity t : transfers) {
-			if (t.getCurrentRound() == 0) {
-				continue;
-			}
-			responses.add(TransferFormListResponse.builder()
-				.status(t.getStatus().getKorName())
-				.currentRound(t.getCurrentRound())
-				.amount(t.getAmount())
-				.paymentDifference(t.getPaymentDifference())
-				.transactionDate(t.getTransactionDate())
-				.build());
+		if (status.equals("연체")) {
+			transferStatus = TransferStatus.OVERDUE;
+		} else if (status.equals("납부")) {
+			transferStatus = TransferStatus.PAID;
+		} else if (status.equals("중도상환")) {
+			transferStatus = TransferStatus.EARLY_REPAYMENT;
 		}
 
-		// 2. 스케줄 기반 중도상환 내역 추가
-		Set<Integer> transferredRounds = transfersByRound.keySet();
+		Page<TransferEntity> transfers = transferRepository.findByFormAndStatusAndCurrentRoundGreaterThan(form,
+			transferStatus, 0, pageable);
 
-		for (PaymentScheduleEntity s : schedules) {
-			Integer round = s.getPaymentRound();
-
-			if (s.getIsPaid() && s.getActualPaidAmount() != null && s.getActualPaidAmount() == 0L
-				&& !transferredRounds.contains(round)) {
-				responses.add(TransferFormListResponse.builder()
-					.status("중도상환")
-					.currentRound(round)
-					.amount(0L)
-					.paymentDifference(0L)
-					.transactionDate(s.getScheduledPaymentDate()) // or s.getActualPaidDate()
-					.build());
-			}
-		}
-
-		// 3. 상태 필터링
-		Stream<TransferFormListResponse> stream = responses.stream();
-		if (!"전체".equals(status)) {
-			stream = stream.filter(r -> r.getStatus().equals(status));
-		}
-
-		List<TransferFormListResponse> filtered = stream.toList();
-
-		// 4. 페이징 처리
-		int start = (int)pageable.getOffset();
-		int end = Math.min(start + pageable.getPageSize(), filtered.size());
-		List<TransferFormListResponse> pageContent = filtered.subList(start, end);
-
-		return new PageImpl<>(pageContent, pageable, filtered.size());
+		return transfers.map(TransferFormListResponse::fromEntity);
 	}
 
 	@Transactional

@@ -155,20 +155,24 @@ public class TransferService {
 		int paymentRoundGap = paymentSchedule.getPaymentRound() - currentRound;
 
 		if (paymentRoundGap > 0) { // 중도 상환
-			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
+			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, paymentSchedule.getPaymentRound(),
+				paymentDifference,
 				TransferStatus.EARLY_REPAYMENT);
 		} else if (paymentRoundGap == 0) { // 납부
 			if (paymentDifference > 0) {
-				transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound,
+				transferEntity = makeTransferEntity(formEntity, sender, receiver, amount,
+					paymentSchedule.getPaymentRound(),
 					paymentDifference,
 					TransferStatus.EARLY_REPAYMENT);
 			} else {
-				transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound,
+				transferEntity = makeTransferEntity(formEntity, sender, receiver, amount,
+					paymentSchedule.getPaymentRound(),
 					paymentDifference,
 					TransferStatus.PAID);
 			}
 		} else { // 연체
-			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
+			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, paymentSchedule.getPaymentRound(),
+				paymentDifference,
 				TransferStatus.OVERDUE);
 		}
 
