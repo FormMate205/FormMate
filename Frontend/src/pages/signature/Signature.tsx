@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -32,13 +33,11 @@ const Signature = () => {
         handleRecaptchaExpired,
     } = useSignature({ formId, type, creditorId, requestedById });
 
-    const onSuccess = async () => {
-        await handleVerifyCode();
-
+    useEffect(() => {
         if (verificationSuccess) {
             navigate(`/chat/${formId}`, { state: { isFin: false } });
         }
-    };
+    }, [verificationSuccess]);
 
     return (
         <div className='flex h-screen w-full flex-col px-4 py-2'>
@@ -179,7 +178,7 @@ const Signature = () => {
                     variant='choiceFill'
                     children='확인'
                     className='w-full'
-                    onClick={onSuccess}
+                    onClick={handleVerifyCode}
                 />
             </div>
         </div>
