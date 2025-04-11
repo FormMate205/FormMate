@@ -47,7 +47,7 @@ public class PaymentScheduleEntity {
 	private Long scheduledInterest; // 예정 이자
 
 	@Column(name = "overdue_amount", nullable = false)
-	private Long overdueAmount; // 연체 금액 (해당 회차 기준)
+	private Long overdueAmount; // 연체 이자 (해당 회차 기준)
 
 	@Column(name = "early_repayment_fee", nullable = false)
 	private Long earlyRepaymentFee; // 중도상환 수수료
@@ -66,4 +66,50 @@ public class PaymentScheduleEntity {
 
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt; // 마지막 수정 시각
+
+	public void markAsPaid(long amount, LocalDateTime paidDate) {
+		this.actualPaidAmount = amount;
+		this.actualPaidDate = paidDate;
+		this.isPaid = true;
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void markAsPartialPaid(long amount, LocalDateTime paidDate) {
+		this.actualPaidAmount = amount;
+		this.actualPaidDate = paidDate;
+		this.isPaid = false;
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void applyEarlyRepayment(long amount, LocalDateTime paidDate) {
+		this.scheduledInterest = 0L;
+		this.actualPaidAmount = amount;
+		this.actualPaidDate = paidDate;
+		this.isPaid = true;
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void updateSchedule(long principal, long interest) {
+		this.scheduledPrincipal = principal;
+		this.scheduledInterest = interest;
+		this.earlyRepaymentFee = 0L;
+		this.actualPaidAmount = 0L;
+		this.isPaid = false;
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void applyEarlyRepaymentFee(long fee) {
+		this.earlyRepaymentFee = fee;
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	public void markAsOverdue() {
+		this.isOverdue = true;
+	}
+
+	public void accumulateOverdue(long amount) {
+		this.overdueAmount += amount;
+		this.updatedAt = LocalDateTime.now();
+	}
+
 }

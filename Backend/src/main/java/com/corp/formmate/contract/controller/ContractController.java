@@ -1,8 +1,12 @@
 package com.corp.formmate.contract.controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.corp.formmate.contract.dto.AmountResponse;
 import com.corp.formmate.contract.dto.ContractDetailResponse;
 import com.corp.formmate.contract.dto.ContractPreviewResponse;
+import com.corp.formmate.contract.dto.ContractTransferResponse;
 import com.corp.formmate.contract.dto.ContractWithPartnerResponse;
 import com.corp.formmate.contract.dto.ExpectedPaymentAmountResponse;
 import com.corp.formmate.contract.dto.InterestResponse;
 import com.corp.formmate.contract.dto.MonthlyContractDetail;
+import com.corp.formmate.contract.dto.TransferFormListResponse;
 import com.corp.formmate.contract.service.ContractService;
 import com.corp.formmate.form.entity.FormStatus;
 import com.corp.formmate.global.annotation.CurrentUser;
@@ -24,6 +30,7 @@ import com.corp.formmate.global.error.dto.ErrorResponse;
 import com.corp.formmate.user.dto.AuthUser;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,7 +45,6 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "계약관리 API", description = "계약관리 관련 API")
 public class ContractController {
 
-	// TODO: Input값 valid 추가
 	private final ContractService contractService;
 
 	@Operation(summary = "계약 상세 조회", description = "계약 상세 페이지 상단 내용(연체 횟수 / 연체 금액 / 다음 상환일 / 중도상환 횟수 / 중도상환 수수료 / 남은 금액)")
@@ -164,20 +170,23 @@ public class ContractController {
 		)
 	})
 	@GetMapping
-	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam String status,
+	public ResponseEntity<List<ContractPreviewResponse>> selectAllContractByStatus(@RequestParam List<String> status,
 		@CurrentUser AuthUser authUser) {
 		Integer userId = authUser.getId();
-		FormStatus formStatus = null;
-		if (!status.equals("ALL")) {
-			for (FormStatus s : FormStatus.values()) {
-				if (s.name().equals(status)) {
-					formStatus = s;
-					break;
-				}
+		List<FormStatus> formStatuses = new ArrayList<>();
+		for(String st : status) {
+			if(st.equals("ALL")) {
+				formStatuses.add(FormStatus.BEFORE_APPROVAL);
+				formStatuses.add(FormStatus.AFTER_APPROVAL);
+				formStatuses.add(FormStatus.IN_PROGRESS);
+				formStatuses.add(FormStatus.OVERDUE);
+				formStatuses.add(FormStatus.COMPLETED);
+			} else {
+				formStatuses.add(FormStatus.valueOf(st));
 			}
 		}
 
-		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatus, userId));
+		return ResponseEntity.ok(contractService.selectAllContractByStatus(formStatuses, userId));
 	}
 
 	@Operation(summary = "보낸 금액/받을 금액", description = "계약관리-목록 화면")
@@ -234,4 +243,110 @@ public class ContractController {
 		return ResponseEntity.ok(details);
 	}
 
+	@Operation(
+		summary = "계약 상대방 목록 조회",
+		description = "현재 유저가 채무자인 계약 중, 다음 납부 예정일이 존재하는 계약 상대방 목록을 반환"
+	)
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "계약 상대방 목록 조회 성공",
+			content = @Content(
+				mediaType = "application/json",
+				array = @ArraySchema(schema = @Schema(implementation = ContractTransferResponse.class))
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 요청 파라미터",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@GetMapping("/forms")
+	public ResponseEntity<List<ContractTransferResponse>> selectContractTransfers(
+		@CurrentUser AuthUser authUser,
+		@RequestParam(required = false) String name
+	) {
+		Integer userId = authUser.getId();
+		List<ContractTransferResponse> responses = contractService.selectContractTransfers(userId, name);
+		return ResponseEntity.status(HttpStatus.OK).body(responses);
+	}
+
+	@Operation(summary = "차용증 거래내역 조회", description = "특정 차용증의 거래내역을 상태별로 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "차용증 거래내역 조회 성공",
+			content = @Content(
+				mediaType = "application/json",
+				examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+					value = """
+						{
+						  "content": [
+						    {
+						      "status": "납부",
+						      "currentRound": 1,
+						      "amount": 100000,
+						      "paymentDifference": 0,
+						      "transactionDate": "2025-03-21 14:30:00"
+						    },
+						    {
+						      "status": "연체",
+						      "currentRound": 2,
+						      "amount": 90000,
+						      "paymentDifference": -10000,
+						      "transactionDate": "2025-04-21 16:45:00"
+						    }
+						  ],
+						  "totalElements": 12,
+						  "totalPages": 2,
+						  "pageable": {
+						    "page": 0,
+						    "size": 10,
+						    "sort": {
+						      "sorted": true,
+						      "direction": "DESC"
+						    }
+						  }
+						}
+						"""
+				)
+			)
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 요청 형식",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "차용증을 찾을 수 없음",
+			content = @Content(
+				mediaType = "application/json",
+				schema = @Schema(implementation = ErrorResponse.class)
+			)
+		)
+	})
+	@GetMapping("/transfer/{formId}")
+	public ResponseEntity<Page<TransferFormListResponse>> selectFormTransfers(
+		@Parameter(description = "차용증 ID", required = true, example = "1")
+		@PathVariable Integer formId,
+
+		@Parameter(description = "거래 유형 (전체, 연체, 납부, 중도상환)")
+		@RequestParam(value = "status", defaultValue = "전체") String status,
+
+		@Parameter(description = "페이징 정보")
+		Pageable pageable
+	) {
+
+		Page<TransferFormListResponse> responses = contractService.selectFormTransfers(formId,
+			status, pageable);
+		return ResponseEntity.status(HttpStatus.OK).body(responses);
+	}
 }

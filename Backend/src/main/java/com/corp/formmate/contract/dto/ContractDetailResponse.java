@@ -50,7 +50,7 @@ public class ContractDetailResponse {
 	private Integer overdueLimit;
 
 	@Schema(
-		description = "현재 연체액",
+		description = "현재 연체액(연채액 + 이자)",
 		example = "110000",
 		required = true
 	)

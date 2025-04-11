@@ -22,9 +22,10 @@ import com.corp.formmate.form.entity.FormEntity;
 import com.corp.formmate.form.repository.FormRepository;
 import com.corp.formmate.global.error.code.ErrorCode;
 import com.corp.formmate.global.error.exception.TransferException;
+import com.corp.formmate.paymentschedule.entity.PaymentScheduleEntity;
+import com.corp.formmate.paymentschedule.service.PaymentScheduleService;
 import com.corp.formmate.transfer.dto.TransferCreateRequest;
 import com.corp.formmate.transfer.dto.TransferCreateResponse;
-import com.corp.formmate.transfer.dto.TransferFormListResponse;
 import com.corp.formmate.transfer.dto.TransferListResponse;
 import com.corp.formmate.transfer.entity.TransferEntity;
 import com.corp.formmate.transfer.entity.TransferStatus;
@@ -55,6 +56,8 @@ public class TransferService {
 	private final BankService bankService;
 
 	private final AlertService alertService;
+
+	private final PaymentScheduleService paymentScheduleService;
 
 	@Transactional(readOnly = true)
 	public Page<TransferListResponse> selectTransfers(Integer userId, String period, String transferType,
@@ -122,24 +125,6 @@ public class TransferService {
 		return transfers.map(transfer -> TransferListResponse.fromEntity(transfer, user));
 	}
 
-	@Transactional(readOnly = true)
-	public Page<TransferFormListResponse> selectFormTransfers(Integer formId, String transferStatus,
-		Pageable pageable) {
-
-		Page<TransferEntity> transfers;
-		FormEntity formEntity = getFormEntity(formId);
-
-		if ("전체".equals(transferStatus)) {
-			transfers = transferRepository.findByFormAndCurrentRoundGreaterThan(formEntity, 0, pageable);
-		} else {
-			TransferStatus status = TransferStatus.fromKorName(transferStatus);
-			transfers = transferRepository.findByFormAndStatusAndCurrentRoundGreaterThan(formEntity, status, 0,
-				pageable);
-		}
-
-		return transfers.map(TransferFormListResponse::fromEntity);
-	}
-
 	@Transactional
 	public TransferCreateResponse createTransfer(Integer userId, @Valid TransferCreateRequest transferCreateRequest) {
 
@@ -163,18 +148,33 @@ public class TransferService {
 
 		TransferEntity transferEntity;
 
+		PaymentScheduleEntity paymentSchedule = paymentScheduleService.selectNonPaidByContract(contractEntity);
+
 		contractService.updateContract(transferCreateRequest); // contract(계약관리) 관련 처리 로직
 
-		if (paymentDifference > 0) { // 중도 상환
-			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
+		int paymentRoundGap = paymentSchedule.getPaymentRound() - currentRound;
+
+		if (paymentRoundGap > 0) { // 중도 상환
+			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, paymentSchedule.getPaymentRound(),
+				paymentDifference,
 				TransferStatus.EARLY_REPAYMENT);
-		} else if (paymentDifference == 0) { // 납부
-			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
-				TransferStatus.PAID);
+		} else if (paymentRoundGap == 0) { // 납부
+			if (paymentDifference > 0) {
+				transferEntity = makeTransferEntity(formEntity, sender, receiver, amount,
+					paymentSchedule.getPaymentRound(),
+					paymentDifference,
+					TransferStatus.EARLY_REPAYMENT);
+			} else {
+				transferEntity = makeTransferEntity(formEntity, sender, receiver, amount,
+					paymentSchedule.getPaymentRound(),
+					paymentDifference,
+					TransferStatus.PAID);
+			}
 		} else { // 연체
-			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, currentRound, paymentDifference,
+			transferEntity = makeTransferEntity(formEntity, sender, receiver, amount, paymentSchedule.getPaymentRound(),
+				paymentDifference,
 				TransferStatus.OVERDUE);
-		} // 해당 구문 빠져나오기 전 contract 관련한 처리 로직 필요
+		}
 
 		transferRepository.save(transferEntity);
 
