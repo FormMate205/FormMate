@@ -29,7 +29,7 @@
 | 이동욱 | Developer (BE 팀장) | Backend  | [github.com/2Ludy](https://github.com/2Ludy)         |
 | 강지은 | Developer (FE 팀장) | Frontend | [github.com/antdundun](https://github.com/antdundun) |
 | 박상학 | Developer           | Backend  | [github.com/Sang-hak](https://github.com/Sang-hak)   |
-| 오은지 | Developer           | Frontend | [github.com/oille12](https://github.com/oille12)     |
+| 오은지 | Developer           | Frontend | [github.com/oille12](https://github.com/oeg9176)     |
 | 윤이영 | Developer           | Frontend | [github.com/y20ng](https://github.com/y20ng)         |
 
 ## 🔍 시스템 아키텍처
