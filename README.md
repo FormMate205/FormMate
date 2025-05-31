@@ -48,6 +48,7 @@
 | 상태 관리       | ![Zustand](https://img.shields.io/badge/Zustand-000000?style=flat&logo=zustand&logoColor=white)                                                                                                       | 전역 상태 관리                   |
 | 서버 상태       | ![TanStack Query](https://img.shields.io/badge/TanStack%20Query-FF4154?style=flat&logo=reactquery&logoColor=white)                                                                                    | API 요청/응답 캐싱 및 상태관리   |
 | 스타일링        | ![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)<br>![shadcn/ui](https://img.shields.io/badge/shadcn/ui-000000?style=flat)                | 유틸리티 기반 CSS 및 UI 컴포넌트 |
+| 폼 처리/유효성 검사| ![React Hook Form](https://img.shields.io/badge/React_Hook_Form-EC5990?style=flat&logo=reacthookform&logoColor=white)<br>![Zod](https://img.shields.io/badge/Zod-3B82F6?style=flat) | 폼 상태 관리 및 스키마 기반 유효성 검사  |
 
 ---
 
